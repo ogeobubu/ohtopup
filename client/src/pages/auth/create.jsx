@@ -92,7 +92,7 @@ const Create = ({ darkMode }) => {
               }}
               validationSchema={validationSchema}
               onSubmit={(values, { resetForm }) => {
-                localStorage.setItems(
+                localStorage.setItem(
                   "ohtopup-create",
                   JSON.stringify({
                     username: values.username,
