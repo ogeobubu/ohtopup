@@ -14,3 +14,8 @@ export const setUser = (userData) => ({
     type: "FETCH_USER_SUCCESS",
     payload: userData,
   });
+
+  export const updateUserDispatch = (data) => ({
+    type: "UPDATE_USER_SUCCESS",
+    payload: data
+  })

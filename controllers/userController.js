@@ -143,7 +143,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email, isDeleted: false });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -273,6 +273,71 @@ const getUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const { phoneNumber, newPassword, oldPassword } = req.body;
+    const updates = {};
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (newPassword) {
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ message: "Current password is incorrect" });
+      }
+
+      if (oldPassword === newPassword) {
+        return res
+          .status(400)
+          .json({
+            message: "New password must be different from old password",
+          });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      updates.password = hashedPassword;
+    }
+
+    if (phoneNumber) {
+      updates.phoneNumber = phoneNumber;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No fields to update" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
+      new: true,
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const softDeleteUser = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const user = await User.findByIdAndUpdate(userId, { isDeleted: true });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Account successfully deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
 module.exports = {
   createUser,
   verifyUser,
@@ -282,4 +347,6 @@ module.exports = {
   verifyOtpAndResetPassword,
   resendOtp,
   getUser,
+  updateUser,
+  softDeleteUser,
 };
