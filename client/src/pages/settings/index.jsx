@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Profile from "./profile";
 import Security from "./security";
 import Services from "./services";
@@ -8,6 +8,14 @@ import Sidebar from "./sidebar";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("Profile");
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [activeTab]);
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-5">Settings</h1>

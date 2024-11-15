@@ -6,6 +6,10 @@ import Login from "../pages/auth/login";
 import Forgot from "../pages/auth/forgot";
 import Reset from "../pages/auth/reset";
 import MainRoutes from "./mainRoutes";
+import AdminRoutes from "./adminRoutes";
+
+// ADMIN
+import AdminLogin from "../admin/pages/auth/login"
 
 export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
   return useRoutes([
@@ -33,6 +37,11 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
       path: "/reset",
       element: <Reset darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
+    {
+      path: "/admin",
+      element: <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
     MainRoutes,
+    AdminRoutes,
   ]);
 }

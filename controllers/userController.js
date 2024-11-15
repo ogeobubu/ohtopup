@@ -162,7 +162,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const payload = { user: { id: user._id } };
+    const payload = { user: { id: user._id, role: user.role } };
     const secret = process.env.JWT_SECRET;
     const token = jwt.sign(payload, secret, { expiresIn: "1h" });
 
@@ -292,11 +292,9 @@ const updateUser = async (req, res) => {
       }
 
       if (oldPassword === newPassword) {
-        return res
-          .status(400)
-          .json({
-            message: "New password must be different from old password",
-          });
+        return res.status(400).json({
+          message: "New password must be different from old password",
+        });
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
