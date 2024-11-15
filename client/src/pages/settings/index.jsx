@@ -3,6 +3,7 @@ import Profile from "./profile";
 import Security from "./security";
 import Services from "./services";
 import General from "./general";
+import Notification from "./notification";
 import Sidebar from "./sidebar";
 
 const Settings = () => {
@@ -16,6 +17,7 @@ const Settings = () => {
           {activeTab === "Profile" && <Profile />}
           {activeTab === "General" && <General />}
           {activeTab === "Security" && <Security />}
+          {activeTab === "Notification" && <Notification />}
           {activeTab === "Services" && <Services />}
         </div>
       </div>

@@ -24,8 +24,7 @@ const Login = ({ darkMode, toggleDarkMode }) => {
       console.log("Login successful", data);
     },
     onError: (error) => {
-      toast.error("Login failed: " + error.message);
-      console.error("Login failed", error);
+      toast.error("Login failed: " + error);
     },
   });
 

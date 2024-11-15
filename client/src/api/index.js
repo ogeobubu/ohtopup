@@ -73,9 +73,9 @@ export const resendCodeUser = async (userData) => {
 export const loginUser = async (userData) => {
   try {
     const response = await instance.post(`/login`, userData);
-    return response.data;
+    return response?.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error logging user");
+    throw new Error(error.response?.data?.message || "Error logging user");
   }
 };
 
@@ -111,6 +111,24 @@ export const getUser = async () => {
     const response = await instance.get(`/`);
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user"); // More specific error message
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const updateUser = async (userData) => {
+  try {
+    const response = await instance.patch(`/`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error updating user");
+  }
+};
+
+export const deleteUser = async () => {
+  try {
+    const response = await instance.delete(`/`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
   }
 };

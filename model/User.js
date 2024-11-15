@@ -71,6 +71,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user",
   },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

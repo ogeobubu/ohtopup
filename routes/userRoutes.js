@@ -8,6 +8,8 @@ const {
   verifyOtpAndResetPassword,
   resendOtp,
   getUser,
+  updateUser,
+  softDeleteUser
 } = require("../controllers/userController");
 const auth = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -20,5 +22,7 @@ router.post("/forgot", forgotPassword);
 router.post("/reset", verifyOtpAndResetPassword);
 router.post("/resend-otp", resendOtp);
 router.get("/", auth, getUser);
+router.patch("/", auth, updateUser);
+router.delete("/", auth, softDeleteUser)
 
 module.exports = router;
