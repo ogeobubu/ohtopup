@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 
 const Header = () => {
-  const user = useSelector(state => state.user.user)
+  const user = useSelector(state => state.admin.admin)
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -48,7 +48,7 @@ const Header = () => {
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded-md p-2">
+            <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded-md p-2 z-10">
               <ul>
                 <li className="py-2 px-4 hover:bg-gray-100 flex items-center">
                   <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
