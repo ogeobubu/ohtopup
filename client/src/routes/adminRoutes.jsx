@@ -5,6 +5,7 @@ import MainLayout from "../admin/layout/mainLayout";
 // import Loadable from "../ui-component/Loadable";
 import Dashboard from "../admin/pages/dashboard"
 import UserManagement from "../admin/pages/users"
+import Settings from "../admin/pages/settings"
 
 const AdminRoutes = {
   path: "/admin",
@@ -19,6 +20,10 @@ const AdminRoutes = {
     {
       path: "users",
       element: <UserManagement />,
+    },
+    {
+      path: "settings",
+      element: <Settings />,
     },
   ],
 };

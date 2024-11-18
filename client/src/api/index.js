@@ -132,3 +132,12 @@ export const deleteUser = async () => {
     throw new Error(error.response.data.message || "Error fetching user");
   }
 };
+
+export const getServices = async () => {
+  try {
+    const response = await instance.get(`/admin/services`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};

@@ -9,6 +9,7 @@ const Button = ({
   darkMode = false,
   disabled = false,
   loading = false,
+  size = 'lg', // Default size is medium
   ...props
 }) => {
   const getButtonStyles = () => {
@@ -34,11 +35,24 @@ const Button = ({
     }
   };
 
+  const getSizeStyles = () => {
+    switch (size) {
+      case 'lg':
+        return 'w-full';
+      case 'md':
+        return 'w-full md:w-48';
+      case 'sm':
+        return 'w-full md:w-32';
+      default:
+        return 'w-full md:w-48';
+    }
+  };
+
   return (
     <button
       onClick={disabled || loading ? null : onClick}
-      className={`w-full font-semibold py-2 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform flex items-center justify-center
-        ${getButtonStyles()} ${className}`}
+      className={`font-semibold py-2 rounded-lg shadow-lg transition duration-300 ease-in-out transform flex items-center justify-center
+        ${getButtonStyles()} ${getSizeStyles()} ${className}`}
       disabled={disabled || loading}
       {...props}
     >
