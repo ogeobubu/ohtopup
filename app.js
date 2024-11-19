@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const walletRoutes = require("./routes/walletRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -22,6 +23,7 @@ mongoose
 
 app.use("/api/users", userRoutes);
 app.use("/api/users/admin", adminRoutes);
+app.use("/api/users/wallet", walletRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
