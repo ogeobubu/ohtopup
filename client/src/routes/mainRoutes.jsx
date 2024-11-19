@@ -4,6 +4,7 @@ import { lazy } from "react";
 import MainLayout from "../layout/mainLayout";
 // import Loadable from "../ui-component/Loadable";
 import Dashboard from "../pages/dashboard"
+import Wallet from "../pages/wallet"
 import Settings from "../pages/settings"
 
 const MainRoutes = {
@@ -15,6 +16,10 @@ const MainRoutes = {
     {
       path: "/dashboard",
       element: <Dashboard />,
+    },
+    {
+      path: "/wallet",
+      element: <Wallet />,
     },
     {
       path: "/settings",

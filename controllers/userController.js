@@ -1,4 +1,5 @@
 const User = require("../model/User");
+const Wallet = require("../model/Wallet");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { generateConfirmationCode } = require("../utils");
@@ -54,6 +55,9 @@ const createUser = async (req, res) => {
     await newUser.save();
 
     await sendConfirmationEmail(newUser.email, username, confirmationCode);
+
+    const wallet = new Wallet({ userId: newUser._id });
+    await wallet.save();
 
     res.status(201).json({
       message:
@@ -275,7 +279,8 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { phoneNumber, newPassword, oldPassword } = req.body;
+    const { phoneNumber, newPassword, oldPassword, emailNotificationsEnabled } =
+      req.body;
     const updates = {};
 
     const user = await User.findById(req.user.id);
@@ -303,6 +308,10 @@ const updateUser = async (req, res) => {
 
     if (phoneNumber) {
       updates.phoneNumber = phoneNumber;
+    }
+
+    if (typeof emailNotificationsEnabled === "boolean") {
+      updates.emailNotificationsEnabled = emailNotificationsEnabled;
     }
 
     if (Object.keys(updates).length === 0) {

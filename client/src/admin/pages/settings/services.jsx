@@ -141,7 +141,7 @@ const Services = () => {
     {
       header: "Date",
       render: (notification) => (
-        <small>{new Date(notification.updatedAt).toLocaleString()}</small>
+        <small>{new Date(notification.updatedAtw).toLocaleString()}</small>
       ),
     },
     {

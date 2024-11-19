@@ -141,3 +141,21 @@ export const getServices = async () => {
     throw new Error(error.response.data.message || "Error fetching user");
   }
 };
+
+export const depositWallet = async (data) => {
+  try {
+    const response = await instance.post(`/wallet/deposit`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const createDedicatedAccount = async (data) => {
+  try {
+    const response = await instance.post(`/wallet/create-dedicated-account`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
