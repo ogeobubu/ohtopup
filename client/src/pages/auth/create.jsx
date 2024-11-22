@@ -66,7 +66,7 @@ const Create = ({ darkMode }) => {
     username: Yup.string().required("Username is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
     phoneNumber: Yup.string().required("Phone number is required"),
-    referralCode: Yup.string().notRequired(),
+    referralCode: Yup.string(),
     password: Yup.string().required("Password is required"),
     source: Yup.string().required("Source is required"),
   });

@@ -1,8 +1,19 @@
 import React, { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
-const FormInput = ({ type, placeholder, value, onChange, label, error, name }) => {
+const FormInput = ({
+  type,
+  placeholder,
+  value,
+  onChange,
+  label,
+  error,
+  name,
+  min,
+  disabled = false,
+  helperText
+}) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -12,7 +23,7 @@ const FormInput = ({ type, placeholder, value, onChange, label, error, name }) =
   const handlePaste = () => {
     navigator.clipboard.readText().then((text) => {
       onChange(text);
-      toast.success('Text pasted successfully!');
+      toast.success("Text pasted successfully!");
     });
   };
 
@@ -21,18 +32,20 @@ const FormInput = ({ type, placeholder, value, onChange, label, error, name }) =
       {label && <label className="block text-gray-500 mb-2">{label}</label>}
       <div className="relative">
         <input
-          name={name} 
+          name={name}
           type={type === "password" && isPasswordVisible ? "text" : type}
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 pr-16 ${
+          min={min}
+          disabled={disabled}
+          className={`w-full p-2 border rounded bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 pr-16 ${
             error
               ? "border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500"
               : "border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400"
           }`}
-          
         />
+        {helperText && <span className="text-xs text-gray-500">{helperText}</span>}
         {label === "Referral Code (Optional)" && (
           <button
             type="button"

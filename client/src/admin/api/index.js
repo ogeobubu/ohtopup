@@ -31,8 +31,11 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (error.response) {
+      console.log(error);
       if (error.response.status === 401) {
-        console.error("Unauthorized request!");
+        console.error("Response Error:", error.response.data);
+      } else if (error.response.status === 403) {
+        window.location.href = "/login";
       } else {
         console.error("Response Error:", error.response.data);
       }
@@ -165,5 +168,55 @@ export const getServices = async () => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error logging user");
+  }
+};
+
+export const createWallet = async (id) => {
+  try {
+    const response = await instance.post(`/wallet`, {
+      userId: id,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const depositWallet = async (id, data) => {
+  try {
+    const response = await instance.post(`/wallet/deposit`, {
+      userId: id,
+      amount: data,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const getWallets = async () => {
+  try {
+    const response = await instance.get(`/wallets`);
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const toggleWallet = async (id) => {
+  try {
+    const response = await instance.patch(`/wallets/${id}/toggle`);
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const getAllTransactions = async () => {
+  try {
+    const response = await instance.get(`/transactions`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
   }
 };

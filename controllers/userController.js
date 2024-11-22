@@ -279,11 +279,17 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { phoneNumber, newPassword, oldPassword, emailNotificationsEnabled } =
-      req.body;
+    const {
+      phoneNumber,
+      newPassword,
+      oldPassword,
+      emailNotificationsEnabled,
+      bankAccount,
+      deleteAccountNumber,
+    } = req.body;
     const updates = {};
-
     const user = await User.findById(req.user.id);
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -297,9 +303,11 @@ const updateUser = async (req, res) => {
       }
 
       if (oldPassword === newPassword) {
-        return res.status(400).json({
-          message: "New password must be different from old password",
-        });
+        return res
+          .status(400)
+          .json({
+            message: "New password must be different from old password",
+          });
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -314,10 +322,53 @@ const updateUser = async (req, res) => {
       updates.emailNotificationsEnabled = emailNotificationsEnabled;
     }
 
+    // Handle adding a bank account
+    if (bankAccount) {
+      const { bankName, accountNumber } = bankAccount;
+      if (!bankName || !accountNumber) {
+        return res
+          .status(400)
+          .json({ message: "Bank name and account number are required" });
+      }
+
+      const existingAccount = user.bankAccounts.find(
+        (account) => account.accountNumber === accountNumber
+      );
+      if (existingAccount) {
+        return res.status(400).json({ message: "Bank account already exists" });
+      }
+
+      // Add the new bank account
+      user.bankAccounts.push({ bankName, accountNumber });
+      updates.bankAccounts = user.bankAccounts;
+    }
+
+    // Handle removing a bank account
+    if (deleteAccountNumber) {
+      if (!deleteAccountNumber) {
+        return res
+          .status(400)
+          .json({ message: "Account number to delete cannot be null" });
+      }
+
+      // Remove the specified bank account
+      const initialLength = user.bankAccounts.length;
+      user.bankAccounts = user.bankAccounts.filter(
+        (account) => account.accountNumber !== deleteAccountNumber
+      );
+      const accountsRemoved = initialLength - user.bankAccounts.length;
+
+      // Only update if accounts were actually removed
+      if (accountsRemoved > 0) {
+        updates.bankAccounts = user.bankAccounts;
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ message: "No fields to update" });
     }
 
+    // Update the user in the database
     const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,
     });
@@ -326,6 +377,46 @@ const updateUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+const deleteBankAccount = async (req, res) => {
+  const { accountNumber } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!accountNumber) {
+      return res.status(400).json({ message: "Account number is required" });
+    }
+
+    const accountIndex = user.bankAccounts.findIndex(
+      (account) => account.accountNumber === accountNumber
+    );
+
+    if (accountIndex === -1) {
+      return res.status(404).json({ message: "Bank account not found" });
+    }
+
+    user.bankAccounts.splice(accountIndex, 1);
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json({
+        message: "Bank account deleted successfully",
+        bankAccounts: user.bankAccounts,
+      });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Error deleting bank account", error: error.message });
   }
 };
 
@@ -356,4 +447,5 @@ module.exports = {
   getUser,
   updateUser,
   softDeleteUser,
+  deleteBankAccount,
 };

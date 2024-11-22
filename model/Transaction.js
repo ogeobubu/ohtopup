@@ -6,9 +6,30 @@ const transactionSchema = new mongoose.Schema({
     ref: "Wallet",
     required: true,
   },
-  amount: { type: Number, required: true },
-  type: { type: String, enum: ["deposit", "withdrawal"], required: true },
-  timestamp: { type: Date, default: Date.now },
+  amount: { 
+    type: Number, 
+    required: true 
+  },
+  type: { 
+    type: String, 
+    enum: ["deposit", "withdrawal"], 
+    required: true 
+  },
+  timestamp: { 
+    type: Date, 
+    default: Date.now 
+  },
+  status: { 
+    type: String, 
+    enum: ["pending", "completed", "failed"], 
+    default: "pending"
+  },
+  bankName: {
+    type: String,
+  },
+  accountNumber: {
+    type: String,
+  },
 });
 
 const Transaction = mongoose.model("Transaction", transactionSchema);

@@ -9,8 +9,15 @@ const {
   resendOtp,
   getUser,
   updateUser,
-  softDeleteUser
+  softDeleteUser,
+  deleteBankAccount
 } = require("../controllers/userController");
+const {
+  getWallet,
+  getTransactionsByUser,
+  getBanks,
+  withdrawWallet
+} = require("../controllers/walletController");
 const auth = require("../middleware/authMiddleware");
 const router = express.Router();
 
@@ -23,6 +30,11 @@ router.post("/reset", verifyOtpAndResetPassword);
 router.post("/resend-otp", resendOtp);
 router.get("/", auth, getUser);
 router.patch("/", auth, updateUser);
-router.delete("/", auth, softDeleteUser)
+router.delete("/", auth, softDeleteUser);
+router.get("/wallet", auth, getWallet);
+router.get("/transactions", auth, getTransactionsByUser);
+router.get("/banks", auth, getBanks);
+router.post("/bank", auth, deleteBankAccount);
+router.post("/withdraw", auth, withdrawWallet);
 
 module.exports = router;

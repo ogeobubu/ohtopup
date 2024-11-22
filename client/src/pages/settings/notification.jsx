@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 const Notification = () => {
   const dispatch = useDispatch();
   const emailNotificationsEnabled = useSelector(
-    (state) => state.user.user.emailNotificationsEnabled
+    (state) => state.user?.user?.emailNotificationsEnabled
   );
   const [isOn, setIsOn] = React.useState(emailNotificationsEnabled);
 
