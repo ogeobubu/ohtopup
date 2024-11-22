@@ -7,7 +7,7 @@ const instance = axios.create({
 });
 
 const getToken = () => {
-  const token = localStorage.getItem('ohtopup-token');
+  const token = localStorage.getItem("ohtopup-token");
   return token;
 };
 
@@ -20,7 +20,7 @@ instance.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request Error:', error);
+    console.error("Request Error:", error);
     return Promise.reject(error);
   }
 );
@@ -31,13 +31,16 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (error.response) {
+      console.log(error);
       if (error.response.status === 401) {
-        console.error('Unauthorized request!');
+        console.error("Response Error:", error.response.data);
+      } else if (error.response.status === 403) {
+        window.location.href = "/login";
       } else {
-        console.error('Response Error:', error.response.data);
+        console.error("Response Error:", error.response.data);
       }
     } else {
-      console.error('Error:', error.message);
+      console.error("Error:", error.message);
     }
     return Promise.reject(error);
   }
@@ -142,18 +145,59 @@ export const getServices = async () => {
   }
 };
 
-export const depositWallet = async (data) => {
+export const createDedicatedAccount = async (data) => {
   try {
-    const response = await instance.post(`/wallet/deposit`, data);
+    const response = await instance.post(
+      `/wallet/create-dedicated-account`,
+      data
+    );
     return response.data;
   } catch (error) {
     throw new Error(error.response.data.message || "Error fetching user");
   }
 };
 
-export const createDedicatedAccount = async (data) => {
+export const getWallet = async () => {
   try {
-    const response = await instance.post(`/wallet/create-dedicated-account`, data);
+    const response = await instance.get(`/wallet`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const getTransactions = async (type) => {
+  try {
+    const response = await instance.get(`/transactions?type=${type}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const getBanks = async () => {
+  try {
+    const response = await instance.get(`/banks`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const withdrawFunds = async (data) => {
+  try {
+    const response = await instance.post(`/withdraw`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const deleteBank = async (id) => {
+  try {
+    const response = await instance.post(`/bank`, {
+      accountNumber: id
+    });
     return response.data;
   } catch (error) {
     throw new Error(error.response.data.message || "Error fetching user");

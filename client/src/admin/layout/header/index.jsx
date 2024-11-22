@@ -25,7 +25,7 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("ohtopup-admin-token");
-    navigate("/login"); 
+    navigate("/admin"); 
   };
 
   return (

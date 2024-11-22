@@ -1,7 +1,7 @@
 const Wallet = require("../model/Wallet");
 const Transaction = require("../model/Transaction");
 const axios = require("axios");
-const {generateRandomAccountNumber} = require("../utils")
+const { generateRandomAccountNumber } = require("../utils");
 
 const fetchBankCodes = async () => {
   try {
@@ -19,8 +19,9 @@ const fetchBankCodes = async () => {
 };
 
 const createWallet = async (req, res) => {
+  const { userId } = req.body;
   try {
-    const wallet = new Wallet({ userId: req.userId });
+    const wallet = new Wallet({ userId });
     await wallet.save();
     res.status(201).json(wallet);
   } catch (error) {
@@ -30,78 +31,149 @@ const createWallet = async (req, res) => {
 
 const getWallet = async (req, res) => {
   try {
-    const wallet = await Wallet.findOne({ userId: req.userId });
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    const wallet = await Wallet.findOne({ userId: req.user.id });
+
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    if (!wallet.isActive) {
+      return res.status(404).json({ message: "Your wallet is disabled" });
+    }
+
     res.json(wallet);
   } catch (error) {
     res.status(500).json({ message: "Error fetching wallet", error });
   }
 };
 
+const getWallets = async (req, res) => {
+  try {
+    const wallets = await Wallet.find().populate("userId", "username email");
+    if (!wallets || wallets.length === 0) {
+      return res.status(404).json({ message: "No wallets found" });
+    }
+
+    const walletDetails = wallets.map((wallet) => ({
+      _id: wallet._id,
+      userId: wallet.userId._id,
+      username: wallet.userId.username,
+      email: wallet.userId.email,
+      balance: wallet.balance,
+      transactions: wallet.transactions,
+      isActive: wallet.isActive,
+    }));
+
+    res.json({
+      data: walletDetails,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching wallets", error });
+  }
+};
+
 const depositWallet = async (req, res) => {
-  const { amount } = req.body;
+  const { userId, amount } = req.body;
+  let transaction = null; // Declare transaction here
 
   try {
-    const wallet = await Wallet.findOne({ userId: req.userId });
+    const wallet = await Wallet.findOne({ userId });
     if (!wallet) return res.status(404).json({ message: "Wallet not found" });
-
-    wallet.balance += amount;
-
-    const transaction = new Transaction({
+    transaction = new Transaction({
       walletId: wallet._id,
       amount,
       type: "deposit",
+      status: "pending",
     });
     await transaction.save();
 
+    // Update the wallet balance
+    wallet.balance += amount;
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
+    transaction.status = "completed";
+    await transaction.save();
+
     res.json(wallet);
   } catch (error) {
+    // If transaction was created, update its status to failed
+    if (transaction) {
+      transaction.status = "failed";
+      await transaction.save();
+    }
     res.status(500).json({ message: "Error depositing to wallet", error });
   }
 };
 
 const withdrawWallet = async (req, res) => {
-  const { amount } = req.body;
+  const { amount, bankName, accountNumber } = req.body;
 
   try {
-    const wallet = await Wallet.findOne({ userId: req.userId });
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    const wallet = await Wallet.findOne({ userId: req.user.id });
+
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
 
     if (wallet.balance < amount) {
       return res.status(400).json({ error: "Insufficient funds" });
     }
 
     wallet.balance -= amount;
-
     const transaction = new Transaction({
       walletId: wallet._id,
       amount,
       type: "withdrawal",
+      bankName,
+      accountNumber,
+      status: "pending",
     });
     await transaction.save();
 
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
-    res.json(wallet);
+    transaction.status = "completed";
+    await transaction.save();
+
+    return res.status(200).json({
+      message: "Withdrawal successful",
+      wallet: {
+        balance: wallet.balance,
+        transactions: wallet.transactions,
+      },
+      transaction: {
+        id: transaction._id,
+        amount: transaction.amount,
+        status: transaction.status,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error withdrawing from wallet", error });
+    console.error(error);
+    if (transaction) {
+      transaction.status = "failed";
+      await transaction.save();
+    }
+
+    return res
+      .status(500)
+      .json({ message: "Error withdrawing from wallet", error: error.message });
   }
 };
 
-
-// Function to create a customer
 const createCustomer = async (customerData) => {
   try {
-    const response = await axios.post("https://api.paystack.co/customer", customerData, {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.post(
+      "https://api.paystack.co/customer",
+      customerData,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return response.data.data;
   } catch (error) {
     console.error("Error creating customer:", error.response.data);
@@ -141,11 +213,13 @@ const handleCreateCustomerAndAccount = async (req, res) => {
 
   try {
     const customerData = {
-      email
+      email,
     };
     const customer = await createCustomer(customerData);
 
-    const dedicatedAccount = await createDedicatedAccount(customer.customer_code);
+    const dedicatedAccount = await createDedicatedAccount(
+      customer.customer_code
+    );
 
     return res.status(201).json({
       message: "Dedicated account created successfully",
@@ -157,10 +231,109 @@ const handleCreateCustomerAndAccount = async (req, res) => {
   }
 };
 
+const toggleWalletStatus = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const wallet = await Wallet.findById(id);
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    wallet.isActive = !wallet.isActive;
+    await wallet.save();
+
+    res.json({
+      message: `Wallet has been ${wallet.isActive ? "enabled" : "disabled"}.`,
+      wallet,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error toggling wallet status", error });
+  }
+};
+
+const getAllTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.find()
+      .populate({
+        path: "walletId",
+        populate: {
+          path: "userId",
+          select: "username email",
+        },
+      })
+      .exec();
+
+    const transactionsWithUserDetails = transactions.map((transaction) => ({
+      _id: transaction._id,
+      amount: transaction.amount,
+      type: transaction.type,
+      timestamp: transaction.timestamp,
+      status: transaction.status,
+      user: {
+        username: transaction.walletId.userId.username,
+        email: transaction.walletId.userId.email,
+      },
+    }));
+
+    res.json(transactionsWithUserDetails);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching transactions", error });
+  }
+};
+
+const getTransactionsByUser = async (req, res) => {
+  const userId = req.user.id;
+  const { type } = req.query;
+
+  try {
+    const transactions = await Transaction.find().populate("walletId").exec();
+
+    const userTransactions = transactions.filter((transaction) => {
+      return transaction.walletId.userId.toString() === userId;
+    });
+
+    const filteredTransactions = type
+      ? userTransactions.filter(
+          (transaction) => transaction.type.toLowerCase() === type.toLowerCase()
+        )
+      : userTransactions;
+
+    res.json(filteredTransactions);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching transactions for user", error });
+  }
+};
+
+const getBanks = async (req, res) => {
+  try {
+    const response = await axios.get("https://api.paystack.co/bank", {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error fetching banks from Paystack:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching banks", error: error.message });
+  }
+};
+
 module.exports = {
   createWallet,
   getWallet,
+  getWallets,
   depositWallet,
   withdrawWallet,
-  handleCreateCustomerAndAccount
+  handleCreateCustomerAndAccount,
+  toggleWalletStatus,
+  getAllTransactions,
+  getTransactionsByUser,
+  getBanks,
 };

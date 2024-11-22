@@ -9,7 +9,8 @@ const walletSchema = new mongoose.Schema({
       ref: "Transaction",
     },
   ],
+  isActive: { type: Boolean, default: true },
 });
 
-const Wallet = mongoose.model("Wallet", walletSchema);
+const Wallet = mongoose.models.Wallet || mongoose.model("Wallet", walletSchema);
 module.exports = Wallet;
