@@ -99,7 +99,7 @@ const Dashboard = () => {
 };
 
 const prepareChartData = (analyticData) => {
-  return analyticData.map((item) => ({
+  return analyticData?.map((item) => ({
     _id: item._id || "No Data",
     totalRevenue: item.totalRevenue || 0,
     totalGross: item.totalGross || 0,
