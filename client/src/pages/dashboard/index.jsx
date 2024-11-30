@@ -1,8 +1,12 @@
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
-import { getUser } from "../../api";
+import { getUser, getWallet } from "../../api";
 import { setUser } from "../../actions/userActions";
+import Wallet from "./wallet";
+import Refer from "./refer";
+import Gift from "./gift";
+import Shortcut from "./shortcut";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -16,6 +20,11 @@ const Dashboard = () => {
     queryFn: getUser,
   });
 
+  const { data: walletData, error: walletError, isLoading: walletLoading } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: getWallet,
+  });
+
   useEffect(() => {
     if (user) {
       dispatch(setUser(user));
@@ -24,14 +33,12 @@ const Dashboard = () => {
 
   return (
     <div>
-      {isLoading && <p>Loading...</p>}
-      {isError && <p>Error: {error.message}</p>}
-      {user && (
-        <div>
-          <p>Username: {user.username}</p>
-          <p>Email: {user.email}</p>
-        </div>
-      )}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <Wallet data={walletData} />
+        <Gift />
+        <Refer />
+      </div>
+      <Shortcut />
     </div>
   );
 };

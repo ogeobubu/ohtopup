@@ -9,7 +9,7 @@ const Modal = ({ isOpen, closeModal, title, children }) => {
       }`}
     >
       <div
-        className={`fixed top-0 right-0 h-screen bg-white shadow-md rounded-md p-6 w-full max-w-sm transition-transform duration-300 transform ${
+        className={`fixed top-0 right-0 h-[100%] bg-white shadow-md rounded-md p-6 w-full max-w-xs transition-transform duration-300 transform ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         style={{
@@ -24,10 +24,15 @@ const Modal = ({ isOpen, closeModal, title, children }) => {
           <FaTimes className="w-5 h-5" />
         </button>
         <h2 className="text-2xl font-bold mb-4">{title}</h2>
-        {children}
+        <div
+          className="modal-content overflow-y-auto"
+          style={{ maxHeight: "calc(100vh - 150px)", paddingRight: "15px", boxSizing: "content-box" }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
 };
 
-export default Modal;
+export default Modal

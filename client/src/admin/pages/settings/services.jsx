@@ -120,43 +120,44 @@ const Services = () => {
   };
 
   const handleDeleteData = async (id) => {
+    console.log(id)
     try {
       await deleteServiceApi(id);
       dispatch(removeService(id));
-      toast.success("Notification deleted successfully!");
+      toast.success("Service deleted successfully!");
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error("Failed to delete notification.");
+      toast.error("Failed to delete service.");
     } finally {
       closeDeleteModal();
     }
   };
 
   const columns = [
-    { header: "Name", render: (notification) => notification.name },
+    { header: "Name", render: (service) => service.name },
     {
       header: "Available",
-      render: (notification) => (notification?.isAvailable ? "true" : "false"),
+      render: (service) => (service?.isAvailable ? "true" : "false"),
     },
     {
       header: "Date",
-      render: (notification) => (
-        <small>{new Date(notification.updatedAtw).toLocaleString()}</small>
+      render: (service) => (
+        <small>{new Date(service.updatedAt).toLocaleString()}</small>
       ),
     },
     {
       header: "Actions",
-      render: (notification) => (
+      render: (service) => (
         <div className="flex space-x-2">
           <button
             className="border border-solid border-green-500 flex justify-center items-center rounded-full w-6 h-6 text-green-500 hover:text-green-700"
-            onClick={() => handleEditService(notification)}
+            onClick={() => handleEditService(service)}
           >
             <FaEdit size={15} />
           </button>
           <button
             className="border border-solid border-red-500 flex justify-center items-center rounded-full w-6 h-6 text-red-500 hover:text-red-700"
-            onClick={() => openDeleteModal(notification.id)}
+            onClick={() => openDeleteModal(service._id)}
           >
             <FaTrash size={15} />
           </button>

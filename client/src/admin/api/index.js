@@ -55,6 +55,17 @@ export const loginAdmin = async (userData) => {
   }
 };
 
+export const getReferrals = async (page = 1, limit = 10, search = '') => {
+  try {
+    const response = await instance.get(`/referrals`, {
+      params: { page, limit, search },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching referrals");
+  }
+};
+
 export const getUser = async () => {
   try {
     const response = await instance.get(`/`);
@@ -171,6 +182,15 @@ export const getServices = async () => {
   }
 };
 
+export const getAllServices = async () => {
+  try {
+    const response = await instance.get(`/all-services`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error logging user");
+  }
+};
+
 export const createWallet = async (id) => {
   try {
     const response = await instance.post(`/wallet`, {
@@ -197,7 +217,7 @@ export const depositWallet = async (id, data) => {
 export const getWallets = async () => {
   try {
     const response = await instance.get(`/wallets`);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     throw new Error(error.response.data.message || "Error fetching user");
   }
@@ -212,11 +232,57 @@ export const toggleWallet = async (id) => {
   }
 };
 
-export const getAllTransactions = async () => {
+export const getAllTransactions = async (page = 1, limit = 10, type = null, reference = null) => {
   try {
-    const response = await instance.get(`/transactions`);
+    const response = await instance.get(`/transactions`, {
+      params: { page, limit, type, reference },
+    });
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user");
+    throw new Error(error.response.data.message || "Error fetching transactions");
+  }
+};
+
+export const getAllUtilityTransactions = async (
+  page = 1,
+  limit = 10,
+  type,
+  requestId
+) => {
+  try {
+    const params = { page, limit };
+    if (type) {
+      params.type = type;
+    }
+    if (type) {
+      params.requestId = requestId;
+    }
+
+    const response = await instance.get(`/utility-transactions`, {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error fetching transactions"
+    );
+  }
+};
+
+export const getUtilityAnalytics = async () => {
+  try {
+    const response = await instance.get(`/utility-analytic`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const addPoint = async (data) => {
+  try {
+    const response = await instance.post(`/add-point`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
   }
 };

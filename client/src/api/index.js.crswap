@@ -1,0 +1,365 @@
+import axios from "axios";
+
+const API_URL = "/api/users";
+
+const instance = axios.create({
+  baseURL: API_URL,
+});
+
+const getToken = () => {
+  const token = localStorage.getItem("ohtopup-token");
+  return token;
+};
+
+instance.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    console.error("Request Error:", error);
+    return Promise.reject(error);
+  }
+);
+
+instance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      console.log(error);
+      if (error.response.status === 401) {
+        console.error("Response Error:", error.response.data);
+      } else if (error.response.status === 403) {
+        window.location.href = "/login";
+      } else {
+        console.error("Response Error:", error.response.data);
+      }
+    } else {
+      console.error("Error:", error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const createUser = async (userData) => {
+  try {
+    const response = await instance.post(`/create`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error creating user");
+  }
+};
+
+export const verifyUser = async (userData) => {
+  try {
+    const response = await instance.post(`/verify`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error creating user");
+  }
+};
+
+export const resendCodeUser = async (userData) => {
+  try {
+    const response = await instance.post(`/resend-code`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error creating user");
+  }
+};
+
+export const loginUser = async (userData) => {
+  try {
+    const response = await instance.post(`/login`, userData);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error logging user");
+  }
+};
+
+export const forgotUser = async (userData) => {
+  try {
+    const response = await instance.post(`/forgot`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error creating user");
+  }
+};
+
+export const resetUser = async (userData) => {
+  try {
+    const response = await instance.post(`/reset`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error creating user");
+  }
+};
+
+export const resendResetCodeUser = async (userData) => {
+  try {
+    const response = await instance.post(`/resend-otp`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error creating user");
+  }
+};
+
+export const getUser = async () => {
+  try {
+    const response = await instance.get(`/`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const updateUser = async (userData) => {
+  try {
+    const response = await instance.patch(`/`, userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error updating user");
+  }
+};
+
+export const deleteUser = async () => {
+  try {
+    const response = await instance.delete(`/`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const getServices = async () => {
+  try {
+    const response = await instance.get(`/admin/services`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const createDedicatedAccount = async (data) => {
+  try {
+    const response = await instance.post(
+      `/wallet/create-dedicated-account`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const getWallet = async () => {
+  try {
+    const response = await instance.get(`/wallet`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const getTransactions = async (type, page = 1, limit = 10, reference) => {
+  try {
+    const response = await instance.get(`/transactions`, {
+      params: { type, page, limit, reference },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching transactions");
+  }
+};
+
+export const getBanks = async () => {
+  try {
+    const response = await instance.get(`/banks`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const verifyBankAccount = async (data) => {
+  try {
+    const response = await instance.post(`/verify-account`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const withdrawFunds = async (data) => {
+  try {
+    const response = await instance.post(`/withdraw`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const deleteBank = async (id) => {
+  try {
+    const response = await instance.post(`/bank`, {
+      accountNumber: id,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const depositWallet = async (data) => {
+  try {
+    const response = await instance.post(`/deposit`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const verifyPaystackTransaction = async (data) => {
+  try {
+    const response = await instance.post(`/verify-payment/`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error verifying payment");
+  }
+};
+
+export const purchaseAirtime = async (data) => {
+  try {
+    const response = await instance.post("/airtime", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error purchasing airtime");
+  }
+};
+
+export const getDataVariationCodes = async (id) => {
+  try {
+    const response = await instance.get(`/data?serviceID=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const purchaseData = async (data) => {
+  try {
+    const response = await instance.post("/data", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error purchasing airtime");
+  }
+};
+
+export const getServiceID = async (id) => {
+  try {
+    const response = await instance.get(`/service-id?identifier=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const getDataVariationTVCodes = async (id) => {
+  try {
+    const response = await instance.get(`/cable?serviceID=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const getCableName = async (id, data) => {
+  try {
+    const response = await instance.post(`/cable/verify`, {
+      billersCode: data,
+      serviceID: id,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const purchaseCable = async (data) => {
+  try {
+    const response = await instance.post("/cable", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response.data.message ||
+        error.response.data.error ||
+        "Error purchasing cable"
+    );
+  }
+};
+
+export const getServiceIDElectricity = async (id) => {
+  try {
+    const response = await instance.get(`/service-id?identifier=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const getElectricityName = async (id, data, type) => {
+  try {
+    const response = await instance.post(`/electricity/verify`, {
+      billersCode: data,
+      serviceID: id,
+      type,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const purchaseElectricity = async (data) => {
+  try {
+    const response = await instance.post("/electricity", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response.data.message ||
+        error.response.data.error ||
+        "Error purchasing electricity"
+    );
+  }
+};
+
+export const getAllUtilityTransactions = async (
+  page = 1,
+  limit = 10,
+  type,
+  requestId
+) => {
+  try {
+    const params = { page, limit };
+    if (type) {
+      params.type = type;
+    }
+    if (type) {
+      params.requestId = requestId;
+    }
+
+    const response = await instance.get(`/utility-transactions`, {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error fetching transactions"
+    );
+  }
+};

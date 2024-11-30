@@ -12,6 +12,7 @@
     "dev:all": "concurrently \"yarn dev\" \"yarn client\""
   },
   "dependencies": {
+    "@paystack/inline-js": "^2.22.1",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
@@ -19,7 +20,8 @@
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.1",
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^6.9.16",
+    "react-paystack": "^6.0.0"
   },
   "devDependencies": {
     "concurrently": "^7.0.0",

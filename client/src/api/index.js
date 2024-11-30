@@ -55,6 +55,17 @@ export const createUser = async (userData) => {
   }
 };
 
+export const getReferrals = async (page = 1, limit = 10, search = '') => {
+  try {
+    const response = await instance.get(`/referrals`, {
+      params: { page, limit, search },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching referrals");
+  }
+};
+
 export const verifyUser = async (userData) => {
   try {
     const response = await instance.post(`/verify`, userData);
@@ -166,18 +177,36 @@ export const getWallet = async () => {
   }
 };
 
-export const getTransactions = async (type) => {
+export const getTransactions = async (
+  type,
+  page = 1,
+  limit = 10,
+  reference
+) => {
   try {
-    const response = await instance.get(`/transactions?type=${type}`);
+    const response = await instance.get(`/transactions`, {
+      params: { type, page, limit, reference },
+    });
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user");
+    throw new Error(
+      error.response.data.message || "Error fetching transactions"
+    );
   }
 };
 
 export const getBanks = async () => {
   try {
     const response = await instance.get(`/banks`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const verifyBankAccount = async (data) => {
+  try {
+    const response = await instance.post(`/verify-account`, data);
     return response.data;
   } catch (error) {
     throw new Error(error.response.data.message || "Error fetching user");
@@ -196,10 +225,168 @@ export const withdrawFunds = async (data) => {
 export const deleteBank = async (id) => {
   try {
     const response = await instance.post(`/bank`, {
-      accountNumber: id
+      accountNumber: id,
     });
     return response.data;
   } catch (error) {
     throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const depositWallet = async (data) => {
+  try {
+    const response = await instance.post(`/deposit`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
+export const verifyMonnifyTransaction = async (ref, id) => {
+  try {
+    const response = await instance.get(`/verify-payment/${ref}?userId=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error verifying payment");
+  }
+};
+
+export const purchaseAirtime = async (data) => {
+  try {
+    const response = await instance.post("/airtime", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error purchasing airtime");
+  }
+};
+
+export const getDataVariationCodes = async (id) => {
+  try {
+    const response = await instance.get(`/data?serviceID=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const purchaseData = async (data) => {
+  try {
+    const response = await instance.post("/data", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error purchasing airtime");
+  }
+};
+
+export const getServiceID = async (id) => {
+  try {
+    const response = await instance.get(`/service-id?identifier=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const getDataVariationTVCodes = async (id) => {
+  try {
+    const response = await instance.get(`/cable?serviceID=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const getCableName = async (id, data) => {
+  try {
+    const response = await instance.post(`/cable/verify`, {
+      billersCode: data,
+      serviceID: id,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const purchaseCable = async (data) => {
+  try {
+    const response = await instance.post("/cable", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response.data.message ||
+        error.response.data.error ||
+        "Error purchasing cable"
+    );
+  }
+};
+
+export const getServiceIDElectricity = async (id) => {
+  try {
+    const response = await instance.get(`/service-id?identifier=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const getElectricityName = async (id, data, type) => {
+  try {
+    const response = await instance.post(`/electricity/verify`, {
+      billersCode: data,
+      serviceID: id,
+      type,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const purchaseElectricity = async (data) => {
+  try {
+    const response = await instance.post("/electricity", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response.data.message ||
+        error.response.data.error ||
+        "Error purchasing electricity"
+    );
+  }
+};
+
+export const getAllUtilityTransactions = async (
+  page = 1,
+  limit = 10,
+  type,
+  requestId
+) => {
+  try {
+    const params = { page, limit };
+    if (type) {
+      params.type = type;
+    }
+    if (type) {
+      params.requestId = requestId;
+    }
+
+    const response = await instance.get(`/utility-transactions`, {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error fetching transactions"
+    );
+  }
+};
+
+export const redeemPoints = async (data) => {
+  try {
+    const response = await instance.post(`/redeem-points`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
   }
 };
