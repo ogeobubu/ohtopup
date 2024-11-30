@@ -13,7 +13,7 @@
     "build": "cd client && yarn build",
     "postinstall": "cd client && yarn install",
     "dev:all": "concurrently \"yarn dev\" \"yarn client\"",
-    "prod": "concurrently \"yarn build\" \"nodemon app.js\""
+    "prod": "concurrently \"cd client\" \"yarn build\" \"nodemon app.js\""
   },
   "dependencies": {
     "@paystack/inline-js": "^2.22.1",
