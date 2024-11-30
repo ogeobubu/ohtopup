@@ -92,7 +92,15 @@ const Banks = ({ user, handleShowBanks, openModal }) => {
 
                 <div className="ml-auto">
                   <span className="text-white text-xs font-medium">
-                    YOUR ACCOUNT NAME... {account?.bankName}
+                  <span
+                        title={account?.accountName}
+                        className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
+                      >
+                        {account?.accountName &&
+                        account?.accountName.length > 10
+                          ? `${account?.accountName.slice(0, 15)}...`
+                          : account?.accountName}
+                      </span> {account?.bankName}
                   </span>
                 </div>
               </div>
@@ -118,7 +126,7 @@ const Banks = ({ user, handleShowBanks, openModal }) => {
               </button>
               <button
                 className="text-[#0B2253] font-semibold"
-                onClick={handleDeleteBank} // Call handleDeleteBank on click
+                onClick={handleDeleteBank}
               >
                 Delete
               </button>
@@ -145,7 +153,16 @@ const Banks = ({ user, handleShowBanks, openModal }) => {
                   </div>
                   <div className="ml-auto">
                     <span className="text-white text-xs font-medium">
-                      YOUR ACCOUNT NAME... {selectedBank?.bankName}
+                      <span
+                        title={selectedBank?.accountName}
+                        className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
+                      >
+                        {selectedBank?.accountName &&
+                        selectedBank?.accountName.length > 10
+                          ? `${selectedBank?.accountName.slice(0, 15)}...`
+                          : selectedBank?.accountName}
+                      </span>{" "}
+                      {selectedBank?.bankName}
                     </span>
                   </div>
                 </div>

@@ -7,38 +7,67 @@ const { sendForgotPasswordEmail } = require("./email/sendForgotPasswordEmail");
 const { sendConfirmationEmail } = require("./email/sendConfirmationEmail");
 const { sendVerificationEmail } = require("./email/sendVerificationEmail");
 const { sendResendResetOTPEmail } = require("./email/sendResendResetOTPEmail");
+const axios = require("axios");
+
+const generateUniqueReferralCode = async (username) => {
+  let code;
+  let isUnique = false;
+
+  while (!isUnique) {
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    code = `${username}-${randomSuffix}`;
+    const existingUser = await User.findOne({ referralCode: code });
+    isUnique = !existingUser;
+  }
+
+  return code;
+};
 
 const createUser = async (req, res) => {
-  const { username, email, phoneNumber, referralCode, password, source } =
-    req.body;
+  const { username, email, phoneNumber, referralCode, password, source } = req.body;
 
   if (!username || !email || !phoneNumber || !password) {
-    return res
-      .status(400)
-      .json({ message: "Please provide all required fields" });
+    return res.status(400).json({ message: "Please provide all required fields" });
   }
 
   try {
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
     if (existingUser) {
-      if (existingUser.username === username) {
-        return res.status(400).json({ message: "Username already exists" });
-      } else {
-        return res.status(400).json({ message: "Email already exists" });
-      }
+      return res.status(400).json({ message: existingUser.username === username ? "Username already exists" : "Email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const newReferralCode = await generateUniqueReferralCode(username);
 
     const newUser = new User({
       username,
       email,
       phoneNumber,
-      referralCode,
+      referralCode: newReferralCode,
       password: hashedPassword,
       source,
     });
+
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode });
+    
+      if (referralCode) {
+        const referrer = await User.findOne({ referralCode });
+      
+        if (referrer) {
+          newUser.referrerId = referrer._id;
+          referrer.referredUsers.push(newUser._id);
+          referrer.referralCount += 1;
+          referrer.points += 1;
+      
+          await referrer.save();
+        } else {
+          return res.status(400).json({ message: "Invalid referral code" });
+        }
+      }
+    }
 
     await newUser.save();
 
@@ -46,26 +75,53 @@ const createUser = async (req, res) => {
     newUser.confirmationCode = confirmationCode;
     newUser.confirmationCodeExpires = Date.now() + 3600000;
 
-    await User.updateOne(
-      { _id: newUser._id },
-      { confirmationCode: newUser.confirmationCode },
-      { confirmationCodeExpires: newUser.confirmationCodeExpires }
-    );
-
-    await newUser.save();
-
+    await User.updateOne({ _id: newUser._id }, { confirmationCode: newUser.confirmationCode, confirmationCodeExpires: newUser.confirmationCodeExpires });
     await sendConfirmationEmail(newUser.email, username, confirmationCode);
 
     const wallet = new Wallet({ userId: newUser._id });
     await wallet.save();
 
-    res.status(201).json({
-      message:
-        "User created successfully! Please verify your email to activate your account.",
-    });
+    res.status(201).json({ message: "User created successfully! Please verify your email to activate your account." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating user", error });
+  }
+};
+
+const getReferrals = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { page = 1, limit = 10, search = '' } = req.query;
+
+    const user = await User.findById(userId).populate({
+      path: 'referredUsers',
+      match: {
+        $or: [
+          { username: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+        ],
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const referredUsers = user.referredUsers || [];
+    const totalUsers = referredUsers.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit, 10);
+    const results = referredUsers.slice(startIndex, endIndex);
+
+    return res.status(200).json({
+      totalUsers,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      users: results,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -168,7 +224,7 @@ const loginUser = async (req, res) => {
 
     const payload = { user: { id: user._id, role: user.role } };
     const secret = process.env.JWT_SECRET;
-    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+    const token = jwt.sign(payload, secret, { expiresIn: "1d" });
 
     res.status(200).json({ message: "Login successful!", token });
   } catch (error) {
@@ -303,11 +359,9 @@ const updateUser = async (req, res) => {
       }
 
       if (oldPassword === newPassword) {
-        return res
-          .status(400)
-          .json({
-            message: "New password must be different from old password",
-          });
+        return res.status(400).json({
+          message: "New password must be different from old password",
+        });
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -322,10 +376,9 @@ const updateUser = async (req, res) => {
       updates.emailNotificationsEnabled = emailNotificationsEnabled;
     }
 
-    // Handle adding a bank account
     if (bankAccount) {
-      const { bankName, accountNumber } = bankAccount;
-      if (!bankName || !accountNumber) {
+      const { bankName, accountNumber, bankCode, accountName } = bankAccount;
+      if (!bankName || !accountNumber || !bankCode || !accountName) {
         return res
           .status(400)
           .json({ message: "Bank name and account number are required" });
@@ -338,12 +391,15 @@ const updateUser = async (req, res) => {
         return res.status(400).json({ message: "Bank account already exists" });
       }
 
-      // Add the new bank account
-      user.bankAccounts.push({ bankName, accountNumber });
+      user.bankAccounts.push({
+        bankName,
+        accountNumber,
+        bankCode,
+        accountName,
+      });
       updates.bankAccounts = user.bankAccounts;
     }
 
-    // Handle removing a bank account
     if (deleteAccountNumber) {
       if (!deleteAccountNumber) {
         return res
@@ -351,14 +407,12 @@ const updateUser = async (req, res) => {
           .json({ message: "Account number to delete cannot be null" });
       }
 
-      // Remove the specified bank account
       const initialLength = user.bankAccounts.length;
       user.bankAccounts = user.bankAccounts.filter(
         (account) => account.accountNumber !== deleteAccountNumber
       );
       const accountsRemoved = initialLength - user.bankAccounts.length;
 
-      // Only update if accounts were actually removed
       if (accountsRemoved > 0) {
         updates.bankAccounts = user.bankAccounts;
       }
@@ -368,7 +422,6 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ message: "No fields to update" });
     }
 
-    // Update the user in the database
     const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,
     });
@@ -406,12 +459,10 @@ const deleteBankAccount = async (req, res) => {
 
     await user.save();
 
-    return res
-      .status(200)
-      .json({
-        message: "Bank account deleted successfully",
-        bankAccounts: user.bankAccounts,
-      });
+    return res.status(200).json({
+      message: "Bank account deleted successfully",
+      bankAccounts: user.bankAccounts,
+    });
   } catch (error) {
     console.error(error);
     return res
@@ -436,8 +487,80 @@ const softDeleteUser = async (req, res) => {
   }
 };
 
+const verifyBankAccount = async (req, res) => {
+  const { accountNumber, bankCode } = req.body;
+
+  try {
+    const response = await axios.get(`https://api.paystack.co/bank/resolve`, {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        account_number: accountNumber,
+        bank_code: bankCode,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: response.data,
+    });
+  } catch (error) {
+    if (error.response) {
+      console.log(error.response);
+      return res.status(error.response.status).json({
+        success: false,
+        message: error.response.data.message || "Error verifying account.",
+      });
+    }
+    return res.status(500).json({ success: false, message: "Server error." });
+  }
+};
+
+const redeemPoints = async (req, res) => {
+  const { pointsToRedeem } = req.body; 
+  const userId = req.user.id;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.points < pointsToRedeem) {
+      return res.status(400).json({ message: "Insufficient points" });
+    }
+
+    const nairaToAdd = Math.floor(pointsToRedeem / 10);
+
+    let wallet = await Wallet.findOne({ userId: userId });
+    if (!wallet) {
+      wallet = new Wallet({ userId: userId, balance: 0 });
+    }
+
+    wallet.balance += nairaToAdd;
+    user.points -= pointsToRedeem;
+
+    await Promise.all([
+      wallet.save(),
+      user.save(),
+    ]);
+
+    res.status(200).json({
+      message: "Points redeemed successfully",
+      balance: wallet.balance,
+      remainingPoints: user.points,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 module.exports = {
   createUser,
+  getReferrals,
   verifyUser,
   resendVerificationCode,
   loginUser,
@@ -448,4 +571,6 @@ module.exports = {
   updateUser,
   softDeleteUser,
   deleteBankAccount,
+  verifyBankAccount,
+  redeemPoints
 };

@@ -5,6 +5,7 @@ const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const walletRoutes = require("./routes/walletRoutes");
 require("dotenv").config();
+const path = require('path');
 
 const app = express();
 app.use(
@@ -24,6 +25,12 @@ mongoose
 app.use("/api/users", userRoutes);
 app.use("/api/users/admin", adminRoutes);
 app.use("/api/users/wallet", walletRoutes);
+
+app.use(express.static(path.join(__dirname, 'dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

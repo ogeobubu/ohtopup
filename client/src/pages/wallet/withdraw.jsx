@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 import TextField from "../../components/ui/forms/input";
 import Button from "../../components/ui/forms/button";
@@ -10,10 +10,12 @@ import { toast } from "react-toastify";
 
 const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
   const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false); // Loading state for withdrawal
 
   const bankOptions =
     user?.bankAccounts?.map((account) => ({
       value: account.accountNumber,
+      code: account.bankCode,
       label: `${account.bankName} - ${account.accountNumber}`,
     })) || [];
 
@@ -30,23 +32,27 @@ const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
         .max(walletData?.balance || 0, "Insufficient funds"),
     }),
     onSubmit: async (values) => {
+      setLoading(true); // Set loading state to true
       try {
         const { amount, selectedBank } = values;
         await withdrawFunds({
+          name: user?.username,
           amount: parseFloat(amount),
           bankName: selectedBank.label.split(" - ")[0],
           accountNumber: selectedBank.value,
+          bankCode: selectedBank.code,
         });
         toast.success("Withdrawal successful!");
 
         await queryClient.invalidateQueries(["wallet"]);
 
         closeModal();
-
         formik.resetForm();
         formik.setFieldValue("selectedBank", null);
       } catch (error) {
         toast.error("Error withdrawing funds: " + error.message);
+      } finally {
+        setLoading(false); // Reset loading state
       }
     },
   });
@@ -111,7 +117,13 @@ const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
         error={formik.touched.amount && Boolean(formik.errors.amount)}
       />
 
-      <Button onClick={formik.handleSubmit}>Withdraw</Button>
+      <Button
+        onClick={formik.handleSubmit}
+        disabled={loading} // Disable button when loading
+        className={loading ? "opacity-50 cursor-not-allowed" : ""}
+      >
+        {loading ? "Withdrawing..." : "Withdraw"} {/* Change button text */}
+      </Button>
     </div>
   );
 };

@@ -29,7 +29,7 @@ const Header = () => {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 py-2 flex justify-between items-center">
+    <nav className="bg-white dark:bg-gray-800 py-2 flex justify-between items-center md:mt-0 mt-5">
       <div className="text-gray-800 dark:text-white">
         <span className="text-xl font-bold">Hello</span>, {user?.username} 👋
       </div>
@@ -48,7 +48,7 @@ const Header = () => {
           <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-300 cursor-pointer" />
         </div>
 
-        <div className="relative inline-block">
+        <div className="">
           <button
             className="bg-gray-100 p-2 rounded-full text-gray-700 hover:bg-gray-300"
             onClick={toggleDropdown}

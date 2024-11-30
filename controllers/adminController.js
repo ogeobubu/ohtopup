@@ -3,6 +3,7 @@ const Notification = require("../model/Notification");
 const Service = require("../model/Service");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 
 const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
@@ -31,6 +32,44 @@ const loginAdmin = async (req, res) => {
     res.status(200).json({ message: "Login successful!", token });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
+  }
+};
+
+const getAdminReferrals = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = "" } = req.query;
+
+    const filter = search
+      ? {
+          $or: [
+            { username: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const totalUsers = await User.countDocuments(filter);
+    const users = await User.find(filter)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit, 10))
+      .populate("referredUsers", "username email")
+      .select("username email points referredUsers");
+
+    return res.status(200).json({
+      totalUsers,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      users: users.map((user) => ({
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        points: user.points,
+        referredUsers: user.referredUsers,
+      })),
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -344,8 +383,40 @@ const getServices = async (req, res) => {
   }
 };
 
+const addPoint = async (req, res) => {
+  const { userId, pointsToAdd } = req.body;
+
+  try {
+    if (!userId || typeof pointsToAdd !== "number" || pointsToAdd <= 0) {
+      return res.status(400).json({ message: "Invalid user ID or points" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.points += pointsToAdd;
+
+    const updatedUser = await user.save();
+
+    res.json({
+      message: "Points added successfully",
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        points: updatedUser.points,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   loginAdmin,
+  getAdminReferrals,
   getAdmin,
   updateAdmin,
   getAllUsers,
@@ -357,5 +428,6 @@ module.exports = {
   createService,
   updateService,
   deleteService,
-  getServices
+  getServices,
+  addPoint,
 };

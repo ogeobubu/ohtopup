@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 const Transactions = () => {
   const { data, error, isLoading } = useQuery(['transactions'], getAllTransactions);
 
-  // Error handling with toast notifications
   if (error) {
     toast.error(error.message || "Error fetching transactions");
   }

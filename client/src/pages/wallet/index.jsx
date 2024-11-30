@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Card from "./card";
-import { FaWallet, FaMoneyBillAlt, FaBuilding, FaExclamationCircle } from "react-icons/fa";
+import {
+  FaBuilding,
+  FaExclamationCircle,
+} from "react-icons/fa";
 import Table from "../../components/ui/table";
 import Button from "../../components/ui/forms/button";
-import { getWallet, getTransactions, getBanks, updateUser, getUser } from "../../api";
+import {
+  getWallet,
+  getTransactions,
+  getBanks,
+  updateUser,
+  getUser,
+  depositWallet,
+  verifyBankAccount,
+} from "../../api";
 import Modal from "../../admin/components/modal";
 import { toast } from "react-toastify";
 import Chip from "../../components/ui/chip";
@@ -14,25 +25,64 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import Banks from "./banks";
 import Withdraw from "./withdraw";
+import Gift from "./gift";
+// import { PaystackButton } from "react-paystack";
+import Pagination from "../../admin/components/pagination";
+import { useNavigate } from "react-router-dom";
 
 const Wallet = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedCard, setSelectedCard] = useState("Naira Wallet");
   const [activeTab, setActiveTab] = useState("withdrawal");
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [selectedBank, setSelectedBank] = useState(null);
   const [banks, setBanks] = useState([]);
   const [showBanks, setShowBanks] = useState(false);
+  const [amount, setAmount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [accountName, setAccountName] = useState("");
+  const [ref, setRef] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const { data: walletData, error: walletError, isLoading: walletLoading } = useQuery({
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
+
+  const [reference, setReference] = useState("");
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const refParam = queryParams.get("ref");
+    if (refParam) {
+      setRef(refParam);
+    }
+  }, []);
+
+  const handleSearchChange = (e) => {
+    setReference(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const {
+    data: walletData,
+    error: walletError,
+    isLoading: walletLoading,
+  } = useQuery({
     queryKey: ["wallet"],
     queryFn: getWallet,
   });
 
-  const { data: transactionsData, error: transactionsError, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["transactions", activeTab],
-    queryFn: () => getTransactions(activeTab.toLowerCase()),
+  const {
+    data: transactionsData,
+    error: transactionsError,
+    isLoading: transactionsLoading,
+  } = useQuery({
+    queryKey: ["transactions", activeTab, currentPage, limit, reference],
+    queryFn: () =>
+      getTransactions(activeTab.toLowerCase(), currentPage, limit, reference),
     enabled: selectedCard === "Naira Wallet",
   });
 
@@ -52,10 +102,53 @@ const Wallet = () => {
       const formattedBanks = bankData.data.map((bank) => ({
         value: bank.id,
         label: bank.name,
+        code: bank.code,
       }));
       setBanks(formattedBanks);
     }
   }, [bankData]);
+
+  const closeDepositModal = () => setIsDepositModalOpen(false);
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+    setAmount(value);
+    if (value === "") {
+      setTotalAmount(0);
+    } else {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue)) {
+        const fee = parsedValue * 0.015;
+        setTotalAmount(parsedValue + fee);
+      } else {
+        setTotalAmount(0);
+      }
+    }
+  };
+
+  const config = {
+    reference: `txn-${Date.now()}-${user?._id}`,
+    email: user?.email,
+    amount: totalAmount * 100,
+    publicKey: "pk_test_ed43711dc37e1454f9b91c9121b25a5662deef5b",
+  };
+
+  const handlePaystackSuccessAction = (reference) => {
+    const data = {
+      reference: reference.reference,
+      userId: user?._id,
+    };
+    verifyTransaction(data);
+  };
+
+  const handlePaystackCloseAction = () => {};
+
+  const componentProps = {
+    ...config,
+    text: "Add Fund",
+    onSuccess: handlePaystackSuccessAction,
+    onClose: handlePaystackCloseAction,
+  };
 
   const handleShowBanks = () => {
     setShowBanks(!showBanks);
@@ -63,6 +156,7 @@ const Wallet = () => {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
+    setCurrentPage(1);
   };
 
   const openModal = () => {
@@ -70,17 +164,13 @@ const Wallet = () => {
     setSelectedBank(null);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  const closeModal = () => setIsModalOpen(false);
 
-  const openWithdrawModal = () => {
-    setIsWithdrawModalOpen(true);
-  };
+  const openDepositModal = () => setIsDepositModalOpen(true);
 
-  const closeWithdrawModal = () => {
-    setIsWithdrawModalOpen(false);
-  };
+  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
+
+  const closeWithdrawModal = () => setIsWithdrawModalOpen(false);
 
   const validationSchema = Yup.object().shape({
     accountNumber: Yup.string()
@@ -88,15 +178,57 @@ const Wallet = () => {
       .matches(/^\d{10}$/, "Account number must be 10 digits"),
   });
 
+  const handleAccountNumberChange = async (e) => {
+    const value = e.target.value;
+    formik.setFieldValue("accountNumber", value);
+
+    if (value.length === 10) {
+      setIsVerifying(true);
+      const response = await verifyBankAccount({
+        accountNumber: value,
+        bankCode: selectedBank?.code,
+      });
+      setIsVerifying(false);
+      setAccountName(response.data.data.account_name);
+    }
+  };
+
+  const handleDeposit = async () => {
+    setLoading(true); // Set loading state to true
+    try {
+      const response = await depositWallet({
+        userId: user?._id,
+        amount: totalAmount,
+        actualAmount: amount,
+        customerName: user?.username,
+        email: user?.email,
+      });
+
+      if (response && response.url) {
+        navigate(`/wallet/${response.reference}`);
+        window.open(response.url, "_blank");
+      } else {
+        console.error("No authorization URL returned");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Error during deposit: " + error.message);
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  };
+
   const formik = useFormik({
     initialValues: { accountNumber: "" },
-    validationSchema: validationSchema,
+    validationSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
         await updateUser({
           bankAccount: {
             bankName: selectedBank?.label,
             accountNumber: values.accountNumber,
+            bankCode: selectedBank?.code,
+            accountName,
           },
         });
         toast.success(`Bank ${selectedBank?.label} added successfully!`);
@@ -110,14 +242,52 @@ const Wallet = () => {
   });
 
   const columns = [
-    { header: "Bank", render: (row) => <div className="flex flex-col"><span>{row.bankName}</span><span className="text-gray-400 text-sm">{row.accountNumber}</span></div> },
+    {
+      header: "Reference",
+      render: (row) => (
+        <p
+          title={row.reference}
+          className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
+        >
+          {row.reference && row.reference.length > 10
+            ? `${row.reference.slice(0, 15)}...`
+            : row.reference}
+        </p>
+      ),
+    },
+    {
+      header: "Bank",
+      render: (row) => (
+        <div className="flex flex-col">
+          <span className="text-sm">{row.bankName}</span>
+          <span className="text-gray-400 text-sm">{row.accountNumber}</span>
+        </div>
+      ),
+    },
     { header: "Amount", render: (row) => <p>₦{row.amount.toFixed(2)}</p> },
     { header: "Status", render: (row) => <Chip status={row.status} /> },
-    { header: "Date", render: (row) => <small>{new Date(row.timestamp).toLocaleString()}</small> },
+    {
+      header: "Date",
+      render: (row) => (
+        <small>{new Date(row.timestamp).toLocaleString()}</small>
+      ),
+    },
   ];
 
   const topupColumns = [
-    { header: "Type", render: (row) => <p>{row.type}</p> },
+    {
+      header: "Reference",
+      render: (row) => (
+        <p
+          title={row.reference}
+          className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
+        >
+          {row.reference && row.reference.length > 10
+            ? `${row.reference.slice(0, 15)}...`
+            : row.reference}
+        </p>
+      ),
+    },
     { header: "Amount", render: (row) => <p>₦{row.amount.toFixed(2)}</p> },
     { header: "Status", render: (row) => <Chip status={row.status} /> },
     {
@@ -142,13 +312,13 @@ const Wallet = () => {
           onClick={() => setSelectedCard("Naira Wallet")}
           isActive={selectedCard === "Naira Wallet"}
         />
-        <Card
+        {/* <Card
           title="Cedis Wallet"
           balance={50}
           color="red"
           onClick={() => setSelectedCard("Cedis Wallet")}
           isActive={selectedCard === "Cedis Wallet"}
-        />
+        /> */}
         <Card
           title="Gift Points"
           balance={500}
@@ -160,9 +330,13 @@ const Wallet = () => {
       {selectedCard === "Naira Wallet" && (
         <>
           {showBanks ? (
-            <Banks user={user} handleShowBanks={handleShowBanks} openModal={openModal} />
+            <Banks
+              user={user}
+              handleShowBanks={handleShowBanks}
+              openModal={openModal}
+            />
           ) : (
-            <div className="mt-5 p-4 border max-w-2xl rounded-sm">
+            <div className="mt-5 p-4 border max-w-3xl rounded-sm">
               <div className="flex flex-col">
                 <div className="rounded-lg w-full max-w-xs">
                   <h1 className="text-sm text-gray-500 font-bold mb-4">
@@ -196,7 +370,10 @@ const Wallet = () => {
                       <span className="text-sm text-gray-600">Withdraw</span>
                     </div>
                     <div className="flex flex-col justify-center gap-1">
-                      <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center">
+                      <button
+                        onClick={openDepositModal}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center"
+                      >
                         <div className="bg-blue-600 rounded-full w-6 h-6 flex justify-center items-center">
                           +
                         </div>
@@ -209,10 +386,12 @@ const Wallet = () => {
                         className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center"
                       >
                         <div className="bg-blue-600 rounded-full w-6 h-6 flex justify-center items-center">
-                          <FaBuilding size={12} className="flex justify-center items-center" />
+                          <FaBuilding size={12} />
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600">Bank Account</span>
+                      <span className="text-sm text-gray-600">
+                        Bank Account
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -245,11 +424,37 @@ const Wallet = () => {
                   {transactionsLoading ? (
                     <p>Loading transactions...</p>
                   ) : transactionsError ? (
-                    <p>Error fetching transactions: {transactionsError.message}</p>
-                  ) : activeTab === "withdrawal" ? (
-                    <Table columns={columns} data={transactionsData} />
+                    <p>
+                      Error fetching transactions: {transactionsError.message}
+                    </p>
                   ) : (
-                    <Table columns={topupColumns} data={transactionsData} />
+                    <>
+                      <div className="flex justify-end">
+                        <input
+                          type="text"
+                          placeholder="Search by Reference..."
+                          value={reference}
+                          onChange={handleSearchChange}
+                          className="border border-gray-300 rounded p-2 mb-3"
+                        />
+                      </div>
+                      {activeTab === "withdrawal" ? (
+                        <Table
+                          columns={columns}
+                          data={transactionsData.transactions}
+                        />
+                      ) : (
+                        <Table
+                          columns={topupColumns}
+                          data={transactionsData.transactions}
+                        />
+                      )}
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={transactionsData.totalPages}
+                        onPageChange={setCurrentPage}
+                      />
+                    </>
                   )}
                 </div>
               </div>
@@ -261,7 +466,7 @@ const Wallet = () => {
             closeModal={closeModal}
             title="Add Bank Account"
           >
-            <form onSubmit={formik.handleSubmit} className="p-4">
+            <form onSubmit={formik.handleSubmit} className="">
               <label className="block text-gray-500 mb-2">Select a Bank</label>
               {bankError && <p className="text-red-500">{bankError.message}</p>}
               <Select
@@ -277,7 +482,7 @@ const Wallet = () => {
                 label="Bank Account Number"
                 placeholder="Enter account number"
                 value={formik.values.accountNumber}
-                onChange={formik.handleChange}
+                onChange={handleAccountNumberChange}
                 onBlur={formik.handleBlur}
                 className={`border ${
                   formik.touched.accountNumber && formik.errors.accountNumber
@@ -290,6 +495,19 @@ const Wallet = () => {
                   {formik.errors.accountNumber}
                 </div>
               )}
+              <TextField
+                name="accountName"
+                label="Bank Account Name"
+                placeholder="Enter account name"
+                value={accountName}
+                disabled
+                onBlur={formik.handleBlur}
+                className={`border ${
+                  formik.touched.accountName && formik.errors.accountName
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
+              />
               <Button type="submit" disabled={!selectedBank}>
                 Add Bank Account
               </Button>
@@ -297,12 +515,49 @@ const Wallet = () => {
           </Modal>
 
           <Modal
+            isOpen={isDepositModalOpen}
+            closeModal={closeDepositModal}
+            title="Add Funds"
+          >
+            <TextField
+              name="amount"
+              label="Amount"
+              placeholder="Enter amount"
+              value={amount}
+              onChange={handleAmountChange}
+              helperText={`Total Amount (including fees): ${totalAmount.toFixed(
+                2
+              )}`}
+            />
+            <div className="my-2">
+            <Button onClick={handleDeposit} disabled={loading}>
+            {loading ? "Processing..." : "Pay"}
+            </Button>
+            </div>
+          
+            {/* <PaystackButton
+              {...componentProps}
+              className="bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full"
+            /> */}
+          </Modal>
+
+          <Modal
             isOpen={isWithdrawModalOpen}
             closeModal={closeWithdrawModal}
             title="Withdraw Funds"
           >
-            <Withdraw handleShowBanks={handleShowBanks} closeModal={closeWithdrawModal} walletData={walletData} user={user} />
+            <Withdraw
+              handleShowBanks={handleShowBanks}
+              closeModal={closeWithdrawModal}
+              walletData={walletData}
+              user={user}
+            />
           </Modal>
+        </>
+      )}
+      {selectedCard === "Gift Points" && (
+        <>
+          <Gift user={user} />
         </>
       )}
     </>
