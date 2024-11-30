@@ -8,8 +8,12 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "client": "cd client && yarn dev",
-    "dev:all": "concurrently \"yarn dev\" \"yarn client\""
+    "client": "cd client && yarn build",
+    "serve-client": "cd client && yarn serve",
+    "build": "cd client && yarn build",
+    "postinstall": "cd client && yarn install",
+    "dev:all": "concurrently \"yarn dev\" \"yarn client\"",
+    "prod": "npm run build && node app.js"
   },
   "dependencies": {
     "@paystack/inline-js": "^2.22.1",
