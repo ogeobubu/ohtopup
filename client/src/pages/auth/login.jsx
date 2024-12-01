@@ -21,7 +21,6 @@ const Login = ({ darkMode, toggleDarkMode }) => {
       storeToken(data.token)
       toast.success("Login successful!");
       navigate("/dashboard")
-      console.log("Login successful", data);
     },
     onError: (error) => {
       toast.error("Login failed: " + error);
