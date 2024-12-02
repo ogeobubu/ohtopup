@@ -9,7 +9,7 @@ const Button = ({
   darkMode = false,
   disabled = false,
   loading = false,
-  size = 'lg', // Default size is medium
+  size = 'lg',
   ...props
 }) => {
   const getButtonStyles = () => {
