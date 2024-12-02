@@ -1,19 +1,19 @@
 import { lazy } from "react";
-
-// import AuthGuard from "../utils/route-guard/AuthGuard";
+import AuthGuard from "../utils/guard";
 import MainLayout from "../admin/layout/mainLayout";
-// import Loadable from "../ui-component/Loadable";
-import Dashboard from "../admin/pages/dashboard"
-import Wallet from "../admin/pages/wallet"
-import Referral from "../admin/pages/referral"
-import UtilityTransactions from "../admin/pages/transactions"
-import UserManagement from "../admin/pages/users"
-import Settings from "../admin/pages/settings"
+import Dashboard from "../admin/pages/dashboard";
+import Wallet from "../admin/pages/wallet";
+import Referral from "../admin/pages/referral";
+import UtilityTransactions from "../admin/pages/transactions";
+import UserManagement from "../admin/pages/users";
+import Settings from "../admin/pages/settings";
 
 const AdminRoutes = {
   path: "/admin",
   element: (
-    <MainLayout />
+    <AuthGuard tokenKey="ohtopup-admin-token">
+      <MainLayout />
+    </AuthGuard>
   ),
   children: [
     {
