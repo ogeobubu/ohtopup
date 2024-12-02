@@ -4,7 +4,7 @@ import { FaTimes } from "react-icons/fa";
 const Modal = ({ isOpen, closeModal, title, children }) => {
   return (
     <div
-      className={`fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center transition-opacity duration-300 ${
+      className={`fixed z-20 inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center transition-opacity duration-300 ${
         isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
