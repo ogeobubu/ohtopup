@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "client": "cd client && yarn build",
+    "client": "cd client && yarn vite",
     "serve-client": "cd client && yarn serve",
     "build": "cd client && yarn build",
     "postinstall": "cd client && yarn install",

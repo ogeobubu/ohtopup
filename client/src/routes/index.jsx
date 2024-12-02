@@ -1,18 +1,16 @@
-import { useRoutes } from "react-router-dom";
+import { useRoutes, Navigate } from "react-router-dom";
 import Landing from "../pages/landing";
 import Create from "../pages/auth/create";
 import Verify from "../pages/auth/verify";
 import Login from "../pages/auth/login";
 import Forgot from "../pages/auth/forgot";
 import Reset from "../pages/auth/reset";
-import MainRoutes from "./mainRoutes";
-import AdminRoutes from "./adminRoutes";
-
-// ADMIN
-import AdminLogin from "../admin/pages/auth/login"
+import MainRoutes from "./mainRoutes"; // Ensure this is a valid object with children
+import AdminRoutes from "./adminRoutes"; // Ensure this is a valid object with children
+import AdminLogin from "../admin/pages/auth/login";
 
 export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
-  return useRoutes([
+  const userRoutes = [
     {
       path: "/",
       element: <Landing darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
@@ -37,11 +35,27 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
       path: "/reset",
       element: <Reset darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
+  ];
+
+  return useRoutes([
+    ...userRoutes,
     {
       path: "/admin",
       element: <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
-    MainRoutes,
-    AdminRoutes,
+    {
+      path: "/admin/*",
+      element: AdminRoutes.element,
+      children: AdminRoutes.children,
+    },
+    {
+      path: MainRoutes.path,
+      element: MainRoutes.element,
+      children: MainRoutes.children,
+    },
+    {
+      path: "*",
+      element: <Navigate to="/login" />,
+    },
   ]);
 }

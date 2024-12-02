@@ -17,13 +17,13 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const links = [
-    { label: "Home", icon: FaHome, to: "/admin/dashboard" },
-    { label: "Transactions", icon: FaMoneyBillAlt, to: "/admin/transactions" },
-    { label: "Wallet", icon: FaWallet, to: "/admin/wallet" },
+    { label: "Home", icon: FaHome, to: "/dashboard" },
+    { label: "Transactions", icon: FaMoneyBillAlt, to: "/transactions" },
+    { label: "Wallet", icon: FaWallet, to: "/wallet" },
     { label: "Referral", icon: FaUserFriends, to: "/admin/referral" },
-    { label: "User Management", icon: FaUserFriends, to: "/admin/users" },
-    { label: "Settings", icon: FaCog, to: "/admin/settings" },
-    { label: "Help & Support", icon: FaQuestionCircle, to: "/admin/help" },
+    { label: "User Ranking", icon: FaUserFriends, to: "/dashboard" },
+    { label: "Settings", icon: FaCog, to: "/settings" },
+    { label: "Help & Support", icon: FaQuestionCircle, to: "/settings" },
   ];
 
   return (
