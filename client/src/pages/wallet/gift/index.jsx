@@ -16,14 +16,14 @@ const Gift = ({ user }) => {
           <h1 className="text-sm text-gray-500 font-bold mb-4">
             Points Balance
           </h1>
-          <div className="mb-3 flex justify-between items-center">
-            <div>
-              <span className="text-4xl font-bold mr-2">{user?.points}</span>
+          <div className="mb-3 flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center">
+              <span className="text-4xl font-bold mr-2">{user?.points || 0}</span>
               <span className="text-sm">
                 10 Points = <strong className="font-bold">1 Naira</strong>
               </span>
             </div>
-            <div className="ml-auto">
+            <div className="mt-4 md:mt-0 md:ml-auto">
               <Button onClick={openWithdrawModal} size="sm">
                 Redeem Point
               </Button>
@@ -51,7 +51,7 @@ const Gift = ({ user }) => {
         </h3>
         <p className="text-gray-700 mb-4">
           Every user has a gift points wallet which can be accessed by going to{" "}
-          <strong>Wallets > Gift Points</strong>. The wallet shows your gift
+          <strong>Wallets &gt; Gift Points</strong>. The wallet shows your gift
           points balance, your gift points history (which includes gift points
           you've earned and redeemed), and the option to redeem the gift points
           for cash.
