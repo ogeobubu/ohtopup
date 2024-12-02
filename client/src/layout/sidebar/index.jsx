@@ -20,10 +20,10 @@ const Sidebar = () => {
     { label: "Home", icon: FaHome, to: "/dashboard" },
     { label: "Transactions", icon: FaMoneyBillAlt, to: "/transactions" },
     { label: "Wallet", icon: FaWallet, to: "/wallet" },
-    { label: "Referral", icon: FaUserFriends, to: "/admin/referral" },
+    { label: "Referral", icon: FaUserFriends, to: "/referral" },
     { label: "User Ranking", icon: FaUserFriends, to: "/dashboard" },
     { label: "Settings", icon: FaCog, to: "/settings" },
-    { label: "Help & Support", icon: FaQuestionCircle, to: "/settings" },
+    { label: "Help & Support", icon: FaQuestionCircle, to: "/dashboard" },
   ];
 
   return (
@@ -35,22 +35,22 @@ const Sidebar = () => {
       </div>
 
       <div
-        className={`fixed z-10 top-0 left-0 w-56 bg-[#F7F9FB] text-gray-800 h-[100%] p-6 transform ${
+        className={`fixed z-10 top-0 left-0 w-56 bg-[#F7F9FB] text-gray-800 h-full p-6 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out md:translate-x-0 md:block`}
       >
         <div className="mb-4 flex justify-between items-center">
-        <img
-          src={logo}
-          alt="Logo"
-          className="w-auto h-12 mx-auto"
-        />
+          <img
+            src={logo}
+            alt="Logo"
+            className="w-auto h-12 mx-auto"
+          />
           <button onClick={() => setIsOpen(false)} className="md:hidden text-gray-800">
             <FaTimes size={24} />
           </button>
         </div>
-        
-        <nav>
+
+        <nav className="overflow-y-auto max-h-[calc(100vh-100px)]"> {/* Adjust max height as necessary */}
           <ul className="space-y-4">
             {links.map((link, index) => (
               <li key={index}>
