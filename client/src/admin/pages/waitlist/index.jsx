@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUserTimes, FaWallet } from "react-icons/fa";
+import { FaPaperPlane } from "react-icons/fa";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
@@ -21,13 +21,13 @@ const Waitlist = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [sendToAll, setSendToAll] = useState(false); // New state for sending to all users
+  const [sendToAll, setSendToAll] = useState(false);
 
   const toggleModal = () => setIsOpen((prev) => !prev);
 
   const handleEditUser = (user) => {
     setCurrentUser(user);
-    setSendToAll(false); // Reset to individual by default
+    setSendToAll(false);
     setIsOpen(true);
   };
 
@@ -71,7 +71,7 @@ const Waitlist = () => {
             onClick={() => handleEditUser(user)}
             className="border border-green-500 flex justify-center items-center rounded-full w-8 h-8 text-green-500 hover:bg-green-100 transition"
           >
-            <FaWallet size={16} />
+            <FaPaperPlane size={16} />
           </button>
         </div>
       ),
@@ -82,9 +82,9 @@ const Waitlist = () => {
     setLoading(true);
     try {
       const data = {
-        emails: sendToAll ? waitlists.emails : [currentUser], // Send all emails or one email
+        emails: sendToAll ? waitlists.emails : [currentUser],
         subject: values.text,
-        message: values.description
+        message: values.description,
       };
       await sendWaitlist(data);
       toast.success("Message sent successfully");
@@ -100,16 +100,12 @@ const Waitlist = () => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-5 text-gray-800">Waitlist Management</h2>
+      <h2 className="text-2xl font-bold mb-5 text-gray-800">
+        Waitlist Management
+      </h2>
       <div className="flex flex-col md:flex-row">
         <div className="flex-1 min-h-[250px] flex flex-col justify-between bg-white shadow-md rounded-lg p-4">
-          {isLoading ? (
-            <p className="text-gray-500">Loading waitlists...</p>
-          ) : isError ? (
-            <p className="text-red-500">Error loading waitlists: {error.message}</p>
-          ) : waitlists?.emails?.length > 0 ? (
-            <div className="overflow-x-auto">
-              <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4">
                 <div className="flex-grow"></div>
                 <div className="flex items-center">
                   <input
@@ -127,6 +123,14 @@ const Waitlist = () => {
                   </button>
                 </div>
               </div>
+          {isLoading ? (
+            <p className="text-gray-500 text-center">Loading waitlists...</p>
+          ) : isError ? (
+            <p className="text-red-500">
+              Error loading waitlists: {error.message}
+            </p>
+          ) : waitlists?.emails?.length > 0 ? (
+            <div className="overflow-x-auto">
 
               <Table columns={columns} data={waitlists.emails} />
 
@@ -138,11 +142,7 @@ const Waitlist = () => {
             </div>
           ) : (
             <div className="border border-gray-300 rounded-md p-6 flex flex-col items-center justify-center h-full bg-gray-50">
-              <img
-                className="w-24 h-24 mb-4"
-                src={noData}
-                alt="No data"
-              />
+              <img className="w-24 h-24 mb-4" src={noData} alt="No data" />
               <p className="mt-2 text-gray-500 text-center">
                 No referral history
               </p>
@@ -187,19 +187,29 @@ const Waitlist = () => {
                 <div className="text-red-600 text-sm">{errors.description}</div>
               ) : null}
 
-              <div className="flex items-center mt-3">
+              <div className="flex items-center mb-4">
                 <input
                   type="checkbox"
                   checked={sendToAll}
                   onChange={() => setSendToAll((prev) => !prev)}
-                  className="mr-2"
+                  className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition duration-200 ease-in-out cursor-pointer"
+                  id="sendToAll"
                 />
-                <label className="text-gray-700">Send to all users</label>
+                <label
+                  htmlFor="sendToAll"
+                  className="ml-2 text-gray-800 text-sm cursor-pointer hover:text-blue-600 transition duration-200 ease-in-out"
+                >
+                  Send to all users
+                </label>
               </div>
 
               <Button
                 type="submit"
-                className={`mt-3 py-2 rounded transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"} text-white`}
+                className={`mt-3 py-2 rounded transition ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
+                } text-white`}
                 disabled={loading}
               >
                 {loading ? "Sending..." : "Send"}
