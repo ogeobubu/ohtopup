@@ -114,7 +114,7 @@ const Waitlist = () => {
                 <div className="flex items-center">
                   <input
                     type="search"
-                    placeholder="Search by username or email"
+                    placeholder="Search by email"
                     className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
