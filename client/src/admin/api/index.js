@@ -35,7 +35,7 @@ instance.interceptors.response.use(
       if (error.response.status === 401) {
         console.error("Response Error:", error.response.data);
       } else if (error.response.status === 403) {
-        window.location.href = "/login";
+        window.location.href = "/admin";
       } else {
         console.error("Response Error:", error.response.data);
       }
@@ -55,7 +55,7 @@ export const loginAdmin = async (userData) => {
   }
 };
 
-export const getReferrals = async (page = 1, limit = 10, search = '') => {
+export const getReferrals = async (page = 1, limit = 10, search = "") => {
   try {
     const response = await instance.get(`/referrals`, {
       params: { page, limit, search },
@@ -232,14 +232,21 @@ export const toggleWallet = async (id) => {
   }
 };
 
-export const getAllTransactions = async (page = 1, limit = 10, type = null, reference = null) => {
+export const getAllTransactions = async (
+  page = 1,
+  limit = 10,
+  type = null,
+  reference = null
+) => {
   try {
     const response = await instance.get(`/transactions`, {
       params: { page, limit, type, reference },
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching transactions");
+    throw new Error(
+      error.response.data.message || "Error fetching transactions"
+    );
   }
 };
 
@@ -284,5 +291,25 @@ export const addPoint = async (data) => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const getWaitlist = async (page = 1, limit = 10, search = "") => {
+  try {
+    const response = await instance.get(`/waitlist`, {
+      params: { page, limit, search },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching waitlist");
+  }
+};
+
+export const sendWaitlist = async (data) => {
+  try {
+    const response = await instance.post(`/waitlist/send`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error sending data");
   }
 };

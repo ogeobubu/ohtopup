@@ -23,6 +23,7 @@ const Sidebar = () => {
     { label: "Referral", icon: FaUserFriends, to: "/admin/referral" },
     { label: "User Management", icon: FaUserFriends, to: "/admin/users" },
     { label: "Settings", icon: FaCog, to: "/admin/settings" },
+    { label: "Waitlist", icon: FaQuestionCircle, to: "/admin/waitlist" },
     { label: "Help & Support", icon: FaQuestionCircle, to: "/admin/dashboard" },
   ];
 

@@ -5,8 +5,8 @@ import Verify from "../pages/auth/verify";
 import Login from "../pages/auth/login";
 import Forgot from "../pages/auth/forgot";
 import Reset from "../pages/auth/reset";
-import MainRoutes from "./mainRoutes"; // Ensure this is a valid object with children
-import AdminRoutes from "./adminRoutes"; // Ensure this is a valid object with children
+import MainRoutes from "./mainRoutes";
+import AdminRoutes from "./adminRoutes";
 import AdminLogin from "../admin/pages/auth/login";
 
 export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
@@ -41,7 +41,9 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
     ...userRoutes,
     {
       path: "/admin",
-      element: <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+      element: (
+        <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      ),
     },
     {
       path: "/admin/*",
