@@ -14,7 +14,7 @@ const {
   updateService,
   deleteService,
   getServices,
-  addPoint
+  addPoint,
 } = require("../controllers/adminController");
 const {
   createWallet,
@@ -27,6 +27,12 @@ const {
   getAllUtilityTransactions,
   getAnalytics,
 } = require("../controllers/utilityController");
+
+const {
+  getWaitlist,
+  sendWaitlistEmails,
+} = require("../controllers/waitlistController");
+
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
 const router = express.Router();
@@ -59,5 +65,8 @@ router.get(
 router.get("/utility-analytic", authUser, authAdmin, getAnalytics);
 
 router.post("/add-point", authUser, authAdmin, addPoint);
+
+router.get("/waitlist", authUser, authAdmin, getWaitlist);
+router.post("/waitlist/send", authUser, authAdmin, sendWaitlistEmails);
 
 module.exports = router;

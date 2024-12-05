@@ -92,7 +92,7 @@ const AdminWalletManagement = () => {
 
   const handleAddFunds = async (amount, resetForm) => {
     if (selectedUser) {
-      setLoadingTransaction(true); // Set loading state to true
+      setLoadingTransaction(true);
       try {
         await depositWallet(selectedUser.userId, parseFloat(amount));
         toast.success(
@@ -104,14 +104,14 @@ const AdminWalletManagement = () => {
       } catch (error) {
         toast.error("Error adding funds. Please try again.");
       } finally {
-        setLoadingTransaction(false); // Reset loading state
+        setLoadingTransaction(false);
       }
     }
   };
 
   const handleCreateWallet = async () => {
     if (selectedUser) {
-      setLoadingTransaction(true); // Set loading state to true
+      setLoadingTransaction(true);
       try {
         await createWalletApi(selectedUser.userId);
         toast.success(`Wallet created for ${selectedUser.username}.`);
@@ -119,7 +119,7 @@ const AdminWalletManagement = () => {
       } catch (error) {
         toast.error("Error creating wallet. Please try again.");
       } finally {
-        setLoadingTransaction(false); // Reset loading state
+        setLoadingTransaction(false);
       }
     }
   };
@@ -149,7 +149,7 @@ const AdminWalletManagement = () => {
       <div className="mb-3">
         <Card
           title="Total Balance"
-          count={`₦${wallets?.totalBalance?.toFixed(2)}`}
+          count={`₦${wallets?.totalBalance ? wallets?.totalBalance?.toFixed(2) : 0.00}`}
           icon={FaMoneyBill}
           bgColor="bg-blue-200"
         />
@@ -213,7 +213,7 @@ const AdminWalletManagement = () => {
                 ),
               },
             ]}
-            data={wallets.data}
+            data={wallets?.data}
           />
         </div>
       )}

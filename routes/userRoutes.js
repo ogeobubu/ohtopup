@@ -13,8 +13,9 @@ const {
   softDeleteUser,
   deleteBankAccount,
   verifyBankAccount,
-  redeemPoints
+  redeemPoints,
 } = require("../controllers/userController");
+
 const {
   getWallet,
   getTransactionsByUser,
@@ -25,8 +26,9 @@ const {
   withdrawWalletPaystack,
   depositWalletWithMonnify,
   verifyMonnifyTransaction,
-  withdrawMonnifyWallet
+  withdrawMonnifyWallet,
 } = require("../controllers/walletController");
+
 const {
   buyAirtime,
   variationCodes,
@@ -39,6 +41,11 @@ const {
   purchaseElectricity,
   getAllUtilityTransactions,
 } = require("../controllers/utilityController");
+
+const {
+  createWaitlist
+} = require("../controllers/waitlistController");
+
 const auth = require("../middleware/authMiddleware");
 const router = express.Router();
 
@@ -75,5 +82,7 @@ router.post("/electricity", auth, purchaseElectricity);
 router.get("/utility-transactions", auth, getAllUtilityTransactions);
 
 router.post("/redeem-points", auth, redeemPoints);
+
+router.post("/waitlist", createWaitlist);
 
 module.exports = router;

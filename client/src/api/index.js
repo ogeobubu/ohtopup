@@ -390,3 +390,12 @@ export const redeemPoints = async (data) => {
     throw new Error(error.response?.data?.message || "Error fetching data");
   }
 };
+
+export const joinWaitlist = async (data) => {
+  try {
+    const response = await instance.post(`/waitlist`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};

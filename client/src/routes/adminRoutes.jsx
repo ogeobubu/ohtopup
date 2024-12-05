@@ -7,6 +7,7 @@ import Referral from "../admin/pages/referral";
 import UtilityTransactions from "../admin/pages/transactions";
 import UserManagement from "../admin/pages/users";
 import Settings from "../admin/pages/settings";
+import Waitlist from "../admin/pages/waitlist";
 
 const AdminRoutes = {
   path: "/admin",
@@ -39,6 +40,10 @@ const AdminRoutes = {
     {
       path: "settings",
       element: <Settings />,
+    },
+    {
+      path: "waitlist",
+      element: <Waitlist />,
     },
   ],
 };
