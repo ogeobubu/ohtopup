@@ -396,6 +396,15 @@ export const joinWaitlist = async (data) => {
     const response = await instance.post(`/waitlist`, data);
     return response?.data;
   } catch (error) {
+    throw new Error(error.response?.data?.message || "Error saving data");
+  }
+};
+
+export const getRanking = async () => {
+  try {
+    const response = await instance.post(`/rankings`);
+    return response?.data;
+  } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching data");
   }
 };

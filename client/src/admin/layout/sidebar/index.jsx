@@ -59,8 +59,8 @@ const Sidebar = () => {
                   to={link.to}
                   className={`flex items-center space-x-4 ${
                     location.pathname === link.to
-                      ? "bg-blue-600 rounded-md px-4 py-2 text-white"
-                      : "text-gray-500 hover:bg-blue-600 hover:text-white rounded-md px-4 py-2 transition-colors duration-200"
+                      ? "bg-green-600 rounded-md px-4 py-2 text-white"
+                      : "text-gray-500 hover:bg-green-600 hover:text-white rounded-md px-4 py-2 transition-colors duration-200"
                   }`}
                 >
                   <link.icon className="w-3 h-3" />

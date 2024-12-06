@@ -13,7 +13,7 @@ import {
   getWallet,
   purchaseCable,
   getServiceID,
-  getDataVariationTVCodes,
+  getDataVariationCodes,
   getCableName,
 } from "../../../api";
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -85,7 +85,7 @@ const Cable = ({ user }) => {
   } = useQuery({
     queryKey: ["variations", queryId],
     queryFn: () =>
-      queryId ? getDataVariationTVCodes(queryId) : Promise.resolve([]),
+      queryId ? getDataVariationCodes(queryId) : Promise.resolve([]),
     enabled: !!queryId,
   });
 

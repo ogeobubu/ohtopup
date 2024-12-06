@@ -441,17 +441,17 @@ const Wallet = () => {
                       {activeTab === "withdrawal" ? (
                         <Table
                           columns={columns}
-                          data={transactionsData.transactions}
+                          data={transactionsData?.transactions}
                         />
                       ) : (
                         <Table
                           columns={topupColumns}
-                          data={transactionsData.transactions}
+                          data={transactionsData?.transactions}
                         />
                       )}
                       <Pagination
                         currentPage={currentPage}
-                        totalPages={transactionsData.totalPages}
+                        totalPages={transactionsData?.totalPages}
                         onPageChange={setCurrentPage}
                       />
                     </>

@@ -127,6 +127,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    weeklyPoints: {
+      type: Number,
+      default: 0,
+    },
     bankAccounts: [bankAccountSchema],
   },
   { timestamps: true }

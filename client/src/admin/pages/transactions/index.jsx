@@ -40,7 +40,7 @@ const Transactions = () => {
         <button
           className={`py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "Electricity Bill"
-              ? "text-blue-500 bg-white rounded-lg w-40"
+              ? "text-green-500 bg-white rounded-lg w-40"
               : "text-gray-500 hover:text-gray-800 w-40"
           }`}
           onClick={() => handleTabClick("Electricity Bill")}
@@ -50,7 +50,7 @@ const Transactions = () => {
         <button
           className={`py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "TV Subscription"
-              ? "text-blue-500 bg-white rounded-lg w-40"
+              ? "text-green-500 bg-white rounded-lg w-40"
               : "text-gray-500 hover:text-gray-800 w-40"
           }`}
           onClick={() => handleTabClick("TV Subscription")}
@@ -60,7 +60,7 @@ const Transactions = () => {
         <button
           className={`py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "Data Services"
-              ? "text-blue-500 bg-white rounded-lg w-40"
+              ? "text-green-500 bg-white rounded-lg w-40"
               : "text-gray-500 hover:text-gray-800 w-40"
           }`}
           onClick={() => handleTabClick("Data Services")}
@@ -70,7 +70,7 @@ const Transactions = () => {
         <button
           className={`py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "Airtime Recharge"
-              ? "text-blue-500 bg-white rounded-lg w-40"
+              ? "text-green-500 bg-white rounded-lg w-40"
               : "text-gray-500 hover:text-gray-800 w-40"
           }`}
           onClick={() => handleTabClick("Airtime Recharge")}

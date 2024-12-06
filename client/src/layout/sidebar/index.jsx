@@ -21,7 +21,7 @@ const Sidebar = () => {
     { label: "Transactions", icon: FaMoneyBillAlt, to: "/transactions" },
     { label: "Wallet", icon: FaWallet, to: "/wallet" },
     { label: "Referral", icon: FaUserFriends, to: "/referral" },
-    { label: "User Ranking", icon: FaUserFriends, to: "/dashboard" },
+    { label: "User Ranking", icon: FaUserFriends, to: "/rank" },
     { label: "Settings", icon: FaCog, to: "/settings" },
     { label: "Help & Support", icon: FaQuestionCircle, to: "/dashboard" },
   ];

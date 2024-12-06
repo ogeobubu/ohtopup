@@ -8,6 +8,7 @@ import UtilityTransactions from "../admin/pages/transactions";
 import UserManagement from "../admin/pages/users";
 import Settings from "../admin/pages/settings";
 import Waitlist from "../admin/pages/waitlist";
+import Utilities from "../admin/pages/utilities";
 
 const AdminRoutes = {
   path: "/admin",
@@ -44,6 +45,10 @@ const AdminRoutes = {
     {
       path: "waitlist",
       element: <Waitlist />,
+    },
+    {
+      path: "utilities",
+      element: <Utilities />,
     },
   ],
 };

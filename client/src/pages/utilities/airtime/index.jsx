@@ -21,7 +21,7 @@ const formatPhoneNumber = (phoneNumber) => {
 const Airtime = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [identifier, setIdentifier] = useState("airtime");
-  const [isSubmitting, setIsSubmitting] = useState(false); // Local loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const closeModal = () => setIsModalOpen(false);
 
@@ -62,7 +62,7 @@ const Airtime = () => {
   const validationSchema = Yup.object().shape({
     amount: Yup.number()
       .required("Amount is required")
-      .min(100, "Amount must be at least ₦100") // Minimum amount set to ₦100
+      .min(100, "Amount must be at least ₦100")
       .max(
         walletData?.balance,
         `Your wallet balance (₦${walletData?.balance?.toFixed(0)}) is insufficient for this transaction`
@@ -71,7 +71,7 @@ const Airtime = () => {
   });
 
   const handleSubmit = (values) => {
-    setIsSubmitting(true); // Set the local loading state to true
+    setIsSubmitting(true);
     mutation.mutate(
       {
         serviceID: values.provider,
@@ -80,7 +80,7 @@ const Airtime = () => {
       },
       {
         onSettled: () => {
-          setIsSubmitting(false); // Reset the loading state regardless of success or error
+          setIsSubmitting(false);
         },
       }
     );
