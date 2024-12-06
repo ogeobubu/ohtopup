@@ -24,21 +24,31 @@ const generateUniqueReferralCode = async (username) => {
 };
 
 const createUser = async (req, res) => {
-  const { username, email, phoneNumber, referralCode, password, source } = req.body;
+  const { username, email, phoneNumber, referralCode, password, source } =
+    req.body;
 
   if (!username || !email || !phoneNumber || !password) {
-    return res.status(400).json({ message: "Please provide all required fields" });
+    return res
+      .status(400)
+      .json({ message: "Please provide all required fields" });
   }
 
   try {
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
     if (existingUser) {
-      return res.status(400).json({ message: existingUser.username === username ? "Username already exists" : "Email already exists" });
+      return res
+        .status(400)
+        .json({
+          message:
+            existingUser.username === username
+              ? "Username already exists"
+              : "Email already exists",
+        });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const newReferralCode = await generateUniqueReferralCode(username);
 
     const newUser = new User({
@@ -52,16 +62,16 @@ const createUser = async (req, res) => {
 
     if (referralCode) {
       const referrer = await User.findOne({ referralCode });
-    
+
       if (referralCode) {
         const referrer = await User.findOne({ referralCode });
-      
+
         if (referrer) {
           newUser.referrerId = referrer._id;
           referrer.referredUsers.push(newUser._id);
           referrer.referralCount += 1;
           referrer.points += 1;
-      
+
           await referrer.save();
         } else {
           return res.status(400).json({ message: "Invalid referral code" });
@@ -75,13 +85,24 @@ const createUser = async (req, res) => {
     newUser.confirmationCode = confirmationCode;
     newUser.confirmationCodeExpires = Date.now() + 3600000;
 
-    await User.updateOne({ _id: newUser._id }, { confirmationCode: newUser.confirmationCode, confirmationCodeExpires: newUser.confirmationCodeExpires });
+    await User.updateOne(
+      { _id: newUser._id },
+      {
+        confirmationCode: newUser.confirmationCode,
+        confirmationCodeExpires: newUser.confirmationCodeExpires,
+      }
+    );
     await sendConfirmationEmail(newUser.email, username, confirmationCode);
 
     const wallet = new Wallet({ userId: newUser._id });
     await wallet.save();
 
-    res.status(201).json({ message: "User created successfully! Please verify your email to activate your account." });
+    res
+      .status(201)
+      .json({
+        message:
+          "User created successfully! Please verify your email to activate your account.",
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating user", error });
@@ -91,20 +112,20 @@ const createUser = async (req, res) => {
 const getReferrals = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { page = 1, limit = 10, search = '' } = req.query;
+    const { page = 1, limit = 10, search = "" } = req.query;
 
     const user = await User.findById(userId).populate({
-      path: 'referredUsers',
+      path: "referredUsers",
       match: {
         $or: [
-          { username: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
+          { username: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
         ],
       },
     });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const referredUsers = user.referredUsers || [];
@@ -121,7 +142,7 @@ const getReferrals = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -519,7 +540,7 @@ const verifyBankAccount = async (req, res) => {
 };
 
 const redeemPoints = async (req, res) => {
-  const { pointsToRedeem } = req.body; 
+  const { pointsToRedeem } = req.body;
   const userId = req.user.id;
 
   try {
@@ -542,10 +563,7 @@ const redeemPoints = async (req, res) => {
     wallet.balance += nairaToAdd;
     user.points -= pointsToRedeem;
 
-    await Promise.all([
-      wallet.save(),
-      user.save(),
-    ]);
+    await Promise.all([wallet.save(), user.save()]);
 
     res.status(200).json({
       message: "Points redeemed successfully",
@@ -556,7 +574,7 @@ const redeemPoints = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
-}
+};
 
 module.exports = {
   createUser,
@@ -572,5 +590,5 @@ module.exports = {
   softDeleteUser,
   deleteBankAccount,
   verifyBankAccount,
-  redeemPoints
+  redeemPoints,
 };

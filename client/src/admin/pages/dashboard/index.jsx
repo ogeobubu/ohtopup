@@ -6,6 +6,7 @@ import { setUser, setUsers } from "../../../actions/adminActions";
 import Card from "./card";
 import { FaMoneyCheckAlt, FaCheckCircle, FaClock, FaTimesCircle } from "react-icons/fa";
 import MyBarChart from "./chart";
+import Shortcut from "./shortcut";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -91,6 +92,8 @@ const Dashboard = () => {
           bgColor="bg-red-200"
         />
       </div>
+      <Shortcut />
+
       <div className="my-5">
         <MyBarChart data={chartData} />
       </div>

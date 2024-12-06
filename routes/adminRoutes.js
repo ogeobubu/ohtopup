@@ -26,6 +26,7 @@ const {
 const {
   getAllUtilityTransactions,
   getAnalytics,
+  variationCodes,
 } = require("../controllers/utilityController");
 
 const {
@@ -33,8 +34,16 @@ const {
   sendWaitlistEmails,
 } = require("../controllers/waitlistController");
 
+const {
+  getPartyVariations,
+  getVariations,
+  saveVariations,
+  toggleVariation
+} = require("../controllers/variationController");
+
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
+
 const router = express.Router();
 
 router.post("/login", loginAdmin);
@@ -68,5 +77,10 @@ router.post("/add-point", authUser, authAdmin, addPoint);
 
 router.get("/waitlist", authUser, authAdmin, getWaitlist);
 router.post("/waitlist/send", authUser, authAdmin, sendWaitlistEmails);
+
+router.get("/data", authUser, authAdmin, getPartyVariations);
+router.get("/data/variations", authUser, authAdmin, getVariations);
+router.post("/save-data", authUser, authAdmin, saveVariations);
+router.get("/data/toggle", authUser, authAdmin, toggleVariation);
 
 module.exports = router;

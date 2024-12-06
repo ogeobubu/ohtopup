@@ -313,3 +313,39 @@ export const sendWaitlist = async (data) => {
     throw new Error(error.response?.data?.message || "Error sending data");
   }
 };
+
+export const getDataVariationCodes = async (id) => {
+  try {
+    const response = await instance.get(`/data?serviceID=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const saveData = async (data) => {
+  try {
+    const response = await instance.post(`/save-data`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error saving data");
+  }
+};
+
+export const getSavedVariations = async (id) => {
+  try {
+    const response = await instance.get(`/data/variations?serviceID=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};
+
+export const toggleData = async (id) => {
+  try {
+    const response = await instance.get(`/data/toggle?variation_code=${id}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching data");
+  }
+};

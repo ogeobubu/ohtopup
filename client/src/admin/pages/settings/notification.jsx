@@ -194,7 +194,7 @@ const Notification = () => {
     <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold mb-4">Notification</h2>
-        <Button onClick={toggleModal} size="sm">
+        <Button className="bg-green-600 hover:bg-green-400" onClick={toggleModal} size="sm">
           Create
         </Button>
       </div>

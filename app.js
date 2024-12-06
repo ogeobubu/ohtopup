@@ -17,10 +17,20 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected successfully");
+  } catch (err) {
+    console.error("Error connecting to MongoDB:", err.message);
+    process.exit(1);
+  }
+};
+
+connectToDatabase();
 
 app.use("/api/users", userRoutes);
 app.use("/api/users/admin", adminRoutes);

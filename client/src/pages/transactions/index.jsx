@@ -58,9 +58,7 @@ const Transactions = () => {
       },
       {
         header: "Date",
-        render: (row) => (
-          <p>{new Date(row.createdAt).toLocaleString()}</p>
-        ),
+        render: (row) => <p>{new Date(row.createdAt).toLocaleString()}</p>,
       },
     ];
 
@@ -126,7 +124,7 @@ const Transactions = () => {
 
     return (
       <>
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-3 px-2">
+        <div className="flex flex-col sm:flex-row justify-end items-center mb-3">
           <input
             type="text"
             placeholder="Search by RequestID..."
@@ -148,16 +146,21 @@ const Transactions = () => {
   };
 
   return (
-    <div className="px-4 py-6">
+    <div className="">
       <h1 className="text-2xl font-bold mb-5">Transactions</h1>
-      <div className="mb-3 flex overflow-x-auto space-x-2 sm:space-x-3 rounded-lg border border-gray-300 bg-[#F7F9FB] py-1 px-2 sm:px-4">
-        {["Electricity Bill", "TV Subscription", "Data Services", "Airtime Recharge"].map((tab) => (
+      <div className="mb-3 flex rounded-lg border border-solid max-w-sm border-gray-300 bg-[#F7F9FB] py-1 px-1">
+        {[
+          "Electricity Bill",
+          "TV Subscription",
+          "Data Services",
+          "Airtime Recharge",
+        ].map((tab) => (
           <button
             key={tab}
             className={`py-1 px-3 font-medium transition-colors duration-300 ${
               activeTab === tab
-                ? "text-blue-500 bg-white rounded-lg"
-                : "text-gray-500 hover:text-gray-800"
+                ? "text-blue-500 bg-white rounded-lg w-40"
+                : "text-gray-500 hover:text-gray-800 w-40"
             }`}
             onClick={() => handleTabClick(tab)}
           >
@@ -172,9 +175,7 @@ const Transactions = () => {
             {error.message || "Error fetching transactions"}
           </div>
         )}
-        {data && (
-          renderTableContent()
-        )}
+        {data && renderTableContent()}
       </>
     </div>
   );

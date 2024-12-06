@@ -8,6 +8,7 @@ import Settings from "../pages/settings";
 import Referral from "../pages/referral";
 import Utilities from "../pages/utilities";
 import Confirmation from "../pages/wallet/confirmation";
+import Rank from "../pages/rank";
 
 const MainRoutes = {
   path: "/",
@@ -44,6 +45,10 @@ const MainRoutes = {
     {
       path: "/utilities",
       element: <Utilities />,
+    },
+    {
+      path: "/rank",
+      element: <Rank />,
     },
   ],
 };

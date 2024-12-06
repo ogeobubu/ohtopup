@@ -40,11 +40,13 @@ const {
   verifyElecticity,
   purchaseElectricity,
   getAllUtilityTransactions,
+  usersRank,
+  resetRankings
 } = require("../controllers/utilityController");
 
-const {
-  createWaitlist
-} = require("../controllers/waitlistController");
+const { getVariations } = require("../controllers/variationController");
+
+const { createWaitlist } = require("../controllers/waitlistController");
 
 const auth = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -71,7 +73,8 @@ router.get("/verify-payment/:ref", auth, verifyMonnifyTransaction);
 router.post("/verify-account", auth, verifyBankAccount);
 
 router.post("/airtime", auth, buyAirtime);
-router.get("/data", auth, variationCodes);
+// router.get("/data", auth, variationCodes);
+router.get("/data", auth, getVariations);
 router.post("/data", auth, buyData);
 router.get("/service-id", auth, getServiceID);
 router.get("/cable", auth, variationTVCodes);
@@ -84,5 +87,8 @@ router.get("/utility-transactions", auth, getAllUtilityTransactions);
 router.post("/redeem-points", auth, redeemPoints);
 
 router.post("/waitlist", createWaitlist);
+
+router.post("/rankings", usersRank);
+router.post("/reset-rankings", resetRankings);
 
 module.exports = router;

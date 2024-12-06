@@ -4,6 +4,8 @@ const Service = require("../model/Service");
 const Wallet = require("../model/Wallet");
 const axios = require("axios");
 const { generateRequestId } = require("../utils");
+const cron = require("node-cron");
+const moment = require('moment');
 
 const buyAirtime = async (req, res) => {
   const { serviceID, amount, phone } = req.body;
@@ -104,6 +106,7 @@ const buyAirtime = async (req, res) => {
     res.status(500).json({ message: "Error processing transaction." });
   }
 };
+
 const variationCodes = async (req, res) => {
   const { serviceID } = req.query;
 
@@ -124,6 +127,7 @@ const variationCodes = async (req, res) => {
 
   res.status(200).json(response.data.content.varations);
 };
+
 const buyData = async (req, res) => {
   const { serviceID, billersCode, variation_code, amount, phone } = req.body;
 
@@ -219,6 +223,7 @@ const buyData = async (req, res) => {
     res.status(500).json({ message: "Error processing transaction." });
   }
 };
+
 const getServiceID = async (req, res) => {
   const VTPASS_URL = process.env.VTPASS_URL;
   const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
@@ -259,6 +264,7 @@ const getServiceID = async (req, res) => {
 
   res.status(200).json(newArray);
 };
+
 const variationTVCodes = async (req, res) => {
   const { serviceID } = req.query;
 
@@ -279,6 +285,7 @@ const variationTVCodes = async (req, res) => {
 
   res.status(200).json(response.data.content.varations);
 };
+
 const verifySmartcard = async (req, res) => {
   const { billersCode, serviceID } = req.body;
 
@@ -291,25 +298,50 @@ const verifySmartcard = async (req, res) => {
     serviceID,
   };
 
-  const response = await axios.post(`${VTPASS_URL}/api/merchant-verify`, data, {
-    headers: {
-      "api-key": `${VTPASS_API_KEY}`,
-      "secret-key": `${VTPASS_SECRET_KEY}`,
-    },
-  });
+  try {
+    const response = await axios.post(
+      `${VTPASS_URL}/api/merchant-verify`,
+      data,
+      {
+        headers: {
+          "api-key": `${VTPASS_API_KEY}`,
+          "secret-key": `${VTPASS_SECRET_KEY}`,
+        },
+      }
+    );
 
-  const newData = {
-    Customer_Name: response.data.content.Customer_Name,
-    Due_Date: response.data.content.Due_Date,
-    Current_Bouquet: response.data.content.Current_Bouquet,
-    Current_Bouquet_Code: response.data.content.Current_Bouquet_Code,
-    Renewal_Amount: response.data.content.Renewal_Amount,
-  };
+    const newData = {
+      Customer_Name: response.data.content.Customer_Name,
+      Due_Date: response.data.content.Due_Date,
+      Current_Bouquet: response.data.content.Current_Bouquet,
+      Current_Bouquet_Code: response.data.content.Current_Bouquet_Code,
+      Renewal_Amount: response.data.content.Renewal_Amount,
+    };
 
-  res.status(200).json({
-    data: newData,
-  });
+    return res.status(200).json({
+      data: newData,
+    });
+  } catch (error) {
+    console.error("Error verifying smartcard:", error);
+    if (error.response) {
+      return res.status(error.response.status).json({
+        message:
+          error.response.data.message ||
+          "An error occurred while verifying the smartcard.",
+      });
+    } else if (error.request) {
+      return res.status(500).json({
+        message:
+          "No response received from the smartcard verification service.",
+      });
+    } else {
+      return res.status(500).json({
+        message: "Error in smartcard verification request: " + error.message,
+      });
+    }
+  }
 };
+
 const purchaseCable = async (req, res) => {
   const {
     serviceID,
@@ -414,6 +446,7 @@ const purchaseCable = async (req, res) => {
     res.status(500).json({ message: "Error processing transaction." });
   }
 };
+
 const verifyElecticity = async (req, res) => {
   const { billersCode, serviceID, type } = req.body;
 
@@ -443,6 +476,7 @@ const verifyElecticity = async (req, res) => {
     data: newData,
   });
 };
+
 const purchaseElectricity = async (req, res) => {
   const { serviceID, billersCode, variation_code, amount, phone } = req.body;
 
@@ -541,6 +575,7 @@ const purchaseElectricity = async (req, res) => {
     res.status(500).json({ message: "Error processing transaction." });
   }
 };
+
 const getAllUtilityTransactions = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -625,6 +660,7 @@ const getAllUtilityTransactions = async (req, res) => {
     res.status(500).json({ message: "Error fetching transactions." });
   }
 };
+
 const getAnalytics = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -661,7 +697,6 @@ const getAnalytics = async (req, res) => {
       },
     ]);
 
-    // Aggregate for monthly analytics
     const monthlyAnalytics = await Utility.aggregate([
       {
         $group: {
@@ -671,7 +706,7 @@ const getAnalytics = async (req, res) => {
         },
       },
       {
-        $sort: { _id: 1 }, // Sort by month
+        $sort: { _id: 1 },
       },
     ]);
 
@@ -685,7 +720,7 @@ const getAnalytics = async (req, res) => {
         },
       },
       {
-        $sort: { _id: 1 }, // Sort by year
+        $sort: { _id: 1 },
       },
     ]);
 
@@ -707,6 +742,71 @@ const getAnalytics = async (req, res) => {
   }
 };
 
+const usersRank = async (req, res) => {
+  try {
+    const rankings = await Utility.aggregate([
+      {
+        $group: {
+          _id: "$user",
+          transactionCount: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { transactionCount: -1 },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "userInfo",
+        },
+      },
+      {
+        $unwind: "$userInfo",
+      },
+      {
+        $project: {
+          username: "$userInfo.username",
+          transactionCount: 1,
+        },
+      },
+    ]).limit(10);
+
+    const rankingsWithPositions = rankings.map((winner, index) => ({
+      username: winner.username.replace(/.(?=.{3})/g, '*'),
+      transactionCount: winner.transactionCount,
+      rank: index + 1,
+    }));
+
+    const now = moment();
+    const nextReset = moment().day(7).startOf('day');
+    if (nextReset.isBefore(now)) {
+      nextReset.add(1, 'weeks');
+    }
+    const countdown = nextReset.diff(now, 'seconds');
+
+    res.status(200).json({ rankings: rankingsWithPositions, countdown });
+  } catch (error) {
+    console.error("Error fetching rankings:", error);
+    res.status(500).json({ message: "Error fetching rankings" });
+  }
+};
+
+const resetRankings = async (req, res) => {
+  try {
+    await User.updateMany({}, { weeklyPoints: 0 });
+    res.status(200).json({ message: "User rankings have been reset." });
+  } catch (error) {
+    console.error("Error resetting rankings:", error);
+    res.status(500).json({ message: "Error resetting rankings." });
+  }
+}
+
+// cron.schedule("0 0 * * 0", async () => {
+//   await resetRankings();
+// });
+
 module.exports = {
   buyAirtime,
   variationCodes,
@@ -719,4 +819,6 @@ module.exports = {
   purchaseElectricity,
   getAllUtilityTransactions,
   getAnalytics,
+  usersRank,
+  resetRankings
 };

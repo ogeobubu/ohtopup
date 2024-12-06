@@ -33,13 +33,11 @@ const AdminWalletManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreatingWallet, setIsCreatingWallet] = useState(false);
   const [activeTab, setActiveTab] = useState("Wallets");
-  const [loadingTransaction, setLoadingTransaction] = useState(false); // Loading state for transactions
+  const [loadingTransaction, setLoadingTransaction] = useState(false);
 
-  // Pagination state for transactions
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 10; // Set your desired limit per page
+  const limit = 10; 
 
-  // State for filters
   const [transactionType, setTransactionType] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -74,7 +72,7 @@ const AdminWalletManagement = () => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     if (tab === "Transactions") {
-      setCurrentPage(1); // Reset to first page on tab change
+      setCurrentPage(1);
     }
   };
 
