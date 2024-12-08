@@ -369,6 +369,20 @@ const monnifyWithdrawUrl = async (accessToken, data) => {
   return response.data;
 };
 
+const monnifyWithdrawUrlAuthorize = async (accessToken, data) => {
+  const response = await axios.post(
+    `${process.env.MONNIFY_URL}/api/v2/disbursements/single/validate-otp`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return response.data;
+};
+
 const updateWalletBalance = async (wallet, amount) => {
   if (wallet) {
     wallet.balance += amount;
@@ -570,11 +584,74 @@ const withdrawMonnifyWallet = async (req, res) => {
         });
       }
 
-      // Update wallet balance
+      const transaction = new Transaction({
+        walletId: wallet._id,
+        amount,
+        type: "withdrawal",
+        bankName,
+        accountNumber,
+        bankCode,
+        status: "pending",
+        paymentMethod: "naira_wallet",
+        reference: data.reference,
+      });
+      await transaction.save();
+
+      return res.status(200).json({
+        message: "Withdrawal processing",
+        transaction: {
+          id: transaction._id,
+          amount: transaction.amount,
+          status: transaction.status,
+          reference: transaction.reference
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Error withdrawing from wallet", error: error.message });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const withdrawMonnifyWalletOTP = async (req, res) => {
+  const { reference, authorizationCode, amount, bankName, accountNumber, bankCode } = req.body;
+
+  try {
+    const wallet = await Wallet.findOne({ userId: req.user.id });
+
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    if (wallet.balance < amount) {
+      return res.status(400).json({ error: "Insufficient funds" });
+    }
+
+    const apiKey = process.env.MONNIFY_API_KEY;
+    const clientSecret = process.env.MONNIFY_SECRET_KEY;
+    const base64Credentials = Buffer.from(`${apiKey}:${clientSecret}`).toString("base64");
+
+    const data = {
+      reference,
+      authorizationCode
+    };
+
+    try {
+      const accessToken = await authenticateMonnify(base64Credentials);
+      const withdrawData = await monnifyWithdrawUrlAuthorize(accessToken, data);
+
+      if (!withdrawData.requestSuccessful) {
+        return res.status(400).json({
+          message: withdrawData.responseMessage,
+          code: withdrawData.responseCode,
+        });
+      }
       wallet.balance -= amount;
       await wallet.save();
 
-      // Create transaction record
       const transaction = new Transaction({
         walletId: wallet._id,
         amount,
@@ -892,5 +969,6 @@ module.exports = {
   withdrawWalletPaystack,
   depositWalletWithMonnify,
   verifyMonnifyTransaction,
-  withdrawMonnifyWallet
+  withdrawMonnifyWallet,
+  withdrawMonnifyWalletOTP
 };

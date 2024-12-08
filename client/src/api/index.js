@@ -222,6 +222,15 @@ export const withdrawFunds = async (data) => {
   }
 };
 
+export const withdrawFundsAuthorization = async (data) => {
+  try {
+    const response = await instance.post(`/withdraw/authorize`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching user");
+  }
+};
+
 export const deleteBank = async (id) => {
   try {
     const response = await instance.post(`/bank`, {
@@ -403,6 +412,33 @@ export const joinWaitlist = async (data) => {
 export const getRanking = async () => {
   try {
     const response = await instance.post(`/rankings`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const sendMessage = async (data) => {
+  try {
+    const response = await instance.post(`/chat/send-message`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error sneding message");
+  }
+};
+
+export const getChatMessages = async (id) => {
+  try {
+    const response = await instance.get(`/chat/messages/${id}`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const getPricing = async (id) => {
+  try {
+    const response = await instance.get(`/pricing`);
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching data");

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaAngleDown, FaEye, FaEyeSlash, FaBuilding } from "react-icons/fa";
 
 const Wallet = ({ data }) => {
+  const navigate = useNavigate();
   const [selectedCurrency, setSelectedCurrency] = useState("NGN");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
@@ -53,7 +55,10 @@ const Wallet = ({ data }) => {
             {showBalance ? <FaEyeSlash /> : <FaEye />}
           </button>
         </h2>
-        <div className="relative inline-block text-left mt-4 md:mt-0" ref={dropdownRef}>
+        <div
+          className="relative inline-block text-left mt-4 md:mt-0"
+          ref={dropdownRef}
+        >
           <button
             type="button"
             className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-[#0B2253] bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500"
@@ -81,20 +86,15 @@ const Wallet = ({ data }) => {
                 >
                   NGN
                 </a>
-                <a
-                  href="#"
-                  className="block px-4 py-2 text-sm text-[#0B2253] hover:bg-gray-100 hover:text-gray-900"
-                  role="menuitem"
-                  onClick={() => handleCurrencyChange("USD")}
-                >
-                  USD
-                </a>
               </div>
             </div>
           )}
         </div>
       </div>
-      <button className="bg-[#D9E4FB] flex items-center hover:bg-blue-300 text-blue-600 font-bold py-2 px-4 rounded">
+      <button
+        onClick={() => navigate("/wallet")}
+        className="bg-[#D9E4FB] flex items-center hover:bg-blue-300 text-blue-600 font-bold py-2 px-4 rounded"
+      >
         <div className="w-4 h-4 rounded-full bg-blue-600 flex justify-center items-center mr-2">
           <FaBuilding size={10} className="text-white" />
         </div>

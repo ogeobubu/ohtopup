@@ -9,6 +9,7 @@ import UserManagement from "../admin/pages/users";
 import Settings from "../admin/pages/settings";
 import Waitlist from "../admin/pages/waitlist";
 import Utilities from "../admin/pages/utilities";
+import Support from "../admin/pages/support";
 
 const AdminRoutes = {
   path: "/admin",
@@ -49,6 +50,10 @@ const AdminRoutes = {
     {
       path: "utilities",
       element: <Utilities />,
+    },
+    {
+      path: "support",
+      element: <Support />,
     },
   ],
 };

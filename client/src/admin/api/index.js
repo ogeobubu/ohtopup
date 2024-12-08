@@ -349,3 +349,39 @@ export const toggleData = async (id) => {
     throw new Error(error.response.data.message || "Error fetching data");
   }
 };
+
+export const sendMessage = async (data) => {
+  try {
+    const response = await instance.post(`/chat/send-message`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error sneding message");
+  }
+};
+
+export const getChatMessages = async (id) => {
+  try {
+    const response = await instance.get(`/chat/messages/${id}`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const setDetails = async () => {
+  try {
+    const response = await instance.post(`/save-company-contact`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error setting data");
+  }
+};
+
+export const updateDetails = async () => {
+  try {
+    const response = await instance.put(`/save-company-contact`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error setting data");
+  }
+};

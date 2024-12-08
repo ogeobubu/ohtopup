@@ -38,7 +38,7 @@ const {
   getPartyVariations,
   getVariations,
   saveVariations,
-  toggleVariation
+  toggleVariation,
 } = require("../controllers/variationController");
 
 const authUser = require("../middleware/authMiddleware");
@@ -82,5 +82,6 @@ router.get("/data", authUser, authAdmin, getPartyVariations);
 router.get("/data/variations", authUser, authAdmin, getVariations);
 router.post("/save-data", authUser, authAdmin, saveVariations);
 router.get("/data/toggle", authUser, authAdmin, toggleVariation);
+
 
 module.exports = router;

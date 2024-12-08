@@ -23,7 +23,7 @@ const Sidebar = () => {
     { label: "Referral", icon: FaUserFriends, to: "/referral" },
     { label: "User Ranking", icon: FaUserFriends, to: "/rank" },
     { label: "Settings", icon: FaCog, to: "/settings" },
-    { label: "Help & Support", icon: FaQuestionCircle, to: "/dashboard" },
+    { label: "Help & Support", icon: FaQuestionCircle, to: "/support" },
   ];
 
   return (
@@ -40,17 +40,16 @@ const Sidebar = () => {
         } transition-transform duration-300 ease-in-out md:translate-x-0 md:block`}
       >
         <div className="mb-4 flex justify-between items-center">
-          <img
-            src={logo}
-            alt="Logo"
-            className="w-auto h-12 mx-auto"
-          />
-          <button onClick={() => setIsOpen(false)} className="md:hidden text-gray-800">
+          <img src={logo} alt="Logo" className="w-auto h-12 mx-auto" />
+          <button
+            onClick={() => setIsOpen(false)}
+            className="md:hidden text-gray-800"
+          >
             <FaTimes size={24} />
           </button>
         </div>
 
-        <nav className="overflow-y-auto max-h-[calc(100vh-100px)]"> {/* Adjust max height as necessary */}
+        <nav className="overflow-y-auto max-h-[calc(100vh-100px)]">
           <ul className="space-y-4">
             {links.map((link, index) => (
               <li key={index}>

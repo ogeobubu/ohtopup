@@ -151,10 +151,34 @@ const toggleVariation = async (req, res) => {
   }
 };
 
+const getSavedVariationsForPricing = async (req, res) => {
+  try {
+    const savedVariations = await Variation.find({ isActive: true });
+
+    if (savedVariations.length > 0) {
+      const pricingData = savedVariations.map(variation => ({
+        id: variation._id,
+        name: variation.name,
+        price: variation.fixedPrice,
+        dataLimit: variation.variation_amount,
+        variationCode: variation.variation_code,
+      }));
+
+      res.status(200).json(pricingData);
+    } else {
+      res.status(404).json({ message: "No active pricing plans found." });
+    }
+  } catch (error) {
+    console.error("Error retrieving saved variations:", error);
+    res.status(500).json({ message: "Error retrieving saved variations" });
+  }
+};
+
 module.exports = {
   getPartyVariations,
   getVariations,
   saveVariations,
   toggleVariation,
   getVariations,
+  getSavedVariationsForPricing
 };
