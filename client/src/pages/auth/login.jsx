@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup"; // For validation
+import * as Yup from "yup";
 import Logo from "../../components/ui/logo";
 import Textarea from "../../components/ui/forms/input";
 import Button from "../../components/ui/forms/button";
@@ -36,7 +36,7 @@ const Login = ({ darkMode, toggleDarkMode }) => {
     <div className="flex md:flex-row justify-between">
       <div className="w-full py-0 md:py-4 h-screen overflow-y-auto">
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-4">
-          <Logo className="mx-auto w-auto" darkMode={darkMode} />
+          <Logo href="/" className="mx-auto w-auto" darkMode={darkMode} />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg font-semibold">Welcome Back,</h3>
             <p className="text-gray-600">

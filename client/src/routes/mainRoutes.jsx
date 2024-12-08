@@ -9,6 +9,7 @@ import Referral from "../pages/referral";
 import Utilities from "../pages/utilities";
 import Confirmation from "../pages/wallet/confirmation";
 import Rank from "../pages/rank";
+import Support from "../pages/support";
 
 const MainRoutes = {
   path: "/",
@@ -49,6 +50,10 @@ const MainRoutes = {
     {
       path: "/rank",
       element: <Rank />,
+    },
+    {
+      path: "/support",
+      element: <Support />,
     },
   ],
 };

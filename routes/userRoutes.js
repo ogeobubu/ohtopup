@@ -21,6 +21,7 @@ const {
   getTransactionsByUser,
   getBanks,
   withdrawWallet,
+  withdrawMonnifyWalletOTP,
   depositWalletWithPaystack,
   verifyPaystackTransaction,
   withdrawWalletPaystack,
@@ -41,10 +42,13 @@ const {
   purchaseElectricity,
   getAllUtilityTransactions,
   usersRank,
-  resetRankings
+  resetRankings,
 } = require("../controllers/utilityController");
 
-const { getVariations } = require("../controllers/variationController");
+const {
+  getVariations,
+  getSavedVariationsForPricing,
+} = require("../controllers/variationController");
 
 const { createWaitlist } = require("../controllers/waitlistController");
 
@@ -68,6 +72,7 @@ router.get("/transactions", auth, getTransactionsByUser);
 router.get("/banks", auth, getBanks);
 router.post("/bank", auth, deleteBankAccount);
 router.post("/withdraw", auth, withdrawMonnifyWallet);
+router.post("/withdraw/authorize", auth, withdrawMonnifyWalletOTP);
 router.post("/deposit", auth, depositWalletWithMonnify);
 router.get("/verify-payment/:ref", auth, verifyMonnifyTransaction);
 router.post("/verify-account", auth, verifyBankAccount);
@@ -83,6 +88,7 @@ router.post("/cable", auth, purchaseCable);
 router.post("/electricity/verify", auth, verifyElecticity);
 router.post("/electricity", auth, purchaseElectricity);
 router.get("/utility-transactions", auth, getAllUtilityTransactions);
+router.get("/pricing", getSavedVariationsForPricing);
 
 router.post("/redeem-points", auth, redeemPoints);
 
