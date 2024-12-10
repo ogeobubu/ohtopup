@@ -11,8 +11,11 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import logo from "../../../assets/logo/ohtopup-high-resolution-logo-transparent.png";
+import logoWhite from "../../../assets/logo/logo-color.svg";
+import { useSelector } from "react-redux";
 
 const Sidebar = () => {
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -36,16 +39,20 @@ const Sidebar = () => {
       </div>
 
       <div
-        className={`fixed z-10 top-0 left-0 w-56 bg-[#F7F9FB] text-gray-800 h-full p-6 transform ${
+        className={`fixed z-10 top-0 left-0 w-56 h-full p-6 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out md:translate-x-0 md:block`}
+        style={{
+          backgroundColor: isDarkMode ? "#2D3748" : "#F7F9FB",
+          color: isDarkMode ? "#E2E8F0" : "#4A5568",
+        }}
       >
         <div className="mb-4 flex justify-between items-center">
-          <img
-            src={logo}
-            alt="Logo"
-            className="w-auto h-12 mx-auto"
-          />
+        {isDarkMode ? (
+            <img src={logoWhite} alt="Logo" className="w-auto h-12 mx-auto" />
+          ) : (
+            <img src={logo} alt="Logo" className="w-auto h-12 mx-auto" />
+          )}
           <button onClick={() => setIsOpen(false)} className="md:hidden text-gray-800">
             <FaTimes size={24} />
           </button>

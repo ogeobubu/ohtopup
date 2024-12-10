@@ -55,7 +55,7 @@ export const createUser = async (userData) => {
   }
 };
 
-export const getReferrals = async (page = 1, limit = 10, search = '') => {
+export const getReferrals = async (page = 1, limit = 10, search = "") => {
   try {
     const response = await instance.get(`/referrals`, {
       params: { page, limit, search },
@@ -442,5 +442,53 @@ export const getPricing = async (id) => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const getNotifications = async () => {
+  try {
+    const response = await instance.get(`/notifications`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const readNotification = async (id) => {
+  try {
+    const response = await instance.patch(`/notification/${id}`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const createTicket = async (data) => {
+  try {
+    const response = await instance.post(`/ticket`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error sending message");
+  }
+};
+
+export const getTickets = async () => {
+  try {
+    const response = await instance.get(`/tickets`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const replyTicket = async (data) => {
+  try {
+    const response = await instance.post(
+      `/tickets/${data.ticketId}/reply`,
+      data
+    );
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error sending message");
   }
 };

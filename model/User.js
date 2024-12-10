@@ -11,6 +11,10 @@ const bankAccountSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      validate: {
+        validator: (v) => /^\d{10,}$/.test(v),
+        message: (props) => `${props.value} is not a valid account number!`,
+      },
     },
     accountName: {
       type: String,
@@ -30,13 +34,24 @@ const bankAccountSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// User Schema
 const userSchema = new mongoose.Schema(
   {
+    firstName: {
+      type: String,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+    },
     username: {
       type: String,
       required: true,
       unique: true,
       trim: true,
+      minlength: 3,
+      maxlength: 30,
     },
     email: {
       type: String,
@@ -44,13 +59,17 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      match: [/.+@.+..+/, "Please enter a valid email address"],
+      match: [/.+@.+\..+/, "Please enter a valid email address"],
     },
     phoneNumber: {
       type: String,
       required: true,
       unique: true,
       trim: true,
+      validate: {
+        validator: (v) => /^\+\d{1,3}\d{9,15}$/.test(v),
+        message: (props) => `${props.value} is not a valid phone number!`,
+      },
     },
     referralCode: {
       type: String,
@@ -100,6 +119,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
+      enum: ["user", "admin", "moderator"],
       default: "user",
     },
     isDeleted: {
@@ -131,10 +151,19 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+      required: true,
+    },
     bankAccounts: [bankAccountSchema],
   },
   { timestamps: true }
 );
+
+userSchema.index({ email: 1 });
+userSchema.index({ phoneNumber: 1 });
+userSchema.index({ username: 1 });
 
 const User = mongoose.model("User", userSchema);
 

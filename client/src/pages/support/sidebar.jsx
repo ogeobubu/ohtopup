@@ -11,6 +11,12 @@ import {
         icon: FaEnvelope,
         name: "Contact",
       },
+      {
+        label: "Send us a message",
+        subtitle: "",
+        icon: FaEnvelope,
+        name: "Ticket",
+      },
       // {
       //   label: "Chat Us",
       //   subtitle: "",

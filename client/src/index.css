@@ -12,6 +12,10 @@
   font-style: normal;
 }
 
+#root {
+  height: 100vh;
+}
+
 * {
   padding: 0;
   margin: 0;

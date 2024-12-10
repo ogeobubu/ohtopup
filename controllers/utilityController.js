@@ -1,11 +1,12 @@
 const Utility = require("../model/Utility");
 const User = require("../model/User");
+const Notification = require("../model/Notification");
 const Service = require("../model/Service");
 const Wallet = require("../model/Wallet");
 const axios = require("axios");
 const { generateRequestId } = require("../utils");
 const cron = require("node-cron");
-const moment = require('moment');
+const moment = require("moment");
 
 const buyAirtime = async (req, res) => {
   const { serviceID, amount, phone } = req.body;
@@ -48,61 +49,64 @@ const buyAirtime = async (req, res) => {
     phone,
   };
 
-  const response = await axios.post(`${VTPASS_URL}/api/pay`, data, {
-    headers: {
-      "api-key": `${VTPASS_API_KEY}`,
-      "secret-key": `${VTPASS_SECRET_KEY}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  const transactionStatus = response.data.content.transactions.status;
-  const transactionType = response.data.content.transactions.type;
-  const productName = response.data.content.transactions.product_name;
-  const totalAmount = response.data.content.transactions.total_amount;
-  const discount = response.data.content.transactions.discount;
-  const commissionRate = response.data.content.transactions.commission;
-  const paymentMethod = "api";
-
-  const newTransaction = new Utility({
-    requestId: request_id,
-    serviceID,
-    status: transactionStatus,
-    type: transactionType,
-    product_name: productName,
-    amount,
-    phone,
-    revenue: totalAmount,
-    user: user._id,
-    transactionDate: new Date(),
-    discount,
-    commissionRate,
-    paymentMethod,
-  });
-
-  if (transactionStatus === "failed") {
-    try {
-      await newTransaction.save();
-      return res.status(400).json({
-        message: "Transaction failed!",
-      });
-    } catch (err) {
-      console.error("Error saving failed transaction:", err);
-      return res.status(500).json({ message: "Error processing transaction." });
-    }
-  }
-
-  wallet.balance -= amount;
-  await wallet.save();
-
   try {
+    const response = await axios.post(`${VTPASS_URL}/api/pay`, data, {
+      headers: {
+        "api-key": `${VTPASS_API_KEY}`,
+        "secret-key": `${VTPASS_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const transactionStatus = response.data.content.transactions.status;
+    const transactionType = response.data.content.transactions.type;
+    const productName = response.data.content.transactions.product_name;
+    const totalAmount = response.data.content.transactions.total_amount;
+    const discount = response.data.content.transactions.discount;
+    const commissionRate = response.data.content.transactions.commission;
+    const paymentMethod = "api";
+
+    const newTransaction = new Utility({
+      requestId: request_id,
+      serviceID,
+      status: transactionStatus,
+      type: transactionType,
+      product_name: productName,
+      amount,
+      phone,
+      revenue: totalAmount,
+      user: user._id,
+      transactionDate: new Date(),
+      discount,
+      commissionRate,
+      paymentMethod,
+    });
+
+    if (transactionStatus === "failed") {
+      await newTransaction.save();
+      return res.status(400).json({ message: "Transaction failed!" });
+    }
+
+    wallet.balance -= amount;
+    await wallet.save();
+
     await newTransaction.save();
+
+    const notification = new Notification({
+      userId: user._id,
+      title: "Airtime Purchase Successful",
+      message: `You have successfully purchased airtime worth ${amount} for ${phone}.`,
+      link: "/transactions",
+    });
+
+    await notification.save();
+
     res.status(201).json({
       message: "Transaction successful!",
       transaction: newTransaction,
     });
   } catch (err) {
-    console.error("Error processing transaction:", err);
+    console.error("Error processing airtime purchase:", err);
     res.status(500).json({ message: "Error processing transaction." });
   }
 };
@@ -157,9 +161,7 @@ const buyData = async (req, res) => {
   }
 
   if (!wallet.isActive) {
-    return res
-      .status(400)
-      .json({ message: "Wallet is disabled. Transactions cannot be made." });
+    return res.status(400).json({ message: "Wallet is disabled. Transactions cannot be made." });
   }
 
   const data = {
@@ -194,7 +196,7 @@ const buyData = async (req, res) => {
       serviceID,
       status: transactionStatus,
       type: transactionType,
-      product_name: response.data.content.transactions.product_name,
+      product_name: productName,
       amount,
       phone: billersCode,
       revenue: totalAmount,
@@ -204,6 +206,20 @@ const buyData = async (req, res) => {
       commissionRate,
       paymentMethod,
     });
+
+    const notificationMessage = transactionStatus === "failed"
+      ? `Transaction failed for ${productName}. Amount: ${amount}.`
+      : `Transaction successful for ${productName}. Amount: ${amount}.`;
+
+    const newNotification = new Notification({
+      userId: user._id,
+      title: `Transaction ${transactionStatus}`,
+      message: notificationMessage,
+      createdAt: new Date(),
+      link: "/transactions"
+    });
+
+    await newNotification.save();
 
     if (transactionStatus === "failed") {
       await newTransaction.save();
@@ -428,7 +444,22 @@ const purchaseCable = async (req, res) => {
       paymentMethod,
     });
 
-    if (response.data.content.transactions.status === "failed") {
+    const notificationMessage = transactionStatus === "failed"
+      ? `Transaction failed for ${productName}. Amount: ${amount}.`
+      : `Transaction successful for ${productName}. Amount: ${amount}.`;
+
+    const newNotification = new Notification({
+      userId: user._id,
+      title: `Transaction ${transactionStatus}`,
+      message: notificationMessage,
+      createdAt: new Date(),
+      link: "/transactions"
+    });
+
+    // Save notification to the database
+    await newNotification.save();
+
+    if (transactionStatus === "failed") {
       await newTransaction.save();
       return res.status(400).json({ message: "Transaction failed!" });
     }
@@ -557,7 +588,21 @@ const purchaseElectricity = async (req, res) => {
       paymentMethod,
     });
 
-    if (response.data.content.transactions.status === "failed") {
+    const notificationMessage = transactionStatus === "failed"
+      ? `Transaction failed for electricity purchase of ${productName}. Amount: ${amount}.`
+      : `Transaction successful for electricity purchase of ${productName}. Amount: ${amount}.`;
+
+    const newNotification = new Notification({
+      userId: user._id,
+      title: `Transaction ${transactionStatus}`,
+      message: notificationMessage,
+      createdAt: new Date(),
+      link: "/transactions"
+    });
+
+    await newNotification.save();
+
+    if (transactionStatus === "failed") {
       await newTransaction.save();
       return res.status(400).json({ message: "Transaction failed!" });
     }
@@ -774,17 +819,17 @@ const usersRank = async (req, res) => {
     ]).limit(10);
 
     const rankingsWithPositions = rankings.map((winner, index) => ({
-      username: winner.username.replace(/.(?=.{3})/g, '*'),
+      username: winner.username.replace(/.(?=.{3})/g, "*"),
       transactionCount: winner.transactionCount,
       rank: index + 1,
     }));
 
     const now = moment();
-    const nextReset = moment().day(7).startOf('day');
+    const nextReset = moment().day(7).startOf("day");
     if (nextReset.isBefore(now)) {
-      nextReset.add(1, 'weeks');
+      nextReset.add(1, "weeks");
     }
-    const countdown = nextReset.diff(now, 'seconds');
+    const countdown = nextReset.diff(now, "seconds");
 
     res.status(200).json({ rankings: rankingsWithPositions, countdown });
   } catch (error) {
@@ -801,7 +846,7 @@ const resetRankings = async (req, res) => {
     console.error("Error resetting rankings:", error);
     res.status(500).json({ message: "Error resetting rankings." });
   }
-}
+};
 
 // cron.schedule("0 0 * * 0", async () => {
 //   await resetRankings();
@@ -820,5 +865,5 @@ module.exports = {
   getAllUtilityTransactions,
   getAnalytics,
   usersRank,
-  resetRankings
+  resetRankings,
 };

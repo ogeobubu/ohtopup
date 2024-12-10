@@ -46,11 +46,18 @@ const {
 } = require("../controllers/utilityController");
 
 const {
+  getNotifications,
+  readNotification,
+} = require("../controllers/notificationController");
+
+const {
   getVariations,
   getSavedVariationsForPricing,
 } = require("../controllers/variationController");
 
 const { createWaitlist } = require("../controllers/waitlistController");
+
+const { createTicket, replyTicket, getUserTickets } = require("../controllers/ticketController");
 
 const auth = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -96,5 +103,12 @@ router.post("/waitlist", createWaitlist);
 
 router.post("/rankings", usersRank);
 router.post("/reset-rankings", resetRankings);
+
+router.get("/notifications", auth, getNotifications);
+router.patch("/notification/:id", auth, readNotification);
+
+router.post("/ticket", auth, createTicket);
+router.get("/tickets", auth, getUserTickets);
+router.post("/tickets/:id/reply", auth, replyTicket);
 
 module.exports = router;

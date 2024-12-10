@@ -544,8 +544,8 @@ const withdrawWallet = async (req, res) => {
   }
 };
 
-const withdrawMonnifyWallet = async (req, res) => {
-  const { amount, bankName, accountNumber, bankCode } = req.body;
+const withdrawFromWallet = async (req, res, isOTP = false) => {
+  const { amount, bankName, accountNumber, bankCode, reference, authorizationCode } = req.body;
 
   try {
     const wallet = await Wallet.findOne({ userId: req.user.id });
@@ -562,28 +562,32 @@ const withdrawMonnifyWallet = async (req, res) => {
     const clientSecret = process.env.MONNIFY_SECRET_KEY;
     const base64Credentials = Buffer.from(`${apiKey}:${clientSecret}`).toString("base64");
 
-    const data = {
-      amount,
-      reference: `txn-${Date.now()}`,
-      narration: "Testing",
-      destinationBankCode: bankCode,
-      destinationAccountNumber: accountNumber,
-      currency: "NGN",
-      sourceAccountNumber: process.env.MONNIFY_ACCOUNT_NUMBER,
-      async: true
-    };
+    const data = isOTP
+      ? { reference, authorizationCode }
+      : {
+          amount,
+          reference: `txn-${Date.now()}`,
+          narration: "Withdrawal Request",
+          destinationBankCode: bankCode,
+          destinationAccountNumber: accountNumber,
+          currency: "NGN",
+          sourceAccountNumber: process.env.MONNIFY_ACCOUNT_NUMBER,
+          async: true,
+        };
 
-    try {
-      const accessToken = await authenticateMonnify(base64Credentials);
-      const withdrawData = await monnifyWithdrawUrl(accessToken, data);
+    const accessToken = await authenticateMonnify(base64Credentials);
+    const withdrawData = isOTP
+      ? await monnifyWithdrawUrlAuthorize(accessToken, data)
+      : await monnifyWithdrawUrl(accessToken, data);
 
-      if (!withdrawData.requestSuccessful) {
-        return res.status(400).json({
-          message: withdrawData.responseMessage,
-          code: withdrawData.responseCode,
-        });
-      }
+    if (!withdrawData.requestSuccessful) {
+      return res.status(400).json({
+        message: withdrawData.responseMessage,
+        code: withdrawData.responseCode,
+      });
+    }
 
+    if (!isOTP) {
       const transaction = new Transaction({
         walletId: wallet._id,
         amount,
@@ -606,63 +610,17 @@ const withdrawMonnifyWallet = async (req, res) => {
           reference: transaction.reference
         },
       });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Error withdrawing from wallet", error: error.message });
-    }
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
+    } else {
+      const transaction = await Transaction.findOne({ reference });
 
-const withdrawMonnifyWalletOTP = async (req, res) => {
-  const { reference, authorizationCode, amount, bankName, accountNumber, bankCode } = req.body;
-
-  try {
-    const wallet = await Wallet.findOne({ userId: req.user.id });
-
-    if (!wallet) {
-      return res.status(404).json({ message: "Wallet not found" });
-    }
-
-    if (wallet.balance < amount) {
-      return res.status(400).json({ error: "Insufficient funds" });
-    }
-
-    const apiKey = process.env.MONNIFY_API_KEY;
-    const clientSecret = process.env.MONNIFY_SECRET_KEY;
-    const base64Credentials = Buffer.from(`${apiKey}:${clientSecret}`).toString("base64");
-
-    const data = {
-      reference,
-      authorizationCode
-    };
-
-    try {
-      const accessToken = await authenticateMonnify(base64Credentials);
-      const withdrawData = await monnifyWithdrawUrlAuthorize(accessToken, data);
-
-      if (!withdrawData.requestSuccessful) {
-        return res.status(400).json({
-          message: withdrawData.responseMessage,
-          code: withdrawData.responseCode,
-        });
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
       }
+
       wallet.balance -= amount;
       await wallet.save();
 
-      const transaction = new Transaction({
-        walletId: wallet._id,
-        amount,
-        type: "withdrawal",
-        bankName,
-        accountNumber,
-        bankCode,
-        status: "completed",
-        paymentMethod: "naira_wallet",
-        reference: data.reference,
-      });
+      transaction.status = "completed";
       await transaction.save();
 
       return res.status(200).json({
@@ -677,15 +635,15 @@ const withdrawMonnifyWalletOTP = async (req, res) => {
           status: transaction.status,
         },
       });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Error withdrawing from wallet", error: error.message });
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Error processing withdrawal", error: error.message });
   }
 };
+
+const withdrawMonnifyWallet = (req, res) => withdrawFromWallet(req, res);
+const withdrawMonnifyWalletOTP = (req, res) => withdrawFromWallet(req, res, true);
 
 const withdrawWalletPaystack = async (req, res) => {
   const { name, bankName, amount, accountNumber, bankCode } = req.body;

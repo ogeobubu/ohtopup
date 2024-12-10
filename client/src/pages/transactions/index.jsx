@@ -4,12 +4,14 @@ import { getAllUtilityTransactions } from "../../api";
 import Table from "../../components/ui/table";
 import Chip from "../../components/ui/chip";
 import Pagination from "../../admin/components/pagination";
+import { useSelector } from "react-redux"; // Import useSelector for Redux
 
 const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [activeTab, setActiveTab] = useState("Electricity Bill");
   const [requestId, setRequestId] = useState("");
+  const isDarkMode = useSelector(state => state.theme.isDarkMode); // Get dark mode from Redux
 
   const handleSearchChange = (e) => {
     setRequestId(e.target.value);
@@ -130,7 +132,7 @@ const Transactions = () => {
             placeholder="Search by RequestID..."
             value={requestId}
             onChange={handleSearchChange}
-            className="border border-gray-300 rounded p-2 w-full sm:w-64"
+            className={`border border-gray-300 rounded p-2 w-full sm:w-64 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
           />
         </div>
         <div className="overflow-x-auto">
@@ -146,9 +148,9 @@ const Transactions = () => {
   };
 
   return (
-    <div className="">
+    <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'} p-4`}>
       <h1 className="text-2xl font-bold mb-5">Transactions</h1>
-      <div className="mb-3 flex rounded-lg border border-solid max-w-sm border-gray-300 bg-[#F7F9FB] py-1 px-1">
+      <div className={`mb-3 flex rounded-lg border border-solid max-w-sm ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-[#F7F9FB]' } py-1 px-1`}>
         {[
           "Electricity Bill",
           "TV Subscription",
