@@ -31,9 +31,8 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (error.response) {
-      console.log(error);
       if (error.response.status === 401) {
-        console.error("Response Error:", error.response.data);
+        window.location.href = "/admin";
       } else if (error.response.status === 403) {
         window.location.href = "/admin";
       } else {
@@ -383,5 +382,35 @@ export const updateDetails = async () => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error setting data");
+  }
+};
+
+export const getTickets = async () => {
+  try {
+    const response = await instance.get(`/tickets`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const replyTicket = async (data) => {
+  try {
+    const response = await instance.post(
+      `/tickets/${data.ticketId}/reply`,
+      data
+    );
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error sending message");
+  }
+};
+
+export const updateTicket = async (id, data) => {
+  try {
+    const response = await instance.patch(`/tickets/${id}`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating data");
   }
 };

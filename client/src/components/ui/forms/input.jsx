@@ -12,7 +12,8 @@ const FormInput = ({
   name,
   min,
   disabled = false,
-  helperText
+  helperText,
+  isDarkMode,
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -29,7 +30,7 @@ const FormInput = ({
 
   return (
     <div className="mb-4">
-      {label && <label className="block text-gray-500 mb-2">{label}</label>}
+      {label && <label className={`block mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{label}</label>}
       <div className="relative">
         <input
           name={name}
@@ -45,7 +46,7 @@ const FormInput = ({
               : "border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400"
           }`}
         />
-        {helperText && <span className="text-xs text-gray-500">{helperText}</span>}
+        {helperText && <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{helperText}</span>}
         {label === "Referral Code (Optional)" && (
           <button
             type="button"

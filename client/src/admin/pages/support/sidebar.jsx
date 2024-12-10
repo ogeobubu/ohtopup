@@ -9,10 +9,10 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       name: "Contact",
     },
     {
-      label: "Chat Us",
+      label: "Ticket",
       subtitle: "",
       icon: FaComments,
-      name: "Chat",
+      name: "Ticket",
     },
   ];
 

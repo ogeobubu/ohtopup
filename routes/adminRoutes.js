@@ -41,6 +41,8 @@ const {
   toggleVariation,
 } = require("../controllers/variationController");
 
+const { replyTicket, getTickets, updateTicket } = require("../controllers/ticketController");
+
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
 
@@ -83,5 +85,8 @@ router.get("/data/variations", authUser, authAdmin, getVariations);
 router.post("/save-data", authUser, authAdmin, saveVariations);
 router.get("/data/toggle", authUser, authAdmin, toggleVariation);
 
+router.get("/tickets", authUser, authAdmin, getTickets);
+router.post("/tickets/:id/reply", authUser, authAdmin, replyTicket);
+router.patch("/tickets/:id", authUser, authAdmin, updateTicket);
 
 module.exports = router;

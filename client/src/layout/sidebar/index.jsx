@@ -10,11 +10,14 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
+import { useSelector } from "react-redux";
 import logo from "../../assets/logo/ohtopup-high-resolution-logo-transparent.png";
+import logoWhite from "../../assets/logo/logo-color.svg";
 
 const Sidebar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
   const links = [
     { label: "Home", icon: FaHome, to: "/dashboard" },
@@ -35,12 +38,20 @@ const Sidebar = () => {
       </div>
 
       <div
-        className={`fixed z-10 top-0 left-0 w-56 bg-[#F7F9FB] text-gray-800 h-full p-6 transform ${
+        className={`fixed z-10 top-0 left-0 w-56 h-full p-6 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out md:translate-x-0 md:block`}
+        } transition-transform duration-300 ease-in-out md:translate-x-0`}
+        style={{
+          backgroundColor: isDarkMode ? "#2D3748" : "#F7F9FB",
+          color: isDarkMode ? "#E2E8F0" : "#4A5568",
+        }}
       >
         <div className="mb-4 flex justify-between items-center">
-          <img src={logo} alt="Logo" className="w-auto h-12 mx-auto" />
+          {isDarkMode ? (
+            <img src={logoWhite} alt="Logo" className="w-auto h-12 mx-auto" />
+          ) : (
+            <img src={logo} alt="Logo" className="w-auto h-12 mx-auto" />
+          )}
           <button
             onClick={() => setIsOpen(false)}
             className="md:hidden text-gray-800"
@@ -58,7 +69,11 @@ const Sidebar = () => {
                   className={`flex items-center space-x-4 ${
                     location.pathname === link.to
                       ? "bg-blue-600 rounded-md px-4 py-2 text-white"
-                      : "text-gray-500 hover:bg-blue-600 hover:text-white rounded-md px-4 py-2 transition-colors duration-200"
+                      : `${
+                          isDarkMode
+                            ? "text-gray-300 hover:bg-blue-600"
+                            : "text-gray-500 hover:bg-blue-600"
+                        } hover:text-white rounded-md px-4 py-2 transition-colors duration-200`
                   }`}
                 >
                   <link.icon className="w-3 h-3" />

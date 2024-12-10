@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Card from "./card";
-import {
-  FaBuilding,
-  FaExclamationCircle,
-} from "react-icons/fa";
+import { FaBuilding, FaExclamationCircle } from "react-icons/fa";
 import Table from "../../components/ui/table";
 import Button from "../../components/ui/forms/button";
 import {
@@ -26,13 +23,15 @@ import * as Yup from "yup";
 import Banks from "./banks";
 import Withdraw from "./withdraw";
 import Gift from "./gift";
-// import { PaystackButton } from "react-paystack";
 import Pagination from "../../admin/components/pagination";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"; // Import useSelector for Redux
 
 const Wallet = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isDarkMode = useSelector(state => state.theme.isDarkMode); // Get dark mode from Redux
+
   const [selectedCard, setSelectedCard] = useState("Naira Wallet");
   const [activeTab, setActiveTab] = useState("withdrawal");
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
@@ -47,10 +46,8 @@ const Wallet = () => {
   const [accountName, setAccountName] = useState("");
   const [ref, setRef] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-
   const [reference, setReference] = useState("");
 
   useEffect(() => {
@@ -126,13 +123,6 @@ const Wallet = () => {
     }
   };
 
-  const config = {
-    reference: `txn-${Date.now()}-${user?._id}`,
-    email: user?.email,
-    amount: totalAmount * 100,
-    publicKey: "pk_test_ed43711dc37e1454f9b91c9121b25a5662deef5b",
-  };
-
   const handlePaystackSuccessAction = (reference) => {
     const data = {
       reference: reference.reference,
@@ -142,13 +132,6 @@ const Wallet = () => {
   };
 
   const handlePaystackCloseAction = () => {};
-
-  const componentProps = {
-    ...config,
-    text: "Add Fund",
-    onSuccess: handlePaystackSuccessAction,
-    onClose: handlePaystackCloseAction,
-  };
 
   const handleShowBanks = () => {
     setShowBanks(!showBanks);
@@ -194,7 +177,7 @@ const Wallet = () => {
   };
 
   const handleDeposit = async () => {
-    setLoading(true); // Set loading state to true
+    setLoading(true); 
     try {
       const response = await depositWallet({
         userId: user?._id,
@@ -214,7 +197,7 @@ const Wallet = () => {
       console.log(error);
       toast.error("Error during deposit: " + error.message);
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false); 
     }
   };
 
@@ -303,7 +286,7 @@ const Wallet = () => {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-5">Wallet</h1>
+      <h1 className={`text-2xl font-bold mb-5 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Wallet</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card
           title="Naira Wallet"
@@ -312,13 +295,6 @@ const Wallet = () => {
           onClick={() => setSelectedCard("Naira Wallet")}
           isActive={selectedCard === "Naira Wallet"}
         />
-        {/* <Card
-          title="Cedis Wallet"
-          balance={50}
-          color="red"
-          onClick={() => setSelectedCard("Cedis Wallet")}
-          isActive={selectedCard === "Cedis Wallet"}
-        /> */}
         <Card
           title="Gift Points"
           balance={500}
@@ -336,7 +312,7 @@ const Wallet = () => {
               openModal={openModal}
             />
           ) : (
-            <div className="mt-5 p-4 border max-w-3xl rounded-sm">
+            <div className={`mt-5 p-4 border max-w-3xl rounded-sm ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
               <div className="flex flex-col">
                 <div className="rounded-lg w-full max-w-xs">
                   <h1 className="text-sm text-gray-500 font-bold mb-4">
@@ -389,16 +365,14 @@ const Wallet = () => {
                           <FaBuilding size={12} />
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600">
-                        Bank Account
-                      </span>
+                      <span className="text-sm text-gray-600">Bank Account</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="mt-5">
-                <div className="flex rounded-lg border border-solid max-w-xs border-gray-300 bg-[#F7F9FB] py-1 px-1">
+                <div className={`flex rounded-lg border border-solid max-w-xs ${isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-[#F7F9FB]' } py-1 px-1`}>
                   <button
                     className={`py-1 px-1 font-medium transition-colors duration-300 ${
                       activeTab === "withdrawal"
@@ -435,7 +409,7 @@ const Wallet = () => {
                           placeholder="Search by Reference..."
                           value={reference}
                           onChange={handleSearchChange}
-                          className="border border-gray-300 rounded p-2 mb-3"
+                          className={`border rounded p-2 mb-3 ${isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-300'}`}
                         />
                       </div>
                       {activeTab === "withdrawal" ? (
@@ -525,32 +499,27 @@ const Wallet = () => {
               placeholder="Enter amount"
               value={amount}
               onChange={handleAmountChange}
-              helperText={`Total Amount (including fees): ${totalAmount.toFixed(
-                2
-              )}`}
+              helperText={`Total Amount (including fees): ${totalAmount.toFixed(2)}`}
             />
             <div className="my-2">
-            <Button onClick={handleDeposit} disabled={loading}>
-            {loading ? "Processing..." : "Pay"}
-            </Button>
+              <Button onClick={handleDeposit} disabled={loading}>
+                {loading ? "Processing..." : "Pay"}
+              </Button>
             </div>
-          
-            {/* <PaystackButton
-              {...componentProps}
-              className="bg-blue-600 text-white py-2 px-4 rounded-lg transition duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full"
-            /> */}
           </Modal>
 
           <Modal
             isOpen={isWithdrawModalOpen}
             closeModal={closeWithdrawModal}
             title="Withdraw Funds"
+            isDarkMode={isDarkMode}
           >
             <Withdraw
               handleShowBanks={handleShowBanks}
               closeModal={closeWithdrawModal}
               walletData={walletData}
               user={user}
+              isDarkMode={isDarkMode}
             />
           </Modal>
         </>

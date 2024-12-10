@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./sidebar";
 import Contact from "./contact";
+import Ticket from "./ticket";
 import Chat from "./chat";
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState("Chat");
+  const [activeTab, setActiveTab] = useState("Ticket");
 
   useEffect(() => {
     window.scrollTo({
@@ -19,8 +20,9 @@ const Settings = () => {
       <div className="flex">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="flex-1 px-8">
-          {activeTab === "Chat" && <Chat />}
+          {activeTab === "Ticket" && <Ticket />}
           {activeTab === "Contact" && <Contact />}
+          {activeTab === "Chat" && <Chat />}
         </div>
       </div>
     </>

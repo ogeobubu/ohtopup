@@ -8,21 +8,26 @@ import { withdrawFunds, withdrawFundsAuthorization } from "../../api";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
+const Spinner = () => (
+  <div className="flex items-center justify-center">
+    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
+
+const Withdraw = ({ handleShowBanks, walletData, user, closeModal, isDarkMode }) => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [authorizationVisible, setAuthorizationVisible] = useState(false);
-  const [reference, setReference] = useState("")
+  const [reference, setReference] = useState("");
   const [amount, setAmount] = useState(0);
   const [selectedBank, setSelectedBank] = useState(null);
   const [authCode, setAuthCode] = useState("");
 
-  const bankOptions =
-    user?.bankAccounts?.map((account) => ({
-      value: account.accountNumber,
-      code: account.bankCode,
-      label: `${account.bankName} - ${account.accountNumber}`,
-    })) || [];
+  const bankOptions = user?.bankAccounts?.map((account) => ({
+    value: account.accountNumber,
+    code: account.bankCode,
+    label: `${account.bankName} - ${account.accountNumber}`,
+  })) || [];
 
   const formik = useFormik({
     initialValues: {
@@ -34,6 +39,7 @@ const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
       amount: Yup.number()
         .required("Amount is required")
         .positive("Amount must be positive")
+        .min(1000, "Minimum withdrawal amount is NGN 1000")
         .max(walletData?.balance || 0, "Insufficient funds"),
     }),
     onSubmit: async (values) => {
@@ -50,14 +56,12 @@ const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
           accountNumber: selectedBank.value,
           bankCode: selectedBank.code,
         });
-
         toast.success("Withdrawal initiated! Please authorize with a code.");
-        setReference(response.transaction.reference)
+        setReference(response.transaction.reference);
         setAuthorizationVisible(true);
         formik.resetForm();
-        formik.setFieldValue("selectedBank", null);
       } catch (error) {
-        toast.error("Error initiating withdrawal: " + error.message);
+        handleError(error);
       } finally {
         setLoading(false);
       }
@@ -70,10 +74,10 @@ const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
       const response = await withdrawFundsAuthorization({
         reference,
         name: user?.username,
-          amount: parseFloat(amount),
-          bankName: selectedBank.label.split(" - ")[0],
-          accountNumber: selectedBank.value,
-          bankCode: selectedBank.code,
+        amount: parseFloat(amount),
+        bankName: selectedBank.label.split(" - ")[0],
+        accountNumber: selectedBank.value,
+        bankCode: selectedBank.code,
         authorizationCode: authCode,
       });
 
@@ -81,10 +85,14 @@ const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
       await queryClient.invalidateQueries(["wallet"]);
       closeModal();
     } catch (error) {
-      toast.error("Error authorizing withdrawal: " + error.message);
+      handleError(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleError = (error) => {
+    toast.error("Error: " + error.message);
   };
 
   const NoBankAccounts = () => (
@@ -103,79 +111,112 @@ const Withdraw = ({ handleShowBanks, walletData, user, closeModal }) => {
   );
 
   return (
-    <div className="space-y-3">
-      <div className="bg-[#F1F4FC] flex justify-center items-center rounded-sm border border-solid border-blue-500 py-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-gray-500 text-sm">Naira Balance</span>
-          <div className="flex justify-center items-center">
-            <span className="text-sm text-gray-500">₦</span>
-            <span className="text-xl font-bold">
-              {walletData?.balance?.toFixed(2) || "0.00"}
-            </span>
-          </div>
-        </div>
-      </div>
-{!authorizationVisible && <>
-      <div>
-        <label className="block text-gray-700 mb-1">Select Bank Account</label>
-        <Select
-          options={bankOptions}
-          placeholder="Select a bank account..."
-          onChange={(option) => formik.setFieldValue("selectedBank", option)}
-          className={`mb-4 ${
-            formik.touched.selectedBank && formik.errors.selectedBank
-              ? "border-red-500"
-              : ""
-          }`}
-          isClearable
-          noOptionsMessage={() => <NoBankAccounts />}
-        />
-        {formik.touched.selectedBank && formik.errors.selectedBank && (
-          <div className="text-red-500 text-sm mb-2">
-            {formik.errors.selectedBank.message}
-          </div>
-        )}
-      </div>
+    <div className={`space-y-3 ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+      <div className={`flex justify-center items-center rounded-sm py-2 ${isDarkMode ? 'bg-gray-700 border border-blue-500' : 'bg-[#F1F4FC] border border-blue-500'}`}>
+  <div className="flex flex-col gap-1">
+    <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>Naira Balance</span>
+    <div className="flex justify-center items-center">
+      <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>₦</span>
+      <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
+        {walletData?.balance?.toFixed(2) || "0.00"}
+      </span>
+    </div>
+  </div>
+</div>
 
-      <TextField
-        label="Amount"
-        helperText={`Withdrawal Fee = NGN 0.00`}
-        value={formik.values.amount}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        name="amount"
-        error={formik.touched.amount && Boolean(formik.errors.amount)}
-      />
-
-      <Button
-        onClick={formik.handleSubmit}
-        disabled={loading}
-        className={loading ? "opacity-50 cursor-not-allowed" : ""}
-      >
-        {loading ? "Withdrawing..." : "Withdraw"}
-      </Button>
-      </>}
-
-      {authorizationVisible && (
+      {!authorizationVisible ? (
         <>
-        <button className="text-underlined text-blue-500 text-sm" onClick={() => setAuthorizationVisible(false)}>Go back</button>
-        <div className="mt-4">
+          <div>
+  <label className={`block mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+    Select Bank Account
+  </label>
+  <Select
+    options={bankOptions}
+    placeholder="Select a bank account..."
+    onChange={(option) => formik.setFieldValue("selectedBank", option)}
+    className={`mb-4 ${
+      formik.touched.selectedBank && formik.errors.selectedBank
+        ? "border-red-500"
+        : isDarkMode ? 'border-gray-600' : 'border-gray-300'
+    }`}
+    isClearable
+    noOptionsMessage={() => <NoBankAccounts />}
+    styles={{
+      control: (base) => ({
+        ...base,
+        backgroundColor: isDarkMode ? '#2d3748' : '#ffffff', // Dark mode background
+        borderColor: formik.touched.selectedBank && formik.errors.selectedBank ? 'red' : isDarkMode ? '#4a5568' : '#d1d5db',
+        color: isDarkMode ? '#cbd5e0' : '#000000', // Text color
+      }),
+      placeholder: (base) => ({
+        ...base,
+        color: isDarkMode ? '#a0aec0' : '#9ca3af', // Placeholder color
+      }),
+      singleValue: (base) => ({
+        ...base,
+        color: isDarkMode ? '#cbd5e0' : '#000000', // Selected value color
+      }),
+      menu: (base) => ({
+        ...base,
+        backgroundColor: isDarkMode ? '#2d3748' : '#ffffff', // Dropdown menu background
+      }),
+      option: (base, { isFocused }) => ({
+        ...base,
+        backgroundColor: isFocused ? (isDarkMode ? '#4a5568' : '#e5f3ff') : (isDarkMode ? '#2d3748' : '#ffffff'), // Option background
+        color: isDarkMode ? '#cbd5e0' : '#000000', // Option text color
+      }),
+    }}
+  />
+  {formik.touched.selectedBank && formik.errors.selectedBank && (
+    <div className="text-red-500 text-sm mb-2">
+      {formik.errors.selectedBank.message}
+    </div>
+  )}
+</div>
+
           <TextField
-            label="Authorization Code"
-            value={authCode}
-            onChange={(e) => setAuthCode(e.target.value)}
-            onBlur={() => {}}
-            error={authCode.length !== 6}
-            helperText="Please enter the 6-digit code."
+            label="Amount"
+            helperText={`Withdrawal Fee = NGN 0.00`}
+            value={formik.values.amount}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            name="amount"
+            error={formik.touched.amount && Boolean(formik.errors.amount)}
+            isDarkMode={isDarkMode}
           />
+          {formik.touched.amount && formik.errors.amount && (
+            <div className="text-red-500 text-sm mb-2">
+              {formik.errors.amount.message}
+            </div>
+          )}
+
           <Button
-            onClick={handleAuthorizationSubmit}
-            disabled={loading || authCode.length !== 6}
-            className={loading ? "opacity-50 cursor-not-allowed" : ""}
+            onClick={formik.handleSubmit}
+            disabled={loading}
+            className={`w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            {loading ? "Authorizing..." : "Authorize"}
+            {loading ? <Spinner /> : "Withdraw"}
           </Button>
-        </div>
+        </>
+      ) : (
+        <>
+          <button className="text-underlined text-blue-500 text-sm" onClick={() => setAuthorizationVisible(false)}>Go back</button>
+          <div className="mt-4">
+            <TextField
+              label="Authorization Code"
+              value={authCode}
+              onChange={(e) => setAuthCode(e.target.value)}
+              error={authCode.length !== 6}
+              helperText="Please enter the 6-digit code."
+            />
+            <Button
+              onClick={handleAuthorizationSubmit}
+              disabled={loading || authCode.length !== 6}
+              className={`w-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {loading ? <Spinner /> : "Authorize"}
+            </Button>
+          </div>
         </>
       )}
     </div>

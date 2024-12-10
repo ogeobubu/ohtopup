@@ -1,7 +1,7 @@
 import React from "react";
 import { FaTimes } from "react-icons/fa";
 
-const Modal = ({ isOpen, closeModal, title, children }) => {
+const Modal = ({ isOpen, closeModal, title, children, isDarkMode }) => {
   return (
     <div
       className={`fixed z-20 inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center transition-opacity duration-300 ${
@@ -9,16 +9,16 @@ const Modal = ({ isOpen, closeModal, title, children }) => {
       }`}
     >
       <div
-        className={`fixed top-0 right-0 h-[100%] bg-white shadow-md rounded-md p-4 w-full max-w-xs transition-transform duration-300 transform ${
+        className={`fixed top-0 right-0 h-[100%] shadow-md rounded-md p-4 w-full max-w-xs transition-transform duration-300 transform ${
           isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        } ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}
         style={{
           visibility: isOpen ? "visible" : "hidden",
         }}
       >
         <button
           onClick={closeModal}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          className="absolute top-2 right-2 hover:text-gray-700"
           aria-label="Close Modal"
         >
           <FaTimes className="w-5 h-5" />

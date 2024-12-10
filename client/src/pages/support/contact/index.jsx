@@ -1,9 +1,12 @@
 import React from "react";
 import { FaEnvelope, FaFacebook, FaTwitter } from "react-icons/fa"; // Importing icons
+import { useSelector } from "react-redux"; // Import useSelector
 
 const Contact = () => {
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode); // Get theme state
+
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-6 w-full">
+    <div className={`border border-solid rounded-md p-6 w-full ${isDarkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
       <h2 className="text-2xl font-bold mb-4">Contact Us</h2>
       <p className="my-3 text-gray-500 text-lg">
         You can reach us via the following channels:
@@ -13,7 +16,7 @@ const Contact = () => {
         href="mailto:ogeobubu@gmail.com" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="mb-4 p-4 bg-gray-100 rounded-lg flex items-center justify-between hover:bg-gray-200 transition duration-300"
+        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
       >
         <div className="flex items-center">
           <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-4">
@@ -33,7 +36,7 @@ const Contact = () => {
         href="https://www.facebook.com" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="mb-4 p-4 bg-gray-100 rounded-lg flex items-center justify-between hover:bg-gray-200 transition duration-300"
+        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
       >
         <div className="flex items-center">
           <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-4">
@@ -53,7 +56,7 @@ const Contact = () => {
         href="https://www.x.com" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="mb-4 p-4 bg-gray-100 rounded-lg flex items-center justify-between hover:bg-gray-200 transition duration-300"
+        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
       >
         <div className="flex items-center">
           <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-4">

@@ -1,6 +1,9 @@
 import React from "react";
+import { useSelector } from "react-redux"; // Import useSelector for Redux
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+  const isDarkMode = useSelector(state => state.theme.isDarkMode); // Get dark mode from Redux
+
   const handlePrevious = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);
@@ -21,7 +24,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           key={i}
           onClick={() => onPageChange(i)}
           className={`mx-1 px-3 py-2 rounded ${
-            i === currentPage ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-blue-300"
+            i === currentPage
+              ? "bg-blue-500 text-white"
+              : `${isDarkMode ? 'bg-gray-700 text-white hover:bg-blue-600' : 'bg-gray-200 text-gray-700 hover:bg-blue-300'}`
           }`}
         >
           {i}
@@ -32,7 +37,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   };
 
   return (
-    <div className="flex justify-between items-center my-4">
+    <div className={`flex justify-between items-center my-4 ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
       <button
         onClick={handlePrevious}
         disabled={currentPage === 1}
