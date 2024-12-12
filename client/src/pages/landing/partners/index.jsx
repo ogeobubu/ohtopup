@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux"; // Import useSelector for Redux
 import ibadan from "../../../assets/ibadan.png";
 import dstv from "../../../assets/dstv.png";
 import mtn from "../../../assets/mtn.png";
@@ -30,7 +31,7 @@ const Partners = () => {
   }, [currentIndex]);
 
   return (
-    <section id="#pricing" className="py-20 bg-gray-100">
+    <section id="pricing" className="py-20 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white">
       <div className="container mx-auto text-center">
         <h3 className="text-3xl font-bold mb-6">Our Partners</h3>
         <div className="relative overflow-hidden">
