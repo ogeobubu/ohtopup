@@ -1,13 +1,13 @@
 import React from "react";
 import { FaBolt, FaWifi, FaPhone, FaTv } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux"; // Import useSelector for Redux
+import { useSelector } from "react-redux";
 
 const Shortcut = () => {
-  const isDarkMode = useSelector(state => state.theme.isDarkMode); // Get dark mode from Redux
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   return (
-    <div className={`p-4 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'}`}>
+    <div className={`md:p-4 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Link
           to="/utilities?id=data"
