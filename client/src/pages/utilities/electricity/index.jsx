@@ -55,7 +55,7 @@ const customStyles = {
   }),
 };
 
-const Electricity = ({ user }) => {
+const Electricity = ({ user, isDarkMode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const closeModal = () => setIsModalOpen(false);
 
@@ -168,235 +168,250 @@ const Electricity = ({ user }) => {
       <span className="animate-bounce">Click to Open Modal</span>
     </button>
   </div>
-      <Modal
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        title="Electricity Bill"
-      >
-        {isLoading ? (
-          <div className="text-center text-xl text-gray-500">
-            Loading data, please wait...
-          </div>
-        ) : identifersError ? (
-          <p className="text-center text-xl text-gray-500">
-            A problem occurred or service is currently unavailabe. Try again
-            later!
-          </p>
-        ) : (
-          <Formik
-            initialValues={{
-              amount: "",
-              provider: "",
-              accountNumber: "",
-              meterType: "",
-              phoneNumber: "",
-            }}
-            validationSchema={validationSchema}
-            onSubmit={(values) => {
-              mutation.mutate({
-                serviceID: values.provider,
-                billersCode: values.accountNumber,
-                variation_code: values.meterType,
-                amount: values.amount,
-                phone: formatPhoneNumber(values.phoneNumber),
-              });
-            }}
-          >
-            {(formik) => {
-              const handleProviderChange = (provider) => {
-                setQueryId(provider.value);
-                formik.setFieldValue("provider", provider.value);
-                formik.setFieldValue("accountNumber", "");
-                formik.setFieldValue("meterType", "");
-                formik.setFieldValue("amount", "");
-                setAccountNumber("");
-                setMeterType("");
-              };
-              const verifyAccountName = (value) => {
-                if (value.length > 12) {
-                  setAccountNumber(value);
-                }
-              };
+  <Modal
+  isOpen={isModalOpen}
+  closeModal={closeModal}
+  title="Electricity Bill"
+  isDarkMode={isDarkMode}
+>
+  {isLoading ? (
+    <div className="text-center text-xl text-gray-500">
+      Loading data, please wait...
+    </div>
+  ) : identifersError ? (
+    <p className="text-center text-xl text-gray-500">
+      A problem occurred or service is currently unavailable. Try again later!
+    </p>
+  ) : (
+    <Formik
+      initialValues={{
+        amount: "",
+        provider: "",
+        accountNumber: "",
+        meterType: "",
+        phoneNumber: "",
+      }}
+      validationSchema={validationSchema}
+      onSubmit={(values) => {
+        mutation.mutate({
+          serviceID: values.provider,
+          billersCode: values.accountNumber,
+          variation_code: values.meterType,
+          amount: values.amount,
+          phone: formatPhoneNumber(values.phoneNumber),
+        });
+      }}
+    >
+      {(formik) => {
+        const handleProviderChange = (provider) => {
+          setQueryId(provider.value);
+          formik.setFieldValue("provider", provider.value);
+          formik.setFieldValue("accountNumber", "");
+          formik.setFieldValue("meterType", "");
+          formik.setFieldValue("amount", "");
+          setAccountNumber("");
+          setMeterType("");
+        };
 
-              return (
-                <Form className="flex flex-col">
-                  <div className="flex flex-col">
-                    <div>
-                      <label className="block text-gray-500 mb-2">Disco</label>
-                      <Select
-                        styles={customStyles}
-                        options={optionsDisco}
-                        onChange={handleProviderChange}
-                        placeholder="Select an option"
-                        classNamePrefix="select"
-                      />
-                      <ErrorMessage
-                        name="provider"
-                        component="div"
-                        className="text-red-500"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="my-3 bg-gray-100 rounded-md p-2">
-                      <label className="block text-gray-500 mb-2">
-                        Meter Type
-                      </label>
-                      <div className="flex items-center">
-                        <Field
-                          type="radio"
-                          name="meterType"
-                          value="prepaid"
-                          id="prepaid"
-                          className="h-5 w-5 text-blue-600"
-                          onChange={() => {
-                            formik.setFieldValue("meterType", "prepaid");
-                            setMeterType("prepaid");
-                          }}
-                        />
-                        <label
-                          htmlFor="prepaid"
-                          className="ml-2 text-gray-700 text-lg"
-                        >
-                          Prepaid Meter
-                        </label>
-                      </div>
-                      <div className="flex items-center">
-                        <Field
-                          type="radio"
-                          name="meterType"
-                          value="postpaid"
-                          id="postpaid"
-                          className="h-5 w-5 text-blue-600"
-                          onChange={() => {
-                            formik.setFieldValue("meterType", "postpaid");
-                            setMeterType("postpaid");
-                          }}
-                        />
-                        <label
-                          htmlFor="postpaid"
-                          className="ml-2 text-gray-700 text-lg"
-                        >
-                          Postpaid Meter
-                        </label>
-                      </div>
-                    </div>
+        const verifyAccountName = (value) => {
+          if (value.length > 12) {
+            setAccountNumber(value);
+          }
+        };
 
-                    <ErrorMessage
-                      name="meterType"
-                      component="div"
-                      className="text-red-500 text-sm mt-2"
-                    />
-                  </div>
-                  <div className="flex flex-col mt-3">
-                    <label className={`block text-gray-500`}>
-                      Meter Number
-                    </label>
-                    <Field name="accountNumber">
-                      {({ field, form }) => (
-                        <TextField
-                          {...field}
-                          type="text"
-                          value={field.value}
-                          className="w-full border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                          onChange={(e) => {
-                            form.setFieldValue(field.name, e.target.value);
-                            verifyAccountName(e.target.value);
-                          }}
-                        />
-                      )}
-                    </Field>
-                    <ErrorMessage
-                      name="accountNumber"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
-                  {accountNameApi && (
-                    <>
-                      <div className="flex flex-col">
-                        <label className={`mb-1 block text-gray-500`}>
-                          Meter Card Name
-                        </label>
-                        <Field name="accountName">
-                          {({ field, form }) => (
-                            <TextField
-                              {...field}
-                              type="text"
-                              disabled
-                              value={accountNameApi?.data.Customer_Name}
-                              className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                            />
-                          )}
-                        </Field>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="flex flex-col">
-                    <label className={`mb-1 block text-gray-500`}>Amount</label>
-                    <Field name="amount">
-                      {({ field, form }) => (
-                        <TextField
-                          {...field}
-                          type="text"
-                          value={formik.values.amount}
-                          className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                          onChange={(e) => {
-                            form.setFieldValue(field.name, e.target.value);
-                          }}
-                        />
-                      )}
-                    </Field>
-                  </div>
-                  <div className="flex flex-col mb-3">
-                    <label className={`mb-1 block text-gray-500 mb-2`}>
-                      Phone Number
-                    </label>
-                    <Field name="phoneNumber">
-                      {({ field, form }) => (
-                        <PhoneInput
-                          {...field}
-                          international
-                          defaultCountry="NG"
-                          value={field.value}
-                          onChange={(value) =>
-                            form.setFieldValue(field.name, value)
-                          }
-                          className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
-                          placeholder="Enter phone number"
-                        />
-                      )}
-                    </Field>
-                    <ErrorMessage
-                      name="phoneNumber"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
-                  <div className="bg-[#F7F9FB] rounded-md p-4 w-full max-w-md mb-3">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-gray-700">Total</h2>
-                      <p className="text-gray-800">
-                        ₦{formik.values.amount || 0}
-                      </p>
-                    </div>
-                  </div>
-                  <ErrorMessage
-                    name="amount"
-                    component="div"
-                    className="text-red-500"
+        return (
+          <Form className="flex flex-col">
+            <div className="flex flex-col">
+              <div>
+                <label className="block text-gray-500 mb-2">Disco</label>
+                <Select
+                  styles={{
+                    ...customStyles,
+                    control: (base) => ({
+                      ...base,
+                      backgroundColor: isDarkMode ? '#2d3748' : '#f7fafc',
+                      borderColor: isDarkMode ? '#4a5568' : '#cbd5e0',
+                      color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                      '&:hover': {
+                        borderColor: isDarkMode ? '#cbd5e0' : '#a0aec0',
+                      },
+                    }),
+                    singleValue: (base) => ({
+                      ...base,
+                      color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isFocused ? (isDarkMode ? '#4a5568' : '#edf2f7') : (isDarkMode ? '#2d3748' : '#ffffff'),
+                      color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                    }),
+                  }}
+                  options={optionsDisco}
+                  onChange={handleProviderChange}
+                  placeholder="Select an option"
+                  classNamePrefix="select"
+                />
+                <ErrorMessage
+                  name="provider"
+                  component="div"
+                  className="text-red-500"
+                />
+              </div>
+            </div>
+            <div>
+              <div className="my-3 bg-gray-100 rounded-md p-2 dark:bg-gray-700">
+                <label className="block text-gray-500 mb-2">Meter Type</label>
+                <div className="flex items-center">
+                  <Field
+                    type="radio"
+                    name="meterType"
+                    value="prepaid"
+                    id="prepaid"
+                    className="h-5 w-5 text-blue-600"
+                    onChange={() => {
+                      formik.setFieldValue("meterType", "prepaid");
+                      setMeterType("prepaid");
+                    }}
                   />
-                  <br />
-                  <Button disabled={mutation.isLoading} type="submit">
-                    Pay
-                  </Button>
-                </Form>
-              );
-            }}
-          </Formik>
-        )}
-      </Modal>
+                  <label
+                    htmlFor="prepaid"
+                    className="ml-2 text-gray-700 text-lg dark:text-gray-300"
+                  >
+                    Prepaid Meter
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <Field
+                    type="radio"
+                    name="meterType"
+                    value="postpaid"
+                    id="postpaid"
+                    className="h-5 w-5 text-blue-600"
+                    onChange={() => {
+                      formik.setFieldValue("meterType", "postpaid");
+                      setMeterType("postpaid");
+                    }}
+                  />
+                  <label
+                    htmlFor="postpaid"
+                    className="ml-2 text-gray-700 text-lg dark:text-gray-300"
+                  >
+                    Postpaid Meter
+                  </label>
+                </div>
+              </div>
+
+              <ErrorMessage
+                name="meterType"
+                component="div"
+                className="text-red-500 text-sm mt-2"
+              />
+            </div>
+            <div className="flex flex-col mt-3">
+              <label className={`block text-gray-500`}>Meter Number</label>
+              <Field name="accountNumber">
+                {({ field, form }) => (
+                  <TextField
+                    {...field}
+                    type="text"
+                    value={field.value}
+                    className="w-full border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                    onChange={(e) => {
+                      form.setFieldValue(field.name, e.target.value);
+                      verifyAccountName(e.target.value);
+                    }}
+                  />
+                )}
+              </Field>
+              <ErrorMessage
+                name="accountNumber"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+            </div>
+            {accountNameApi && (
+              <>
+                <div className="flex flex-col">
+                  <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
+                    Meter Card Name
+                  </label>
+                  <Field name="accountName">
+                    {({ field, form }) => (
+                      <TextField
+                        {...field}
+                        type="text"
+                        disabled
+                        value={accountNameApi?.data.Customer_Name}
+                        className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                      />
+                    )}
+                  </Field>
+                </div>
+              </>
+            )}
+
+            <div className="flex flex-col">
+              <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>Amount</label>
+              <Field name="amount">
+                {({ field, form }) => (
+                  <TextField
+                    {...field}
+                    type="text"
+                    value={formik.values.amount}
+                    className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                    onChange={(e) => {
+                      form.setFieldValue(field.name, e.target.value);
+                    }}
+                  />
+                )}
+              </Field>
+            </div>
+            <div className="flex flex-col mb-3">
+              <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>Phone Number</label>
+              <Field name="phoneNumber">
+                {({ field, form }) => (
+                  <PhoneInput
+                    {...field}
+                    international
+                    defaultCountry="NG"
+                    value={field.value}
+                    onChange={(value) =>
+                      form.setFieldValue(field.name, value)
+                    }
+                    className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
+                    placeholder="Enter phone number"
+                  />
+                )}
+              </Field>
+              <ErrorMessage
+                name="phoneNumber"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+            </div>
+            <div className="bg-[#F7F9FB] dark:bg-gray-700 rounded-md p-4 w-full max-w-md mb-3">
+              <div className="flex justify-between items-center">
+                <h2 className="text-gray-700 dark:text-gray-300">Total</h2>
+                <p className="text-gray-800 dark:text-gray-200">
+                  ₦{formik.values.amount || 0}
+                </p>
+              </div>
+            </div>
+            <ErrorMessage
+              name="amount"
+              component="div"
+              className="text-red-500"
+            />
+            <br />
+            <Button disabled={mutation.isLoading} type="submit">
+              Pay
+            </Button>
+          </Form>
+        );
+      }}
+    </Formik>
+  )}
+</Modal>
     </div>
   );
 };
