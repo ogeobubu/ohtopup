@@ -18,7 +18,7 @@ const formatPhoneNumber = (phoneNumber) => {
   return phoneNumber.replace(/^\+234/, "0");
 };
 
-const Airtime = () => {
+const Airtime = ({ isDarkMode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [identifier, setIdentifier] = useState("airtime");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,134 +97,135 @@ const Airtime = () => {
       </button>
     </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        title="Airtime Purchase"
-      >
-        {identifiersError ? (
-          <p className="text-center text-xl text-gray-500">
-            A problem occurred or service is currently unavailable. Try again later!
-          </p>
-        ) : (
-          <Formik
-            initialValues={{
-              phoneNumber: "",
-              amount: "",
-              provider: "",
-            }}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {(formik) => (
-              <Form className="flex flex-col space-y-3">
-                <div className="flex flex-col">
-                  <label className="text-[#6d7a98]" htmlFor="provider">
-                    Select Network Provider
-                  </label>
-                  <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2">
-                    {identifiers?.map((provider) => (
-                      <button
-                        title={provider?.serviceID}
-                        key={provider?.serviceID}
-                        type="button"
-                        className={`flex justify-center items-center rounded-full h-9 w-9 ${
-                          formik.values.provider === provider?.serviceID
-                            ? "border-2 border-blue-500"
-                            : "border-0"
-                        }`}
-                        onClick={() =>
-                          formik.setFieldValue("provider", provider?.serviceID)
-                        }
-                      >
-                        <img
-                          src={
-                            provider?.serviceID === "mtn"
-                              ? mtn
-                              : provider?.serviceID === "glo"
-                              ? glo
-                              : provider?.serviceID === "airtel"
-                              ? airtel
-                              : provider?.serviceID === "etisalat"
-                              ? nineMobile
-                              : provider?.image
-                          }
-                          alt={provider?.serviceID}
-                          className="h-8 w-8 object-cover rounded-full"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                  <ErrorMessage
-                    name="provider"
-                    component="div"
-                    className="text-red-500 text-sm"
+    <Modal
+  isOpen={isModalOpen}
+  closeModal={closeModal}
+  title="Airtime Purchase"
+  isDarkMode={isDarkMode}
+>
+  {identifiersError ? (
+    <p className="text-center text-xl text-gray-500">
+      A problem occurred or service is currently unavailable. Try again later!
+    </p>
+  ) : (
+    <Formik
+      initialValues={{
+        phoneNumber: "",
+        amount: "",
+        provider: "",
+      }}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+    >
+      {(formik) => (
+        <Form className="flex flex-col space-y-3">
+          <div className="flex flex-col">
+            <label className="text-[#6d7a98]" htmlFor="provider">
+              Select Network Provider
+            </label>
+            <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2">
+              {identifiers?.map((provider) => (
+                <button
+                  title={provider?.serviceID}
+                  key={provider?.serviceID}
+                  type="button"
+                  className={`flex justify-center items-center rounded-full h-9 w-9 ${
+                    formik.values.provider === provider?.serviceID
+                      ? "border-2 border-blue-500"
+                      : "border-0"
+                  }`}
+                  onClick={() =>
+                    formik.setFieldValue("provider", provider?.serviceID)
+                  }
+                >
+                  <img
+                    src={
+                      provider?.serviceID === "mtn"
+                        ? mtn
+                        : provider?.serviceID === "glo"
+                        ? glo
+                        : provider?.serviceID === "airtel"
+                        ? airtel
+                        : provider?.serviceID === "etisalat"
+                        ? nineMobile
+                        : provider?.image
+                    }
+                    alt={provider?.serviceID}
+                    className="h-8 w-8 object-cover rounded-full"
                   />
-                </div>
+                </button>
+              ))}
+            </div>
+            <ErrorMessage
+              name="provider"
+              component="div"
+              className="text-red-500 text-sm"
+            />
+          </div>
 
-                <div className="flex flex-col">
-                  <label className={`mb-1 block text-gray-500 mb-2`}>
-                    Phone Number
-                  </label>
-                  <Field name="phoneNumber">
-                    {({ field, form }) => (
-                      <PhoneInput
-                        {...field}
-                        international
-                        defaultCountry="NG"
-                        value={field.value}
-                        onChange={(value) => form.setFieldValue(field.name, value)}
-                        className={`w-full p-2 border rounded bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                        placeholder="Enter phone number"
-                      />
-                    )}
-                  </Field>
-                  <ErrorMessage
-                    name="phoneNumber"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
-                </div>
+          <div className="flex flex-col">
+            <label className={`mb-1 block text-gray-500`}>
+              Phone Number
+            </label>
+            <Field name="phoneNumber">
+              {({ field, form }) => (
+                <PhoneInput
+                  {...field}
+                  international
+                  defaultCountry="NG"
+                  value={field.value}
+                  onChange={(value) => form.setFieldValue(field.name, value)}
+                  className={`w-full p-2 border rounded bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600`}
+                  placeholder="Enter phone number"
+                />
+              )}
+            </Field>
+            <ErrorMessage
+              name="phoneNumber"
+              component="div"
+              className="text-red-500 text-sm"
+            />
+          </div>
 
-                <div className="flex flex-col">
-                  <label className={`mb-1 block text-gray-500`}>
-                    Amount
-                  </label>
-                  <Field name="amount">
-                    {({ field, form }) => (
-                      <TextField
-                        {...field}
-                        type="number"
-                        value={field.value}
-                        className="w-full p-2 border rounded bg-gray-50 text-gray-900"
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? "" : parseFloat(e.target.value);
-                          form.setFieldValue(field.name, value);
-                        }}
-                      />
-                    )}
-                  </Field>
-                  <ErrorMessage
-                    name="amount"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
-                </div>
+          <div className="flex flex-col">
+            <label className={`mb-1 block text-gray-500`}>
+              Amount
+            </label>
+            <Field name="amount">
+              {({ field, form }) => (
+                <TextField
+                  {...field}
+                  type="number"
+                  value={field.value}
+                  className="w-full p-2 border rounded bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? "" : parseFloat(e.target.value);
+                    form.setFieldValue(field.name, value);
+                  }}
+                />
+              )}
+            </Field>
+            <ErrorMessage
+              name="amount"
+              component="div"
+              className="text-red-500 text-sm"
+            />
+          </div>
 
-                <div className="bg-[#F7F9FB] rounded-md p-4 w-full max-w-md">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-gray-700">Total</h2>
-                    <p className="text-gray-800">₦{formik.values.amount || 0}</p>
-                  </div>
-                </div>
-                <Button type="submit" disabled={isSubmitting || walletLoading || identifiersLoading}>
-                  {isSubmitting ? "Processing..." : "Pay Now"}
-                </Button>
-              </Form>
-            )}
-          </Formik>
-        )}
-      </Modal>
+          <div className={`bg-[#F7F9FB] dark:bg-gray-800 rounded-md p-4 w-full max-w-md`}>
+            <div className="flex justify-between items-center">
+              <h2 className="text-gray-700 dark:text-gray-300">Total</h2>
+              <p className="text-gray-800 dark:text-gray-200">₦{formik.values.amount || 0}</p>
+            </div>
+          </div>
+          <Button type="submit" disabled={isSubmitting || walletLoading || identifiersLoading}>
+            {isSubmitting ? "Processing..." : "Pay Now"}
+          </Button>
+        </Form>
+      )}
+    </Formik>
+  )}
+</Modal>
     </div>
   );
 };

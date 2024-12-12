@@ -55,7 +55,7 @@ const formatPhoneNumber = (phoneNumber) => {
   return phoneNumber.replace(/^\+234/, "0");
 };
 
-const Cable = ({ user }) => {
+const Cable = ({ user, isDarkMode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const closeModal = () => setIsModalOpen(false);
 
@@ -161,6 +161,7 @@ const Cable = ({ user }) => {
         isOpen={isModalOpen}
         closeModal={closeModal}
         title="Cable Purchase"
+        isDarkMode={isDarkMode}
       >
         {identifersError ? (
           <p className="text-center text-xl text-gray-500">
@@ -220,7 +221,7 @@ const Cable = ({ user }) => {
               return (
                 <Form className="flex flex-col">
                   <div className="flex flex-col">
-                    <label className="text-[#6d7a98]" htmlFor="provider">
+                  <label className={`text-[#6d7a98] ${isDarkMode ? 'text-gray-300' : 'text-black'}`} htmlFor="provider">
                       Select Network Provider
                     </label>
                     <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2">
@@ -326,11 +327,31 @@ const Cable = ({ user }) => {
                             Package Plan
                           </label>
                           <Select
-                            styles={customStyles}
                             options={options}
                             onChange={handleDataPlanChange}
                             placeholder="Select an option"
                             classNamePrefix="select"
+                            styles={{
+                              ...customStyles,
+                              control: (base) => ({
+                                ...base,
+                                backgroundColor: isDarkMode ? '#2d3748' : '#f7fafc',
+                                borderColor: isDarkMode ? '#4a5568' : '#cbd5e0',
+                                color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                                '&:hover': {
+                                  borderColor: isDarkMode ? '#cbd5e0' : '#a0aec0',
+                                },
+                              }),
+                              singleValue: (base) => ({
+                                ...base,
+                                color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                              }),
+                              option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isFocused ? (isDarkMode ? '#4a5568' : '#edf2f7') : (isDarkMode ? '#2d3748' : '#ffffff'),
+                                color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                              }),
+                            }}
                           />
                           <ErrorMessage
                             name="source"
@@ -340,7 +361,7 @@ const Cable = ({ user }) => {
                         </div>
                       )}
                       {!changeBouquet && (
-                        <div className="flex flex-col">
+                        <div className="flex flex-col mt-3">
                           <label className={`mb-1 block text-gray-500`}>
                             Amount
                           </label>
@@ -363,7 +384,7 @@ const Cable = ({ user }) => {
                           </Field>
                         </div>
                       )}
-                      <div className="flex flex-col mb-3">
+                      <div className="flex flex-col my-3">
                         <label className={`mb-1 block text-gray-500 mb-2`}>
                           Phone Number
                         </label>
@@ -389,10 +410,10 @@ const Cable = ({ user }) => {
                         />
                       </div>
 
-                      <div className="bg-[#F7F9FB] rounded-md p-4 w-full max-w-md mb-3">
+                      <div className="bg-[#F7F9FB] dark:bg-gray-700 rounded-md p-4 w-full max-w-md mb-3">
                         <div className="flex justify-between items-center">
-                          <h2 className="text-gray-700">Total</h2>
-                          <p className="text-gray-800">
+                          <h2 className="text-gray-700 dark:text-white">Total</h2>
+                          <p className="text-gray-800 dark:text-white">
                             ₦
                             {!changeBouquet
                               ? accountNameApi?.data.Renewal_Amount
