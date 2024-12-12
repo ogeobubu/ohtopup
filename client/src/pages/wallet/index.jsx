@@ -319,7 +319,7 @@ const Wallet = () => {
             />
           ) : (
             <div
-              className={`mt-5 p-4 border max-w-3xl rounded-sm ${
+              className={`mt-5 md:p-4 p-2 border max-w-3xl rounded-sm ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
               }`}
             >
@@ -343,8 +343,8 @@ const Wallet = () => {
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-3">
-                    <div className="flex flex-col justify-center gap-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="flex flex-col justify-center items-center gap-1">
                       <button
                         onClick={openWithdrawModal}
                         className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center"
@@ -355,7 +355,8 @@ const Wallet = () => {
                       </button>
                       <span className="text-sm text-gray-600">Withdraw</span>
                     </div>
-                    <div className="flex flex-col justify-center gap-1">
+
+                    <div className="flex flex-col justify-center items-center gap-1">
                       <button
                         onClick={openDepositModal}
                         className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center"
@@ -366,7 +367,8 @@ const Wallet = () => {
                       </button>
                       <span className="text-sm text-gray-600">Add Funds</span>
                     </div>
-                    <div className="flex flex-col justify-center gap-1">
+
+                    <div className="flex flex-col justify-center items-center gap-1">
                       <button
                         onClick={handleShowBanks}
                         className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center"

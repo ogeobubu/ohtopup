@@ -150,7 +150,7 @@ const Transactions = () => {
   return (
     <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'} md:p-4`}>
       <h1 className="text-2xl font-bold mb-5">Transactions</h1>
-      <div className={`mb-3 flex flex-wrap rounded-lg border border-solid max-w-sm ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-[#F7F9FB]' } py-1 px-1`}>
+      <div className={`mb-3 flex flex-wrap md:flex-row flex-col rounded-lg border border-solid max-w-sm ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-[#F7F9FB]' } py-1 px-1`}>
   {[
     "Electricity Bill",
     "TV Subscription",
