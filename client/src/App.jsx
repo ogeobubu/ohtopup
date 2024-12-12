@@ -18,7 +18,7 @@ const App = () => {
   };
 
   return (
-    <div className={`h-[100%] ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
+    <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
       <ToastContainer />
       <Routes darkMode={isDarkMode} toggleDarkMode={handleToggleDarkMode} />
     </div>

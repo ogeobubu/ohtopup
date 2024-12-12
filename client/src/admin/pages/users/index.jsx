@@ -12,6 +12,7 @@ import Modal from "../../components/modal";
 
 const UserManagement = () => {
   const users = useSelector((state) => state.admin.users);
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
@@ -122,8 +123,8 @@ const UserManagement = () => {
   ];
 
   return (
-    <div className="my-5">
-      <div className="flex gap-4">
+    <div className="my-5 px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
           title="Registered Users"
           count={users.length}
@@ -147,15 +148,15 @@ const UserManagement = () => {
         />
       </div>
 
-      <div className="flex justify-between my-4">
+      <div className="flex flex-col sm:flex-row justify-between my-4 gap-2">
         <input
           type="text"
           placeholder="Search..."
           value={searchTerm}
           onChange={handleSearchChange}
-          className="border border-gray-300 rounded p-2"
+          className="border border-gray-300 rounded p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white flex-grow"
         />
-        <div className="flex gap-1 items-center">
+        <div className="flex md:flex-row flex-col gap-2 items-center">
           <Select
             options={[
               { value: "", label: "All" },
@@ -164,8 +165,39 @@ const UserManagement = () => {
             ]}
             value={filter}
             onChange={handleFilterChange}
-            className="w-40"
+            className="w-full sm:w-40"
             placeholder="Filter by role"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
+                borderColor: isDarkMode ? "#4a5568" : "#d1d5db",
+                color: isDarkMode ? "#cbd5e0" : "#000000",
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: isDarkMode ? "#a0aec0" : "#9ca3af",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: isDarkMode ? "#cbd5e0" : "#000000",
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
+              }),
+              option: (base, { isFocused }) => ({
+                ...base,
+                backgroundColor: isFocused
+                  ? isDarkMode
+                    ? "#4a5568"
+                    : "#e5f3ff"
+                  : isDarkMode
+                  ? "#2d3748"
+                  : "#ffffff",
+                color: isDarkMode ? "#cbd5e0" : "#000000",
+              }),
+            }}
           />
           <Select
             options={[
@@ -174,8 +206,39 @@ const UserManagement = () => {
               { value: "deleted", label: "Deleted User" },
             ]}
             onChange={handleStatusChange}
-            className="w-40"
+            className="w-full sm:w-40"
             placeholder="Filter by status"
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
+                borderColor: isDarkMode ? "#4a5568" : "#d1d5db",
+                color: isDarkMode ? "#cbd5e0" : "#000000",
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: isDarkMode ? "#a0aec0" : "#9ca3af",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: isDarkMode ? "#cbd5e0" : "#000000",
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
+              }),
+              option: (base, { isFocused }) => ({
+                ...base,
+                backgroundColor: isFocused
+                  ? isDarkMode
+                    ? "#4a5568"
+                    : "#e5f3ff"
+                  : isDarkMode
+                  ? "#2d3748"
+                  : "#ffffff",
+                color: isDarkMode ? "#cbd5e0" : "#000000",
+              }),
+            }}
           />
         </div>
       </div>
@@ -183,7 +246,9 @@ const UserManagement = () => {
       {isUsersLoading || isAnalyticsLoading ? (
         <p>Loading...</p>
       ) : (
-        <Table columns={columns} data={users} />
+        <div className="overflow-x-auto">
+          <Table columns={columns} data={users} />
+        </div>
       )}
 
       <Pagination
@@ -192,11 +257,16 @@ const UserManagement = () => {
         onPageChange={setCurrentPage}
       />
 
-      <Modal isOpen={isOpen} closeModal={toggleModal} title="Update User">
+      <Modal
+        isOpen={isOpen}
+        closeModal={toggleModal}
+        title="Update User"
+        isDarkMode={isDarkMode}
+      >
         <div className="p-4 bg-blue-100 rounded-md">
           <div className="flex justify-between items-center w-full">
             <div className="flex flex-col gap-1">
-              <span>Delete User</span>
+              <span className="dark:text-gray-600">Delete User</span>
               <small className="text-sm text-gray-500">
                 You can delete/undelete this user.
               </small>

@@ -4,14 +4,14 @@ import { getAllUtilityTransactions } from "../../api";
 import Table from "../../components/ui/table";
 import Chip from "../../components/ui/chip";
 import Pagination from "../../admin/components/pagination";
-import { useSelector } from "react-redux"; // Import useSelector for Redux
+import { useSelector } from "react-redux";
 
 const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [activeTab, setActiveTab] = useState("Electricity Bill");
   const [requestId, setRequestId] = useState("");
-  const isDarkMode = useSelector(state => state.theme.isDarkMode); // Get dark mode from Redux
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   const handleSearchChange = (e) => {
     setRequestId(e.target.value);
@@ -136,8 +136,8 @@ const Transactions = () => {
           />
         </div>
         <div className="overflow-x-auto">
-          <Table columns={columns} data={data?.transactions} />
-        </div>
+        <Table columns={columns} data={data?.transactions} />
+      </div>
         <Pagination
           currentPage={currentPage}
           totalPages={data ? data.totalPages : 0}
@@ -148,28 +148,28 @@ const Transactions = () => {
   };
 
   return (
-    <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'} p-4`}>
+    <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'} md:p-4`}>
       <h1 className="text-2xl font-bold mb-5">Transactions</h1>
-      <div className={`mb-3 flex rounded-lg border border-solid max-w-sm ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-[#F7F9FB]' } py-1 px-1`}>
-        {[
-          "Electricity Bill",
-          "TV Subscription",
-          "Data Services",
-          "Airtime Recharge",
-        ].map((tab) => (
-          <button
-            key={tab}
-            className={`py-1 px-3 font-medium transition-colors duration-300 ${
-              activeTab === tab
-                ? "text-blue-500 bg-white rounded-lg w-40"
-                : "text-gray-500 hover:text-gray-800 w-40"
-            }`}
-            onClick={() => handleTabClick(tab)}
-          >
-            {tab.split(" ")[0]}
-          </button>
-        ))}
-      </div>
+      <div className={`mb-3 flex flex-wrap rounded-lg border border-solid max-w-sm ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-[#F7F9FB]' } py-1 px-1`}>
+  {[
+    "Electricity Bill",
+    "TV Subscription",
+    "Data Services",
+    "Airtime Recharge",
+  ].map((tab) => (
+    <button
+      key={tab}
+      className={`flex-1 py-1 mx-1 font-medium transition-colors duration-300 ${
+        activeTab === tab
+          ? "text-blue-500 bg-white rounded-lg"
+          : "text-gray-500 hover:text-gray-800"
+      }`}
+      onClick={() => handleTabClick(tab)}
+    >
+      {tab.split(" ")[0]}
+    </button>
+  ))}
+</div>
       <>
         {isLoading && <div>Loading transactions...</div>}
         {error && (

@@ -8,16 +8,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createTicket, replyTicket, getTickets, getUser } from "../../../api";
 import { toast } from "react-toastify";
 import Modal from "../../../admin/components/modal";
+import Pagination from "../../../admin/components/pagination";
 import Table from "../../../components/ui/table";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { FaEye } from "react-icons/fa";
 
-const Ticket = () => {
+const Ticket = ({ isDarkMode }) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ticketsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const toggleCreateModal = () => setIsCreateModalOpen((prev) => !prev);
   const toggleReplyModal = () => setIsReplyModalOpen((prev) => !prev);
@@ -27,9 +31,9 @@ const Ticket = () => {
     queryFn: getUser,
   });
 
-  const { data: tickets = [], isLoading } = useQuery({
-    queryKey: ["tickets"],
-    queryFn: getTickets,
+  const { data: ticketsData = {}, isLoading } = useQuery({
+    queryKey: ["tickets", currentPage, ticketsPerPage, searchQuery],
+    queryFn: () => getTickets(currentPage, ticketsPerPage, searchQuery),
   });
 
   const createMutation = useMutation({
@@ -102,19 +106,47 @@ const Ticket = () => {
     },
   ];
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold mb-4">Tickets</h2>
+    <div className="p-4 border border-solid rounded-md border-gray-200 w-full">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6">
+        <h2 className="text-xl md:text-2xl font-bold">Tickets</h2>
         <Button onClick={toggleCreateModal} size="sm">
           Create
         </Button>
       </div>
+
+      <div className="my-4">
+        <Textfield
+          placeholder="Search by Ticket ID"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="w-full"
+        />
+      </div>
+
       <div className="my-5">
         {isLoading ? (
           <p>Loading tickets...</p>
         ) : (
-          <Table columns={columns} data={tickets} />
+          <>
+            <div className="overflow-x-auto">
+              <Table columns={columns} data={ticketsData.tickets || []} />
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(ticketsData.totalCount / ticketsPerPage)}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
 
@@ -122,6 +154,7 @@ const Ticket = () => {
         isOpen={isCreateModalOpen}
         closeModal={toggleCreateModal}
         title="Create Ticket"
+        isDarkMode={isDarkMode}
       >
         <Formik
           initialValues={{ title: "", description: "", email: user?.email }}
@@ -185,11 +218,11 @@ const Ticket = () => {
         </Formik>
       </Modal>
 
-      {/* Reply Modal */}
       <Modal
         isOpen={isReplyModalOpen}
         closeModal={toggleReplyModal}
         title="Ticket Replies"
+        isDarkMode={isDarkMode}
       >
         {selectedTicket && (
           <div>
@@ -218,7 +251,7 @@ const Ticket = () => {
                         }}
                       >
                         <strong className="font-semibold">
-                          {reply.role === "admin" ? "Admin:" : "User:"}
+                          {reply.role === "admin" ? "Admin:" : ""}
                         </strong>
                         <p className="text-gray-800 mt-1">{reply.content}</p>
                         <small className="text-gray-500 block mt-2">

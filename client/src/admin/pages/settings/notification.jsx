@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Select from "react-select";
 import Textfield from "../../../components/ui/forms/input";
 import Textarea from "../../../components/ui/forms/textarea";
 import Button from "../../../components/ui/forms/button";
+import Pagination from "../../components/pagination"; 
 import { useQuery } from "@tanstack/react-query";
 import {
   getAllUsers,
@@ -13,11 +13,6 @@ import {
   getAllUsersNotifications,
   deleteNotification as deleteNotificationApi,
 } from "../../api";
-import {
-  getNotifications,
-  addNotification,
-  removeNotification,
-} from "../../../actions/adminActions";
 import { toast } from "react-toastify";
 import Modal from "../../components/modal";
 import Table from "../../components/table";
@@ -25,14 +20,15 @@ import DeleteModal from "../../components/deleteModal";
 import { FaTrash } from "react-icons/fa";
 
 const Notification = () => {
-  const dispatch = useDispatch();
-  const notificationsData = useSelector((state) => state.admin.notifications);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [users, setUsers] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userIdToDelete, setUserIdToDelete] = useState(null);
   const [expandedNotificationId, setExpandedNotificationId] = useState(null);
+  const [notifications, setNotifications] = useState([]); // Added notifications state
 
   const openDeleteModal = (userId) => {
     setUserIdToDelete(userId);
@@ -46,38 +42,29 @@ const Notification = () => {
 
   const toggleModal = () => setIsOpen((prev) => !prev);
 
-  const {
-    data: userData,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data: userData, isLoading: isUserLoading, isError: isUserError, error: userError } = useQuery({
     queryKey: ["users", search],
     queryFn: () => getAllUsers(1, 10, search, "", "active"),
     keepPreviousData: true,
   });
 
-  const {
-    data: notifications,
-    isLoading: isNotificationLoading,
-    isError: isNotificationError,
-    error: notificationError,
-  } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: getAllUsersNotifications,
+  const { data: notificationsData = { notifications: [] }, isLoading: isNotificationLoading, isError: isNotificationError, error: notificationError } = useQuery({
+    queryKey: ["notifications", currentPage, search],
+    queryFn: () => getAllUsersNotifications({ page: currentPage, username: search }),
   });
+
+  useEffect(() => {
+    if(notificationsData) {
+      setTotalPages(notificationsData.totalPages);
+      setNotifications(notificationsData.notifications); 
+    }
+  }, [notificationsData])
 
   useEffect(() => {
     if (userData) {
       setUsers(userData.users);
     }
   }, [userData]);
-
-  useEffect(() => {
-    if (notifications) {
-      dispatch(getNotifications(notifications));
-    }
-  }, [notifications, dispatch]);
 
   const formik = useFormik({
     initialValues: {
@@ -96,15 +83,13 @@ const Notification = () => {
         type: values.type,
         message: values.message,
       };
-    
+
       try {
         const newNotification = await createNotificationApi(notificationData);
-        console.log("API Response:", newNotification);
-    
-        const notifications = newNotification.notifications || [newNotification.notification];
-    
-        notifications.forEach((notification) => {
-          const data = {
+        const createdNotification = newNotification.notifications || [newNotification.notification];
+
+        setNotifications((prev) => [
+          ...createdNotification.map((notification) => ({
             id: notification._id,
             user: {
               id: notification.userId,
@@ -114,14 +99,11 @@ const Notification = () => {
             type: notification.type,
             message: notification.message,
             createdAt: notification.createdAt,
-          };
-    
-          dispatch(addNotification(data));
-        });
-    
-        toast.success("Notification sent successfully!");
+          })),
+          ...prev,
+        ]);
 
-        formik.setFieldValue("user", null);
+        toast.success("Notification sent successfully!");
         formik.resetForm();
         toggleModal();
       } catch (err) {
@@ -134,7 +116,7 @@ const Notification = () => {
   const handleDeleteData = async (id) => {
     try {
       await deleteNotificationApi(id);
-      dispatch(removeNotification(id));
+      setNotifications((prev) => prev.filter((notification) => notification.id !== id));
       toast.success("Notification deleted successfully!");
     } catch (error) {
       console.error("Delete error:", error);
@@ -145,42 +127,34 @@ const Notification = () => {
   };
 
   const columns = [
-    { header: "Type", render: (notification) => notification.type },
     { header: "User", render: (notification) => notification?.user?.username },
     {
       header: "Message",
       render: (notification) => {
-        const isExpanded = expandedNotificationId === notification._id;
-        const trimmedMessage = notification.message.length > 50 
-          ? `${notification.message.substring(0, 50)}...` 
+        const isExpanded = expandedNotificationId === notification.id;
+        const trimmedMessage = notification.message.length > 50
+          ? `${notification.message.substring(0, 50)}...`
           : notification.message;
 
         return (
           <div>
-            <p>{isExpanded ? notification.message : trimmedMessage}</p>
-            {notification.message.length > 50 && (
-              <button
-                onClick={() => setExpandedNotificationId(isExpanded ? null : notification._id)}
-                className="text-blue-500 underline"
-              >
-                {isExpanded ? "View Less" : "View More"}
-              </button>
-            )}
+            <p className="text-sm">{isExpanded ? notification.message : trimmedMessage}</p>
           </div>
         );
       },
     },
     {
       header: "Date",
-      render: (notification) =>
-        <small>{new Date(notification.createdAt).toLocaleString()}</small>,
+      render: (notification) => (
+        <small>{new Date(notification.createdAt).toLocaleString()}</small>
+      ),
     },
     {
       header: "Actions",
       render: (notification) => (
         <div className="flex space-x-2">
           <button
-            className="border border-solid border-red-500 flex justify-center items-center rounded-full w-6 h-6 text-red-500 hover:text-red-700"
+            className="border border-solid border-red-500 flex justify-center items-center rounded-full w-8 h-8 text-red-500 hover:text-red-700"
             onClick={() => openDeleteModal(notification.id)}
           >
             <FaTrash size={15} />
@@ -191,30 +165,44 @@ const Notification = () => {
   ];
 
   return (
-    <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
+    <div className="p-6 border border-solid rounded-md border-gray-200 bg-white dark:bg-gray-800 w-full">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold mb-4">Notification</h2>
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Notification</h2>
         <Button className="bg-green-600 hover:bg-green-400" onClick={toggleModal} size="sm">
           Create
         </Button>
       </div>
       <div className="my-5">
+        <Textfield
+          label="Filter by Username"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1); 
+          }}
+        />
         {isNotificationLoading ? (
           <p>Loading notifications...</p>
         ) : isNotificationError ? (
           <p>Error: {notificationError.message}</p>
         ) : (
-          <Table columns={columns} data={notificationsData} />
+          <>
+          <div className="overflow-x-auto">
+            <Table columns={columns} data={notifications} />
+            
+          </div>
+          <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </>
         )}
       </div>
-      {isLoading && <p>Loading users...</p>}
-      {isError && <p>Error: {error.message}</p>}
+      {isUserLoading && <p>Loading users...</p>}
+      {isUserError && <p>Error: {userError.message}</p>}
 
-      <Modal
-        isOpen={isOpen}
-        closeModal={toggleModal}
-        title="Create Notification"
-      >
+      <Modal isOpen={isOpen} closeModal={toggleModal} title="Create Notification">
         <form onSubmit={formik.handleSubmit}>
           <Textfield
             label="Type"

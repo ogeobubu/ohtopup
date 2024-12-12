@@ -10,22 +10,29 @@ const generateTicketId = () => {
 
 const createTicket = async (req, res) => {
   try {
+    const userRole = await User.find({ _id: req.user.id });
     const userId = req.user.id;
     const { title, description, email } = req.body;
     const ticketId = generateTicketId();
 
-    const ticket = new Ticket({ ticketId, userId, title, description });
+    const ticket = new Ticket({
+      ticketId,
+      userId,
+      title,
+      description,
+    });
     await ticket.save();
 
-    const creatorNotification = new Notification({
-      userId,
-      title: "New Ticket Created",
-      message: `Your ticket with ID ${ticketId} has been created successfully.`,
-      link: `/tickets/${ticketId}`,
-    });
-    await creatorNotification.save();
+    if (userRole.role === "user") {
+      const creatorNotification = new Notification({
+        userId,
+        title: "New Ticket Created",
+        message: `Your ticket with ID ${ticketId} has been created successfully.`,
+        link: `/support`,
+      });
+      await creatorNotification.save();
+    }
 
-    // Find the user to check their notification preference
     const user = await User.findById(userId);
     if (user.emailNotificationsEnabled) {
       await sendWaitlistEmail(
@@ -41,11 +48,10 @@ const createTicket = async (req, res) => {
         userId: admin._id,
         title: "New Ticket Alert",
         message: `A new ticket has been created with ID ${ticketId} by user ${userId}.`,
-        link: `/tickets/${ticketId}`,
+        link: `/support`,
       });
       await adminNotification.save();
 
-      // Send email to admin if they have a valid email
       if (admin.email) {
         await sendWaitlistEmail(
           admin.email,
@@ -87,29 +93,54 @@ const replyTicket = async (req, res) => {
     });
     await notification.save();
 
-    // Check if the user wants to receive email notifications
     const user = await User.findById(ticket.userId);
+
     if (user.emailNotificationsEnabled) {
-      await sendWaitlistEmail(
-        email,
-        "New Reply on Your Ticket",
-        `You have a new reply on your ticket with ID ${ticket.ticketId}.`
-      );
+      if (role === "admin" && email) {
+        await sendWaitlistEmail(
+          email,
+          "New Reply on Your Ticket",
+          `You have a new reply on your ticket with ID ${ticket.ticketId}.`
+        );
+      } else if (role === "user") {
+        console.log(
+          "Email not provided for user; skipping email notification."
+        );
+      }
+    } else {
+      console.log("Email notifications are disabled for this user.");
     }
 
     res.status(201).json(ticket);
   } catch (error) {
+    console.error("Error posting reply:", error);
     res.status(500).json({ message: "Error posting reply" });
   }
 };
 
 const getTickets = async (req, res) => {
+  const { page = 1, limit = 10, searchQuery = "" } = req.query;
+
   try {
-    const tickets = await Ticket.find()
+    const query = searchQuery
+      ? {
+          $or: [
+            { ticketId: { $regex: searchQuery, $options: "i" } },
+            { title: { $regex: searchQuery, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const tickets = await Ticket.find(query)
       .sort({ createdAt: -1 })
       .populate("userId")
-      .populate("replies.userId");
-    res.json(tickets);
+      .populate("replies.userId")
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const totalCount = await Ticket.countDocuments(query);
+
+    res.json({ tickets, totalCount });
   } catch (error) {
     res.status(500).json({ message: "Error fetching tickets" });
   }
@@ -117,16 +148,39 @@ const getTickets = async (req, res) => {
 
 const getUserTickets = async (req, res) => {
   const userId = req.user.id;
+  const { page = 1, limit = 10, ticketId } = req.query;
+
   try {
-    const tickets = await Ticket.find({ userId }).sort({ createdAt: -1 });
-    res.json(tickets);
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    const query = { userId };
+    if (ticketId) {
+      query.ticketId = ticketId;
+    }
+
+    const tickets = await Ticket.find(query)
+      .sort({ createdAt: -1 })
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
+
+    const totalTickets = await Ticket.countDocuments(query);
+
+    res.json({
+      tickets,
+      totalCount: totalTickets,
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalTickets / limitNumber),
+    });
   } catch (error) {
+    console.error("Error fetching tickets:", error);
     res.status(500).json({ message: "Error fetching your tickets" });
   }
 };
 
 const updateTicket = async (req, res) => {
-  const { status } = req.body; // Removed email from here; we will fetch it from the user
+  const userRole = await User.find({ _id: req.user.id });
+  const { status } = req.body;
   try {
     const ticket = await Ticket.findByIdAndUpdate(
       req.params.id,
@@ -138,22 +192,42 @@ const updateTicket = async (req, res) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    const notification = new Notification({
-      userId: ticket.userId,
-      title: "Ticket Status Updated",
-      message: `Your ticket with ID ${ticket.ticketId} has been updated to ${status}.`,
-      link: `/support`,
-    });
-    await notification.save();
+    if (userRole.role === "user") {
+      const userNotification = new Notification({
+        userId: ticket.userId,
+        title: "Ticket Status Updated",
+        message: `Your ticket with ID ${ticket.ticketId} has been updated to ${status}.`,
+        link: `/support`,
+      });
+      await userNotification.save();
 
-    // Check if the user wants to receive email notifications
-    const user = await User.findById(ticket.userId);
-    if (user.emailNotificationsEnabled) {
-      await sendWaitlistEmail(
-        user.email, // Use the user's email
-        "Ticket Status Updated",
-        `Your ticket with ID ${ticket.ticketId} has been updated to ${status}.`
-      );
+      const user = await User.findById(ticket.userId);
+      if (user.emailNotificationsEnabled) {
+        await sendWaitlistEmail(
+          user.email,
+          "Ticket Status Updated",
+          `Your ticket with ID ${ticket.ticketId} has been updated to ${status}.`
+        );
+      }
+    }
+
+    const admins = await User.find({ role: "admin" });
+    for (const admin of admins) {
+      const adminNotification = new Notification({
+        userId: admin._id,
+        title: "Ticket Status Updated",
+        message: `Ticket ID ${ticket.ticketId} has been updated to ${status} by user ${ticket.userId}.`,
+        link: `/support`,
+      });
+      await adminNotification.save();
+
+      if (admin.email) {
+        await sendWaitlistEmail(
+          admin.email,
+          "Ticket Status Updated",
+          `Ticket ID ${ticket.ticketId} has been updated to ${status} by user ${ticket.userId}.`
+        );
+      }
     }
 
     res.json(ticket);
