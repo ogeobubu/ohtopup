@@ -49,7 +49,9 @@ const DataPricing = () => {
         href=""
       />
       <div className="container mx-auto py-20 px-4">
-        <h1 className="text-4xl font-bold text-center mb-10">Pricing Plans</h1>
+        <h1 className="text-4xl font-bold text-center mb-10 text-gray-900 dark:text-white">
+          Pricing Plans
+        </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {pricingPlans.map((plan) => {
             const serviceName = plan.variationCode.split("-")[0];
@@ -57,18 +59,20 @@ const DataPricing = () => {
             return (
               <div
                 key={plan.id}
-                className="bg-white shadow-md rounded-lg p-6 text-center"
+                className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 text-center"
               >
                 <div className="rounded-full border border-solid border-gray-500 w-12 h-12 flex justify-center items-center mb-4 p-1 mx-auto">
                   <img
                     src={imageMap[serviceName]}
                     alt={serviceName}
-                    className="object-cover mx-auto "
+                    className="object-cover mx-auto"
                   />
                 </div>
-                <h2 className="text-2xl font-semibold mb-2">{plan.name}</h2>
+                <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">
+                  {plan.name}
+                </h2>
 
-                <p className="text-xl font-bold mb-4">
+                <p className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-300">
                   {formatPrice(plan.dataLimit)}
                 </p>
                 <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">
