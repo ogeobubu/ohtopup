@@ -69,11 +69,11 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className={`bg-white dark:bg-gray-800 py-2 flex justify-between items-center md:mt-0 mt-5`}>
+    <nav className={`bg-white dark:bg-gray-800 py-2 flex flex-col md:flex-row justify-between items-center md:mt-0 mt-5`}>
       <div className="text-gray-800 dark:text-white">
         <span className="text-xl font-bold">Hello</span>, {user?.username} 👋
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 mt-2 md:mt-0">
         <button
           className="bg-gray-100 dark:bg-gray-700 p-2 rounded-full"
           onClick={() => dispatch(toggleDarkMode())}
@@ -138,28 +138,28 @@ const Header = () => {
           </button>
 
           {isDropdownOpen && (
-  <div className="absolute z-10 right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-md rounded-md p-2">
-    <ul>
-      <li className="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
-        <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
-        <div className="flex flex-col">
-          <span className="text-[18px] dark:text-white">Profile</span>
-          <small className="text-[14px] text-gray-400 dark:text-gray-300">View my profile</small>
-        </div>
-      </li>
-      <li 
-        className="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center cursor-pointer"
-        onClick={handleLogout}
-      >
-        <FaSignOutAlt className="text-blue-500 w-5 h-5 mr-2" />
-        <div className="flex flex-col">
-          <span className="text-[18px] dark:text-white">Logout</span>
-          <small className="text-[14px] text-gray-400 dark:text-gray-300">Logout of your account</small>
-        </div>
-      </li>
-    </ul>
-  </div>
-)}
+            <div className="absolute z-10 right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-md rounded-md p-2">
+              <ul>
+                <li className="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                  <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
+                  <div className="flex flex-col">
+                    <span className="text-[18px] dark:text-white">Profile</span>
+                    <small className="text-[14px] text-gray-400 dark:text-gray-300">View my profile</small>
+                  </div>
+                </li>
+                <li 
+                  className="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  <FaSignOutAlt className="text-blue-500 w-5 h-5 mr-2" />
+                  <div className="flex flex-col">
+                    <span className="text-[18px] dark:text-white">Logout</span>
+                    <small className="text-[14px] text-gray-400 dark:text-gray-300">Logout of your account</small>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </nav>
