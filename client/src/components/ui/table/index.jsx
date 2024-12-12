@@ -6,8 +6,8 @@ const Table = ({ columns, data }) => {
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   return (
-    <div className={`overflow-x-auto ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-      <table className={`min-w-full table-auto ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
+    <div className={`md:w-full w-64 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <table className={`table-auto w-full ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
         <thead>
           <tr className={`${isDarkMode ? 'bg-gray-700' : 'bg-[#F7F9FB]'}`}>
             {columns?.map((col, index) => (

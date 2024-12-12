@@ -288,10 +288,21 @@ const createNotification = async (req, res) => {
 };
 
 const getAllNotifications = async (req, res) => {
+  const { page = 1, limit = 5, username } = req.query;
+
   try {
-    const notifications = await Notification.find()
+    const query = {};
+    if (username) {
+      query["userId.username"] = { $regex: username, $options: "i" };
+    }
+
+    const notifications = await Notification.find(query)
       .populate("userId", "username email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Notification.countDocuments(query);
 
     const formattedNotifications = notifications.map((notification) => ({
       id: notification._id,
@@ -300,12 +311,16 @@ const getAllNotifications = async (req, res) => {
         username: notification.userId.username,
         email: notification.userId.email,
       },
-      type: notification.type,
       message: notification.message,
       createdAt: notification.createdAt,
     }));
 
-    res.status(200).json(formattedNotifications);
+    res.status(200).json({
+      notifications: formattedNotifications,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error });

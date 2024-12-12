@@ -19,9 +19,9 @@ const Settings = () => {
   return (
     <>
       <h1 className="text-2xl font-bold mb-5">Settings</h1>
-      <div className="flex">
+      <div className="flex flex-col md:flex-row">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="flex-1 px-8">
+        <div className="flex-1 mt-5 md:mt-0 md:px-8">
           {activeTab === "Profile" && <Profile />}
           {activeTab === "General" && <General />}
           {activeTab === "Security" && <Security />}

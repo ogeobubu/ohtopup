@@ -33,7 +33,7 @@ const Sidebar = () => {
     <div className="absolute">
       <div className="md:hidden flex items-center justify-between p-4 absolute z-1">
         <button onClick={() => setIsOpen(!isOpen)} className="text-gray-800">
-          <FaBars size={24} />
+          <FaBars className="dark:text-white" size={24} />
         </button>
       </div>
 
@@ -56,7 +56,7 @@ const Sidebar = () => {
             onClick={() => setIsOpen(false)}
             className="md:hidden text-gray-800"
           >
-            <FaTimes size={24} />
+            <FaTimes className="dark:text-white" size={24} />
           </button>
         </div>
 

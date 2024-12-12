@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { FaBell, FaUserCircle, FaSignOutAlt, FaMoon, FaSun, FaCircle } from "react-icons/fa";
 import { clearUserData } from "../../actions/userActions";
-import { getNotifications, readNotification } from "../../api"; 
+import { getNotifications, readNotification } from "../../api";
 import { toggleDarkMode } from "../../actions/themeActions";
 
 const Header = () => {
@@ -77,6 +77,7 @@ const Header = () => {
         <button
           className="bg-gray-100 dark:bg-gray-700 p-2 rounded-full"
           onClick={() => dispatch(toggleDarkMode())}
+          aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           {isDarkMode ? (
             <FaSun className="w-4 h-4 text-yellow-500" />
@@ -88,6 +89,7 @@ const Header = () => {
           <button
             className="bg-gray-100 p-2 rounded-full"
             onClick={toggleNotification}
+            aria-label="Notifications"
           >
             <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-300 cursor-pointer" />
             {unreadCount > 0 && (
@@ -130,33 +132,34 @@ const Header = () => {
           <button
             className="bg-gray-100 p-2 rounded-full text-gray-700 hover:bg-gray-300"
             onClick={toggleDropdown}
+            aria-label="User Menu"
           >
             <FaUserCircle className="text-gray-500 w-4 h-4" />
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded-md p-2">
-              <ul>
-                <li className="py-2 px-4 hover:bg-gray-100 flex items-center">
-                  <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
-                  <div className="flex flex-col">
-                    <span className="text-[18px]">Profile</span>
-                    <small className="text-[14px] text-gray-400">View my profile</small>
-                  </div>
-                </li>
-                <li 
-                  className="py-2 px-4 hover:bg-gray-100 flex items-center cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  <FaSignOutAlt className="text-blue-500 w-5 h-5 mr-2" />
-                  <div className="flex flex-col">
-                    <span className="text-[18px]">Logout</span>
-                    <small className="text-[14px] text-gray-400">Logout of your account</small>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          )}
+  <div className="absolute z-10 right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-md rounded-md p-2">
+    <ul>
+      <li className="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+        <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
+        <div className="flex flex-col">
+          <span className="text-[18px] dark:text-white">Profile</span>
+          <small className="text-[14px] text-gray-400 dark:text-gray-300">View my profile</small>
+        </div>
+      </li>
+      <li 
+        className="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center cursor-pointer"
+        onClick={handleLogout}
+      >
+        <FaSignOutAlt className="text-blue-500 w-5 h-5 mr-2" />
+        <div className="flex flex-col">
+          <span className="text-[18px] dark:text-white">Logout</span>
+          <small className="text-[14px] text-gray-400 dark:text-gray-300">Logout of your account</small>
+        </div>
+      </li>
+    </ul>
+  </div>
+)}
         </div>
       </div>
     </nav>

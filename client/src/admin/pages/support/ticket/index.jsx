@@ -5,22 +5,27 @@ import { replyTicket, getTickets, updateTicket } from "../../../api";
 import { toast } from "react-toastify";
 import Modal from "../../../components/modal";
 import Table from "../../../components/table";
+import Pagination from "../../../components/pagination";
 import Textarea from "../../../../components/ui/forms/textarea";
+import Textfield from "../../../../components/ui/forms/input";
 import Button from "../../../../components/ui/forms/button";
 import { Formik, Form, Field } from "formik";
 import { FaEye, FaTrash } from "react-icons/fa";
 
-const Ticket = () => {
+const Ticket = ({ isDarkMode }) => {
   const dispatch = useDispatch();
-  const queryClient = useQueryClient(); // Initialize query client
+  const queryClient = useQueryClient(); 
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ticketsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const toggleReplyModal = () => setIsReplyModalOpen((prev) => !prev);
 
-  const { data: tickets = [], isLoading } = useQuery({
-    queryKey: ["tickets"],
-    queryFn: getTickets,
+  const { data: ticketsData = { tickets: [], totalCount: 0 }, isLoading } = useQuery({
+    queryKey: ["tickets", currentPage, ticketsPerPage, searchQuery],
+    queryFn: () => getTickets(currentPage, ticketsPerPage, searchQuery),
   });
 
   const replyMutation = useMutation({
@@ -47,7 +52,7 @@ const Ticket = () => {
   });
 
   const columns = [
-    { header: "ID", render: (ticket) => <span className="text-sm">{ticket.ticketId}</span>},
+    { header: "ID", render: (ticket) => <span className="text-sm">{ticket.ticketId}</span> },
     { header: "Title", render: (ticket) => <span className="text-sm">{ticket.title}</span> },
     {
       header: "Date",
@@ -97,16 +102,44 @@ const Ticket = () => {
     },
   ];
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold mb-4">Tickets</h2>
+    <div className="p-4 border border-solid rounded-md border-gray-200 w-full">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Tickets</h2>
       </div>
+      
+      <div className="my-4">
+        <Textfield
+          placeholder="Search by Ticket ID"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="w-full"
+        />
+      </div>
+
       <div className="my-5">
         {isLoading ? (
           <p>Loading tickets...</p>
         ) : (
-          <Table columns={columns} data={tickets} />
+          <>
+            <div className="overflow-x-auto">
+              <Table columns={columns} data={ticketsData.tickets || []} />
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(ticketsData.totalCount / ticketsPerPage)}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
 
@@ -114,11 +147,12 @@ const Ticket = () => {
         isOpen={isReplyModalOpen}
         closeModal={toggleReplyModal}
         title="Ticket Replies"
+        isDarkMode={isDarkMode}
       >
         {selectedTicket && (
           <div>
             <h3 className="text-xl font-bold mb-2">{selectedTicket.title}</h3>
-            <p className="text-gray-700 mb-4">{selectedTicket.description}</p>
+            <p className="dark:text-white text-gray-700 mb-4">{selectedTicket.description}</p>
             <div className="border-t border-gray-300 pt-4">
               <h4 className="text-lg font-semibold mb-2">Replies</h4>
               <div className="flex flex-col">
@@ -141,7 +175,7 @@ const Ticket = () => {
                           wordBreak: "break-word",
                         }}
                       >
-                        <strong>{reply.role === "admin" ? "Admin:" : "User:"}</strong>
+                        <strong>{reply.role === "admin" ? "" : "User:"}</strong>
                         <p className="text-gray-800">{reply.content}</p>
                         <small className="text-gray-500">
                           {new Date(reply.createdAt).toLocaleString()}
@@ -150,7 +184,7 @@ const Ticket = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">No replies yet.</p>
+                  <p className="dark:text-white text-gray-500">No replies yet.</p>
                 )}
               </div>
             </div>

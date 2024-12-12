@@ -184,7 +184,9 @@ const Services = () => {
         ) : isServicesError ? (
           <p>Error: {serviceError.message}</p>
         ) : (
-          <Table columns={columns} data={serviceData} />
+          <div className="overflow-x-auto">
+            <Table columns={columns} data={serviceData} />
+          </div>
         )}
       </div>
 

@@ -472,9 +472,11 @@ export const createTicket = async (data) => {
   }
 };
 
-export const getTickets = async () => {
+export const getTickets = async (page = 1, limit = 10, searchQuery = '') => {
   try {
-    const response = await instance.get(`/tickets`);
+    const response = await instance.get(`/tickets`, {
+      params: { page, limit, ticketId: searchQuery }, 
+    });
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching data");

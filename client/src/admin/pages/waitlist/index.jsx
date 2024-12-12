@@ -12,6 +12,7 @@ import Textfield from "../../../components/ui/forms/input";
 import Textarea from "../../../components/ui/forms/textarea";
 import Button from "../../../components/ui/forms/button";
 import noData from "../../../assets/no-data.svg";
+import { useSelector } from "react-redux";
 
 const Waitlist = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,6 +23,7 @@ const Waitlist = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [sendToAll, setSendToAll] = useState(false);
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
   const toggleModal = () => setIsOpen((prev) => !prev);
 
@@ -100,29 +102,29 @@ const Waitlist = () => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-5 text-gray-800">
+      <h2 className="text-2xl font-bold mb-5 text-gray-800 dark:text-white">
         Waitlist Management
       </h2>
-      <div className="flex flex-col md:flex-row">
-        <div className="flex-1 min-h-[250px] flex flex-col justify-between bg-white shadow-md rounded-lg p-4">
-        <div className="flex justify-between items-center mb-4">
-                <div className="flex-grow"></div>
-                <div className="flex items-center">
-                  <input
-                    type="search"
-                    placeholder="Search by email"
-                    className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <button
-                    className="ml-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                    onClick={handleClearSearch}
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
+      <div className="flex flex-col md:flex-row bg-white dark:bg-gray-800">
+        <div className="flex-1 min-h-[250px] flex flex-col justify-between bg-white dark:bg-gray-700 shadow-md rounded-lg p-4">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex-grow"></div>
+            <div className="flex items-center">
+              <input
+                type="search"
+                placeholder="Search by email"
+                className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button
+                className="ml-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                onClick={handleClearSearch}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
           {isLoading ? (
             <p className="text-gray-500 text-center">Loading waitlists...</p>
           ) : isError ? (
@@ -131,9 +133,7 @@ const Waitlist = () => {
             </p>
           ) : waitlists?.emails?.length > 0 ? (
             <div className="overflow-x-auto">
-
               <Table columns={columns} data={waitlists.emails} />
-
               <Pagination
                 currentPage={currentPage}
                 totalPages={waitlists.totalPages}
@@ -141,9 +141,9 @@ const Waitlist = () => {
               />
             </div>
           ) : (
-            <div className="border border-gray-300 rounded-md p-6 flex flex-col items-center justify-center h-full bg-gray-50">
+            <div className="border border-gray-300 rounded-md p-6 flex flex-col items-center justify-center h-full bg-gray-50 dark:bg-gray-600">
               <img className="w-24 h-24 mb-4" src={noData} alt="No data" />
-              <p className="mt-2 text-gray-500 text-center">
+              <p className="mt-2 text-gray-500 dark:text-gray-300 text-center">
                 No referral history
               </p>
             </div>
@@ -151,7 +151,12 @@ const Waitlist = () => {
         </div>
       </div>
 
-      <Modal isOpen={isOpen} closeModal={toggleModal} title="Send Email">
+      <Modal
+        isOpen={isOpen}
+        closeModal={toggleModal}
+        title="Send Email"
+        isDarkMode={isDarkMode}
+      >
         <Formik
           initialValues={{ text: "", description: "" }}
           validationSchema={Yup.object({
@@ -162,26 +167,32 @@ const Waitlist = () => {
         >
           {({ errors, touched }) => (
             <Form className="flex flex-col">
-              <label htmlFor="text" className="mb-1 text-gray-700">
+              <label
+                htmlFor="text"
+                className="mb-1 text-gray-700 dark:text-gray-300"
+              >
                 Enter Subject:
               </label>
               <Field
                 name="text"
                 as={Textfield}
                 placeholder="Enter subject"
-                className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               />
               {errors.text && touched.text ? (
                 <div className="text-red-600 text-sm">{errors.text}</div>
               ) : null}
-              <label htmlFor="description" className="mb-1 text-gray-700">
+              <label
+                htmlFor="description"
+                className="mb-1 text-gray-700 dark:text-gray-300"
+              >
                 Enter Description:
               </label>
               <Field
                 name="description"
                 as={Textarea}
                 placeholder="Enter description"
-                className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               />
               {errors.description && touched.description ? (
                 <div className="text-red-600 text-sm">{errors.description}</div>
@@ -197,7 +208,7 @@ const Waitlist = () => {
                 />
                 <label
                   htmlFor="sendToAll"
-                  className="ml-2 text-gray-800 text-sm cursor-pointer hover:text-blue-600 transition duration-200 ease-in-out"
+                  className="ml-2 text-gray-800 dark:text-gray-300 text-sm cursor-pointer hover:text-blue-600 transition duration-200 ease-in-out"
                 >
                   Send to all users
                 </label>

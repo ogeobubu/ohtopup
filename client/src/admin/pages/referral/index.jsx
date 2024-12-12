@@ -19,7 +19,7 @@ const Referral = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [isOpen, setIsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(false); // Loading state for adding points
+  const [loading, setLoading] = useState(false);
 
   const toggleModal = () => setIsOpen((prev) => !prev);
 
@@ -87,7 +87,7 @@ const Referral = () => {
   ];
 
   const handleAddPoints = async (values, { resetForm }) => {
-    setLoading(true); // Set loading to true on submit
+    setLoading(true);
     try {
       const amount = Number(values.amount);
       const data = {
@@ -102,15 +102,15 @@ const Referral = () => {
     } catch (error) {
       toast.error("Error adding points: " + error.message);
     } finally {
-      setLoading(false); // Set loading to false after finish
+      setLoading(false);
     }
   };
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-5 text-gray-800">Referral Management</h2>
+      <h2 className="text-2xl font-bold mb-5 dark:text-white text-gray-800">Referral Management</h2>
       <div className="flex flex-col md:flex-row">
-        <div className="flex-1 min-h-[250px] flex flex-col justify-between bg-white shadow-md rounded-lg p-4">
+        <div className="flex-1 min-h-[250px] flex flex-col justify-between dark:bg-gray-800 bg-white shadow-md rounded-lg p-4">
           {isLoading ? (
             <p className="text-gray-500">Loading referrals...</p>
           ) : isError ? (
@@ -123,7 +123,7 @@ const Referral = () => {
                   <input
                     type="search"
                     placeholder="Search by username or email"
-                    className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="border border-gray-300 rounded-md p-2 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />

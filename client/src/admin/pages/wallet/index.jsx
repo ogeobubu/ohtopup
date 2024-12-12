@@ -153,9 +153,9 @@ const AdminWalletManagement = () => {
         />
       </div>
 
-      <div className="mb-3 flex rounded-lg border border-solid max-w-xs border-gray-300 bg-[#F7F9FB] py-1 px-1">
+      <div className="mb-3 flex md:flex-row flex-col rounded-lg border border-solid max-w-xs border-gray-300 bg-[#F7F9FB] py-1 px-1">
         <button
-          className={`py-1 px-1 font-medium transition-colors duration-300 ${
+          className={`md:w-40 w-full py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "Wallets"
               ? "text-blue-500 bg-white rounded-lg w-40"
               : "text-gray-500 hover:text-gray-800 w-40"
@@ -165,7 +165,7 @@ const AdminWalletManagement = () => {
           Wallets
         </button>
         <button
-          className={`py-1 px-1 font-medium transition-colors duration-300 ${
+          className={`md:w-40 w-full py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "Transactions"
               ? "text-blue-500 bg-white rounded-lg w-40"
               : "text-gray-500 hover:text-gray-800 w-40"

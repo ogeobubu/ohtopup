@@ -7,9 +7,9 @@ import { redeemPoints } from "../../../api";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-const Redeem = ({ walletData, user, closeModal }) => {
+const Redeem = ({ walletData, user, closeModal, isDarkMode }) => {
   const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
 
   const maxAmount = user?.points;
 
@@ -24,7 +24,7 @@ const Redeem = ({ walletData, user, closeModal }) => {
         .max(maxAmount, `Amount cannot exceed ${maxAmount} points`),
     }),
     onSubmit: async (values) => {
-      setLoading(true); // Set loading to true on submit
+      setLoading(true);
       try {
         await redeemPoints({
           pointsToRedeem: parseFloat(values.amount),
@@ -38,7 +38,7 @@ const Redeem = ({ walletData, user, closeModal }) => {
       } catch (error) {
         toast.error("Error redeeming points: " + error.message);
       } finally {
-        setLoading(false); // Set loading to false after finish
+        setLoading(false);
       }
     },
   });
@@ -49,7 +49,7 @@ const Redeem = ({ walletData, user, closeModal }) => {
         <div className="flex flex-col gap-1">
           <span className="text-gray-500 text-sm">Points Balance</span>
           <div className="flex justify-center items-center">
-            <span className="text-xl font-bold">{user?.points || "0"}</span>
+            <span className="text-xl font-bold dark:text-gray-800">{user?.points || "0"}</span>
           </div>
           <span className="text-sm text-gray-500">
             10 Points = <strong className="font-bold">1 Naira</strong>

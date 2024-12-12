@@ -42,11 +42,11 @@ const Rank = () => {
 
   return (
     <>
-      <div className={`mb-3 flex rounded-lg border border-solid max-w-xs ${isDarkMode ? 'border-gray-600' : 'border-gray-300'} bg-blue-500 py-1 px-1`}>
+      <div className={`mb-3 flex md:flex-row flex-col rounded-lg border border-solid max-w-xs ${isDarkMode ? 'border-gray-600' : 'border-gray-300'} bg-blue-500 py-1 px-1`}>
         {["Ranking", "Position"].map((tab) => (
           <button
             key={tab}
-            className={`py-1 px-3 font-medium transition-colors duration-300 ${
+            className={`py-1 px-3 md:w-40 w-full font-medium transition-colors duration-300 ${
               activeTab === tab
                 ? "text-white bg-green-600 rounded-lg w-40"
                 : "text-gray-200 hover:text-white hover:bg-green-500 w-40"

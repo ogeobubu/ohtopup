@@ -127,12 +127,17 @@ export const createNotification = async (userData) => {
   }
 };
 
-export const getAllUsersNotifications = async (userData) => {
+export const getAllUsersNotifications = async ({ page, username }) => {
   try {
-    const response = await instance.get(`/notifications`, userData);
+    const response = await instance.get(`/notifications`, {
+      params: {
+        page,
+        username,
+      },
+    });
     return response?.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error logging user");
+    throw new Error(error.response?.data?.message || "Error fetching notifications");
   }
 };
 
@@ -385,9 +390,11 @@ export const updateDetails = async () => {
   }
 };
 
-export const getTickets = async () => {
+export const getTickets = async (page = 1, limit = 10, searchQuery = '') => {
   try {
-    const response = await instance.get(`/tickets`);
+    const response = await instance.get(`/tickets`, {
+      params: { page, limit, searchQuery },
+    });
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching data");
@@ -414,3 +421,21 @@ export const updateTicket = async (id, data) => {
     throw new Error(error.response?.data?.message || "Error updating data");
   }
 };
+
+export const getNotifications = async () => {
+  try {
+    const response = await instance.get(`/notifications`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const readNotification = async (id) => {
+  try {
+    const response = await instance.patch(`/notification/${id}`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+}

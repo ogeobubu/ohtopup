@@ -25,12 +25,12 @@ import Withdraw from "./withdraw";
 import Gift from "./gift";
 import Pagination from "../../admin/components/pagination";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux"; // Import useSelector for Redux
+import { useSelector } from "react-redux";
 
 const Wallet = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const isDarkMode = useSelector(state => state.theme.isDarkMode); // Get dark mode from Redux
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
   const [selectedCard, setSelectedCard] = useState("Naira Wallet");
   const [activeTab, setActiveTab] = useState("withdrawal");
@@ -177,7 +177,7 @@ const Wallet = () => {
   };
 
   const handleDeposit = async () => {
-    setLoading(true); 
+    setLoading(true);
     try {
       const response = await depositWallet({
         userId: user?._id,
@@ -197,7 +197,7 @@ const Wallet = () => {
       console.log(error);
       toast.error("Error during deposit: " + error.message);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -286,7 +286,13 @@ const Wallet = () => {
 
   return (
     <>
-      <h1 className={`text-2xl font-bold mb-5 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Wallet</h1>
+      <h1
+        className={`text-2xl font-bold mb-5 ${
+          isDarkMode ? "text-white" : "text-gray-800"
+        }`}
+      >
+        Wallet
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card
           title="Naira Wallet"
@@ -312,7 +318,11 @@ const Wallet = () => {
               openModal={openModal}
             />
           ) : (
-            <div className={`mt-5 p-4 border max-w-3xl rounded-sm ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+            <div
+              className={`mt-5 p-4 border max-w-3xl rounded-sm ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-800"
+              }`}
+            >
               <div className="flex flex-col">
                 <div className="rounded-lg w-full max-w-xs">
                   <h1 className="text-sm text-gray-500 font-bold mb-4">
@@ -365,16 +375,24 @@ const Wallet = () => {
                           <FaBuilding size={12} />
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600">Bank Account</span>
+                      <span className="text-sm text-gray-600">
+                        Bank Account
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="mt-5">
-                <div className={`flex rounded-lg border border-solid max-w-xs ${isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-[#F7F9FB]' } py-1 px-1`}>
+                <div
+                  className={`flex md:flex-row flex-col rounded-lg border border-solid max-w-xs ${
+                    isDarkMode
+                      ? "border-gray-600 bg-gray-700"
+                      : "border-gray-300 bg-[#F7F9FB]"
+                  } py-1 px-1`}
+                >
                   <button
-                    className={`py-1 px-1 font-medium transition-colors duration-300 ${
+                    className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
                       activeTab === "withdrawal"
                         ? "text-blue-500 bg-white rounded-lg w-40"
                         : "text-gray-500 hover:text-gray-800 w-40"
@@ -384,7 +402,7 @@ const Wallet = () => {
                     Withdrawal
                   </button>
                   <button
-                    className={`py-1 px-1 font-medium transition-colors duration-300 ${
+                    className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
                       activeTab === "deposit"
                         ? "text-blue-500 bg-white rounded-lg w-40"
                         : "text-gray-500 hover:text-gray-800 w-40"
@@ -394,6 +412,7 @@ const Wallet = () => {
                     Topup
                   </button>
                 </div>
+
                 <div className="mt-6">
                   {transactionsLoading ? (
                     <p>Loading transactions...</p>
@@ -409,19 +428,27 @@ const Wallet = () => {
                           placeholder="Search by Reference..."
                           value={reference}
                           onChange={handleSearchChange}
-                          className={`border rounded p-2 mb-3 ${isDarkMode ? 'border-gray-600 bg-gray-800 text-white' : 'border-gray-300'}`}
+                          className={`border rounded p-2 mb-3 ${
+                            isDarkMode
+                              ? "border-gray-600 bg-gray-800 text-white"
+                              : "border-gray-300"
+                          }`}
                         />
                       </div>
                       {activeTab === "withdrawal" ? (
-                        <Table
-                          columns={columns}
-                          data={transactionsData?.transactions}
-                        />
+                        <div className="overflow-x-auto">
+                          <Table
+                            columns={columns}
+                            data={transactionsData?.transactions}
+                          />
+                        </div>
                       ) : (
-                        <Table
-                          columns={topupColumns}
-                          data={transactionsData?.transactions}
-                        />
+                        <div className="overflow-x-auto">
+                          <Table
+                            columns={topupColumns}
+                            data={transactionsData?.transactions}
+                          />
+                        </div>
                       )}
                       <Pagination
                         currentPage={currentPage}
@@ -492,6 +519,7 @@ const Wallet = () => {
             isOpen={isDepositModalOpen}
             closeModal={closeDepositModal}
             title="Add Funds"
+            isDarkMode={isDarkMode}
           >
             <TextField
               name="amount"
@@ -499,7 +527,9 @@ const Wallet = () => {
               placeholder="Enter amount"
               value={amount}
               onChange={handleAmountChange}
-              helperText={`Total Amount (including fees): ${totalAmount.toFixed(2)}`}
+              helperText={`Total Amount (including fees): ${totalAmount.toFixed(
+                2
+              )}`}
             />
             <div className="my-2">
               <Button onClick={handleDeposit} disabled={loading}>
@@ -526,7 +556,7 @@ const Wallet = () => {
       )}
       {selectedCard === "Gift Points" && (
         <>
-          <Gift user={user} />
+          <Gift user={user} isDarkMode={isDarkMode} />
         </>
       )}
     </>
