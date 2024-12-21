@@ -23,8 +23,8 @@ const Contact = () => {
             <FaEnvelope size={16} md:size={20} className="text-blue-500" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm md:text-base">Email Address</span>
-            <span className="text-gray-600 text-xs md:text-sm">ogeobubu@gmail.com</span>
+            <span className="text-sm md:text-base dark:text-white">Email Address</span>
+            <span className="text-gray-600 text-xs md:text-sm dark:text-white">ogeobubu@gmail.com</span>
           </div>
         </div>
         <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
@@ -43,8 +43,8 @@ const Contact = () => {
             <FaFacebook size={20} className="text-blue-600" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm md:text-base">Social Media</span>
-            <span className="text-gray-600 text-xs md:text-sm">Facebook</span>
+            <span className="text-sm md:text-base dark:text-white">Social Media</span>
+            <span className="text-gray-600 text-xs md:text-sm dark:text-white">Facebook</span>
           </div>
         </div>
         <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2">
@@ -63,8 +63,8 @@ const Contact = () => {
             <FaTwitter size={20} className="text-blue-400" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm md:text-base">Social Media</span>
-            <span className="text-gray-600 text-xs md:text-sm">X (formerly Twitter)</span>
+            <span className="text-sm md:text-base dark:text-white">Social Media</span>
+            <span className="text-gray-600 text-xs md:text-sm dark:text-white">X (formerly Twitter)</span>
           </div>
         </div>
         <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2">

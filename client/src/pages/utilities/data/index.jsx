@@ -237,7 +237,6 @@ const Data = ({ isDarkMode } ) => {
                     Data Plan
                   </label>
                   <Select
-                    styles={customStyles}
                     options={options}
                     onChange={handleDataPlanChange}
                     placeholder="Select an option"

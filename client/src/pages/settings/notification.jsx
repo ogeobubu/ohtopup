@@ -49,7 +49,7 @@ const Notification = () => {
               onChange={handleCheckboxChange}
               className="mr-2 w-6 h-6"
             />
-            <label className="text-gray-600">
+            <label className="text-gray-600 dark:text-white">
               Receive OhTopUp news, announcements, and product updates in your
               email inbox.
             </label>
