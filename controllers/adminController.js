@@ -231,7 +231,7 @@ const getUserAnalytics = async (req, res) => {
 };
 
 const createNotification = async (req, res) => {
-  const { userId, type, message, link } = req.body;
+  const { userId, title, message, link } = req.body;
 
   try {
     let notifications = [];
@@ -239,11 +239,10 @@ const createNotification = async (req, res) => {
     if (userId === "all") {
       const users = await User.find().select("username email");
 
-      // Create a notification for each user
       for (const user of users) {
         const notification = new Notification({
           userId: user._id,
-          type,
+          title,
           message,
           link,
         });
@@ -262,7 +261,7 @@ const createNotification = async (req, res) => {
         notifications,
       });
     } else {
-      const notification = new Notification({ userId, type, message, link });
+      const notification = new Notification({ userId, title, message, link });
       await notification.save();
 
       const user = await User.findById(userId).select("username email");

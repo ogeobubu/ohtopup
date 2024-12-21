@@ -20,12 +20,12 @@ const Services = () => {
   return (
     <div className="border border-solid border-gray-200 rounded-md p-6">
       <h2 className="text-2xl font-bold mb-4">Services</h2>
-      <div className="max-w-sm w-auto bg-[#F7F9FB] p-4 rounded-md">
+      <div className="max-w-sm w-auto bg-[#F7F9FB] dark:bg-gray-800 p-4 rounded-md">
         <div className="space-y-8">
           {data?.map((service) => (
             <div key={service._id} className="flex justify-between items-center">
               <div className="flex flex-col gap-1">
-                <span className="text-gray-500">{service.name}</span>
+                <span className="text-gray-500 dark:text-white">{service.name}</span>
               </div>
               <div className="flex items-center">
                 {service.isAvailable ? (

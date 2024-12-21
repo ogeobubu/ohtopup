@@ -37,7 +37,7 @@ const Security = () => {
   return (
     <div className="border border-solid border-gray-200 rounded-md p-6 w-full">
       <h2 className="text-2xl font-bold mb-4">Security</h2>
-      <div className="max-w-sm w-auto bg-[#F7F9FB] py-2 px-4 rounded-md">
+      <div className="max-w-sm w-auto bg-[#F7F9FB] dark:bg-gray-800 py-2 px-4 rounded-md">
         <div className="space-y-8">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">

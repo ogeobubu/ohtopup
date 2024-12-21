@@ -61,8 +61,8 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             className={`w-6 h-6 ${activeTab === tab.name ? "text-blue-500" : isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
           />
           <div className="flex flex-col gap-1">
-            <span>{tab.label}</span>
-            <small>{tab.subtitle}</small>
+            <span className="dark:text-white">{tab.label}</span>
+            <small className="dark:text-white">{tab.subtitle}</small>
           </div>
         </div>
       ))}
