@@ -260,6 +260,15 @@ export const verifyMonnifyTransaction = async (ref, id) => {
   }
 };
 
+export const verifyPaystackTransaction = async (ref) => {
+  try {
+    const response = await instance.get(`/verify-payment/${ref}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error verifying payment");
+  }
+};
+
 export const purchaseAirtime = async (data) => {
   try {
     const response = await instance.post("/airtime", data);
@@ -492,5 +501,14 @@ export const replyTicket = async (data) => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error sending message");
+  }
+};
+
+export const getRates = async () => {
+  try {
+    const response = await instance.get(`/rates`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
   }
 };

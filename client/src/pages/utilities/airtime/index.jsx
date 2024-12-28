@@ -13,6 +13,7 @@ import { getWallet, purchaseAirtime, getServiceID } from "../../../api";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import { formatNairaAmount } from "../../../utils";
 
 const formatPhoneNumber = (phoneNumber) => {
   return phoneNumber.replace(/^\+234/, "0");
@@ -215,7 +216,7 @@ const Airtime = ({ isDarkMode }) => {
           <div className={`bg-[#F7F9FB] dark:bg-gray-800 rounded-md p-4 w-full max-w-md`}>
             <div className="flex justify-between items-center">
               <h2 className="text-gray-700 dark:text-gray-300">Total</h2>
-              <p className="text-gray-800 dark:text-gray-200">₦{formik.values.amount || 0}</p>
+              <p className="text-gray-800 dark:text-gray-200">{formatNairaAmount(formik.values.amount) || 0}</p>
             </div>
           </div>
           <Button type="submit" disabled={isSubmitting || walletLoading || identifiersLoading}>

@@ -18,6 +18,8 @@ import {
   getWallets,
   toggleWallet,
   getAllTransactions,
+  getRates,
+  setRates,
 } from "../../api";
 import Textfield from "../../../components/ui/forms/input";
 import { Formik, Form, Field } from "formik";
@@ -26,20 +28,36 @@ import Chip from "../../../components/ui/chip";
 import Card from "./card";
 import Pagination from "../../components/pagination";
 import Select from "react-select";
+import { formatNairaAmount } from "../../../utils";
 
 const AdminWalletManagement = () => {
   const users = useSelector((state) => state.admin.users);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRateOpen, setIsRateOpen] = useState(false);
   const [isCreatingWallet, setIsCreatingWallet] = useState(false);
   const [activeTab, setActiveTab] = useState("Wallets");
   const [loadingTransaction, setLoadingTransaction] = useState(false);
+  const [formattedAmount, setFormattedAmount] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 10; 
+  const limit = 10;
 
   const [transactionType, setTransactionType] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [withdrawalRate, setWithdrawalRate] = useState("");
+  const [depositRate, setDepositRate] = useState("");
+
+  const {
+    data: rates,
+    isLoading: loadingRates,
+    error: ratesError,
+    refetch: refetchRates,
+  } = useQuery({
+    queryKey: ["rates"],
+    queryFn: getRates,
+  });
 
   const {
     data: wallets,
@@ -88,6 +106,37 @@ const AdminWalletManagement = () => {
     setIsModalOpen(false);
   };
 
+  const openRate = () => {
+    setIsRateOpen(true);
+  };
+
+  const closeRate = () => {
+    setWithdrawalRate("");
+    setDepositRate("");
+    setIsRateOpen(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Withdrawal Rate:", withdrawalRate);
+    console.log("Deposit Rate:", depositRate);
+    closeRate();
+  };
+
+  const handleAmountChange = (e, setFieldValue) => {
+    const value = e.target.value.replace(/,/g, "");
+    const numericValue = parseFloat(value);
+
+    if (!isNaN(numericValue)) {
+      const formatted = numericValue.toLocaleString("en-NG");
+      setFormattedAmount(formatted);
+      setFieldValue("amount", value);
+    } else {
+      setFormattedAmount("");
+      setFieldValue("amount", "");
+    }
+  };
+
   const handleAddFunds = async (amount, resetForm) => {
     if (selectedUser) {
       setLoadingTransaction(true);
@@ -97,6 +146,7 @@ const AdminWalletManagement = () => {
           `Successfully added ₦${amount} to ${selectedUser.username}'s wallet.`
         );
         resetForm();
+        setFormattedAmount("");
         refetchWallets();
         closeModal();
       } catch (error) {
@@ -147,7 +197,7 @@ const AdminWalletManagement = () => {
       <div className="mb-3">
         <Card
           title="Total Balance"
-          count={`₦${wallets?.totalBalance ? wallets?.totalBalance?.toFixed(2) : 0.00}`}
+          count={formatNairaAmount(wallets?.totalBalance)}
           icon={FaMoneyBill}
           bgColor="bg-blue-200"
         />
@@ -176,6 +226,15 @@ const AdminWalletManagement = () => {
         </button>
       </div>
 
+      <div className="w-full flex justify-end mb-4">
+        <button
+          onClick={openRate}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Set Rate
+        </button>
+      </div>
+
       {activeTab === "Wallets" && (
         <div className="overflow-x-auto">
           <Table
@@ -183,7 +242,7 @@ const AdminWalletManagement = () => {
               { header: "User", render: (row) => <p>{row.username}</p> },
               {
                 header: "Wallet Balance",
-                render: (row) => <p>₦{row?.balance?.toFixed(2) || "0.00"}</p>,
+                render: (row) => <p>{formatNairaAmount(row?.balance)}</p>,
               },
               {
                 header: "Actions",
@@ -266,7 +325,7 @@ const AdminWalletManagement = () => {
                   },
                   {
                     header: "Amount",
-                    render: (row) => <p>₦{row.amount.toFixed(2)}</p>,
+                    render: (row) => <p>{formatNairaAmount(row.amount)}</p>,
                   },
                   { header: "Type", render: (row) => <p>{row.type}</p> },
                   {
@@ -317,7 +376,7 @@ const AdminWalletManagement = () => {
             }
           }}
         >
-          {({ errors, touched }) => (
+          {({ errors, touched, setFieldValue }) => (
             <Form className="flex flex-col">
               {!isCreatingWallet ? (
                 <>
@@ -328,7 +387,8 @@ const AdminWalletManagement = () => {
                     name="amount"
                     as={Textfield}
                     placeholder="₦0.00"
-                    min="0"
+                    value={formattedAmount}
+                    onChange={(e) => handleAmountChange(e, setFieldValue)}
                   />
                   {errors.amount && touched.amount ? (
                     <div className="text-red-600 text-sm">{errors.amount}</div>
@@ -342,11 +402,83 @@ const AdminWalletManagement = () => {
               )}
               <Button
                 type="submit"
-                className={`bg-blue-500 hover:bg-blue-600 text-white mt-3 ${loadingTransaction ? "opacity-50 cursor-not-allowed" : ""}`}
-                disabled={loadingTransaction} // Disable if loading
+                className={`bg-blue-500 hover:bg-blue-600 text-white mt-3 ${
+                  loadingTransaction ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={loadingTransaction}
               >
                 {isCreatingWallet ? "Create Wallet" : "Add Funds"}
               </Button>
+            </Form>
+          )}
+        </Formik>
+      </Modal>
+
+      <Modal isOpen={isRateOpen} closeModal={closeRate} title={`Set Rates`}>
+        {loadingRates ? (
+          <p>Loading current rates...</p>
+        ) : ratesError ? (
+          <p>Error fetching rates: {ratesError.message}</p>
+        ) : (
+          <div className="mb-4">
+            <p>Current Withdrawal Rate: {formatNairaAmount(rates.withdrawalRate)}</p>
+            <p>Current Deposit Rate: {rates.depositRate}%</p>
+          </div>
+        )}
+        <Formik
+          initialValues={{ withdrawalRate: "", depositRate: "" }}
+          validationSchema={Yup.object({
+            withdrawalRate: Yup.number()
+              .required("Withdrawal rate is required")
+              .positive("Rate must be positive"),
+            depositRate: Yup.number()
+              .required("Deposit rate is required")
+              .positive("Rate must be positive"),
+          })}
+          onSubmit={async (values) => {
+            try {
+              await setRates(values);
+              toast.success("Rates updated successfully!");
+              refetchRates(); // Refresh rates after setting new ones
+              closeRate();
+            } catch (error) {
+              toast.error("Error updating rates. Please try again.");
+            }
+          }}
+        >
+          {({ handleSubmit }) => (
+            <Form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block mb-1">Withdrawal Rate:</label>
+                <Field
+                  name="withdrawalRate"
+                  as={Textfield}
+                  placeholder="Enter withdrawal rate"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-1">Deposit Rate:</label>
+                <Field
+                  name="depositRate"
+                  as={Textfield}
+                  placeholder="Enter deposit rate"
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={closeRate}
+                  className="mr-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Submit
+                </button>
+              </div>
             </Form>
           )}
         </Formik>

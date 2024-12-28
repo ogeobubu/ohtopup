@@ -17,6 +17,10 @@ const {
 } = require("../controllers/userController");
 
 const {
+  getRates
+} = require("../controllers/adminController");
+
+const {
   getWallet,
   getTransactionsByUser,
   getBanks,
@@ -28,6 +32,7 @@ const {
   depositWalletWithMonnify,
   verifyMonnifyTransaction,
   withdrawMonnifyWallet,
+  depositPaystackWallet
 } = require("../controllers/walletController");
 
 const {
@@ -80,8 +85,8 @@ router.get("/banks", auth, getBanks);
 router.post("/bank", auth, deleteBankAccount);
 router.post("/withdraw", auth, withdrawMonnifyWallet);
 router.post("/withdraw/authorize", auth, withdrawMonnifyWalletOTP);
-router.post("/deposit", auth, depositWalletWithMonnify);
-router.get("/verify-payment/:ref", auth, verifyMonnifyTransaction);
+router.post("/deposit", auth, depositPaystackWallet);
+router.get("/verify-payment/:ref", auth, verifyPaystackTransaction);
 router.post("/verify-account", auth, verifyBankAccount);
 
 router.post("/airtime", auth, buyAirtime);
@@ -110,5 +115,7 @@ router.patch("/notification/:id", auth, readNotification);
 router.post("/ticket", auth, createTicket);
 router.get("/tickets", auth, getUserTickets);
 router.post("/tickets/:id/reply", auth, replyTicket);
+
+router.get("/rates", auth, getRates);
 
 module.exports = router;

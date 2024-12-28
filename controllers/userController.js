@@ -37,14 +37,12 @@ const createUser = async (req, res) => {
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
     if (existingUser) {
-      return res
-        .status(400)
-        .json({
-          message:
-            existingUser.username === username
-              ? "Username already exists"
-              : "Email already exists",
-        });
+      return res.status(400).json({
+        message:
+          existingUser.username === username
+            ? "Username already exists"
+            : "Email already exists",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -97,12 +95,10 @@ const createUser = async (req, res) => {
     const wallet = new Wallet({ userId: newUser._id });
     await wallet.save();
 
-    res
-      .status(201)
-      .json({
-        message:
-          "User created successfully! Please verify your email to activate your account.",
-      });
+    res.status(201).json({
+      message:
+        "User created successfully! Please verify your email to activate your account.",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating user", error });

@@ -20,6 +20,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import { formatNairaAmount } from "../../../utils";
 
 const customStyles = {
   control: (provided) => ({
@@ -306,7 +307,7 @@ const Data = ({ isDarkMode } ) => {
                   <div className="flex justify-between items-center">
                     <h2 className="text-gray-700 dark:text-gray-300">Total</h2>
                     <p className="text-gray-800 dark:text-gray-200">
-                      ₦{formik.values.amount || 0}
+                      {formatNairaAmount(formik.values.amount) || 0}
                     </p>
                   </div>
                 </div>

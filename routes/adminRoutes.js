@@ -15,6 +15,8 @@ const {
   deleteService,
   getServices,
   addPoint,
+  getRates,
+  setRates
 } = require("../controllers/adminController");
 const {
   createWallet,
@@ -88,5 +90,8 @@ router.get("/data/toggle", authUser, authAdmin, toggleVariation);
 router.get("/tickets", authUser, authAdmin, getTickets);
 router.post("/tickets/:id/reply", authUser, authAdmin, replyTicket);
 router.patch("/tickets/:id", authUser, authAdmin, updateTicket);
+
+router.get("/rates", authUser, authAdmin, getRates);
+router.post("/rates", authUser, authAdmin, setRates);
 
 module.exports = router;
