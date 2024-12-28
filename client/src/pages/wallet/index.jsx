@@ -120,7 +120,7 @@ const Wallet = () => {
     reference: `txn_${Date.now()}_${user?._id}`,
     email: user?.email,
     amount: totalAmount * 100,
-    publicKey: "pk_test_ed43711dc37e1454f9b91c9121b25a5662deef5b",
+    publicKey: "pk_live_3268883afd976308390d1833c7c5bb9787750ce3",
   };
 
   useEffect(() => {
