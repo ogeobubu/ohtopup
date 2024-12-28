@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaAngleDown, FaEye, FaEyeSlash, FaBuilding } from "react-icons/fa";
-import { useSelector } from "react-redux"; // Import useSelector for Redux
+import { useSelector } from "react-redux";
 
 const Wallet = ({ data }) => {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ const Wallet = ({ data }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
   const dropdownRef = useRef(null);
-  const isDarkMode = useSelector(state => state.theme.isDarkMode); // Get dark mode from Redux
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   const handleCurrencyChange = (currency) => {
     setSelectedCurrency(currency);
@@ -37,18 +37,16 @@ const Wallet = ({ data }) => {
     };
   }, [dropdownRef]);
 
-  const balanceArray =
-    showBalance && data?.balance
-      ? data.balance.toFixed(2).toString().split(".")
-      : ["***", ""];
+  const formattedBalance = showBalance && data?.balance
+    ? data.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : "***";
 
   return (
     <div className={`p-6 rounded-lg shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-[#F7F9FB] text-gray-800'}`}>
       <div className="flex flex-col md:flex-row items-start justify-between mb-4">
         <h2 className="text-2xl font-bold flex items-center">
           <span className="text-lg">₦</span>
-          <span className="text-2xl font-bold">{balanceArray[0]}</span>
-          <span className="text-lg font-medium">.{balanceArray[1]}</span>
+          <span className="text-2xl font-bold">{formattedBalance}</span>
           <button
             className="ml-4 focus:outline-none"
             onClick={toggleBalanceVisibility}

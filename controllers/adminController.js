@@ -1,6 +1,7 @@
 const User = require("../model/User");
 const Notification = require("../model/Notification");
 const Service = require("../model/Service");
+const Rate = require("../model/Rate");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
@@ -428,6 +429,45 @@ const addPoint = async (req, res) => {
   }
 };
 
+const getRates = async (req, res) => {
+  try {
+    const rates = await Rate.findOne();
+    if (!rates) {
+      return res.status(404).json({ message: "Rates not found" });
+    }
+    res.status(200).json(rates);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+const setRates = async (req, res) => {
+  const { withdrawalRate, depositRate } = req.body;
+
+  try {
+    let rates = await Rate.findOne();
+
+    if (rates) {
+      rates.withdrawalRate = withdrawalRate;
+      rates.depositRate = depositRate;
+      await rates.save();
+      return res
+        .status(200)
+        .json({ message: "Rates updated successfully", rates });
+    } else {
+      rates = new Rate({ withdrawalRate, depositRate });
+      await rates.save();
+      return res
+        .status(201)
+        .json({ message: "Rates created successfully", rates });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
 module.exports = {
   loginAdmin,
   getAdminReferrals,
@@ -444,4 +484,6 @@ module.exports = {
   deleteService,
   getServices,
   addPoint,
+  getRates,
+  setRates,
 };

@@ -439,3 +439,21 @@ export const readNotification = async (id) => {
     throw new Error(error.response?.data?.message || "Error fetching data");
   }
 }
+
+export const getRates = async () => {
+  try {
+    const response = await instance.get(`/rates`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching data");
+  }
+};
+
+export const setRates = async (data) => {
+  try {
+    const response = await instance.post(`/rates`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error setting data");
+  }
+};

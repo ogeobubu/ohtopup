@@ -1,8 +1,19 @@
-export const formatPhoneNumber = (phoneNumber) => {
-    return phoneNumber.replace(/^\+234/, "0");
-  };
-  
-  export const customStyles = {
+export const formatNairaAmount = (amount) => {
+  const numericValue = typeof amount === 'number' ? amount : parseFloat(amount?.replace(/₦|,/g, '').trim());
+
+  if (isNaN(numericValue)) {
+    return '₦0.00';
+  }
+
+  const formattedValue = numericValue.toLocaleString('en-NG', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  return `₦${formattedValue}`;
+};
+
+export const customStyles = {
   control: (provided) => ({
     ...provided,
     borderColor: "#d1d5db",
@@ -31,4 +42,3 @@ export const formatPhoneNumber = (phoneNumber) => {
     color: "#111827",
   }),
 };
-  

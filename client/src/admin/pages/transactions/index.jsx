@@ -4,6 +4,7 @@ import { getAllUtilityTransactions } from "../../api";
 import Table from "../../components/table";
 import Chip from "../../../components/ui/chip";
 import Pagination from "../../components/pagination";
+import { formatNairaAmount } from "../../../utils"
 
 const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,7 +96,7 @@ const Transactions = () => {
                         },
                         {
                           header: "Amount",
-                          render: (row) => <p>₦{row.amount.toFixed(2)}</p>,
+                          render: (row) => <p>{formatNairaAmount(row.amount)}</p>,
                         },
                         {
                           header: "Meter Number",

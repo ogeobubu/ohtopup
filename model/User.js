@@ -34,17 +34,8 @@ const bankAccountSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// User Schema
 const userSchema = new mongoose.Schema(
   {
-    firstName: {
-      type: String,
-      trim: true,
-    },
-    lastName: {
-      type: String,
-      trim: true,
-    },
     username: {
       type: String,
       required: true,
@@ -150,11 +141,6 @@ const userSchema = new mongoose.Schema(
     weeklyPoints: {
       type: Number,
       default: 0,
-    },
-    gender: {
-      type: String,
-      enum: ["male", "female", "other"],
-      required: true,
     },
     bankAccounts: [bankAccountSchema],
   },

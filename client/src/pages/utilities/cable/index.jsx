@@ -20,6 +20,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import { formatNairaAmount } from "../../../utils"
 
 const customStyles = {
   control: (provided) => ({
@@ -371,7 +372,7 @@ const Cable = ({ user, isDarkMode }) => {
                                 {...field}
                                 type="text"
                                 disabled
-                                value={accountNameApi?.data.Renewal_Amount?.toString()}
+                                value={formatNairaAmount(accountNameApi?.data.Renewal_Amount)}
                                 className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
                                 onChange={(e) => {
                                   form.setFieldValue(
@@ -414,10 +415,10 @@ const Cable = ({ user, isDarkMode }) => {
                         <div className="flex justify-between items-center">
                           <h2 className="text-gray-700 dark:text-white">Total</h2>
                           <p className="text-gray-800 dark:text-white">
-                            ₦
+                            
                             {!changeBouquet
-                              ? accountNameApi?.data.Renewal_Amount
-                              : formik.values.amount || 0}
+                              ? formatNairaAmount(accountNameApi?.data.Renewal_Amount)
+                              : formatNairaAmount(formik.values.amount) || 0}
                           </p>
                         </div>
                       </div>

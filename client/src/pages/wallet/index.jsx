@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { PaystackButton } from "react-paystack";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Card from "./card";
 import { FaBuilding, FaExclamationCircle } from "react-icons/fa";
@@ -12,6 +13,8 @@ import {
   getUser,
   depositWallet,
   verifyBankAccount,
+  getRates,
+  verifyPaystackTransaction,
 } from "../../api";
 import Modal from "../../admin/components/modal";
 import { toast } from "react-toastify";
@@ -26,6 +29,7 @@ import Gift from "./gift";
 import Pagination from "../../admin/components/pagination";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { formatNairaAmount } from "../../utils";
 
 const Wallet = () => {
   const navigate = useNavigate();
@@ -50,6 +54,19 @@ const Wallet = () => {
   const limit = 10;
   const [reference, setReference] = useState("");
 
+  const openModal = () => {
+    setIsModalOpen(true);
+    setSelectedBank(null);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
+
+  const openDepositModal = () => setIsDepositModalOpen(true);
+
+  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
+
+  const closeWithdrawModal = () => setIsWithdrawModalOpen(false);
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const refParam = queryParams.get("ref");
@@ -62,6 +79,11 @@ const Wallet = () => {
     setReference(e.target.value);
     setCurrentPage(1);
   };
+
+  const { data: rates, refetch: refetchRates } = useQuery({
+    queryKey: ["rates"],
+    queryFn: getRates,
+  });
 
   const {
     data: walletData,
@@ -94,6 +116,13 @@ const Wallet = () => {
     queryFn: getUser,
   });
 
+  const config = {
+    reference: `txn_${Date.now()}_${user?._id}`,
+    email: user?.email,
+    amount: totalAmount * 100,
+    publicKey: "pk_test_ed43711dc37e1454f9b91c9121b25a5662deef5b",
+  };
+
   useEffect(() => {
     if (bankData) {
       const formattedBanks = bankData.data.map((bank) => ({
@@ -108,14 +137,15 @@ const Wallet = () => {
   const closeDepositModal = () => setIsDepositModalOpen(false);
 
   const handleAmountChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/,/g, "");
     setAmount(value);
+
     if (value === "") {
       setTotalAmount(0);
     } else {
       const parsedValue = parseFloat(value);
       if (!isNaN(parsedValue)) {
-        const fee = parsedValue * 0.015;
+        const fee = parsedValue * (rates?.depositRate / 100);
         setTotalAmount(parsedValue + fee);
       } else {
         setTotalAmount(0);
@@ -123,15 +153,42 @@ const Wallet = () => {
     }
   };
 
-  const handlePaystackSuccessAction = (reference) => {
-    const data = {
-      reference: reference.reference,
-      userId: user?._id,
-    };
-    verifyTransaction(data);
+  const formattedAmount = amount ? parseFloat(amount).toLocaleString() : "";
+
+  const handlePaystackSuccessAction = async (reference) => {
+    if (reference.status === "success") {
+      try {
+        const response = await depositWallet({
+          userId: user?._id,
+          amount,
+          reference: reference.reference,
+        });
+
+        if (response) {
+          toast.success("Payment successful!");
+          setIsDepositModalOpen(false)
+          queryClient.invalidateQueries(["wallet"]);
+          queryClient.invalidateQueries(["transactions"]);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error("Error during deposit: " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
-  const handlePaystackCloseAction = () => {};
+  const handlePaystackCloseAction = () => {
+    console.log("closed");
+  };
+
+  const componentProps = {
+    ...config,
+    text: "Pay Now",
+    onSuccess: (reference) => handlePaystackSuccessAction(reference),
+    onClose: handlePaystackCloseAction,
+  };
 
   const handleShowBanks = () => {
     setShowBanks(!showBanks);
@@ -141,19 +198,6 @@ const Wallet = () => {
     setActiveTab(tab);
     setCurrentPage(1);
   };
-
-  const openModal = () => {
-    setIsModalOpen(true);
-    setSelectedBank(null);
-  };
-
-  const closeModal = () => setIsModalOpen(false);
-
-  const openDepositModal = () => setIsDepositModalOpen(true);
-
-  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
-
-  const closeWithdrawModal = () => setIsWithdrawModalOpen(false);
 
   const validationSchema = Yup.object().shape({
     accountNumber: Yup.string()
@@ -173,31 +217,6 @@ const Wallet = () => {
       });
       setIsVerifying(false);
       setAccountName(response.data.data.account_name);
-    }
-  };
-
-  const handleDeposit = async () => {
-    setLoading(true);
-    try {
-      const response = await depositWallet({
-        userId: user?._id,
-        amount: totalAmount,
-        actualAmount: amount,
-        customerName: user?.username,
-        email: user?.email,
-      });
-
-      if (response && response.url) {
-        navigate(`/wallet/${response.reference}`);
-        window.open(response.url, "_blank");
-      } else {
-        console.error("No authorization URL returned");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Error during deposit: " + error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -247,7 +266,10 @@ const Wallet = () => {
         </div>
       ),
     },
-    { header: "Amount", render: (row) => <p>₦{row.amount.toFixed(2)}</p> },
+    {
+      header: "Amount",
+      render: (row) => <p>{formatNairaAmount(row.amount)}</p>,
+    },
     { header: "Status", render: (row) => <Chip status={row.status} /> },
     {
       header: "Date",
@@ -271,7 +293,10 @@ const Wallet = () => {
         </p>
       ),
     },
-    { header: "Amount", render: (row) => <p>₦{row.amount.toFixed(2)}</p> },
+    {
+      header: "Amount",
+      render: (row) => <p>{formatNairaAmount(row.amount)}</p>,
+    },
     { header: "Status", render: (row) => <Chip status={row.status} /> },
     {
       header: "Date",
@@ -281,7 +306,13 @@ const Wallet = () => {
     },
   ];
 
-  const formattedBalance = walletData?.balance?.toFixed(2) || "0.00";
+  const formattedBalance =
+    walletData && walletData?.balance
+      ? walletData?.balance.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+      : "0.00";
   const [whole, decimal] = formattedBalance.split(".");
 
   return (
@@ -346,7 +377,12 @@ const Wallet = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div className="flex flex-col justify-center items-center gap-1">
                       <button
-                        onClick={openWithdrawModal}
+                        onClick={() => {
+                          return toast.error(
+                            "Feature not available. Try again later!"
+                          );
+                        }}
+                        // onClick={openWithdrawModal}
                         className="bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center"
                       >
                         <div className="bg-blue-600 rounded-full w-6 h-6 flex justify-center items-center">
@@ -527,16 +563,19 @@ const Wallet = () => {
               name="amount"
               label="Amount"
               placeholder="Enter amount"
-              value={amount}
+              value={formattedAmount}
               onChange={handleAmountChange}
-              helperText={`Total Amount (including fees): ${totalAmount.toFixed(
-                2
+              helperText={`Total Amount (including fees): ${formatNairaAmount(
+                totalAmount
               )}`}
             />
             <div className="my-2">
-              <Button onClick={handleDeposit} disabled={loading}>
-                {loading ? "Processing..." : "Pay"}
+              <Button loading={loading} {...componentProps}>
+                <PaystackButton {...componentProps} />
               </Button>
+              {/* <Button onClick={handleDeposit} disabled={loading}>
+                {loading ? "Processing..." : "Pay"}
+              </Button> */}
             </div>
           </Modal>
 
@@ -552,6 +591,8 @@ const Wallet = () => {
               walletData={walletData}
               user={user}
               isDarkMode={isDarkMode}
+              rates={rates}
+              formatNairaAmount={formatNairaAmount}
             />
           </Modal>
         </>
