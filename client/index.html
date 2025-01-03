@@ -2,13 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.png" />
+    <link id="favicon" rel="icon" type="image/png" href="/vite.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <title>OhTopUp | Affordable Utility Purchases</title>
 
     <meta name="google-site-verification" content="ZpAiYMzM1XHcpPARNlTTQG-kCO4mB1DNlKN_UnBu8vE" />
-    
+
     <meta name="description" content="OhTopUp offers affordable utility purchase options to help you save money while enjoying essential services. Explore our range of products and make smart purchases today!" />
     
     <meta name="keywords" content="utility purchases, affordable utilities, savings, essential services, energy bills, prepaid services" />
@@ -17,7 +17,7 @@
     <meta property="og:title" content="OhTopUp | Affordable Utility Purchases" />
     <meta property="og:description" content="Save money with OhTopUp's affordable utility purchase options. Discover essential services today!" />
     <meta property="og:image" content="/ohtopup-high-resolution-logo-white.png" />
-    <meta property="og:url" content="https://www.ohtopup.onrender.com" />
+    <meta property="og:url" content="https://ohtopup.onrender.com" />
     <meta property="og:type" content="website" />
     
     <meta name="twitter:card" content="summary_large_image" />
@@ -25,30 +25,41 @@
     <meta name="twitter:description" content="Save money with OhTopUp's affordable utility purchase options. Discover essential services today!" />
     <meta name="twitter:image" content="/ohtopup-high-resolution-logo-white.png" />
 
-    <link rel="canonical" href="https://www.ohtopup.onrender.com" />
+    <link rel="canonical" href="https://ohtopup.onrender.com" />
 
-    <!-- Additional SEO Tags -->
     <meta name="robots" content="index, follow" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
-    <!-- Structured Data for Rich Snippets -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "OhTopUp",
-        "url": "https://www.ohtopup.onrender.com",
+        "url": "https://ohtopup.onrender.com",
         "logo": "/ohtopup-high-resolution-logo-white.png",
         "sameAs": [
-          "https://www.facebook.com/ogeobubu",
+          "https://facebook.com/ogeobubu",
           "https://x.com/ogeobubu",
-          "https://www.linkedin.com/in/oge-obubu"
+          "https://linkedin.com/in/oge-obubu"
         ]
       }
     </script>
 
-    <!-- Open Graph Locale -->
     <meta property="og:locale" content="en_US" />
+    
+    <script>
+      const setFavicon = (isDarkMode) => {
+        const favicon = document.getElementById('favicon');
+        favicon.href = isDarkMode ? '/vite.png' : '/fav-black.png';
+      };
+
+      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setFavicon(isDarkMode);
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+        setFavicon(event.matches);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
