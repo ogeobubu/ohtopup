@@ -54,6 +54,8 @@ const Wallet = () => {
   const limit = 10;
   const [reference, setReference] = useState("");
 
+  console.log(import.meta.env.VITE_PAYSTACK_PUBLIC_KEY)
+
   const openModal = () => {
     setIsModalOpen(true);
     setSelectedBank(null);
@@ -120,7 +122,7 @@ const Wallet = () => {
     reference: `txn_${Date.now()}_${user?._id}`,
     email: user?.email,
     amount: totalAmount * 100,
-    publicKey: "pk_live_3268883afd976308390d1833c7c5bb9787750ce3",
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
   };
 
   useEffect(() => {

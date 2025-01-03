@@ -107,12 +107,13 @@ const depositWallet = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ userId });
     if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+
     transaction = new Transaction({
       walletId: wallet._id,
       amount,
       type: "deposit",
       status: "pending",
-      reference: `txn-${Date.now()}`,
+      reference: `txn_${Date.now()}_${userId}`,
       paymentMethod: "naira_wallet",
     });
     await transaction.save();
@@ -123,6 +124,21 @@ const depositWallet = async (req, res) => {
 
     transaction.status = "completed";
     await transaction.save();
+
+    if (amount > 1000) {
+      const user = await User.findById(userId);
+      if (user && user.referrerId) {
+        const referrer = await User.findById(user.referrerId);
+        if (referrer) {
+          if (!referrer.referralDepositMap.get(userId)) {
+            referrer.points += 1;
+            referrer.totalReferralPoints += 1;
+            referrer.referralDepositMap.set(userId, true);
+            await referrer.save();
+          }
+        }
+      }
+    }
 
     res.json(wallet);
   } catch (error) {
@@ -262,13 +278,13 @@ const depositWalletWithMonnify = async (req, res) => {
     );
 
     await recordTransaction(
-          wallet._id,
-          response.data.responseBody.transactionReference,
-          actualAmount,
-          "deposit",
-          "pending",
-          paymentData.paymentMethod
-        );
+      wallet._id,
+      response.data.responseBody.transactionReference,
+      actualAmount,
+      "deposit",
+      "pending",
+      paymentData.paymentMethod
+    );
 
     res.json({
       reference: response.data.responseBody.transactionReference,
@@ -317,7 +333,6 @@ const verifyMonnifyTransaction = async (req, res) => {
     const accessToken = await authenticateMonnify(base64Credentials);
     const transactionData = await fetchTransaction(encodedRef, accessToken);
 
-
     const actualAmount = getAmount.amount;
 
     const wallet = await Wallet.findOne({ userId });
@@ -325,30 +340,27 @@ const verifyMonnifyTransaction = async (req, res) => {
 
     if (transactionData.responseBody.paymentStatus === "PAID") {
       await updateWalletBalance(wallet, settlementAmount);
-      await updateTransactionStatus(
-        ref,
-        "completed"
-      );
+      await updateTransactionStatus(ref, "completed");
 
-      return res
-        .status(200)
-        .json({ status: "paid", message: "Transaction successful", transactionData });
-    } else if(transactionData.responseBody.paymentStatus === "PENDING") {
-      await updateTransactionStatus(
-        ref,
-        "pending"
-      );
-      return res
-        .status(200)
-        .json({ status: "pending", message: "Transaction pending", transactionData });
+      return res.status(200).json({
+        status: "paid",
+        message: "Transaction successful",
+        transactionData,
+      });
+    } else if (transactionData.responseBody.paymentStatus === "PENDING") {
+      await updateTransactionStatus(ref, "pending");
+      return res.status(200).json({
+        status: "pending",
+        message: "Transaction pending",
+        transactionData,
+      });
     } else {
-      await updateTransactionStatus(
-        ref,
-        "failed"
-      );
-      return res
-        .status(200)
-        .json({ status: "failed", message: "Transaction failed", transactionData });
+      await updateTransactionStatus(ref, "failed");
+      return res.status(200).json({
+        status: "failed",
+        message: "Transaction failed",
+        transactionData,
+      });
     }
   } catch (error) {
     console.error(
@@ -540,7 +552,10 @@ const verifyPaystackTransaction = async (req, res) => {
         });
     }
   } catch (error) {
-    console.error("Error verifying transaction:", error.response?.data || error.message);
+    console.error(
+      "Error verifying transaction:",
+      error.response?.data || error.message
+    );
 
     return res.status(500).json({
       message: "Error verifying transaction",
@@ -605,7 +620,14 @@ const withdrawWallet = async (req, res) => {
 };
 
 const withdrawFromWallet = async (req, res, isOTP = false) => {
-  const { amount, bankName, accountNumber, bankCode, reference, authorizationCode } = req.body;
+  const {
+    amount,
+    bankName,
+    accountNumber,
+    bankCode,
+    reference,
+    authorizationCode,
+  } = req.body;
 
   try {
     const wallet = await Wallet.findOne({ userId: req.user.id });
@@ -620,7 +642,9 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
 
     const apiKey = process.env.MONNIFY_API_KEY;
     const clientSecret = process.env.MONNIFY_SECRET_KEY;
-    const base64Credentials = Buffer.from(`${apiKey}:${clientSecret}`).toString("base64");
+    const base64Credentials = Buffer.from(`${apiKey}:${clientSecret}`).toString(
+      "base64"
+    );
 
     const data = isOTP
       ? { reference, authorizationCode }
@@ -667,7 +691,7 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
           id: transaction._id,
           amount: transaction.amount,
           status: transaction.status,
-          reference: transaction.reference
+          reference: transaction.reference,
         },
       });
     } else {
@@ -698,12 +722,15 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error processing withdrawal", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error processing withdrawal", error: error.message });
   }
 };
 
 const withdrawMonnifyWallet = (req, res) => withdrawFromWallet(req, res);
-const withdrawMonnifyWalletOTP = (req, res) => withdrawFromWallet(req, res, true);
+const withdrawMonnifyWalletOTP = (req, res) =>
+  withdrawFromWallet(req, res, true);
 
 const withdrawWalletPaystack = async (req, res) => {
   const { name, bankName, amount, accountNumber, bankCode } = req.body;
@@ -989,5 +1016,5 @@ module.exports = {
   verifyMonnifyTransaction,
   withdrawMonnifyWallet,
   withdrawMonnifyWalletOTP,
-  depositPaystackWallet
+  depositPaystackWallet,
 };

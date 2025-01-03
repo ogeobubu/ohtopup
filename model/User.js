@@ -138,9 +138,13 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    weeklyPoints: {
+    totalReferralPoints: {
       type: Number,
       default: 0,
+    },
+    referralDepositMap: {
+      type: Map,
+      of: Boolean,
     },
     bankAccounts: [bankAccountSchema],
   },

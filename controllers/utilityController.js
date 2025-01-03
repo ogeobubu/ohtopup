@@ -58,6 +58,8 @@ const buyAirtime = async (req, res) => {
       },
     });
 
+    console.log(response.data);
+
     const transactionStatus = response.data.content.transactions.status;
     const transactionType = response.data.content.transactions.type;
     const productName = response.data.content.transactions.product_name;
@@ -161,7 +163,9 @@ const buyData = async (req, res) => {
   }
 
   if (!wallet.isActive) {
-    return res.status(400).json({ message: "Wallet is disabled. Transactions cannot be made." });
+    return res
+      .status(400)
+      .json({ message: "Wallet is disabled. Transactions cannot be made." });
   }
 
   const data = {
@@ -207,16 +211,17 @@ const buyData = async (req, res) => {
       paymentMethod,
     });
 
-    const notificationMessage = transactionStatus === "failed"
-      ? `Transaction failed for ${productName}. Amount: ${amount}.`
-      : `Transaction successful for ${productName}. Amount: ${amount}.`;
+    const notificationMessage =
+      transactionStatus === "failed"
+        ? `Transaction failed for ${productName}. Amount: ${amount}.`
+        : `Transaction successful for ${productName}. Amount: ${amount}.`;
 
     const newNotification = new Notification({
       userId: user._id,
       title: `Transaction ${transactionStatus}`,
       message: notificationMessage,
       createdAt: new Date(),
-      link: "/transactions"
+      link: "/transactions",
     });
 
     await newNotification.save();
@@ -444,16 +449,17 @@ const purchaseCable = async (req, res) => {
       paymentMethod,
     });
 
-    const notificationMessage = transactionStatus === "failed"
-      ? `Transaction failed for ${productName}. Amount: ${amount}.`
-      : `Transaction successful for ${productName}. Amount: ${amount}.`;
+    const notificationMessage =
+      transactionStatus === "failed"
+        ? `Transaction failed for ${productName}. Amount: ${amount}.`
+        : `Transaction successful for ${productName}. Amount: ${amount}.`;
 
     const newNotification = new Notification({
       userId: user._id,
       title: `Transaction ${transactionStatus}`,
       message: notificationMessage,
       createdAt: new Date(),
-      link: "/transactions"
+      link: "/transactions",
     });
 
     // Save notification to the database
@@ -588,16 +594,17 @@ const purchaseElectricity = async (req, res) => {
       paymentMethod,
     });
 
-    const notificationMessage = transactionStatus === "failed"
-      ? `Transaction failed for electricity purchase of ${productName}. Amount: ${amount}.`
-      : `Transaction successful for electricity purchase of ${productName}. Amount: ${amount}.`;
+    const notificationMessage =
+      transactionStatus === "failed"
+        ? `Transaction failed for electricity purchase of ${productName}. Amount: ${amount}.`
+        : `Transaction successful for electricity purchase of ${productName}. Amount: ${amount}.`;
 
     const newNotification = new Notification({
       userId: user._id,
       title: `Transaction ${transactionStatus}`,
       message: notificationMessage,
       createdAt: new Date(),
-      link: "/transactions"
+      link: "/transactions",
     });
 
     await newNotification.save();

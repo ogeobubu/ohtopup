@@ -421,8 +421,11 @@ const AdminWalletManagement = () => {
           <p>Error fetching rates: {ratesError.message}</p>
         ) : (
           <div className="mb-4">
-            <p>Current Withdrawal Rate: {formatNairaAmount(rates.withdrawalRate)}</p>
-            <p>Current Deposit Rate: {rates.depositRate}%</p>
+            <p>
+              Current Withdrawal Rate:{" "}
+              {formatNairaAmount(rates?.withdrawalRate)}
+            </p>
+            <p>Current Deposit Rate: {rates?.depositRate}%</p>
           </div>
         )}
         <Formik
@@ -439,7 +442,7 @@ const AdminWalletManagement = () => {
             try {
               await setRates(values);
               toast.success("Rates updated successfully!");
-              refetchRates(); // Refresh rates after setting new ones
+              refetchRates();
               closeRate();
             } catch (error) {
               toast.error("Error updating rates. Please try again.");

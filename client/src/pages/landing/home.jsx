@@ -11,7 +11,7 @@ const HomePage = () => {
   return (
     <div>
       <Navbar />
-      <Hero heading="Paying smart is" subheading="When you pay for bills and you get discounts." buttonText="Get Started" href="/login" />
+      <Hero heading="Paying smart is" subheading="When you pay for bills and you get discounts." buttonText="Get Started" secondButtonText="Download App" href="/login" />
       <Partners />
       <Offer />
       <Rating />
