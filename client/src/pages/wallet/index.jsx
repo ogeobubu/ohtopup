@@ -14,7 +14,6 @@ import {
   depositWallet,
   verifyBankAccount,
   getRates,
-  verifyPaystackTransaction,
 } from "../../api";
 import Modal from "../../admin/components/modal";
 import { toast } from "react-toastify";
@@ -54,8 +53,6 @@ const Wallet = () => {
   const limit = 10;
   const [reference, setReference] = useState("");
 
-  console.log(import.meta.env.VITE_PAYSTACK_PUBLIC_KEY)
-
   const openModal = () => {
     setIsModalOpen(true);
     setSelectedBank(null);
@@ -65,7 +62,7 @@ const Wallet = () => {
 
   const openDepositModal = () => setIsDepositModalOpen(true);
 
-  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
+  // const openWithdrawModal = () => setIsWithdrawModalOpen(true);
 
   const closeWithdrawModal = () => setIsWithdrawModalOpen(false);
 
@@ -122,7 +119,7 @@ const Wallet = () => {
     reference: `txn_${Date.now()}_${user?._id}`,
     email: user?.email,
     amount: totalAmount * 100,
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_LIVE_KEY,
   };
 
   useEffect(() => {
