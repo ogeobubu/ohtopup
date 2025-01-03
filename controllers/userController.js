@@ -64,15 +64,17 @@ const createUser = async (req, res) => {
       if (referralCode) {
         const referrer = await User.findOne({ referralCode });
 
-        if (referrer) {
-          newUser.referrerId = referrer._id;
-          referrer.referredUsers.push(newUser._id);
-          referrer.referralCount += 1;
-          referrer.points += 1;
+        if (referralCode) {
+          const referrer = await User.findOne({ referralCode });
+          if (referrer) {
+            newUser.referrerId = referrer._id;
+            referrer.referredUsers.push(newUser._id);
+            referrer.referralCount += 1;
 
-          await referrer.save();
-        } else {
-          return res.status(400).json({ message: "Invalid referral code" });
+            await referrer.save();
+          } else {
+            return res.status(400).json({ message: "Invalid referral code" });
+          }
         }
       }
     }
