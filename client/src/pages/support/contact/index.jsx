@@ -1,6 +1,6 @@
 import React from "react";
-import { FaEnvelope, FaFacebook, FaTwitter } from "react-icons/fa"; // Importing icons
-import { useSelector } from "react-redux"; // Import useSelector
+import { FaEnvelope, FaFacebook, FaTwitter, FaWhatsapp } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 const Contact = () => {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
@@ -65,6 +65,26 @@ const Contact = () => {
           <div className="flex flex-col">
             <span className="text-sm md:text-base dark:text-white">Social Media</span>
             <span className="text-gray-600 text-xs md:text-sm dark:text-white">X (formerly Twitter)</span>
+          </div>
+        </div>
+        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2">
+          ➔
+        </span>
+      </a>
+
+      <a 
+        href="https://wa.me/+2348154212889" 
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+      >
+        <div className="flex items-center">
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-4">
+            <FaWhatsapp size={20} className="text-green-500" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm md:text-base dark:text-white">Chat with Us</span>
+            <span className="text-gray-600 text-xs md:text-sm dark:text-white">WhatsApp</span>
           </div>
         </div>
         <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2">
