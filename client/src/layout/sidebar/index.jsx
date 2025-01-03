@@ -11,8 +11,9 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import logo from "../../assets/logo/ohtopup-high-resolution-logo-transparent.png";
-import logoWhite from "../../assets/logo/logo-color.svg";
+// import logo from "../../assets/logo/ohtopup-high-resolution-logo-transparent.png";
+import logo from "../../assets/logo/new-dark.png";
+import logoWhite from "../../assets/logo/logo-app.png";
 
 const Sidebar = () => {
   const location = useLocation();

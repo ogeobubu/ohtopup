@@ -13,7 +13,7 @@ const Footer = () => {
             <MdPhone className="mr-2" /> (+234) 08154212889
           </div>
           <div className="flex items-center mt-2 contactItem text-sm md:text-base">
-            <MdEmail className="mr-2" /> ohtopupsupport@gmail.com
+            <MdEmail className="mr-2" /> ohtopup@gmail.com
           </div>
           <div className="flex items-center mt-2 contactItem text-sm md:text-base">
             <MdLocationOn className="mr-2" /> 

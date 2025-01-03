@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logo from "../../../assets/logo/logo-color.svg";
-import logoDark from "../../../assets/logo/dark-remove.png";
+import logo from "../../../assets/logo/logo-app.png";
+import logoDark from "../../../assets/logo/new-dark.png";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,7 +36,7 @@ const Navbar = () => {
           <img
             className="h-12"
             src={isScrolled ? logoDark : logo}
-            alt="VTU Platform Logo"
+            alt="OhTopUp Logo"
           />
           </Link>
           <div className="hidden md:flex space-x-4">
