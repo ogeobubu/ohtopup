@@ -35,6 +35,28 @@ const sendWaitlistEmail = async (
   await transporter.sendMail(mailOptions);
 };
 
+const sendLoginNotificationEmail = async (userEmail) => {
+  const transporter = createTransporter();
+
+  const mailOptions = {
+    to: process.env.EMAIL_USER,
+    from: userEmail,
+    subject: "User Login Notification",
+    html: `
+      <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
+        <img src="https://i.ibb.co/cvZqP33/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+        <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">User Login Notification</h2>
+        <p style="font-size: 16px; line-height: 1.5;">A user has successfully logged in:</p>
+        <p style="font-size: 16px; line-height: 1.5;"><strong>Email:</strong> ${userEmail}</p>
+        <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This is an automated message. Please do not reply.</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 module.exports = {
   sendWaitlistEmail,
+  sendLoginNotificationEmail
 };

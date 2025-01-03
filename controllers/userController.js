@@ -3,6 +3,7 @@ const Wallet = require("../model/Wallet");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { generateConfirmationCode } = require("../utils");
+const { sendLoginNotificationEmail } = require("./email")
 const { sendForgotPasswordEmail } = require("./email/sendForgotPasswordEmail");
 const { sendConfirmationEmail } = require("./email/sendConfirmationEmail");
 const { sendVerificationEmail } = require("./email/sendVerificationEmail");
@@ -240,6 +241,8 @@ const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    await sendLoginNotificationEmail(user.email);
 
     const payload = { user: { id: user._id, role: user.role } };
     const secret = process.env.JWT_SECRET;
