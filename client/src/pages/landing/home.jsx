@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"
+import React from "react";
 import Footer from "./footer"
 import Navbar from "./navbar"
 import Hero from "./hero"
@@ -8,6 +7,7 @@ import Offer from "./offer"
 import Rating from "./rating"
 
 const HomePage = () => {
+
   return (
     <div>
       <Navbar />

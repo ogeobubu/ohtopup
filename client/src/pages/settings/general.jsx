@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { toggleDarkMode } from "../../actions/themeActions"; // Adjust the path as necessary
+import { toggleDarkMode } from "../../actions/themeActions";
 
 const General = () => {
   const dispatch = useDispatch();

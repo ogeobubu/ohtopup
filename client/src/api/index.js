@@ -35,7 +35,10 @@ instance.interceptors.response.use(
       if (error.response.status === 401) {
         console.error("Response Error:", error.response.data);
       } else if (error.response.status === 403) {
+        if(error.response.data.message === "Invalid token") {
+          localStorage.removeItem("ohtopup-token")
         window.location.href = "/login";
+        }
       } else {
         console.error("Response Error:", error.response.data);
       }

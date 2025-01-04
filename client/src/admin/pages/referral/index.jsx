@@ -110,7 +110,7 @@ const Referral = () => {
     <>
       <h2 className="text-2xl font-bold mb-5 dark:text-white text-gray-800">Referral Management</h2>
       <div className="flex flex-col md:flex-row">
-        <div className="flex-1 min-h-[250px] flex flex-col justify-between dark:bg-gray-800 bg-white shadow-md rounded-lg p-4">
+        <div className="flex-1 min-h-[250px] flex flex-col justify-between">
           {isLoading ? (
             <p className="text-gray-500">Loading referrals...</p>
           ) : isError ? (
@@ -135,9 +135,9 @@ const Referral = () => {
                   </button>
                 </div>
               </div>
-
+              <div className="overflow-x-auto">
               <Table columns={columns} data={referrals.users} />
-
+</div>
               <Pagination
                 currentPage={currentPage}
                 totalPages={referrals.totalPages}

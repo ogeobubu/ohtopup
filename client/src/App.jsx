@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import Routes from "./routes";
 import { useSelector, useDispatch } from "react-redux";
-import { FaWhatsapp } from "react-icons/fa"; // Importing WhatsApp icon
+import { FaWhatsapp } from "react-icons/fa";
 
 const App = () => {
   const dispatch = useDispatch();

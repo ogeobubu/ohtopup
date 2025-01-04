@@ -12,38 +12,41 @@ import AdminRoutes from "./adminRoutes";
 import AdminLogin from "../admin/pages/auth/login";
 
 export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
+  const isLogin = localStorage.getItem("ohtopup-token");
+  const isLoginAdmin = localStorage.getItem("ohtopup-admin-token");
+
   const userRoutes = [
     {
       path: "/",
-      element: <Landing darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
-    },
-    {
-      path: "/create",
-      element: <Create darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
-    },
-    {
-      path: "/verify",
-      element: <Verify darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
-    },
-    {
-      path: "/login",
-      element: <Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
-    },
-    {
-      path: "/forgot",
-      element: <Forgot darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
-    },
-    {
-      path: "/reset",
-      element: <Reset darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+      element: isLogin ? <Navigate to="/dashboard" /> : <Landing darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
     {
       path: "/about",
-      element: <About darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+      element: isLogin ? <Navigate to="/dashboard" /> : <About darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
     {
       path: "/pricing",
-      element: <Pricing darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+      element: isLogin ? <Navigate to="/dashboard" /> : <Pricing darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/create",
+      element: isLogin ? <Navigate to="/dashboard" /> : <Create darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/verify",
+      element: isLogin ? <Navigate to="/dashboard" /> : <Verify darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/login",
+      element: isLogin ? <Navigate to="/dashboard" /> : <Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/forgot",
+      element: isLogin ? <Navigate to="/dashboard" /> : <Forgot darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/reset",
+      element: isLogin ? <Navigate to="/dashboard" /> : <Reset darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
   ];
 
@@ -51,9 +54,8 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
     ...userRoutes,
     {
       path: "/admin",
-      element: (
-        <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      ),
+      element: isLoginAdmin ? <Navigate to="/admin/dashboard" /> : <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      ,
     },
     {
       path: "/admin/*",

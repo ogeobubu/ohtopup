@@ -1,7 +1,16 @@
 import { TOGGLE_DARK_MODE } from '../actions/themeActions';
 
+const getInitialTheme = () => {
+  const storedTheme = localStorage.getItem('theme');
+  if (storedTheme) {
+    return storedTheme === 'dark';
+  }
+  
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
 const initialState = {
-  isDarkMode: localStorage.getItem('theme') === 'dark',
+  isDarkMode: getInitialTheme(),
 };
 
 const themeReducer = (state = initialState, action) => {

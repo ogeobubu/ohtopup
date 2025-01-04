@@ -11,7 +11,6 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
-// import logo from "../../assets/logo/ohtopup-high-resolution-logo-transparent.png";
 import logo from "../../assets/logo/new-dark.png";
 import logoWhite from "../../assets/logo/logo-app.png";
 
@@ -67,6 +66,7 @@ const Sidebar = () => {
               <li key={index}>
                 <Link
                   to={link.to}
+                  onClick={() => setIsOpen(false)}
                   className={`flex items-center space-x-4 ${
                     location.pathname === link.to
                       ? "bg-blue-600 rounded-md px-4 py-2 text-white"
