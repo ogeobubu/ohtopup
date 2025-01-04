@@ -15,7 +15,7 @@ const sendVerificationEmail = async (username, email, confirmationCode) => {
     subject: "Verification Code - OhTopUp",
     html: `
         <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/cvZqP33/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+          <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
           <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Welcome to OhTopUp, ${username}!</h2>
           <p style="font-size: 16px; line-height: 1.5;">Thank you for creating an account. Please verify your email address to activate your account and start using our services.</p>
           <p style="font-size: 16px; line-height: 1.5;">We noticed that you requested a new verification code. Here it is:</p>
