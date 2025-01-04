@@ -167,8 +167,8 @@ const Services = () => {
   ];
 
   return (
-    <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
-      <div className="flex justify-between items-center">
+    <div className="md:p-6 p-2 border border-solid rounded-md border-gray-200 w-full">
+      <div className="flex flex-col md:flex-row justify-between items-center">
         <h2 className="text-2xl font-bold mb-4">Services</h2>
         <Button
           className="bg-green-600 hover:bg-green-400"
@@ -178,13 +178,13 @@ const Services = () => {
           Create
         </Button>
       </div>
-      <div className="my-5">
+      <div className="my-5 overflow-x-auto">
         {isServicesLoading ? (
           <p>Loading services...</p>
         ) : isServicesError ? (
           <p>Error: {serviceError.message}</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="">
             <Table columns={columns} data={serviceData} />
           </div>
         )}

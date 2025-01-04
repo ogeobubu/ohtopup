@@ -35,7 +35,7 @@ const Transactions = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md">
+    <div className="">
       <h1 className="text-2xl font-bold mb-5 text-gray-800 dark:text-gray-200">
         Transactions
       </h1>

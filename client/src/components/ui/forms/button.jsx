@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaSpinner } from 'react-icons/fa'; // Importing a spinner icon
+import { FaSpinner } from 'react-icons/fa';
 
 const Button = ({
   variant = 'primary',
@@ -10,6 +10,7 @@ const Button = ({
   disabled = false,
   loading = false,
   size = 'lg',
+  onSuccess,
   ...props
 }) => {
   const getButtonStyles = () => {
@@ -48,9 +49,16 @@ const Button = ({
     }
   };
 
+  const handleClick = () => {
+    if (!disabled && !loading) {
+      onClick && onClick();
+      onSuccess && onSuccess();
+    }
+  };
+
   return (
     <button
-      onClick={disabled || loading ? null : onClick}
+      onClick={handleClick}
       className={`font-semibold py-2 rounded-lg shadow-lg transition duration-300 ease-in-out transform flex items-center justify-center
         ${getButtonStyles()} ${getSizeStyles()} ${className}`}
       disabled={disabled || loading}

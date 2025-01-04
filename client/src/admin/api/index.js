@@ -32,9 +32,15 @@ instance.interceptors.response.use(
   (error) => {
     if (error.response) {
       if (error.response.status === 401) {
-        window.location.href = "/admin";
+        if(error.response.data.message === "Invalid token") {
+          localStorage.removeItem("ohtopup-admin-token")
+          window.location.href = "/admin";
+        }
       } else if (error.response.status === 403) {
+        if(error.response.data.message === "Invalid token") {
+          localStorage.removeItem("ohtopup-admin-token")
         window.location.href = "/admin";
+        }
       } else {
         console.error("Response Error:", error.response.data);
       }

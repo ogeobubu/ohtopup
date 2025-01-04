@@ -165,8 +165,8 @@ const Notification = () => {
   ];
 
   return (
-    <div className="p-6 border border-solid rounded-md border-gray-200 bg-white dark:bg-gray-800 w-full">
-      <div className="flex justify-between items-center">
+    <div className="md:p-6 p-2 border border-solid rounded-md border-gray-200 bg-white dark:bg-gray-800 w-full">
+      <div className="flex flex-col md:flex-row justify-between items-center">
         <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Notification</h2>
         <Button className="bg-green-600 hover:bg-green-400" onClick={toggleModal} size="sm">
           Create
@@ -189,7 +189,6 @@ const Notification = () => {
           <>
           <div className="overflow-x-auto">
             <Table columns={columns} data={notifications} />
-            
           </div>
           <Pagination
               currentPage={currentPage}

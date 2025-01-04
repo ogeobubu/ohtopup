@@ -39,7 +39,7 @@ const Header = () => {
   };
 
   const {
-    data: notificationsData = { notifications: [] }, // Default to an object with notifications key
+    data: notificationsData = { notifications: [] },
     isLoading,
     error,
     refetch,
@@ -49,7 +49,6 @@ const Header = () => {
     enabled: !!user?._id,
   });
 
-  // Extract notifications array
   const notifications = notificationsData.notifications || [];
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
@@ -58,8 +57,8 @@ const Header = () => {
   };
 
   const handleNotificationClick = async (notification) => {
-    await readNotification(notification.id); // Use notification.id
-    refetch(); // Refresh notifications after reading one
+    await readNotification(notification.id);
+    refetch();
     navigate(`${notification.link}`);
     setIsNotificationOpen(false);
   };
@@ -81,11 +80,11 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className="bg-white dark:bg-gray-800 py-2 flex justify-between items-center md:mt-0 mt-5">
-      <div className="text-gray-800 dark:text-white">
-        <span className="text-xl font-bold">Hello</span>, {user?.username} 👋
+    <nav className="bg-white dark:bg-gray-800 py-2 flex flex-wrap justify-between items-center md:mt-0 mt-5 px-4">
+      <div className="text-gray-800 dark:text-white text-lg md:text-xl font-bold">
+        Hello, {user?.username} 👋
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 md:space-x-4">
         <button
           className="bg-gray-100 dark:bg-gray-700 p-2 rounded-full"
           onClick={() => dispatch(toggleDarkMode())}

@@ -123,7 +123,7 @@ const UserManagement = () => {
   ];
 
   return (
-    <div className="my-5 px-4 sm:px-6 lg:px-8">
+    <div className="my-5 md:px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
           title="Registered Users"
