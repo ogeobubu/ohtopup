@@ -18,7 +18,7 @@ const Footer = () => {
           <div className="flex items-center mt-2 contactItem text-sm md:text-base">
             <MdLocationOn className="mr-2" /> 
             <span>
-              6, Henry Omoragbon, Unity Estate, Alagbole, Ogun State
+              Lagos, Nigeria
             </span>
           </div>
         </div>
