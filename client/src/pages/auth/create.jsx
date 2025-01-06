@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import Select from "react-select";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Logo from "../../components/ui/logo";
@@ -50,12 +50,13 @@ const options = [
 ];
 
 const Create = ({ darkMode }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
   const mutation = useMutation({
     mutationFn: createUser,
     onSuccess: (data) => {
       toast.success(data.message);
-      navigate("/verify")
+      navigate("/verify");
     },
     onError: (error) => {
       const errorMessage =
@@ -73,6 +74,9 @@ const Create = ({ darkMode }) => {
     source: Yup.string().required("Source is required"),
   });
 
+  const queryParams = new URLSearchParams(location.search);
+  const referralCode = queryParams.get("code") || "";
+
   return (
     <div className="flex md:flex-row justify-between">
       <div className="w-full py-0 md:py-4 h-screen overflow-y-auto">
@@ -88,7 +92,7 @@ const Create = ({ darkMode }) => {
                 username: "",
                 email: "",
                 phoneNumber: "",
-                referralCode: "",
+                referralCode: referralCode,
                 password: "",
                 source: "",
               }}
