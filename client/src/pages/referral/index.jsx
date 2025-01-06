@@ -47,11 +47,11 @@ const Referral = () => {
         await navigator.share({
           title: "Join me on this platform!",
           text: `Use my referral code: ${user?.referralCode}`,
-          url: window.location.href,
+          url: `https://ohtopup.onrender.com/create?code=${user?.referralCode}`,
         });
-        toast.success("Referral code shared successfully!");
+        toast.success("Referral link shared successfully!");
       } catch {
-        toast.error("Failed to share the referral code.");
+        toast.error("Failed to share the referral link.");
       }
     } else {
       navigator.clipboard.writeText(user?.referralCode);
@@ -74,7 +74,6 @@ const Referral = () => {
         Referral
       </h2>
       <div className="flex flex-col md:flex-row gap-4">
-        {/* Referral Code Section */}
         <div
           className={`flex-1 p-4 ${
             isDarkMode ? "bg-gray-800" : "bg-gray-100"
@@ -97,7 +96,7 @@ const Referral = () => {
               }`}
             >
               Earn referral bonus when your friends sign up with your referral
-              code and trade successfully.
+              code and make transaction successfully.
             </p>
           </div>
           <div className="mt-4 flex items-center justify-center mx-auto">
@@ -117,7 +116,6 @@ const Referral = () => {
           </div>
         </div>
 
-        {/* Referrals Table Section */}
         <div
           className={`flex-1 md:pl-6 md:pr-6 min-h-[250px] flex flex-col justify-between ${
             isDarkMode ? "bg-gray-800" : ""
