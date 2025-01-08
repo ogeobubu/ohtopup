@@ -165,10 +165,10 @@ const Transactions = () => {
         } py-1 px-1`}
       >
         {[
+          "Airtime Recharge",
+          "Data Services",
           "Electricity Bill",
           "TV Subscription",
-          "Data Services",
-          "Airtime Recharge",
         ].map((tab) => (
           <button
             key={tab}
