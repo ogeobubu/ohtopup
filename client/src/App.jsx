@@ -1,13 +1,30 @@
 import React, { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import Routes from "./routes";
+import { getUser } from "./api"
+import { setUser } from "./actions/userActions";
 import { useSelector, useDispatch } from "react-redux";
 import { FaWhatsapp } from "react-icons/fa";
 
 const App = () => {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  const savedUser = useSelector(state => state.user.user)
+
+  const { data: user, isLoading: userLoading, isError: userError } = useQuery({
+    queryKey: ["user"],
+    queryFn: getUser,
+  });
+
+  useEffect(() => {
+    if(savedUser) {
+      return;
+    } else {
+      dispatch(setUser(user));
+    }
+  }, [savedUser, user, dispatch])
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
