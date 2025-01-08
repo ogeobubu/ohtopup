@@ -3,7 +3,7 @@ const StatusChip = ({ status }) => {
   let textColor = "";
 
   switch (status) {
-    case "completed":
+    case "delivered":
       chipColor = "bg-green-100";
       textColor = "text-green-800";
       break;

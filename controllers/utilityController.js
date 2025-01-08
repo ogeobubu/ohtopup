@@ -214,7 +214,7 @@ const buyData = async (req, res) => {
     const notificationMessage =
       transactionStatus === "failed"
         ? `Transaction failed for ${productName}. Amount: ${amount}.`
-        : `Transaction successful for ${productName}. Amount: ${amount}.`;
+        : transactionStatus === "pending" ? `Transaction pending for ${productName}. Amount: ${amount}.` : `Transaction successful for ${productName}. Amount: ${amount}.`;
 
     const newNotification = new Notification({
       userId: user._id,

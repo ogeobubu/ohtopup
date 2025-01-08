@@ -10,7 +10,7 @@ import { formatNairaAmount } from "../../utils";
 const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [activeTab, setActiveTab] = useState("Electricity Bill");
+  const [activeTab, setActiveTab] = useState("Airtime Recharge");
   const [requestId, setRequestId] = useState("");
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
