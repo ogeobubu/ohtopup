@@ -7,6 +7,10 @@ const StatusChip = ({ status }) => {
       chipColor = "bg-green-100";
       textColor = "text-green-800";
       break;
+      case "completed":
+      chipColor = "bg-green-100";
+      textColor = "text-green-800";
+      break;
     case "pending":
       chipColor = "bg-yellow-100";
       textColor = "text-yellow-800";
