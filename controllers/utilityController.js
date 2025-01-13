@@ -187,12 +187,12 @@ const buyData = async (req, res) => {
       headers,
     });
 
-    const transactionStatus = response.data.content.transactions.status;
-    const transactionType = response.data.content.transactions.type;
-    const productName = response.data.content.transactions.product_name;
-    const totalAmount = response.data.content.transactions.total_amount;
-    const discount = response.data.content.transactions.discount;
-    const commissionRate = response.data.content.transactions.commission;
+    const transactionStatus = response.data.content?.transactions?.status;
+    const transactionType = response.data.content?.transactions?.type;
+    const productName = response.data.content?.transactions?.product_name;
+    const totalAmount = response.data.content?.transactions?.total_amount;
+    const discount = response.data.content?.transactions?.discount;
+    const commissionRate = response.data.content?.transactions?.commission;
     const paymentMethod = "api";
 
     const newTransaction = new Utility({
