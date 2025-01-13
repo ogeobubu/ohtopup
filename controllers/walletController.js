@@ -151,12 +151,21 @@ const depositWallet = async (req, res) => {
 };
 
 const depositPaystackWallet = async (req, res) => {
-  const { userId, amount, reference } = req.body;
+  const { userId, amount: rawAmount, reference } = req.body;
   let transaction = null;
+
+  const amount = Number(rawAmount);
+
+  if (isNaN(amount) || amount <= 0) {
+    return res.status(400).json({ message: "Amount must be a positive number." });
+  }
 
   try {
     const wallet = await Wallet.findOne({ userId });
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found." });
+    }
+
     transaction = new Transaction({
       walletId: wallet._id,
       amount,
@@ -180,7 +189,7 @@ const depositPaystackWallet = async (req, res) => {
       transaction.status = "failed";
       await transaction.save();
     }
-    res.status(500).json({ message: "Error depositing to wallet", error });
+    res.status(500).json({ message: "Error depositing to wallet.", error: error.message || error });
   }
 };
 
