@@ -13,7 +13,7 @@ const Contact = () => {
       </p>
 
       <a
-        href="mailto:ogeobubu@gmail.com"
+        href="mailto:ohtopup@gmail.com"
         target="_blank"
         rel="noopener noreferrer"
         className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
@@ -24,7 +24,7 @@ const Contact = () => {
           </div>
           <div className="flex flex-col">
             <span className="text-sm md:text-base dark:text-white">Email Address</span>
-            <span className="text-gray-600 text-xs md:text-sm dark:text-white">ogeobubu@gmail.com</span>
+            <span className="text-gray-600 text-xs md:text-sm dark:text-white">ohtopup@gmail.com</span>
           </div>
         </div>
         <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
