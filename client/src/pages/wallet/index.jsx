@@ -136,18 +136,21 @@ const Wallet = () => {
   const closeDepositModal = () => setIsDepositModalOpen(false);
 
   const handleAmountChange = (e) => {
-    const value = e.target.value.replace(/,/g, "");
-    setAmount(value);
+    const value = e.target.value.replace(/[^0-9]/g, '');
   
-    if (value === "") {
-      setTotalAmount(0);
-    } else {
-      const parsedValue = parseFloat(value);
-      if (!isNaN(parsedValue)) {
-        const fee = parsedValue * (rates?.depositRate / 100);
-        setTotalAmount(parsedValue + fee);
-      } else {
+    if (value === '' || !isNaN(value)) {
+      setAmount(value);
+  
+      if (value === '') {
         setTotalAmount(0);
+      } else {
+        const parsedValue = parseFloat(value);
+        if (!isNaN(parsedValue)) {
+          const fee = parsedValue * (rates?.depositRate / 100);
+          setTotalAmount(parsedValue + fee);
+        } else {
+          setTotalAmount(0);
+        }
       }
     }
   };
