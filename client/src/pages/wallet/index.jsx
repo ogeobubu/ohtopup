@@ -138,7 +138,7 @@ const Wallet = () => {
   const handleAmountChange = (e) => {
     const value = e.target.value.replace(/,/g, "");
     setAmount(value);
-
+  
     if (value === "") {
       setTotalAmount(0);
     } else {
@@ -553,30 +553,42 @@ const Wallet = () => {
           </Modal>
 
           <Modal
-            isOpen={isDepositModalOpen}
-            closeModal={closeDepositModal}
-            title="Add Funds"
-            isDarkMode={isDarkMode}
-          >
-            <TextField
-              name="amount"
-              label="Amount"
-              placeholder="Enter amount"
-              value={formattedAmount}
-              onChange={handleAmountChange}
-              helperText={`Total Amount (including fees): ${formatNairaAmount(
-                totalAmount
-              )}`}
-            />
-            <div className="my-2">
-              <Button loading={loading} {...componentProps}>
-                <PaystackButton {...componentProps} />
-              </Button>
-              {/* <Button onClick={handleDeposit} disabled={loading}>
-                {loading ? "Processing..." : "Pay"}
-              </Button> */}
-            </div>
-          </Modal>
+  isOpen={isDepositModalOpen}
+  closeModal={closeDepositModal}
+  title="Add Funds"
+  isDarkMode={isDarkMode}
+>
+  <p style={{ color: 'red', fontWeight: 'bold' }}>
+    Please note: The minimum deposit amount is 1000.
+  </p>
+  
+  <TextField
+    name="amount"
+    label="Amount"
+    placeholder="Enter amount"
+    value={formattedAmount}
+    onChange={handleAmountChange}
+    helperText={`Total Amount (including fees): ${formatNairaAmount(totalAmount)}`}
+  />
+  
+  <div className="my-2">
+    <Button 
+      loading={loading} 
+      disabled={amount < 1000 || loading}
+      {...componentProps}
+    >
+      <PaystackButton 
+        {...componentProps} 
+        disabled={amount < 1000}
+      />
+    </Button>
+    {amount > 0 && amount < 1000 && (
+      <p className="text-red-500 text-sm mt-2">
+        Minimum deposit amount is ₦1000
+      </p>
+    )}
+  </div>
+</Modal>
 
           <Modal
             isOpen={isWithdrawModalOpen}

@@ -159,6 +159,9 @@ const depositPaystackWallet = async (req, res) => {
   if (isNaN(amount) || amount <= 0) {
     return res.status(400).json({ message: "Amount must be a positive number." });
   }
+  if (amount < 1000) {
+    return res.status(400).json({ message: "Amount must be at least 1000." });
+  }
 
   try {
     const wallet = await Wallet.findOne({ userId });
