@@ -2,6 +2,7 @@ import { useRoutes, Navigate } from "react-router-dom";
 import Landing from "../pages/landing/home";
 import About from "../pages/landing/about";
 import Pricing from "../pages/landing/pricing";
+import Terms from "../pages/landing/terms";
 import Create from "../pages/auth/create";
 import Verify from "../pages/auth/verify";
 import Login from "../pages/auth/login";
@@ -27,6 +28,10 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
     {
       path: "/pricing",
       element: isLogin ? <Navigate to="/dashboard" /> : <Pricing darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/terms",
+      element: isLogin ? <Navigate to="/dashboard" /> : <Terms darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
     {
       path: "/create",

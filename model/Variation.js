@@ -4,7 +4,6 @@ const VariationSchema = new mongoose.Schema({
   variation_code: {
     type: String,
     required: true,
-    unique: true,
   },
   name: {
     type: String,
@@ -27,6 +26,8 @@ const VariationSchema = new mongoose.Schema({
     default: true,
   },
 });
+
+VariationSchema.index({ variation_code: 1, serviceID: 1 }, { unique: true });
 
 const Variation = mongoose.model('Variation', VariationSchema);
 module.exports = Variation;

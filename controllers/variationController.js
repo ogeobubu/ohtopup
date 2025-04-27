@@ -130,8 +130,6 @@ const getVariations = async (req, res) => {
 const toggleVariation = async (req, res) => {
   const { variation_code } = req.query;
 
-  console.log(variation_code);
-
   try {
     const variation = await Variation.findOne({ variation_code });
 
