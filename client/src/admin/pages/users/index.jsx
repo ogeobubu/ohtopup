@@ -85,7 +85,6 @@ const UserManagement = () => {
   const totalPages = Math.ceil(usersData?.totalCount / 10);
 
   const columns = [
-    { header: "ID", render: (user) => user._id },
     {
       header: "Name",
       render: (user) => (
@@ -100,7 +99,10 @@ const UserManagement = () => {
       ),
     },
     { header: "Email", render: (user) => user?.email },
-    { header: "Role", render: (user) => user?.role },
+    { header: "Source", render: (user) => <span className="capitalize">{user?.source}</span> },
+    { header: "Role", render: (user) => <span className={`inline-flex items-center px-3 py-[0.5px] rounded-full text-white ${user?.role === 'admin' ? 'bg-green-500' : 'bg-blue-500'}`}>
+    {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
+  </span> },
     {
       header: "Actions",
       render: (user) => (
@@ -127,7 +129,7 @@ const UserManagement = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card
           title="Registered Users"
-          count={users.length}
+          count={analyticsData?.totalUsers || 0}
           icon={FaUser}
           bgColor="bg-blue-200"
         />
