@@ -162,6 +162,7 @@ const getAllUsers = async (req, res) => {
 
   try {
     const users = await User.find(query)
+      .sort({ createdAt: -1 })
       .limit(Number(limit))
       .skip((Number(page) - 1) * Number(limit))
       .exec();
@@ -307,7 +308,7 @@ const getAllNotifications = async (req, res) => {
     const formattedNotifications = notifications.map((notification) => ({
       id: notification._id,
       user: {
-        id: notification.userId._id,
+        id: notification?.userId?._id,
         username: notification.userId.username,
         email: notification.userId.email,
       },
