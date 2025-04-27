@@ -25,8 +25,7 @@ const generateUniqueReferralCode = async (username) => {
 };
 
 const createUser = async (req, res) => {
-  const { username, email, phoneNumber, referralCode, password, source } =
-    req.body;
+  const { username, email, phoneNumber, password, source } = req.body;
 
   if (!username || !email || !phoneNumber || !password) {
     return res
@@ -47,7 +46,6 @@ const createUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newReferralCode = await generateUniqueReferralCode(username);
 
     const newUser = new User({
@@ -59,27 +57,7 @@ const createUser = async (req, res) => {
       source,
     });
 
-    if (referralCode) {
-      const referrer = await User.findOne({ referralCode });
-
-      if (referralCode) {
-        const referrer = await User.findOne({ referralCode });
-
-        if (referralCode) {
-          const referrer = await User.findOne({ referralCode });
-          if (referrer) {
-            newUser.referrerId = referrer._id;
-            referrer.referredUsers.push(newUser._id);
-            referrer.referralCount += 1;
-
-            await referrer.save();
-          } else {
-            return res.status(400).json({ message: "Invalid referral code" });
-          }
-        }
-      }
-    }
-
+    // Removed referral code logic
     await newUser.save();
 
     const confirmationCode = Math.floor(Math.random() * 9000) + 1000;

@@ -20,6 +20,8 @@ const Data = () => {
   const [selectedVariations, setSelectedVariations] = useState([]);
   const [activeTab, setActiveTab] = useState("Set");
 
+  console.log(queryId)
+
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     if (tab === "Transactions") {
@@ -74,11 +76,13 @@ const Data = () => {
     try {
       await saveData(dataToSave);
       toast.success("Variations saved successfully!");
+      setQueryId(null);
     } catch (error) {
-      console.error("Error saving variations:", error);
       toast.error("Error saving variations. Please try again.");
+      setQueryId(null);
     } finally {
       setIsSubmitting(false);
+      setQueryId(null);
     }
   };
 
@@ -86,11 +90,11 @@ const Data = () => {
     try {
       await toggleData(variation_code);
       toast.success("Variation toggled successfully!");
-
+      setQueryId(null);
       queryClient.invalidateQueries(["variations", queryId]);
       queryClient.invalidateQueries(["getVariations", queryId]);
     } catch (error) {
-      console.error("Error toggling variation:", error);
+      setQueryId(null);
       toast.error("Error toggling variation. Please try again.");
     }
   };

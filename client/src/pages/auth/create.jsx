@@ -59,6 +59,7 @@ const Create = ({ darkMode }) => {
       navigate("/verify");
     },
     onError: (error) => {
+      console.error("Error creating account:", error); // Log the error for debugging
       const errorMessage =
         error.response?.data?.message || "Error creating account";
       toast.error(errorMessage);
@@ -216,9 +217,9 @@ const Create = ({ darkMode }) => {
                   <div className="my-4">
                     <p className="text-sm text-gray-500 text-lead text-center text-[16px]">
                       By clicking on “Create Account”, you have agreed to our{" "}
-                      <span className="text-sm text-green-600 text-[16px]">
+                      <Link to="/terms" className="text-sm text-green-600 text-[16px]">
                         Terms & Conditions.
-                      </span>
+                      </Link>
                     </p>
                   </div>
                 </Form>

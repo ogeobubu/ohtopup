@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const Variation = require("./model/Variation");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -18,10 +19,27 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
+async function findDuplicates() {
+  const duplicates = await Variation.aggregate([
+    {
+      $group: {
+        _id: { variation_code: "$variation_code", serviceID: "$serviceID" },
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $match: { count: { $gt: 1 } }
+    }
+  ]);
+
+  console.log('Duplicates:', duplicates);
+}
+
 const connectToDatabase = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("MongoDB connected successfully");
+    return findDuplicates();
   } catch (err) {
     console.error("Error connecting to MongoDB:", err.message);
     process.exit(1);

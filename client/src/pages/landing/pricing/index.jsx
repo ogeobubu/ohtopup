@@ -8,11 +8,15 @@ import { getPricing } from "../../../api";
 import dstv from "../../../assets/dstv.png";
 import mtn from "../../../assets/mtn.png";
 import glo from "../../../assets/glo.png";
+import airtel from "../../../assets/airtel.svg";
+import nineMobile from "../../../assets/9mobile.svg";
 
 const imageMap = {
   mtn: mtn,
   dstv: dstv,
   glo: glo,
+  airt: airtel,
+  eti: nineMobile
 };
 
 const formatPrice = (amount) => {
