@@ -43,6 +43,8 @@ const {
   toggleVariation,
 } = require("../controllers/variationController");
 
+const { readNotification } = require("../controllers/notificationController")
+
 const { replyTicket, getTickets, updateTicket } = require("../controllers/ticketController");
 
 const authUser = require("../middleware/authMiddleware");
@@ -93,5 +95,7 @@ router.patch("/tickets/:id", authUser, authAdmin, updateTicket);
 
 router.get("/rates", authUser, authAdmin, getRates);
 router.post("/rates", authUser, authAdmin, setRates);
+
+router.patch("/notification/:id", authUser, authAdmin, readNotification);
 
 module.exports = router;
