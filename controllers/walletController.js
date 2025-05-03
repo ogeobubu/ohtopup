@@ -64,6 +64,7 @@ const getWallets = async (req, res) => {
 
     const wallets = await Wallet.find(searchQuery)
       .skip(skip)
+      .sort({ createdAt: -1 })
       .limit(Number(limit))
       .populate("userId", "username email");
 
@@ -80,9 +81,9 @@ const getWallets = async (req, res) => {
 
     const walletDetails = wallets.map((wallet) => ({
       _id: wallet._id,
-      userId: wallet.userId._id,
-      username: wallet.userId.username,
-      email: wallet.userId.email,
+      userId: wallet.userId ? wallet.userId._id : null,
+      username: wallet.userId ? wallet.userId.username : "Unknown",
+      email: wallet.userId ? wallet.userId.email : "Unknown",
       balance: wallet.balance,
       transactions: wallet.transactions,
       isActive: wallet.isActive,
@@ -96,7 +97,14 @@ const getWallets = async (req, res) => {
       limit,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching wallets", error });
+    console.error("Error fetching wallets:", error);
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid wallet ID format" });
+    }
+    if (error.name === 'ValidationError') {
+      return res.status(422).json({ message: "Validation error", details: error.message });
+    }
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
 

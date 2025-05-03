@@ -33,6 +33,23 @@ const Verify = ({ darkMode }) => {
     };
   }, []);
 
+  const handlePaste = (event, index) => {
+    const pastedData = event.clipboardData.getData("text").slice(0, 4);
+    const inputs = pastedData.split("");
+
+    inputs.forEach((value, i) => {
+      if (index + i < inputRefs.current.length) {
+        inputRefs.current[index + i].value = value;
+        inputRefs.current[index + i].dispatchEvent(new Event("input")); // Trigger input event
+      }
+    });
+
+    event.preventDefault();
+    if (inputs.length > 0) {
+      inputRefs.current[Math.min(index + inputs.length, inputRefs.current.length - 1)].focus();
+    }
+  };
+
   const validationSchema = Yup.object().shape({
     confirmationCode: Yup.string()
       .length(4, "Code must be 4 digits")
@@ -58,8 +75,12 @@ const Verify = ({ darkMode }) => {
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg font-semibold">Verify Email</h3>
             <p className="text-gray-600">
-              Enter your confirmation code to verify email address.
+              Enter your confirmation code to verify your email address.
             </p>
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Note:</strong>
+              <span className="block sm:inline"> If you don't see the email, please check your spam folder.</span>
+            </div>
             <Formik
               initialValues={{ confirmationCode: "" }}
               validationSchema={validationSchema}
@@ -93,6 +114,7 @@ const Verify = ({ darkMode }) => {
                             ${isError ? "border-red-500" : "border-blue-500"} 
                             focus:outline-none focus:border-blue-600`}
                           maxLength="1"
+                          onPaste={(e) => handlePaste(e, index)}
                           onChange={(e) => {
                             setFieldValue(
                               "confirmationCode",
@@ -148,9 +170,9 @@ const Verify = ({ darkMode }) => {
                   <br />
                   <br />
                   <div className="my-3">
-                  <Button type="submit" disabled={isSubmitting}>
-                    Verify Code
-                  </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      Verify Code
+                    </Button>
                   </div>
                   <Link
                     className="flex justify-center items-center text-blue-500 hover:text-blue-700 focus:text-blue-700 text-center"

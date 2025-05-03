@@ -52,6 +52,7 @@ const getAdminReferrals = async (req, res) => {
     const totalUsers = await User.countDocuments(filter);
     const users = await User.find(filter)
       .skip((page - 1) * limit)
+      .sort({ createdAt: -1 })
       .limit(parseInt(limit, 10))
       .populate("referredUsers", "username email")
       .select("username email points referredUsers");
@@ -309,11 +310,11 @@ const getAllNotifications = async (req, res) => {
       id: notification._id,
       user: {
         id: notification?.userId?._id,
-        username: notification.userId.username,
-        email: notification.userId.email,
+        username: notification?.userId?.username,
+        email: notification?.userId?.email,
       },
-      message: notification.message,
-      createdAt: notification.createdAt,
+      message: notification?.message,
+      createdAt: notification?.createdAt,
     }));
 
     res.status(200).json({

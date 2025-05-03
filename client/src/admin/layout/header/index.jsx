@@ -59,7 +59,6 @@ const Header = () => {
   const handleNotificationClick = async (notification) => {
     await readNotification(notification.id);
     refetch();
-    navigate(`${notification.link}`);
     setIsNotificationOpen(false);
   };
 
