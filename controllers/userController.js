@@ -25,7 +25,7 @@ const generateUniqueReferralCode = async (username) => {
 };
 
 const createUser = async (req, res) => {
-  const { username, email, phoneNumber, password, source } = req.body;
+  const { username, email, phoneNumber, password, source, referrerCode } = req.body;
 
   if (!username || !email || !phoneNumber || !password) {
     return res.status(400).json({ message: "Please provide all required fields" });
@@ -50,14 +50,23 @@ const createUser = async (req, res) => {
       referralCode: newReferralCode,
       password: hashedPassword,
       source,
+      referrerCode, // Store the referrer code if provided
     });
 
-    await newUser.save(); // Save user first
+    await newUser.save();
 
     // Create and save wallet for the new user
     const wallet = new Wallet({ userId: newUser._id });
     await wallet.save();
-    console.log("Wallet created:", wallet);
+
+    // Handle points for the referrer
+    if (referrerCode) {
+      const referrer = await User.findOne({ referralCode: referrerCode });
+      if (referrer) {
+        referrer.referredUsers.push(newUser._id); // Track referred user
+        await referrer.save();
+      }
+    }
 
     const confirmationCode = Math.floor(Math.random() * 9000) + 1000;
     newUser.confirmationCode = confirmationCode;
