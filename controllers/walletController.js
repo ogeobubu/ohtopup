@@ -49,35 +49,17 @@ const getWallet = async (req, res) => {
 
 const getWallets = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "" } = req.query;
-
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const searchQuery = search
-      ? {
-          $or: [
-            { "userId.username": { $regex: search, $options: "i" } },
-            { "userId.email": { $regex: search, $options: "i" } },
-            { balance: { $regex: search, $options: "i" } },
-          ],
-        }
-      : {};
 
-    const wallets = await Wallet.find(searchQuery)
+    // Fetch the wallets with pagination
+    const wallets = await Wallet.find({})
       .skip(skip)
+      .limit(limit)
       .sort({ createdAt: -1 })
-      .limit(Number(limit))
-      .populate("userId", "username email");
-
-    if (!wallets || wallets.length === 0) {
-      return res.status(404).json({ message: "No wallets found" });
-    }
-
-    const totalBalance = wallets.reduce(
-      (acc, wallet) => acc + wallet.balance,
-      0
-    );
-
-    const totalCount = await Wallet.countDocuments(searchQuery);
+      .populate("userId", "username email")
+      .exec();
 
     const walletDetails = wallets.map((wallet) => ({
       _id: wallet._id,
@@ -89,22 +71,26 @@ const getWallets = async (req, res) => {
       isActive: wallet.isActive,
     }));
 
+    const totalCount = await Wallet.countDocuments({});
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Calculate total wallet balance
+    const totalBalance = await Wallet.aggregate([
+      { $group: { _id: null, total: { $sum: "$balance" } } }
+    ]);
+
+    const totalWalletAmount = totalBalance.length > 0 ? totalBalance[0].total : 0;
+
     res.json({
-      data: walletDetails,
-      totalCount,
-      totalBalance,
-      page,
-      limit,
+      currentPage: page,
+      totalPages: totalPages,
+      totalWallets: totalCount,
+      totalWalletAmount: totalWalletAmount,
+      wallets: walletDetails,
     });
   } catch (error) {
     console.error("Error fetching wallets:", error);
-    if (error.name === 'CastError') {
-      return res.status(400).json({ message: "Invalid wallet ID format" });
-    }
-    if (error.name === 'ValidationError') {
-      return res.status(422).json({ message: "Validation error", details: error.message });
-    }
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res.status(500).json({ message: "Error fetching wallets", error });
   }
 };
 

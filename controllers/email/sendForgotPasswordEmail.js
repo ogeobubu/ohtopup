@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-const sendForgotPasswordEmail = async (user, fullName) => {
+const sendForgotPasswordEmail = async (email, user, fullName) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -11,7 +11,7 @@ const sendForgotPasswordEmail = async (user, fullName) => {
   });
 
   const mailOptions = {
-    to: user.email,
+    to: email,
     from: process.env.EMAIL_USER,
     subject: "Reset Your OhTopUp Password",
     html: `

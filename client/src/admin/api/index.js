@@ -32,14 +32,14 @@ instance.interceptors.response.use(
   (error) => {
     if (error.response) {
       if (error.response.status === 401) {
-        if(error.response.data.message === "Invalid token") {
-          localStorage.removeItem("ohtopup-admin-token")
+        if (error.response.data.message === "Invalid token") {
+          localStorage.removeItem("ohtopup-admin-token");
           window.location.href = "/admin";
         }
       } else if (error.response.status === 403) {
-        if(error.response.data.message === "Invalid token") {
-          localStorage.removeItem("ohtopup-admin-token")
-        window.location.href = "/admin";
+        if (error.response.data.message === "Invalid token") {
+          localStorage.removeItem("ohtopup-admin-token");
+          window.location.href = "/admin";
         }
       } else {
         console.error("Response Error:", error.response.data);
@@ -143,7 +143,9 @@ export const getAllUsersNotifications = async ({ page, username }) => {
     });
     return response?.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error fetching notifications");
+    throw new Error(
+      error.response?.data?.message || "Error fetching notifications"
+    );
   }
 };
 
@@ -224,9 +226,11 @@ export const depositWallet = async (id, data) => {
   }
 };
 
-export const getWallets = async () => {
+export const getWallets = async (page = 1, limit = 10) => {
   try {
-    const response = await instance.get(`/wallets`);
+    const response = await instance.get(`/wallets`, {
+      params: { page, limit },
+    });
     return response.data;
   } catch (error) {
     throw new Error(error.response.data.message || "Error fetching user");
@@ -396,7 +400,7 @@ export const updateDetails = async () => {
   }
 };
 
-export const getTickets = async (page = 1, limit = 10, searchQuery = '') => {
+export const getTickets = async (page = 1, limit = 10, searchQuery = "") => {
   try {
     const response = await instance.get(`/tickets`, {
       params: { page, limit, searchQuery },
@@ -444,7 +448,7 @@ export const readNotification = async (id) => {
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching data");
   }
-}
+};
 
 export const getRates = async () => {
   try {

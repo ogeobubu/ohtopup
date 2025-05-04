@@ -28,9 +28,7 @@ const createUser = async (req, res) => {
   const { username, email, phoneNumber, password, source } = req.body;
 
   if (!username || !email || !phoneNumber || !password) {
-    return res
-      .status(400)
-      .json({ message: "Please provide all required fields" });
+    return res.status(400).json({ message: "Please provide all required fields" });
   }
 
   try {
@@ -38,10 +36,7 @@ const createUser = async (req, res) => {
 
     if (existingUser) {
       return res.status(400).json({
-        message:
-          existingUser.username === username
-            ? "Username already exists"
-            : "Email already exists",
+        message: existingUser.username === username ? "Username already exists" : "Email already exists",
       });
     }
 
@@ -57,8 +52,12 @@ const createUser = async (req, res) => {
       source,
     });
 
-    // Removed referral code logic
-    await newUser.save();
+    await newUser.save(); // Save user first
+
+    // Create and save wallet for the new user
+    const wallet = new Wallet({ userId: newUser._id });
+    await wallet.save();
+    console.log("Wallet created:", wallet);
 
     const confirmationCode = Math.floor(Math.random() * 9000) + 1000;
     newUser.confirmationCode = confirmationCode;
@@ -71,14 +70,11 @@ const createUser = async (req, res) => {
         confirmationCodeExpires: newUser.confirmationCodeExpires,
       }
     );
+
     await sendConfirmationEmail(newUser.email, username, confirmationCode);
 
-    const wallet = new Wallet({ userId: newUser._id });
-    await wallet.save();
-
     res.status(201).json({
-      message:
-        "User created successfully! Please verify your email to activate your account.",
+      message: "User created successfully! Please verify your email to activate your account.",
     });
   } catch (error) {
     console.error(error);
@@ -250,7 +246,7 @@ const forgotPassword = async (req, res) => {
       { otp: user.otp, otpExpires: user.otpExpires }
     );
 
-    await sendForgotPasswordEmail(user, user.username);
+    await sendForgotPasswordEmail(email, user, user.username);
     res.status(200).json({ message: "OTP sent to your email." });
   } catch (error) {
     res.status(500).json({ message: "Error sending OTP", error });
