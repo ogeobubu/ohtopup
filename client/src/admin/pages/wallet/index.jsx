@@ -65,9 +65,11 @@ const AdminWalletManagement = () => {
     error: walletError,
     refetch: refetchWallets,
   } = useQuery({
-    queryKey: ["wallets"],
-    queryFn: getWallets,
+    queryKey: ["wallets", currentPage, limit],
+    queryFn: () => getWallets(currentPage, limit),
   });
+
+  const totalWalletPages = wallets?.totalPages || 1;
 
   const {
     data: transactions,
@@ -197,7 +199,7 @@ const AdminWalletManagement = () => {
       <div className="mb-3">
         <Card
           title="Total Balance"
-          count={formatNairaAmount(wallets?.totalBalance)}
+          count={formatNairaAmount(wallets?.totalWalletAmount)}
           icon={FaMoneyBill}
           bgColor="bg-blue-200"
         />
@@ -236,43 +238,52 @@ const AdminWalletManagement = () => {
       </div>
 
       {activeTab === "Wallets" && (
-        <div className="overflow-x-auto">
-          <Table
-            columns={[
-              { header: "User", render: (row) => <p>{row.username}</p> },
-              {
-                header: "Wallet Balance",
-                render: (row) => <p>{formatNairaAmount(row?.balance)}</p>,
-              },
-              {
-                header: "Actions",
-                render: (row) => (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleToggleWallet(row._id, row.isActive)}
-                      className={`flex justify-center items-center rounded-full border border-solid w-6 h-6 ${
-                        row.isActive ? "border-green-500" : "border-red-500"
-                      } text-blue-500`}
-                    >
-                      {row.isActive ? (
-                        <FaToggleOn className="text-green-500" size={15} />
-                      ) : (
-                        <FaToggleOff className="text-red-500" size={15} />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => openModal(row)}
-                      className="border border-solid border-green-500 flex justify-center items-center rounded-full w-6 h-6 text-green-500 hover:text-green-700"
-                    >
-                      <FaWallet size={15} />
-                    </button>
-                  </div>
-                ),
-              },
-            ]}
-            data={wallets?.data}
+        <>
+          <div className="overflow-x-auto">
+            <Table
+              columns={[
+                { header: "User", render: (row) => <p>{row.username}</p> },
+                {
+                  header: "Wallet Balance",
+                  render: (row) => <p>{formatNairaAmount(row?.balance)}</p>,
+                },
+                {
+                  header: "Actions",
+                  render: (row) => (
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() =>
+                          handleToggleWallet(row._id, row.isActive)
+                        }
+                        className={`flex justify-center items-center rounded-full border border-solid w-6 h-6 ${
+                          row.isActive ? "border-green-500" : "border-red-500"
+                        } text-blue-500`}
+                      >
+                        {row.isActive ? (
+                          <FaToggleOn className="text-green-500" size={15} />
+                        ) : (
+                          <FaToggleOff className="text-red-500" size={15} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => openModal(row)}
+                        className="border border-solid border-green-500 flex justify-center items-center rounded-full w-6 h-6 text-green-500 hover:text-green-700"
+                      >
+                        <FaWallet size={15} />
+                      </button>
+                    </div>
+                  ),
+                },
+              ]}
+              data={wallets?.wallets}
+            />
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalWalletPages}
+            onPageChange={setCurrentPage}
           />
-        </div>
+        </>
       )}
 
       {activeTab === "Transactions" && (
