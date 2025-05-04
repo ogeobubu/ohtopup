@@ -55,7 +55,7 @@ const getAdminReferrals = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(parseInt(limit, 10))
       .populate("referredUsers", "username email")
-      .select("username email points referredUsers");
+      .select("username email points referredUsers referralCode");
 
     return res.status(200).json({
       totalUsers,
@@ -67,6 +67,7 @@ const getAdminReferrals = async (req, res) => {
         email: user.email,
         points: user.points,
         referredUsers: user.referredUsers,
+        referralCode: user.referralCode,
       })),
     });
   } catch (error) {

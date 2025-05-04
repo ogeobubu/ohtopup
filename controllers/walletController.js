@@ -1,4 +1,5 @@
 const Wallet = require("../model/Wallet");
+const User = require("../model/User");
 const Transaction = require("../model/Transaction");
 const axios = require("axios");
 const { generateRandomAccountNumber } = require("../utils");
@@ -53,23 +54,39 @@ const getWallets = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
-    // Fetch the wallets with pagination
+    // Fetch the wallets with pagination, sorted to show the latest first
     const wallets = await Wallet.find({})
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 }) // Latest wallets first
       .populate("userId", "username email")
       .exec();
 
-    const walletDetails = wallets.map((wallet) => ({
-      _id: wallet._id,
-      userId: wallet.userId ? wallet.userId._id : null,
-      username: wallet.userId ? wallet.userId.username : "Unknown",
-      email: wallet.userId ? wallet.userId.email : "Unknown",
-      balance: wallet.balance,
-      transactions: wallet.transactions,
-      isActive: wallet.isActive,
+    // Array to hold wallets to delete
+    const walletsToDelete = [];
+
+    const walletDetails = await Promise.all(wallets.map(async (wallet) => {
+      if (!wallet.userId || !wallet.userId.username || !wallet.userId.email) {
+        // If user doesn't exist, mark wallet for deletion
+        walletsToDelete.push(wallet._id);
+        return null; // Skip this wallet in the response
+      }
+
+      return {
+        _id: wallet._id,
+        userId: wallet.userId._id,
+        username: wallet.userId.username,
+        email: wallet.userId.email,
+        balance: wallet.balance,
+        transactions: wallet.transactions,
+        isActive: wallet.isActive,
+      };
     }));
+
+    // Delete wallets that don't have valid users
+    if (walletsToDelete.length > 0) {
+      await Wallet.deleteMany({ _id: { $in: walletsToDelete } });
+    }
 
     const totalCount = await Wallet.countDocuments({});
     const totalPages = Math.ceil(totalCount / limit);
@@ -86,7 +103,7 @@ const getWallets = async (req, res) => {
       totalPages: totalPages,
       totalWallets: totalCount,
       totalWalletAmount: totalWalletAmount,
-      wallets: walletDetails,
+      wallets: walletDetails.filter(Boolean), // Filter out null values
     });
   } catch (error) {
     console.error("Error fetching wallets:", error);
@@ -163,6 +180,10 @@ const depositPaystackWallet = async (req, res) => {
       return res.status(404).json({ message: "Wallet not found." });
     }
 
+    // Check if this is the user's first deposit
+    const user = await User.findById(userId);
+    const isFirstDeposit = wallet.transactions.length === 0;
+
     transaction = new Transaction({
       walletId: wallet._id,
       amount,
@@ -179,6 +200,14 @@ const depositPaystackWallet = async (req, res) => {
 
     transaction.status = "completed";
     await transaction.save();
+
+    if (isFirstDeposit && amount >= 1000) {
+      const referrer = user.referrerCode ? await User.findOne({ referralCode: user.referrerCode }) : null;
+      if (referrer) {
+        referrer.points = (referrer.points || 0) + 10;
+        await referrer.save();
+      }
+    }
 
     res.json(wallet);
   } catch (error) {

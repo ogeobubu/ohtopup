@@ -65,7 +65,7 @@ const Referral = () => {
 
   const columns = [
     { header: "Username", render: (item) => item.username },
-    { header: "Email", render: (item) => item.email },
+    { header: "Referral Code", render: (item) => item.referralCode },
     {
       header: "Referred Users",
       render: (item) => item?.referredUsers?.length || 0,
