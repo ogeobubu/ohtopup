@@ -5,7 +5,7 @@ const utilitySchema = new mongoose.Schema(
     requestId: {
       type: String,
       required: true,
-      unique: true,
+      unique: true, 
     },
     serviceID: {
       type: String,
@@ -13,8 +13,14 @@ const utilitySchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "completed", "failed", "delivered"],
-      default: "pending",
+      enum: [
+        "initiated", 
+        "pending",   
+        "delivered",
+        "failed", 
+        "review_needed",
+      ],
+      default: "initiated",
     },
     type: {
       type: String,
@@ -36,6 +42,14 @@ const utilitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    billersCode: {
+        type: String,
+        trim: true,
+    },
+    variation_code: {
+        type: String,
+        trim: true,
+    },
     token: {
       type: String,
     },
@@ -55,16 +69,21 @@ const utilitySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    transactionDate: {
-      type: Date,
-      default: Date.now,
-    },
     paymentMethod: {
       type: String,
+     
     },
     category: {
       type: String,
     },
+    
+     localStatus: {
+        type: String,
+        enum: ['review_needed', 'reconciled', 'error'],
+     },
+     localErrorMessage: {
+         type: String,
+     }
   },
   { timestamps: true }
 );

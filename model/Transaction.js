@@ -53,8 +53,8 @@ const transactionSchema = new mongoose.Schema(
         "bank_transfer",
         "card_payment",
         "naira_wallet",
-        "CARD",
-        "ACCOUNT_TRANSFER",
+        "CARD",    
+        "ACCOUNT_TRANSFER", 
       ],
       required: true,
     },
@@ -63,4 +63,5 @@ const transactionSchema = new mongoose.Schema(
 );
 
 const Transaction = mongoose.model("Transaction", transactionSchema);
+
 module.exports = Transaction;

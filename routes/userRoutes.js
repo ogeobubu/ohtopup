@@ -35,10 +35,11 @@ const {
   depositPaystackWallet
 } = require("../controllers/walletController");
 
+const { buyAirtime } = require("../controllers/airtimeController")
+const { buyData } = require("../controllers/dataController")
+
 const {
-  buyAirtime,
   variationCodes,
-  buyData,
   getServiceID,
   variationTVCodes,
   verifySmartcard,
@@ -93,7 +94,7 @@ router.post("/airtime", auth, buyAirtime);
 // router.get("/data", auth, variationCodes);
 router.get("/data", auth, getVariations);
 router.post("/data", auth, buyData);
-router.get("/service-id", auth, getServiceID);
+router.get("/service-id", getServiceID);
 router.get("/cable", auth, variationTVCodes);
 router.post("/cable/verify", auth, verifySmartcard);
 router.post("/cable", auth, purchaseCable);
