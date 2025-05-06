@@ -29,6 +29,7 @@ const variationCodes = async (req, res) => {
   res.status(200).json(response.data.content.varations);
 };
 
+
 const getServiceID = async (req, res) => {
   const VTPASS_URL = process.env.VTPASS_URL;
   const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
@@ -147,6 +148,127 @@ const verifySmartcard = async (req, res) => {
   }
 };
 
+const purchaseCable = async (req, res) => {
+  const {
+    serviceID,
+    billersCode,
+    variation_code,
+    amount,
+    phone,
+    subscription_type,
+  } = req.body;
+
+  const VTPASS_URL = process.env.VTPASS_URL;
+  const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
+  const VTPASS_SECRET_KEY = process.env.VTPASS_SECRET_KEY;
+
+  const request_id = generateRequestId();
+
+  if (!request_id || !serviceID || !amount || !phone) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  const user = await User.findById(req.user.id);
+  const wallet = await Wallet.findOne({ userId: req.user.id });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found." });
+  }
+
+  if (!wallet) {
+    return res.status(404).json({ message: "Wallet not found." });
+  }
+
+  if (wallet.balance < amount) {
+    return res.status(400).json({ error: "Insufficient funds." });
+  }
+
+  if (!wallet.isActive) {
+    return res
+      .status(400)
+      .json({ message: "Wallet is disabled. Transactions cannot be made." });
+  }
+
+  const data = {
+    request_id,
+    serviceID,
+    billersCode,
+    variation_code,
+    amount,
+    phone,
+    subscription_type,
+  };
+
+  const headers = {
+    "api-key": VTPASS_API_KEY,
+    "secret-key": VTPASS_SECRET_KEY,
+    "Content-Type": "application/json",
+  };
+
+  try {
+    const response = await axios.post(`${VTPASS_URL}/api/pay`, data, {
+      headers,
+    });
+
+    const transactionStatus = response.data.content.transactions.status;
+    const transactionType = response.data.content.transactions.type;
+    const productName = response.data.content.transactions.product_name;
+    const totalAmount = response.data.content.transactions.total_amount;
+    const discount = response.data.content.transactions.discount;
+    const commissionRate = response.data.content.transactions.commission;
+    const paymentMethod = "api";
+
+    const newTransaction = new Utility({
+      requestId: request_id,
+      serviceID,
+      status: transactionStatus,
+      type: transactionType,
+      product_name: productName,
+      amount,
+      phone: billersCode,
+      revenue: totalAmount,
+      user: user._id,
+      transactionDate: new Date(),
+      discount,
+      commissionRate,
+      paymentMethod,
+    });
+
+    const notificationMessage =
+      transactionStatus === "failed"
+        ? `Transaction failed for ${productName}. Amount: ${amount}.`
+        : `Transaction successful for ${productName}. Amount: ${amount}.`;
+
+    const newNotification = new Notification({
+      userId: user._id,
+      title: `Transaction ${transactionStatus}`,
+      message: notificationMessage,
+      createdAt: new Date(),
+      link: "/transactions",
+    });
+
+    // Save notification to the database
+    await newNotification.save();
+
+    if (transactionStatus === "failed") {
+      await newTransaction.save();
+      return res.status(400).json({ message: "Transaction failed!" });
+    }
+
+    wallet.balance -= amount;
+    await wallet.save();
+    await newTransaction.save();
+
+    res.status(201).json({
+      message: "Transaction successful!",
+      transaction: newTransaction,
+    });
+  } catch (err) {
+    console.error("Error processing transaction:", err);
+    res.status(500).json({ message: "Error processing transaction." });
+  }
+};
+
 const verifyElecticity = async (req, res) => {
   const { billersCode, serviceID, type } = req.body;
 
@@ -176,6 +298,8 @@ const verifyElecticity = async (req, res) => {
     data: newData,
   });
 };
+
+
 
 const getAllUtilityTransactions = async (req, res) => {
   try {
@@ -413,7 +537,9 @@ module.exports = {
   getServiceID,
   variationTVCodes,
   verifySmartcard,
+  purchaseCable,
   verifyElecticity,
+  purchaseElectricity,
   getAllUtilityTransactions,
   getAnalytics,
   usersRank,

@@ -58,7 +58,11 @@ const formatPhoneNumber = (phoneNumber) => {
 
 const Cable = ({ user, isDarkMode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const closeModal = () => setIsModalOpen(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setIsSubmitting(false);
+  };
 
   useEffect(() => {
     setIsModalOpen(true);
@@ -113,6 +117,7 @@ const Cable = ({ user, isDarkMode }) => {
     data: accountNameApi,
     error: accountNameError,
     isLoading: accountNameLoading,
+    isFetching: accountNameFetching,
   } = useQuery({
     queryKey: ["accountName", accountNumber, queryId],
     queryFn: () =>
@@ -130,6 +135,7 @@ const Cable = ({ user, isDarkMode }) => {
     },
     onError: (error) => {
       toast.error(error.message || "Transaction failed. Please try again.");
+      setIsSubmitting(false);
     },
   });
 
@@ -148,61 +154,69 @@ const Cable = ({ user, isDarkMode }) => {
     source: Yup.string().required("Please select a data plan"),
   });
 
+  const handleSubmit = async (values) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    const code = accountNameApi?.data.Current_Bouquet_Code;
+    const test = code?.split(",")[0];
+    let data = null;
+    if (!changeBouquet) {
+      data = {
+        serviceID: values.provider,
+        billersCode: values.accountNumber,
+        amount: accountNameApi?.data?.Renewal_Amount?.toString(),
+        phone: formatPhoneNumber(values.phoneNumber),
+        subscription_type: "renew",
+      };
+    } else {
+      data = {
+        serviceID: values.provider,
+        billersCode: values.accountNumber,
+        amount: values.amount,
+        phone: formatPhoneNumber(values.phoneNumber),
+        variation_code: values.source,
+        subscription_type: "change",
+      };
+    }
+    mutation.mutate(data);
+  };
+
   return (
     <div className="border border-solid border-gray-200 rounded-md p-6 h-full flex flex-col items-center justify-center">
-    <div className="relative">
-    <button
-      onClick={() => setIsModalOpen(true)}
-      className="flex items-center justify-center bg-blue-500 text-white font-semibold py-2 px-4 rounded-full"
-    >
-      <span className="animate-bounce">Click to Open Modal</span>
-    </button>
-  </div>
+      <div className="relative">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center justify-center bg-blue-500 text-white font-semibold py-2 px-4 rounded-full"
+        >
+          <span className="animate-bounce">Click to Open Modal</span>
+        </button>
+      </div>
       <Modal
         isOpen={isModalOpen}
         closeModal={closeModal}
         title="Cable Purchase"
         isDarkMode={isDarkMode}
       >
-        {identifersError ? (
+        {identifersLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : identifersError ? (
           <p className="text-center text-xl text-gray-500">
-            A problem occurred or service is currently unavailabe. Try again
-            later!
+            A problem occurred or service is currently unavailable. Try again later!
           </p>
         ) : (
           <Formik
-          initialValues={{
-            phoneNumber: "", 
-            amount: "", 
-            provider: "",
-            source: "",
-            accountNumber: "",
-          }}
-            // validationSchema={validationSchema}
-            onSubmit={(values) => {
-              const code = accountNameApi?.data.Current_Bouquet_Code;
-              const test = code.split(",")[0];
-              let data = null;
-              if (!changeBouquet) {
-                data = {
-                  serviceID: values.provider,
-                  billersCode: values.accountNumber,
-                  amount: accountNameApi?.data?.Renewal_Amount?.toString(),
-                  phone: formatPhoneNumber(values.phoneNumber),
-                  subscription_type: "renew",
-                };
-              } else {
-                data = {
-                  serviceID: values.provider,
-                  billersCode: values.accountNumber,
-                  amount: values.amount,
-                  phone: formatPhoneNumber(values.phoneNumber),
-                  variation_code: values.source,
-                  subscription_type: "change",
-                };
-              }
-              mutation.mutate(data);
+            initialValues={{
+              phoneNumber: "", 
+              amount: "", 
+              provider: "",
+              source: "",
+              accountNumber: "",
             }}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
           >
             {(formik) => {
               const handleProviderChange = (provider) => {
@@ -222,31 +236,38 @@ const Cable = ({ user, isDarkMode }) => {
               return (
                 <Form className="flex flex-col">
                   <div className="flex flex-col">
-                  <label className={`text-[#6d7a98] ${isDarkMode ? 'text-gray-300' : 'text-black'}`} htmlFor="provider">
+                    <label className={`text-[#6d7a98] ${isDarkMode ? 'text-gray-300' : 'text-black'}`} htmlFor="provider">
                       Select Network Provider
                     </label>
-                    <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2">
-                      {identifers?.map((provider) => (
-                        <button
-                          key={provider.serviceID}
-                          type="button"
-                          className={`flex justify-center items-center rounded-full h-9 w-9 ${
-                            formik.values.provider === provider.serviceID
-                              ? "border-2 border-blue-500"
-                              : "border-0"
-                          }`}
-                          onClick={() =>
-                            handleProviderChange(provider.serviceID)
-                          }
-                        >
-                          <img
-                            src={provider?.image}
-                            alt={provider.serviceID}
-                            className="h-8 w-8 rounded-full"
-                          />
-                        </button>
-                      ))}
-                    </div>
+                    {identifersLoading ? (
+                      <div className="flex justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+                      </div>
+                    ) : (
+                      <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2 dark:border-gray-600">
+                        {identifers?.map((provider) => (
+                          <button
+                            key={provider.serviceID}
+                            type="button"
+                            className={`flex justify-center items-center rounded-full h-9 w-9 ${
+                              formik.values.provider === provider.serviceID
+                                ? "border-2 border-blue-500"
+                                : "border-0"
+                            }`}
+                            onClick={() =>
+                              handleProviderChange(provider.serviceID)
+                            }
+                            disabled={isSubmitting}
+                          >
+                            <img
+                              src={provider?.image}
+                              alt={provider.serviceID}
+                              className="h-8 w-8 rounded-full"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <ErrorMessage
                       name="provider"
                       component="div"
@@ -257,21 +278,29 @@ const Cable = ({ user, isDarkMode }) => {
                   {formik.values.provider && (
                     <>
                       <div className="flex flex-col mt-3">
-                        <label className={`block text-gray-500`}>
+                        <label className={`block text-gray-500 dark:text-gray-300`}>
                           Smart Card Number
                         </label>
                         <Field name="accountNumber">
                           {({ field, form }) => (
-                            <TextField
-                              {...field}
-                              type="text"
-                              value={field.value || ""}
-                              className="w-full border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                              onChange={(e) => {
-                                form.setFieldValue(field.name, e.target.value);
-                                verifyAccountName(e.target.value);
-                              }}
-                            />
+                            <div className="relative">
+                              <TextField
+                                {...field}
+                                type="text"
+                                value={field.value || ""}
+                                className="w-full border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                                onChange={(e) => {
+                                  form.setFieldValue(field.name, e.target.value);
+                                  verifyAccountName(e.target.value);
+                                }}
+                                disabled={isSubmitting}
+                              />
+                              {accountNameFetching && (
+                                <div className="absolute right-3 top-3">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </Field>
                         <ErrorMessage
@@ -280,10 +309,15 @@ const Cable = ({ user, isDarkMode }) => {
                           className="text-red-500 text-sm"
                         />
                       </div>
-                      {accountNameApi && (
+                      {accountNameLoading ? (
+                        <div className="space-y-3 my-3">
+                          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                        </div>
+                      ) : accountNameApi && (
                         <>
                           <div className="flex flex-col">
-                            <label className={`mb-1 block text-gray-500`}>
+                            <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
                               Smart Card Name
                             </label>
                             <Field name="accountName">
@@ -299,7 +333,7 @@ const Cable = ({ user, isDarkMode }) => {
                             </Field>
                           </div>
                           <div className="flex flex-col">
-                            <label className={`mb-1 block text-gray-500`}>
+                            <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
                               Current Bouquet
                             </label>
                             <Field name="accountName">
@@ -315,45 +349,52 @@ const Cable = ({ user, isDarkMode }) => {
                             </Field>
                           </div>
                           <button
+                          type="button"
                             onClick={() => setChangeBouquet((prev) => !prev)}
-                            className="ml-auto cursor-pointer"
+                            className="ml-auto cursor-pointer text-blue-500 dark:text-blue-400"
+                            disabled={isSubmitting}
                           >
-                            {!changeBouquet ? "Do not renew" : "Renew package"}
+                            {!changeBouquet ? "Change package" : "Renew current package"}
                           </button>
                         </>
                       )}
                       {changeBouquet && (
                         <div>
-                          <label className="block text-gray-500 mb-2">
+                          <label className="block text-gray-500 mb-2 dark:text-gray-300">
                             Package Plan
                           </label>
-                          <Select
-                            options={options}
-                            onChange={handleDataPlanChange}
-                            placeholder="Select an option"
-                            classNamePrefix="select"
-                            styles={{
-                              ...customStyles,
-                              control: (base) => ({
-                                ...base,
-                                backgroundColor: isDarkMode ? '#2d3748' : '#f7fafc',
-                                borderColor: isDarkMode ? '#4a5568' : '#cbd5e0',
-                                color: isDarkMode ? '#e2e8f0' : '#4a5568',
-                                '&:hover': {
-                                  borderColor: isDarkMode ? '#cbd5e0' : '#a0aec0',
-                                },
-                              }),
-                              singleValue: (base) => ({
-                                ...base,
-                                color: isDarkMode ? '#e2e8f0' : '#4a5568',
-                              }),
-                              option: (base, state) => ({
-                                ...base,
-                                backgroundColor: state.isFocused ? (isDarkMode ? '#4a5568' : '#edf2f7') : (isDarkMode ? '#2d3748' : '#ffffff'),
-                                color: isDarkMode ? '#e2e8f0' : '#4a5568',
-                              }),
-                            }}
-                          />
+                          {variationsLoading ? (
+                            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                          ) : (
+                            <Select
+                              options={options}
+                              onChange={handleDataPlanChange}
+                              placeholder="Select an option"
+                              classNamePrefix="select"
+                              isDisabled={isSubmitting}
+                              styles={{
+                                ...customStyles,
+                                control: (base) => ({
+                                  ...base,
+                                  backgroundColor: isDarkMode ? '#2d3748' : '#f7fafc',
+                                  borderColor: isDarkMode ? '#4a5568' : '#cbd5e0',
+                                  color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                                  '&:hover': {
+                                    borderColor: isDarkMode ? '#cbd5e0' : '#a0aec0',
+                                  },
+                                }),
+                                singleValue: (base) => ({
+                                  ...base,
+                                  color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                                }),
+                                option: (base, state) => ({
+                                  ...base,
+                                  backgroundColor: state.isFocused ? (isDarkMode ? '#4a5568' : '#edf2f7') : (isDarkMode ? '#2d3748' : '#ffffff'),
+                                  color: isDarkMode ? '#e2e8f0' : '#4a5568',
+                                }),
+                              }}
+                            />
+                          )}
                           <ErrorMessage
                             name="source"
                             component="div"
@@ -363,7 +404,7 @@ const Cable = ({ user, isDarkMode }) => {
                       )}
                       {!changeBouquet && (
                         <div className="flex flex-col mt-3">
-                          <label className={`mb-1 block text-gray-500`}>
+                          <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
                             Amount
                           </label>
                           <Field name="amount">
@@ -386,7 +427,7 @@ const Cable = ({ user, isDarkMode }) => {
                         </div>
                       )}
                       <div className="flex flex-col my-3">
-                        <label className={`mb-1 block text-gray-500 mb-2`}>
+                        <label className={`mb-1 block text-gray-500 dark:text-gray-300 mb-2`}>
                           Phone Number
                         </label>
                         <Field name="phoneNumber">
@@ -401,6 +442,7 @@ const Cable = ({ user, isDarkMode }) => {
                               }
                               className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
                               placeholder="Enter phone number"
+                              disabled={isSubmitting}
                             />
                           )}
                         </Field>
@@ -415,7 +457,6 @@ const Cable = ({ user, isDarkMode }) => {
                         <div className="flex justify-between items-center">
                           <h2 className="text-gray-700 dark:text-white">Total</h2>
                           <p className="text-gray-800 dark:text-white">
-                            
                             {!changeBouquet
                               ? formatNairaAmount(accountNameApi?.data.Renewal_Amount)
                               : formatNairaAmount(formik.values.amount) || 0}
@@ -432,13 +473,35 @@ const Cable = ({ user, isDarkMode }) => {
                   {formik.values.provider && (
                     <div className="mt-3">
                       {changeBouquet ? (
-                        <Button type="submit" disabled={mutation.isLoading}>
-                          {mutation.isLoading ? "Processing..." : "Pay Now"}
+                        <Button 
+                          type="submit" 
+                          disabled={isSubmitting || !formik.isValid}
+                          className="relative"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <span className="opacity-0">Pay Now</span>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                              </div>
+                            </>
+                          ) : "Pay Now"}
                         </Button>
                       ) : (
                         accountNameApi && (
-                          <Button disabled={mutation.isLoading} type="submit">
-                            Renew Payment
+                          <Button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className="relative"
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <span className="opacity-0">Renew Payment</span>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                </div>
+                              </>
+                            ) : "Renew Payment"}
                           </Button>
                         )
                       )}

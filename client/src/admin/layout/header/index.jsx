@@ -108,7 +108,7 @@ const Header = () => {
           </button>
 
           {isNotificationOpen && (
-            <div className="absolute z-10 right-0 mt-2 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-md p-4">
+            <div className="absolute z-10 left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-md p-4">
               <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
               {isLoading ? (
                 <p className="text-gray-500">Loading notifications...</p>

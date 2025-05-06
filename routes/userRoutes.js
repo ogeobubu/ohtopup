@@ -37,15 +37,16 @@ const {
 
 const { buyAirtime } = require("../controllers/airtimeController")
 const { buyData } = require("../controllers/dataController")
+const { purchaseElectricity } = require("../controllers/electricityController")
+const { purchaseCable } = require("../controllers/cableController")
 
 const {
   variationCodes,
   getServiceID,
   variationTVCodes,
   verifySmartcard,
-  purchaseCable,
+  // purchaseCable,
   verifyElecticity,
-  purchaseElectricity,
   getAllUtilityTransactions,
   usersRank,
   resetRankings,
