@@ -7,9 +7,11 @@ const { generateRequestId } = require('../utils');
 const { handleServiceError } = require('../middleware/errorHandler');
 
 
-const buyAirtime = async (req, res) => {
+const purchaseElectricity = async (req, res) => {
   try {
-    const { serviceID, amount, phone } = validationService.validateAirtimePurchaseInput(req);
+    const { serviceID, billersCode, variation_code, amount, phone } = validationService.validateElectricityPurchaseInput(req);
+
+    const transactionContact = billersCode;
 
     const user = await dbService.findUserById(req.user.id);
     const wallet = await dbService.findWalletByUserId(req.user.id);
@@ -29,6 +31,8 @@ const buyAirtime = async (req, res) => {
     const apiRequestData = {
       request_id,
       serviceID,
+      billersCode,
+      variation_code,
       amount,
       phone,
     };
@@ -46,7 +50,7 @@ const buyAirtime = async (req, res) => {
       user._id,
       request_id,
       serviceID,
-      phone
+      transactionContact
     );
 
     const result = await transactionService.handlePaymentOutcome(
@@ -54,7 +58,7 @@ const buyAirtime = async (req, res) => {
       wallet,
       amount,
       user._id,
-      phone
+      transactionContact
     );
 
     res.status(result.status).json({
@@ -70,5 +74,5 @@ const buyAirtime = async (req, res) => {
 };
 
 module.exports = {
-  buyAirtime,
+  purchaseElectricity,
 };

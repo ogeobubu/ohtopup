@@ -3,6 +3,7 @@ const User = require("../model/User");
 const Transaction = require("../model/Transaction");
 const axios = require("axios");
 const { generateRandomAccountNumber } = require("../utils");
+const { handleServiceError } = require('../middleware/errorHandler');
 
 const fetchBankCodes = async () => {
   try {
@@ -970,49 +971,51 @@ const getTransactionsByUser = async (req, res) => {
   const { type, page = 1, limit = 10, reference } = req.query;
 
   try {
-    const transactions = await Transaction.find()
-      .populate("walletId")
+    const wallet = await Wallet.findOne({ userId: userId });
+
+    if (!wallet) {
+      return res.json({
+        totalTransactions: 0,
+        totalPages: 0,
+        currentPage: Number(page),
+        transactions: [],
+      });
+    }
+
+    const filters = {
+      walletId: wallet._id,
+    };
+
+    if (type) {
+      filters.type = type.toLowerCase();
+    }
+
+    if (reference) {
+      filters.reference = { $regex: reference, $options: 'i' };
+    }
+
+    const totalTransactions = await Transaction.countDocuments(filters);
+    const totalPages = Math.ceil(totalTransactions / parseInt(limit));
+
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    const transactions = await Transaction.find(filters)
       .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limitNumber)
       .exec();
-
-    const userTransactions = transactions.filter((transaction) => {
-      return transaction.walletId.userId.toString() === userId;
-    });
-
-    const filteredTransactions = type
-      ? userTransactions.filter(
-          (transaction) => transaction.type.toLowerCase() === type.toLowerCase()
-        )
-      : userTransactions;
-
-    const searchByReferenceTransactions = reference
-      ? filteredTransactions.filter((transaction) =>
-          transaction?.reference
-            ?.toLowerCase()
-            ?.includes(reference?.toLowerCase())
-        )
-      : filteredTransactions;
-
-    const totalTransactions = searchByReferenceTransactions.length;
-    const totalPages = Math.ceil(totalTransactions / limit);
-    const offset = (page - 1) * limit;
-
-    const paginatedTransactions = searchByReferenceTransactions.slice(
-      offset,
-      offset + limit
-    );
 
     res.json({
       totalTransactions,
       totalPages,
-      currentPage: Number(page),
-      transactions: paginatedTransactions,
+      currentPage: pageNumber,
+      transactions: transactions,
     });
+
   } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ message: "Error fetching transactions for user", error });
+    handleServiceError(error, res);
   }
 };
 
