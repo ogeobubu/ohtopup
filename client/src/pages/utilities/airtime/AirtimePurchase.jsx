@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { getWallet, getServiceID } from '../../../api';
-import Modal from '../../../admin/components/modal';
-import AirtimeForm from './components/AirtimeForm';
-import ConfirmationModal from './components/ConfirmationModal';
-import useAirtimePurchase from './hooks/useAirtimePurchase';
-import { formatPhoneNumber } from '../../../utils';
-import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { getWallet, getServiceID } from "../../../api";
+import Modal from "../../../admin/components/modal";
+import AirtimeForm from "./components/AirtimeForm";
+import ConfirmationModal from "./components/ConfirmationModal";
+import useAirtimePurchase from "./hooks/useAirtimePurchase";
+import { formatPhoneNumber } from "../../../utils";
+import LoadingSpinner from "../../../components/ui/LoadingSpinner";
+
+const Loader = () => (
+  <div className="flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
 
 const AirtimePurchase = ({ isDarkMode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,22 +21,22 @@ const AirtimePurchase = ({ isDarkMode }) => {
   const [isConfirming, setIsConfirming] = useState(false);
 
   // Enhanced query with loading states
-  const { 
-    data: walletData, 
+  const {
+    data: walletData,
     isLoading: isWalletLoading,
-    error: walletError 
+    error: walletError,
   } = useQuery({
-    queryKey: ['wallet'],
+    queryKey: ["wallet"],
     queryFn: getWallet,
   });
 
-  const { 
-    data: providers, 
+  const {
+    data: providers,
     isLoading: isProvidersLoading,
-    error: providersError 
+    error: providersError,
   } = useQuery({
-    queryKey: ['providers', 'airtime'],
-    queryFn: () => getServiceID('airtime'),
+    queryKey: ["providers", "airtime"],
+    queryFn: () => getServiceID("airtime"),
   });
 
   const { mutateAsync, isLoading: isSubmitting } = useAirtimePurchase(() => {
@@ -74,12 +80,25 @@ const AirtimePurchase = ({ isDarkMode }) => {
     return (
       <div className="border border-solid border-gray-200 rounded-md p-6 h-full flex flex-col items-center justify-center">
         <div className="text-red-500 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-12 w-12"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         </div>
         <p className="text-gray-600 dark:text-gray-300 text-center">
-          {walletError?.message || providersError?.message || 'Failed to load airtime services. Please try again later.'}
+          {walletError?.message ||
+            providersError?.message ||
+            "Failed to load airtime services. Please try again later."}
         </p>
         <button
           onClick={() => window.location.reload()}
@@ -104,29 +123,33 @@ const AirtimePurchase = ({ isDarkMode }) => {
             Processing...
           </span>
         ) : (
-          'Buy Airtime'
+          "Buy Airtime"
         )}
       </button>
 
-      <Modal 
-        isDarkMode={isDarkMode} 
-        isOpen={isModalOpen} 
-        closeModal={() => setIsModalOpen(false)} 
+      <Modal
+        isDarkMode={isDarkMode}
+        isOpen={isModalOpen}
+        closeModal={() => setIsModalOpen(false)}
         title="Airtime Purchase"
       >
-        <AirtimeForm
-          providers={providers}
-          walletBalance={walletData?.balance}
-          isDarkMode={isDarkMode}
-          onSubmit={(values) => {
-            setTransactionDetails({
-              ...values,
-              providerName: values.provider.toUpperCase()
-            });
-            setIsConfirmationOpen(true);
-          }}
-          isLoading={isSubmitting}
-        />
+        {isWalletLoading || isProvidersLoading ? (
+          <Loader />
+        ) : (
+          <AirtimeForm
+            providers={providers}
+            walletBalance={walletData?.balance}
+            isDarkMode={isDarkMode}
+            onSubmit={(values) => {
+              setTransactionDetails({
+                ...values,
+                providerName: values.provider.toUpperCase(),
+              });
+              setIsConfirmationOpen(true);
+            }}
+            isLoading={isSubmitting}
+          />
+        )}
       </Modal>
 
       <ConfirmationModal
