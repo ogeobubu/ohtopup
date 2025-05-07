@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { useQuery } from '@tanstack/react-query';
 import { getWallet, getServiceID, getUser } from '../../../api';
 import Modal from '../../../admin/components/modal';
-import ConfirmationModal  from './components/ConfirmationModal';
+import ConfirmationModal from './components/ConfirmationModal';
 import NetworkProviderSelector from './components/NetworkProviderSelector';
 import DataPlanSelector from './components/DataPlanSelector';
 import PhoneNumberInput from './components/PhoneNumberInput';
@@ -13,23 +13,29 @@ import useDataVariations from './hooks/useDataVariations';
 import useDataPurchase from './hooks/useDataPurchase';
 import { formatNairaAmount, formatPhoneNumber } from '../../../utils';
 
+const Loader = () => (
+  <div className="flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
+
 const DataPurchase = ({ isDarkMode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [transactionDetails, setTransactionDetails] = useState(null);
   const [queryId, setQueryId] = useState(null);
 
-  const { data: identifers } = useQuery({
+  const { data: identifers, isLoading: isIdentifersLoading } = useQuery({
     queryKey: ['identifers', 'data'],
     queryFn: () => getServiceID('data'),
   });
 
-  const { data: walletData } = useQuery({
+  const { data: walletData, isLoading: isWalletLoading } = useQuery({
     queryKey: ['wallet'],
     queryFn: getWallet,
   });
 
-  const { data: user } = useQuery({
+  const { data: user, isLoading: isUserLoading } = useQuery({
     queryKey: ['user'],
     queryFn: getUser,
   });
@@ -37,10 +43,9 @@ const DataPurchase = ({ isDarkMode }) => {
   const { data: options } = useDataVariations(queryId);
 
   useEffect(() => {
-    setIsModalOpen(true)
-  }, [])
- 
-
+    setIsModalOpen(true);
+  }, []);
+  
   const validationSchema = Yup.object().shape({
     phoneNumber: Yup.string()
       .required('Phone number is required')
@@ -102,6 +107,8 @@ const DataPurchase = ({ isDarkMode }) => {
     }
   };
 
+  const isLoading = isIdentifersLoading || isWalletLoading || isUserLoading;
+
   return (
     <div className="border border-solid border-gray-200 rounded-md p-6 h-full flex flex-col items-center justify-center">
       <button
@@ -112,70 +119,74 @@ const DataPurchase = ({ isDarkMode }) => {
       </button>
 
       <Modal isDarkMode={isDarkMode} isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} title="Data Purchase">
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ values, setFieldValue }) => (
-            <Form className="flex flex-col space-y-4">
-              <NetworkProviderSelector
-                providers={identifers}
-                selectedProvider={values.provider}
-                onChange={(provider) => {
-                  setQueryId(provider);
-                  setFieldValue('provider', provider);
-                  setFieldValue('source', '');
-                  setFieldValue('amount', '');
-                }}
-                isSubmitting={isSubmitting}
-              />
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ values, setFieldValue }) => (
+              <Form className="flex flex-col space-y-4">
+                <NetworkProviderSelector
+                  providers={identifers}
+                  selectedProvider={values.provider}
+                  onChange={(provider) => {
+                    setQueryId(provider);
+                    setFieldValue('provider', provider);
+                    setFieldValue('source', '');
+                    setFieldValue('amount', '');
+                  }}
+                  isSubmitting={isSubmitting}
+                />
 
-              {values.provider && (
-                <>
-                  <DataPlanSelector
-                    providerId={values.provider}
-                    isDarkMode={isDarkMode}
-                    onChange={(selectedOption) => {
-                      setFieldValue('source', selectedOption.value);
-                      setFieldValue('amount', selectedOption.amount);
-                    }}
-                    value={options?.find(opt => opt.value === values.source)}
-                  />
+                {values.provider && (
+                  <>
+                    <DataPlanSelector
+                      providerId={values.provider}
+                      isDarkMode={isDarkMode}
+                      onChange={(selectedOption) => {
+                        setFieldValue('source', selectedOption.value);
+                        setFieldValue('amount', selectedOption.amount);
+                      }}
+                      value={options?.find(opt => opt.value === values.source)}
+                    />
 
-                  <PhoneNumberInput
-                    name="phoneNumber"
-                    isDarkMode={isDarkMode}
-                    disabled={isSubmitting}
-                  />
+                    <PhoneNumberInput
+                      name="phoneNumber"
+                      isDarkMode={isDarkMode}
+                      disabled={isSubmitting}
+                    />
 
-                  <TransactionSummary
-                    amount={values.amount}
-                    walletBalance={walletData?.balance}
-                    isDarkMode={isDarkMode}
-                  />
+                    <TransactionSummary
+                      amount={values.amount}
+                      walletBalance={walletData?.balance}
+                      isDarkMode={isDarkMode}
+                    />
 
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !options || !values.source}
-                    className="relative mt-4 py-3 font-medium bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-400"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="opacity-0">Proceed to Payment</span>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                        </div>
-                      </>
-                    ) : (
-                      "Proceed to Payment"
-                    )}
-                  </button>
-                </>
-              )}
-            </Form>
-          )}
-        </Formik>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !options || !values.source}
+                      className="relative mt-4 py-3 font-medium bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-400"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="opacity-0">Proceed to Payment</span>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Loader />
+                          </div>
+                        </>
+                      ) : (
+                        "Proceed to Payment"
+                      )}
+                    </button>
+                  </>
+                )}
+              </Form>
+            )}
+          </Formik>
+        )}
       </Modal>
 
       <ConfirmationModal
