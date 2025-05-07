@@ -98,4 +98,5 @@ router.post("/rates", authUser, authAdmin, setRates);
 
 router.patch("/notification/:id", authUser, authAdmin, readNotification);
 
+
 module.exports = router;

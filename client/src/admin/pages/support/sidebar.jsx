@@ -6,6 +6,12 @@ import {
 const Sidebar = ({ activeTab, setActiveTab, className }) => {
   const tabs = [
     {
+      label: "X API",
+      subtitle: "",
+      icon: FaComments,
+      name: "XPost",
+    },
+    {
       label: "Contact Us",
       subtitle: "",
       icon: FaEnvelope,
@@ -17,6 +23,8 @@ const Sidebar = ({ activeTab, setActiveTab, className }) => {
       icon: FaComments,
       name: "Ticket",
     },
+   
+    
     // {
     //   label: "Chat Us",
     //   subtitle: "",
