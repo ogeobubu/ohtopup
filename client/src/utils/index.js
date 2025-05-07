@@ -13,6 +13,11 @@ export const formatNairaAmount = (amount) => {
   return `₦${formattedValue}`;
 };
 
+export const formatPhoneNumber = (phoneNumber) => {
+  if (!phoneNumber) return '';
+  return phoneNumber.replace(/^\+234/, '0');
+};
+
 export const customStyles = {
   control: (provided) => ({
     ...provided,
