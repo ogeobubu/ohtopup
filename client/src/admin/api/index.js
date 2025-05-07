@@ -355,12 +355,14 @@ export const getSavedVariations = async (id) => {
   }
 };
 
-export const toggleData = async (id) => {
+export const toggleData = async (variation_code, serviceID) => {
   try {
-    const response = await instance.get(`/data/toggle?variation_code=${id}`);
+    const response = await instance.get(
+      `/data/toggle?variation_code=${variation_code}&serviceID=${serviceID}`
+    );
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching data");
+    throw new Error(error.response.data.message || "Error toggling variation");
   }
 };
 

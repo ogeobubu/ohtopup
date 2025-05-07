@@ -1,6 +1,8 @@
 const Utility = require('../model/Utility');
 const Notification = require('../model/Notification');
+const User = require('../model/User');
 const walletService = require('./walletService');
+const { sendTransactionEmailNotification } = require("../controllers/email/sendTransactionEmailNotification")
 
 
 const processPaymentApiResponse = (vtpassResponseData, requestedAmount, userId, requestId, serviceId, contactValue, optionalFields = {}) => {
@@ -87,6 +89,16 @@ const handlePaymentOutcome = async (transaction, wallet, requestedAmount, userId
       await transaction.save();
 
       const notificationStatus = transaction.status === "delivered" ? "Successful" : "Pending";
+
+      const user = await User.findById(userId);
+    if (user && user.emailNotificationsEnabled) {
+      await sendTransactionEmailNotification(user.email, user.username, {
+        product_name: transaction.product_name,
+        status: notificationStatus,
+        amount: transaction.amount,
+      });
+    }
+
       const notification = new Notification({
         userId: userId,
         title: `Transaction ${notificationStatus}: ${transaction.product_name}`,
