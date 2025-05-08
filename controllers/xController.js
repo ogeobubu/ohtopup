@@ -224,7 +224,7 @@ const triggerRepost = async (req, res) => { // Keep triggerRepost, but it now tr
       });
   }
   try {
-    await checkAndProcessTelcoPosts(); // Call the new function
+    await checkAndProcessTelcoPosts();
     res.json({
       success: true,
       message: "Manual telco post processing triggered. Check backend logs for details.",
@@ -253,7 +253,7 @@ const setTwitterClient = (twitterClient) => {};
 
 module.exports = {
   postTweet,
-  triggerRepost, // Export triggerRepost, but it calls the new combined function
-  startRepostJob, // Keep startRepostJob name, but it schedules the new combined function
+  triggerRepost,
+  startRepostJob,
   setTwitterClient,
 };
