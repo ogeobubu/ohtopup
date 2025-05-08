@@ -472,26 +472,39 @@ export const setRates = async (data) => {
 
 export const postTweetToX = async (text) => {
   try {
-    const response = await instance.post('/x/post-to-x', { text });
+    const response = await instance.post("/x/post-to-x", { text });
     return response?.data;
   } catch (error) {
     console.error("Error posting tweet:", error);
-    throw new Error(error.response?.data?.message || "Error posting tweet to X");
+    throw new Error(
+      error.response?.data?.message || "Error posting tweet to X"
+    );
   }
 };
 
 export const triggerTelcoRepost = async () => {
   try {
-    const response = await instance.post('/x/trigger-repost');
+    const response = await instance.post("/x/trigger-repost");
     return response?.data;
   } catch (error) {
     console.error("Error triggering repost:", error);
-    throw new Error(error.response?.data?.message || "Error triggering telco repost");
+    throw new Error(
+      error.response?.data?.message || "Error triggering telco repost"
+    );
   }
 };
 
 export const initiateXAuth = () => {
   const authUrl = `${instance.defaults.baseURL}/auth/x`;
   console.log("Opening new tab for X authentication:", authUrl);
-  window.open(authUrl, '_blank');
+  window.open(authUrl, "_blank");
+};
+
+export const getRandomContent = async () => {
+  try {
+    const response = await instance.get("/ai/random-content");
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+  }
 };

@@ -16,7 +16,7 @@ const {
   getServices,
   addPoint,
   getRates,
-  setRates
+  setRates,
 } = require("../controllers/adminController");
 const {
   createWallet,
@@ -43,9 +43,15 @@ const {
   toggleVariation,
 } = require("../controllers/variationController");
 
-const { readNotification } = require("../controllers/notificationController")
+const { readNotification } = require("../controllers/notificationController");
 
-const { replyTicket, getTickets, updateTicket } = require("../controllers/ticketController");
+const {
+  replyTicket,
+  getTickets,
+  updateTicket,
+} = require("../controllers/ticketController");
+
+const { getRandomContent } = require("../controllers/contentController");
 
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
@@ -98,5 +104,6 @@ router.post("/rates", authUser, authAdmin, setRates);
 
 router.patch("/notification/:id", authUser, authAdmin, readNotification);
 
+router.get("/ai/random-content", authUser, authAdmin, getRandomContent);
 
 module.exports = router;
