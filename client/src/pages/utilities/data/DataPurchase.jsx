@@ -124,7 +124,6 @@ const DataPurchase = ({ isDarkMode }) => {
         ) : (
           <Formik
             initialValues={initialValues}
-            validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
             {({ values, setFieldValue }) => (

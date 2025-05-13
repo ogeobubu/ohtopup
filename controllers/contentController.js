@@ -1,5 +1,5 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-require('dotenv').config();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
@@ -7,6 +7,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 const getRandomContent = async (req, res) => {
   console.log("Executing getRandomContent...");
+  console.log(process.env.GOOGLE_API_KEY);
 
   const prompt = `As an X growth expert, generate the following in a single response:
 
@@ -23,10 +24,12 @@ Format the response clearly, separating the suggested tweet from the list of fut
 
     console.log("Content generated successfully.");
     res.status(200).json({ content: text });
-
   } catch (error) {
-    console.error('Error generating content:', error);
-    const errorMessage = process.env.NODE_ENV === 'development' ? error.message : 'Failed to generate content';
+    console.error("Error generating content:", error);
+    const errorMessage =
+      process.env.NODE_ENV === "development"
+        ? error.message
+        : "Failed to generate content";
     res.status(500).json({ error: errorMessage });
   }
 };
