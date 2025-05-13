@@ -10,13 +10,14 @@ import mtn from "../../../assets/mtn.png";
 import glo from "../../../assets/glo.png";
 import airtel from "../../../assets/airtel.svg";
 import nineMobile from "../../../assets/9mobile.svg";
+import defaultNetworkImage from "../../../assets/default-network.png";
 
 const imageMap = {
   mtn: mtn,
   dstv: dstv,
   glo: glo,
   airt: airtel,
-  eti: nineMobile
+  eti: nineMobile,
 };
 
 const formatPrice = (amount) => {
@@ -57,8 +58,16 @@ const DataPricing = () => {
           Pricing Plans
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {pricingPlans.map((plan) => {
+          {pricingPlans?.data?.map((plan) => {
             const serviceName = plan.variationCode.split("-")[0];
+            let imageSrc;
+            if (serviceName === "glo" || plan.variationCode.startsWith("glo")) {
+              imageSrc = imageMap.glo;
+            } else if (!isNaN(serviceName)) {
+              imageSrc = defaultNetworkImage;
+            } else {
+              imageSrc = imageMap[serviceName];
+            }
 
             return (
               <div
@@ -67,15 +76,14 @@ const DataPricing = () => {
               >
                 <div className="rounded-full border border-solid border-gray-500 w-12 h-12 flex justify-center items-center mb-4 p-1 mx-auto">
                   <img
-                    src={imageMap[serviceName]}
+                    src={imageSrc}
                     alt={serviceName}
                     className="object-cover mx-auto"
                   />
                 </div>
-                <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">
+                <h2 className="text-sm font-semibold mb-2 text-gray-900 dark:text-white">
                   {plan.name}
                 </h2>
-
                 <p className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-300">
                   {formatPrice(plan.dataLimit)}
                 </p>

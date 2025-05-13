@@ -35,7 +35,7 @@ const NetworkProviderSelector = ({ providers, selectedProvider, onChange, isSubm
               selectedProvider === provider.serviceID ? "ring-2 ring-blue-500" : ""
             }`}>
               <img
-                src={getProviderImage(provider.serviceID)}
+                src={provider.image}
                 alt={provider.serviceID}
                 className="h-8 w-8 object-contain"
               />
