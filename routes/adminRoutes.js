@@ -51,7 +51,7 @@ const {
   updateTicket,
 } = require("../controllers/ticketController");
 
-const { getRandomContent } = require("../controllers/contentController");
+const { generateMarketingContent } = require("../controllers/contentController");
 
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
@@ -104,6 +104,6 @@ router.post("/rates", authUser, authAdmin, setRates);
 
 router.patch("/notification/:id", authUser, authAdmin, readNotification);
 
-router.get("/ai/random-content", authUser, authAdmin, getRandomContent);
+router.get("/ai/random-content", authUser, authAdmin, generateMarketingContent);
 
 module.exports = router;

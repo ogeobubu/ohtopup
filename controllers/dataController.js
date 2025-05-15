@@ -1,15 +1,14 @@
-const validationService = require('../services/validationService');
-const dbService = require('../services/dbService');
-const walletService = require('../services/walletService');
-const vtpassService = require('../services/vtpassService');
-const transactionService = require('../services/transactionService');
-const { generateRequestId } = require('../utils');
-const { handleServiceError } = require('../middleware/errorHandler');
+const validationService = require("../services/validationService");
+const dbService = require("../services/dbService");
+const walletService = require("../services/walletService");
+const vtpassService = require("../services/vtpassService");
+const transactionService = require("../services/transactionService");
+const { generateRequestId } = require("../utils");
 
-
-const buyData = async (req, res) => {
+const buyData = async (req, res, next) => {
   try {
-    const { serviceID, billersCode, variation_code, amount, inputPhone } = validationService.validateDataPurchaseInput(req);
+    const { serviceID, billersCode, variation_code, amount, inputPhone } =
+      validationService.validateDataPurchaseInput(req);
 
     const transactionContact = billersCode;
 
@@ -22,12 +21,13 @@ const buyData = async (req, res) => {
     const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
     const VTPASS_SECRET_KEY = process.env.VTPASS_SECRET_KEY;
 
-
     const request_id = generateRequestId();
-     if (!request_id) {
-       console.error("Failed to generate unique request ID.");
-       return res.status(500).json({ message: "Could not process request ID. Please try again." });
-     }
+    if (!request_id) {
+      return next({
+        status: 500,
+        message: "Could not process request ID. Please try again.",
+      });
+    }
 
     const apiRequestData = {
       request_id,
@@ -56,20 +56,20 @@ const buyData = async (req, res) => {
     const result = await transactionService.handlePaymentOutcome(
       newTransaction,
       wallet,
-      amount, 
+      amount,
       user._id,
       transactionContact
     );
 
     res.status(result.status).json({
       message: result.message,
-      ...result.transactionDetails && { transaction: result.transactionDetails },
-      ...result.newBalance !== undefined && { newBalance: result.newBalance }
+      ...(result.transactionDetails && {
+        transaction: result.transactionDetails,
+      }),
+      ...(result.newBalance !== undefined && { newBalance: result.newBalance }),
     });
-
-
   } catch (err) {
-    handleServiceError(err, res);
+    next(err);
   }
 };
 

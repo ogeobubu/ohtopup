@@ -13,6 +13,8 @@ require("dotenv").config();
 const path = require("path");
 const xController = require("./controllers/xController");
 
+const { handleServiceError } = require('./middleware/errorHandler');
+
 const app = express();
 
 app.use(
@@ -52,7 +54,6 @@ app.use("/api/users/admin", adminRoutes);
 app.use("/api/users/wallet", walletRoutes);
 app.use("/api/users/chat", chatRoutes);
 app.use("/api/users/admin/chat", chatRoutes);
-
 app.use("/api/users/admin/auth", authRoutes);
 app.use("/api/users/admin/x", xRoutes);
 
@@ -64,6 +65,8 @@ app.use(express.static(frontendBuildPath));
 app.get("*", (req, res) => {
   res.sendFile(path.join(frontendBuildPath, "index.html"));
 });
+
+app.use(handleServiceError);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

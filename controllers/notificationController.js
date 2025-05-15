@@ -1,35 +1,92 @@
-const Notification = require("../model/Notification");
+const notificationService = require("../services/notificationService");
 
-const createNotification = async (req, res) => {
+const createNotification = async (req, res, next) => {
   const { userId, title, message, link } = req.body;
-  const notification = new Notification({ userId, title, message, link });
-  await notification.save();
-  res.status(201).json(notification);
-};
 
-const getNotifications = async (req, res) => {
+  if (!userId || !title || !message) {
+    return next({
+      status: 400,
+      message: "User ID, title, and message are required.",
+    });
+  }
+
   try {
-    const notifications = await Notification.find({ userId: req.user.id })
-      .sort({ createdAt: -1 });
-    res.json(notifications);
+    const result = await notificationService.createNotification(
+      userId,
+      title,
+      message,
+      link
+    );
+
+    if (userId === "all") {
+      const usersWithNotifications = await Promise.all(
+        result.map(async (notif) => {
+          const user = await User.findById(notif.userId).select(
+            "username email"
+          );
+          return {
+            ...notif.toObject(),
+            user: user
+              ? { id: user._id, username: user.username, email: user.email }
+              : null,
+          };
+        })
+      );
+      return res.status(201).json({
+        message: `${usersWithNotifications.length} notifications sent to all users.`,
+        notifications: usersWithNotifications,
+      });
+    } else {
+      const user = await User.findById(result.userId).select("username email");
+      if (!user) {
+        console.warn(
+          `Notification created for user ID ${result.userId} but user not found for response.`
+        );
+        return res.status(201).json({ notification: result.toObject() });
+      }
+      return res.status(201).json({
+        notification: {
+          ...result.toObject(),
+          user: { id: user._id, username: user.username, email: user.email },
+        },
+      });
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching notifications' });
+    next(error);
   }
 };
 
-const readNotification = async (req, res) => {
-  const notification = await Notification.findByIdAndUpdate(
-    req.params.id,
-    { read: true },
-    { new: true }
-  );
+const getNotifications = async (req, res, next) => {
+  const userId = req.user.id;
 
-  if (!notification) {
-    return res.status(404).json({ message: "Notification not found" });
+  try {
+    const notifications = await notificationService.getUserNotifications(
+      userId
+    );
+    res.status(200).json(notifications);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const readNotification = async (req, res, next) => {
+  const notificationId = req.params.id;
+  const userId = req.user.id;
+
+  if (!notificationId) {
+    return next({
+      status: 400,
+      message: "Notification ID is required in URL parameters.",
+    });
   }
 
-  res.json(notification);
+  try {
+    const updatedNotification =
+      await notificationService.markNotificationAsRead(notificationId, userId);
+    res.status(200).json(updatedNotification);
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {
