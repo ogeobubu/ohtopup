@@ -45,7 +45,6 @@ const {
   getServiceID,
   variationTVCodes,
   verifySmartcard,
-  // purchaseCable,
   verifyElecticity,
   getAllUtilityTransactions,
   usersRank,

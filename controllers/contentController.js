@@ -1,14 +1,17 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+
+if (!GOOGLE_API_KEY) {
+  console.error("GOOGLE_API_KEY not found in environment variables.");
+}
+
+const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
-const getRandomContent = async (req, res) => {
-  console.log("Executing getRandomContent...");
-  console.log(process.env.GOOGLE_API_KEY);
-
+const generateMarketingContent = async () => {
   const prompt = `As an X growth expert, generate the following in a single response:
 
 1.  ONE concise and engaging tweet (under 280 characters, aim for brevity) promoting ohtopup.onrender.com. The tweet should encourage sign-ups by emphasizing the benefits of paying for essential utility services easily and affordably (Data Top-up, Airtime Top-up, Electricity bills, Cable TV subscriptions). Highlight affordability and reliability. Include a clear call to action to visit ohtopup.onrender.com.
@@ -22,16 +25,17 @@ Format the response clearly, separating the suggested tweet from the list of fut
     const response = await result.response;
     const text = response.text();
 
-    console.log("Content generated successfully.");
-    res.status(200).json({ content: text });
+    return { content: text };
   } catch (error) {
-    console.error("Error generating content:", error);
-    const errorMessage =
-      process.env.NODE_ENV === "development"
-        ? error.message
-        : "Failed to generate content";
-    res.status(500).json({ error: errorMessage });
+    console.error("Error generating content with AI:", error);
+    throw {
+      status: error.response?.status || 500,
+      message: "Failed to generate content from AI.",
+      details: error.message,
+    };
   }
 };
 
-module.exports = { getRandomContent };
+module.exports = {
+  generateMarketingContent,
+};

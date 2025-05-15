@@ -1,422 +1,245 @@
 const User = require("../model/User");
-const Notification = require("../model/Notification");
-const Service = require("../model/Service");
-const Rate = require("../model/Rate");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const Wallet = require("../model/Wallet");
+const Transaction = require("../model/Transaction");
 const axios = require("axios");
+const { handleServiceError } = require("../middleware/errorHandler");
 
-const loginAdmin = async (req, res) => {
+const authService = require("../services/authService");
+const userService = require("../services/userService");
+const notificationService = require("../services/notificationService");
+const serviceCatalogService = require("../services/serviceCatalogService");
+const rateService = require("../services/rateService");
+const {
+  sendTransactionEmailNotification,
+} = require("./email/sendTransactionEmailNotification");
+
+const loginAdmin = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email, isDeleted: false });
-
-    if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    if (user.role !== "admin") {
-      return res.status(403).json({ message: "Access denied. Admins only." });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    const payload = { user: { id: user._id, role: user.role } };
-    const secret = process.env.JWT_SECRET;
-    const token = jwt.sign(payload, secret, { expiresIn: "1d" });
-
+    const token = await authService.loginAdminUser(email, password);
     res.status(200).json({ message: "Login successful!", token });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
 };
 
-const getAdminReferrals = async (req, res) => {
+const getAdminReferrals = async (req, res, next) => {
+  const { page, limit, search } = req.query;
+
   try {
-    const { page = 1, limit = 10, search = "" } = req.query;
+    const referralData = await userService.getReferralsData(
+      page,
+      limit,
+      search
+    );
 
-    const filter = search
-      ? {
-          $or: [
-            { username: { $regex: search, $options: "i" } },
-            { email: { $regex: search, $options: "i" } },
-          ],
-        }
-      : {};
-
-    const totalUsers = await User.countDocuments(filter);
-    const users = await User.find(filter)
-      .skip((page - 1) * limit)
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit, 10))
-      .populate("referredUsers", "username email")
-      .select("username email points referredUsers referralCode");
-
-    return res.status(200).json({
-      totalUsers,
-      currentPage: page,
-      totalPages: Math.ceil(totalUsers / limit),
-      users: users.map((user) => ({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        points: user.points,
-        referredUsers: user.referredUsers,
-        referralCode: user.referralCode,
-      })),
-    });
+    return res.status(200).json(referralData);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-const getAdmin = async (req, res) => {
+const getAdmin = async (req, res, next) => {
+  const adminId = req.user.id;
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
+    const user = await userService.getAdminUser(adminId);
     res.json(user);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-const updateAdmin = async (req, res) => {
+const updateAdmin = async (req, res, next) => {
+  const adminId = req.user.id;
+  const { phoneNumber, newPassword, oldPassword } = req.body;
+
   try {
-    const { phoneNumber, newPassword, oldPassword } = req.body;
-    const updates = {};
-
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (newPassword) {
-      const isMatch = await bcrypt.compare(oldPassword, user.password);
-      if (!isMatch) {
-        return res
-          .status(400)
-          .json({ message: "Current password is incorrect" });
-      }
-
-      if (oldPassword === newPassword) {
-        return res.status(400).json({
-          message: "New password must be different from old password",
-        });
-      }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      updates.password = hashedPassword;
-    }
-
-    if (phoneNumber) {
-      updates.phoneNumber = phoneNumber;
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ message: "No fields to update" });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
-      new: true,
-    });
+    const updatedUser = await userService.updateAdminUser(
+      adminId,
+      phoneNumber,
+      newPassword,
+      oldPassword
+    );
 
     res.json(updatedUser);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-const getAllUsers = async (req, res) => {
-  const { page = 1, limit = 10, search = "", role, status } = req.query;
-
-  const query = {};
-
-  if (status === "all") {
-  } else if (status === "deleted") {
-    query.isDeleted = true;
-  } else {
-    query.isDeleted = false;
-  }
-
-  if (role) {
-    query.role = role;
-  }
-
-  if (search) {
-    const searchRegex = new RegExp(search.trim(), "i");
-    query.$or = [
-      { username: { $regex: searchRegex } },
-      { email: { $regex: searchRegex } },
-    ];
-  }
+const getAllUsers = async (req, res, next) => {
+  const { page, limit, search, role, status } = req.query;
 
   try {
-    const users = await User.find(query)
-      .sort({ createdAt: -1 })
-      .limit(Number(limit))
-      .skip((Number(page) - 1) * Number(limit))
-      .exec();
-
-    const totalCount = await User.countDocuments(query);
+    const { users, totalCount } = await userService.getAllUsers(
+      page,
+      limit,
+      search,
+      role,
+      status
+    );
 
     res.status(200).json({ users, totalCount });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
+  const userId = req.params.id;
+  const { isDeleted, ...otherUpdates } = req.body;
+
   try {
-    const { isDeleted } = req.body;
-    const updates = {};
-
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (typeof isDeleted !== "undefined") {
-      updates.isDeleted = isDeleted;
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ message: "No fields to update" });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, updates, {
-      new: true,
+    const updatedUser = await userService.updateUser(userId, {
+      isDeleted,
+      ...otherUpdates,
     });
 
     res.json(updatedUser);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-const getUserAnalytics = async (req, res) => {
+const getUserAnalytics = async (req, res, next) => {
   try {
-    const totalUsers = await User.countDocuments();
-
-    const totalActiveUsers = await User.countDocuments({ isDeleted: false });
-
-    const totalDeletedUsers = await User.countDocuments({ isDeleted: true });
-
-    const usersByRole = await User.aggregate([
-      {
-        $group: {
-          _id: "$role",
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-
-    res.status(200).json({
-      totalUsers,
-      totalActiveUsers,
-      totalDeletedUsers,
-      usersByRole,
-    });
+    const analyticsData = await userService.getUserAnalytics();
+    res.status(200).json(analyticsData);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
 };
 
-const createNotification = async (req, res) => {
+const createNotification = async (req, res, next) => {
   const { userId, title, message, link } = req.body;
 
   try {
-    let notifications = [];
+    const result = await notificationService.createNotification(
+      userId,
+      title,
+      message,
+      link
+    );
 
     if (userId === "all") {
-      const users = await User.find().select("username email");
-
-      for (const user of users) {
-        const notification = new Notification({
-          userId: user._id,
-          title,
-          message,
-          link,
-        });
-        await notification.save();
-        notifications.push({
-          ...notification.toObject(),
-          user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-          },
-        });
-      }
+      const usersWithNotifications = await Promise.all(
+        result.map(async (notif) => {
+          const user = await User.findById(notif.userId).select(
+            "username email"
+          );
+          return {
+            ...notif.toObject(),
+            user: user
+              ? { id: user._id, username: user.username, email: user.email }
+              : null,
+          };
+        })
+      );
       return res.status(201).json({
-        message: `${notifications.length} notifications sent to all users.`,
-        notifications,
+        message: `${usersWithNotifications.length} notifications sent to all users.`,
+        notifications: usersWithNotifications,
       });
     } else {
-      const notification = new Notification({ userId, title, message, link });
-      await notification.save();
-
-      const user = await User.findById(userId).select("username email");
+      const user = await User.findById(result.userId).select("username email");
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        console.warn(
+          `Notification created for user ID ${result.userId} but user not found for response.`
+        );
+        return res.status(201).json({ notification: result.toObject() });
       }
-
       return res.status(201).json({
         notification: {
-          ...notification.toObject(),
-          user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-          },
+          ...result.toObject(),
+          user: { id: user._id, username: user.username, email: user.email },
         },
       });
     }
   } catch (error) {
-    console.error("Error creating notification:", error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-const getAllNotifications = async (req, res) => {
-  const { page = 1, limit = 5, username } = req.query;
+const getAllNotifications = async (req, res, next) => {
+  const { page, limit, username } = req.query;
 
   try {
-    const query = {};
-    if (username) {
-      query["userId.username"] = { $regex: username, $options: "i" };
-    }
-
-    const notifications = await Notification.find(query)
-      .populate("userId", "username email")
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
-
-    const total = await Notification.countDocuments(query);
-
-    const formattedNotifications = notifications.map((notification) => ({
-      id: notification._id,
-      user: {
-        id: notification?.userId?._id,
-        username: notification?.userId?.username,
-        email: notification?.userId?.email,
-      },
-      message: notification?.message,
-      createdAt: notification?.createdAt,
-    }));
-
-    res.status(200).json({
-      notifications: formattedNotifications,
-      total,
-      page: parseInt(page),
-      totalPages: Math.ceil(total / limit),
-    });
+    const notificationData = await notificationService.getAllNotifications(
+      page,
+      limit,
+      username
+    );
+    res.status(200).json(notificationData);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
 };
 
-const deleteNotification = async (req, res) => {
+const deleteNotification = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const deletedNotification = await Notification.findByIdAndDelete(id);
-
-    if (!deletedNotification) {
-      return res.status(404).json({ message: "Notification not found" });
-    }
-
+    await notificationService.deleteNotification(id);
     res.status(200).json({ message: "Notification deleted successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
 };
 
-const createService = async (req, res) => {
+const createService = async (req, res, next) => {
   const { name, isAvailable } = req.body;
 
   try {
-    const newService = new Service({ name, isAvailable });
-    await newService.save();
+    const newService = await serviceCatalogService.createService(
+      name,
+      isAvailable
+    );
     res.status(201).json(newService);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const updateService = async (req, res) => {
+const updateService = async (req, res, next) => {
   const { id } = req.params;
   const { name, isAvailable } = req.body;
 
   try {
-    const updatedService = await Service.findByIdAndUpdate(
-      id,
-      { name, isAvailable },
-      { new: true, runValidators: true }
-    );
-    if (!updatedService) {
-      return res.status(404).json({ error: "Service not found" });
-    }
+    const updatedService = await serviceCatalogService.updateService(id, {
+      name,
+      isAvailable,
+    });
     res.json(updatedService);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const deleteService = async (req, res) => {
+const deleteService = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const deletedService = await Service.findByIdAndDelete(id);
-    if (!deletedService) {
-      return res.status(404).json({ error: "Service not found" });
-    }
+    await serviceCatalogService.deleteService(id);
     res.json({ message: "Service deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const getServices = async (req, res) => {
+const getServices = async (req, res, next) => {
   try {
-    const services = await Service.find();
+    const services = await serviceCatalogService.getServices();
     res.json(services);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const addPoint = async (req, res) => {
+const addPoint = async (req, res, next) => {
   const { userId, pointsToAdd } = req.body;
 
   try {
-    if (!userId || typeof pointsToAdd !== "number" || pointsToAdd <= 0) {
-      return res.status(400).json({ message: "Invalid user ID or points" });
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    user.points += pointsToAdd;
-
-    const updatedUser = await user.save();
+    const updatedUser = await userService.addPointsToUser(userId, pointsToAdd);
 
     res.json({
       message: "Points added successfully",
@@ -427,47 +250,30 @@ const addPoint = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-const getRates = async (req, res) => {
+const getRates = async (req, res, next) => {
   try {
-    const rates = await Rate.findOne();
-    if (!rates) {
-      return res.status(404).json({ message: "Rates not found" });
-    }
+    const rates = await rateService.getRates();
     res.status(200).json(rates);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
 };
 
-const setRates = async (req, res) => {
+const setRates = async (req, res, next) => {
   const { withdrawalRate, depositRate } = req.body;
 
   try {
-    let rates = await Rate.findOne();
+    const rates = await rateService.setRates(withdrawalRate, depositRate);
 
-    if (rates) {
-      rates.withdrawalRate = withdrawalRate;
-      rates.depositRate = depositRate;
-      await rates.save();
-      return res
-        .status(200)
-        .json({ message: "Rates updated successfully", rates });
-    } else {
-      rates = new Rate({ withdrawalRate, depositRate });
-      await rates.save();
-      return res
-        .status(201)
-        .json({ message: "Rates created successfully", rates });
-    }
+    return res
+      .status(200)
+      .json({ message: "Rates updated successfully", rates });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
 };
 

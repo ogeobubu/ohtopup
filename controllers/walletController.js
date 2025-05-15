@@ -1,24 +1,17 @@
+// walletController.js
+
 const Wallet = require("../model/Wallet");
 const User = require("../model/User");
 const Transaction = require("../model/Transaction");
 const axios = require("axios");
-const { generateRandomAccountNumber } = require("../utils");
-const { handleServiceError } = require('../middleware/errorHandler');
+const { handleServiceError } = require("../middleware/errorHandler");
 
-const fetchBankCodes = async () => {
-  try {
-    const response = await axios.get("https://api.paystack.co/bank", {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-      },
-    });
+const walletService = require("../services/walletService");
+const dbService = require("../services/dbService");
 
-    return response.data.data;
-  } catch (error) {
-    console.error("Error fetching bank codes:", error);
-    throw error;
-  }
-};
+const {
+  sendTransactionEmailNotification,
+} = require("../controllers/email/sendTransactionEmailNotification");
 
 const createWallet = async (req, res) => {
   const { userId } = req.body;
@@ -27,24 +20,31 @@ const createWallet = async (req, res) => {
     await wallet.save();
     res.status(201).json(wallet);
   } catch (error) {
+    console.error("Error creating wallet:", error);
     res.status(500).json({ message: "Error creating wallet", error });
   }
 };
 
 const getWallet = async (req, res) => {
   try {
-    const wallet = await Wallet.findOne({ userId: req.user.id });
+    const userId = req.user.id;
+    const wallet = await dbService.findWalletByUserId(userId);
 
-    if (!wallet) {
-      return res.status(404).json({ message: "Wallet not found" });
-    }
-
-    if (!wallet.isActive) {
-      return res.status(404).json({ message: "Your wallet is disabled" });
+    try {
+      walletService.checkWalletForDebit(wallet, 0);
+    } catch (serviceError) {
+      if (serviceError.status === 400) {
+        return res.status(404).json({ message: serviceError.message });
+      }
+      throw serviceError;
     }
 
     res.json(wallet);
   } catch (error) {
+    console.error("Error fetching wallet:", error);
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
     res.status(500).json({ message: "Error fetching wallet", error });
   }
 };
@@ -55,56 +55,54 @@ const getWallets = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
 
-    // Fetch the wallets with pagination, sorted to show the latest first
     const wallets = await Wallet.find({})
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }) // Latest wallets first
+      .sort({ createdAt: -1 })
       .populate("userId", "username email")
       .exec();
 
-    // Array to hold wallets to delete
     const walletsToDelete = [];
+    const walletDetails = await Promise.all(
+      wallets.map(async (wallet) => {
+        if (!wallet.userId || !wallet.userId.username || !wallet.userId.email) {
+          walletsToDelete.push(wallet._id);
+          return null;
+        }
+        return {
+          _id: wallet._id,
+          userId: wallet.userId._id,
+          username: wallet.userId.username,
+          email: wallet.userId.email,
+          balance: wallet.balance,
+          transactions: wallet.transactions,
+          isActive: wallet.isActive,
+        };
+      })
+    );
 
-    const walletDetails = await Promise.all(wallets.map(async (wallet) => {
-      if (!wallet.userId || !wallet.userId.username || !wallet.userId.email) {
-        // If user doesn't exist, mark wallet for deletion
-        walletsToDelete.push(wallet._id);
-        return null; // Skip this wallet in the response
-      }
-
-      return {
-        _id: wallet._id,
-        userId: wallet.userId._id,
-        username: wallet.userId.username,
-        email: wallet.userId.email,
-        balance: wallet.balance,
-        transactions: wallet.transactions,
-        isActive: wallet.isActive,
-      };
-    }));
-
-    // Delete wallets that don't have valid users
     if (walletsToDelete.length > 0) {
+      console.log(
+        `Deleting ${walletsToDelete.length} wallets with missing users.`
+      );
       await Wallet.deleteMany({ _id: { $in: walletsToDelete } });
     }
 
     const totalCount = await Wallet.countDocuments({});
     const totalPages = Math.ceil(totalCount / limit);
 
-    // Calculate total wallet balance
     const totalBalance = await Wallet.aggregate([
-      { $group: { _id: null, total: { $sum: "$balance" } } }
+      { $group: { _id: null, total: { $sum: "$balance" } } },
     ]);
-
-    const totalWalletAmount = totalBalance.length > 0 ? totalBalance[0].total : 0;
+    const totalWalletAmount =
+      totalBalance.length > 0 ? totalBalance[0].total : 0;
 
     res.json({
       currentPage: page,
       totalPages: totalPages,
       totalWallets: totalCount,
       totalWalletAmount: totalWalletAmount,
-      wallets: walletDetails.filter(Boolean), // Filter out null values
+      wallets: walletDetails.filter(Boolean),
     });
   } catch (error) {
     console.error("Error fetching wallets:", error);
@@ -117,46 +115,58 @@ const depositWallet = async (req, res) => {
   let transaction = null;
 
   try {
-    const wallet = await Wallet.findOne({ userId });
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    const wallet = await dbService.findWalletByUserId(userId);
 
-    transaction = new Transaction({
-      walletId: wallet._id,
-      amount,
-      type: "deposit",
-      status: "pending",
-      reference: `txn_${Date.now()}_${userId}`,
-      paymentMethod: "naira_wallet",
-    });
-    await transaction.save();
+    // CORRECTED: Pass arguments individually
+    transaction = await walletService.recordTransaction(
+      wallet._id, // walletId
+      `txn_${Date.now()}_${userId}`, // reference
+      amount, // amount
+      "deposit", // type
+      "pending", // status
+      "naira_wallet" // paymentMethod
+    );
 
-    wallet.balance += amount;
+    await walletService.creditWallet(wallet, amount);
+
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
+    const completedTransaction = await walletService.updateTransactionStatus(
+      transaction.reference,
+      "completed"
+    );
     transaction.status = "completed";
-    await transaction.save();
 
-    if (amount > 1000) {
-      const user = await User.findById(userId);
-      if (user && user.referrerId) {
-        const referrer = await User.findById(user.referrerId);
-        if (referrer) {
-          if (!referrer.referralDepositMap.get(userId)) {
-            referrer.points += 1;
-            referrer.totalReferralPoints += 1;
-            referrer.referralDepositMap.set(userId, true);
-            await referrer.save();
-          }
-        }
-      }
-    }
+    const user = await dbService.findUserById(userId);
+
+    await sendTransactionEmailNotification(user.email, user.username, {
+      type: completedTransaction.type,
+      product_name: "Wallet Deposit",
+      status: completedTransaction.status,
+      amount: completedTransaction.amount,
+      balance: wallet.balance,
+      reference: completedTransaction.reference,
+    });
 
     res.json(wallet);
   } catch (error) {
-    if (transaction) {
-      transaction.status = "failed";
-      await transaction.save();
+    if (transaction && transaction.status === "pending") {
+      try {
+        await walletService.updateTransactionStatus(
+          transaction.reference,
+          "failed"
+        );
+      } catch (updateError) {
+        console.error(
+          "Failed to mark transaction as failed after deposit error:",
+          updateError
+        );
+      }
+    }
+    console.error("Error depositing to wallet:", error);
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
     }
     res.status(500).json({ message: "Error depositing to wallet", error });
   }
@@ -164,59 +174,82 @@ const depositWallet = async (req, res) => {
 
 const depositPaystackWallet = async (req, res) => {
   const { userId, amount: rawAmount, reference } = req.body;
-  let transaction = null;
 
   const amount = Number(rawAmount);
 
   if (isNaN(amount) || amount <= 0) {
-    return res.status(400).json({ message: "Amount must be a positive number." });
+    return res
+      .status(400)
+      .json({ message: "Amount must be a positive number." });
   }
   if (amount < 1000) {
     return res.status(400).json({ message: "Amount must be at least 1000." });
   }
 
   try {
-    const wallet = await Wallet.findOne({ userId });
-    if (!wallet) {
-      return res.status(404).json({ message: "Wallet not found." });
+    const wallet = await dbService.findWalletByUserId(userId);
+
+    const existingCompletedTx =
+      await walletService.findCompletedTransactionByReference(reference);
+    if (existingCompletedTx) {
+      return res
+        .status(400)
+        .json({
+          message: "Transaction with this reference already completed.",
+        });
     }
 
-    // Check if this is the user's first deposit
-    const user = await User.findById(userId);
-    const isFirstDeposit = wallet.transactions.length === 0;
+    // CORRECTED: Pass arguments individually
+    const transaction = await walletService.recordTransaction(
+      wallet._id, // walletId
+      reference, // reference
+      amount, // amount
+      "deposit", // type
+      "completed", // status
+      "paystack" // paymentMethod
+    );
 
-    transaction = new Transaction({
-      walletId: wallet._id,
-      amount,
-      type: "deposit",
-      status: "pending",
-      reference,
-      paymentMethod: "paystack",
-    });
-    await transaction.save();
+    await walletService.creditWallet(wallet, amount);
 
-    wallet.balance += amount;
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
-    transaction.status = "completed";
-    await transaction.save();
+    await walletService.handleReferralDepositReward(userId, amount);
 
-    if (isFirstDeposit && amount >= 1000) {
-      const referrer = user.referrerCode ? await User.findOne({ referralCode: user.referrerCode }) : null;
-      if (referrer) {
-        referrer.points = (referrer.points || 0) + 10;
-        await referrer.save();
-      }
-    }
+    const user = await dbService.findUserById(userId);
+
+    await sendTransactionEmailNotification(user.email, user.username, {
+      type: transaction.type,
+      product_name: "Paystack Deposit",
+      status: transaction.status,
+      amount: transaction.amount,
+      balance: wallet.balance,
+      reference: transaction.reference,
+    });
 
     res.json(wallet);
   } catch (error) {
-    if (transaction) {
-      transaction.status = "failed";
-      await transaction.save();
+    console.error("Error processing confirmed Paystack deposit:", error);
+    try {
+      const tx = await walletService.findTransactionByReference(reference);
+      if (tx && tx.status !== "completed") {
+        await walletService.updateTransactionStatus(reference, "failed");
+      }
+    } catch (updateError) {
+      console.error(
+        "Failed to mark Paystack confirmed transaction as failed:",
+        updateError
+      );
     }
-    res.status(500).json({ message: "Error depositing to wallet.", error: error.message || error });
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
+    res
+      .status(500)
+      .json({
+        message: "Error processing confirmed Paystack deposit.",
+        error: error.message || error,
+      });
   }
 };
 
@@ -224,28 +257,27 @@ const depositWalletWithPaystack = async (req, res) => {
   const { userId, amount, paymentMethod, email } = req.body;
 
   try {
-    const wallet = await Wallet.findOne({ userId });
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    const wallet = await dbService.findWalletByUserId(userId);
 
     const transactionReference = `txn_${Date.now()}_${userId}`;
     const totalAmount = amount * 100;
 
-    const transaction = new Transaction({
-      walletId: wallet._id,
-      amount,
-      type: "deposit",
-      status: "pending",
-      reference: transactionReference,
-      paymentMethod,
-    });
-    await transaction.save();
+    // CORRECTED: Pass arguments individually
+    const transaction = await walletService.recordTransaction(
+      wallet._id, // walletId
+      transactionReference, // reference
+      amount, // amount
+      "deposit", // type
+      "pending", // status
+      paymentMethod // paymentMethod
+    );
 
     const paymentData = {
       email,
       amount: totalAmount,
       currency: "NGN",
       reference: transactionReference,
-      callback_url: "https://yourdomain.com/api/payment/callback",
+      callback_url: `${process.env.BASE_URL}/api/wallet/deposit/paystack/verify`,
     };
 
     const response = await axios.post(
@@ -259,6 +291,26 @@ const depositWalletWithPaystack = async (req, res) => {
       }
     );
 
+    if (
+      !response.data ||
+      !response.data.status ||
+      !response.data.data ||
+      !response.data.data.authorization_url
+    ) {
+      console.error(
+        "Paystack initialization failed after recording transaction:",
+        response.data
+      );
+      await walletService.updateTransactionStatus(
+        transactionReference,
+        "failed"
+      );
+      return res.status(500).json({
+        message: "Paystack initialization failed",
+        error: response.data?.message || "Invalid response from Paystack",
+      });
+    }
+
     res.json({
       reference: transactionReference,
       url: response.data.data.authorization_url,
@@ -268,9 +320,12 @@ const depositWalletWithPaystack = async (req, res) => {
       "Error initiating deposit with Paystack:",
       error.response?.data || error
     );
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
     res.status(500).json({
       message: "Error initiating deposit with Paystack",
-      error: error.response?.data,
+      error: error.response?.data || "Internal Server Error",
     });
   }
 };
@@ -279,8 +334,7 @@ const depositWalletWithMonnify = async (req, res) => {
   const { userId, actualAmount, amount, email } = req.body;
 
   try {
-    const wallet = await Wallet.findOne({ userId });
-    if (!wallet) return res.status(404).json({ message: "Wallet not found" });
+    const wallet = await dbService.findWalletByUserId(userId);
 
     const transactionReference = `txn_${Date.now()}_${userId}`;
     const totalAmount = amount;
@@ -292,7 +346,7 @@ const depositWalletWithMonnify = async (req, res) => {
       paymentReference: transactionReference,
       paymentDescription: "Deposit Payment",
       contractCode: process.env.MONNIFY_CONTRACT,
-      callback_url: `https://google.com`,
+      callback_url: `${process.env.BASE_URL}/api/wallet/deposit/monnify/verify/${transactionReference}?userId=${userId}`,
       paymentMethod: "CARD",
     };
 
@@ -313,17 +367,76 @@ const depositWalletWithMonnify = async (req, res) => {
       }
     );
 
-    await recordTransaction(
-      wallet._id,
-      response.data.responseBody.transactionReference,
-      actualAmount,
-      "deposit",
-      "pending",
-      paymentData.paymentMethod
-    );
+    if (
+      !response.data ||
+      !response.data.requestSuccessful ||
+      !response.data.responseBody?.checkoutUrl
+    ) {
+      console.error("Monnify initialization failed:", response.data);
+      const recordedTx = await walletService.findTransactionByReference(
+        transactionReference
+      );
+      if (recordedTx) {
+        await walletService.updateTransactionStatus(
+          transactionReference,
+          "failed"
+        );
+      } else {
+        // CORRECTED: Pass arguments individually
+        await walletService.recordTransaction(
+          wallet._id, // walletId
+          transactionReference, // reference
+          actualAmount, // amount (using actualAmount for local record)
+          "deposit", // type
+          "failed", // status
+          paymentData.paymentMethod, // paymentMethod
+          { gatewayResponse: response.data } // details
+        );
+      }
+
+      return res.status(500).json({
+        message: "Monnify initialization failed",
+        error:
+          response.data?.responseMessage || "Invalid response from Monnify",
+      });
+    }
+
+    const monnifyReference =
+      response.data.responseBody.transactionReference || transactionReference;
+    try {
+      const pendingTx = await walletService.findTransactionByReference(
+        transactionReference
+      );
+      if (pendingTx) {
+        if (pendingTx.status !== "pending") {
+          console.warn(
+            `Monnify deposit initiated for transaction ${transactionReference} which was not pending (status: ${pendingTx.status}).`
+          );
+        }
+        if (pendingTx.reference !== monnifyReference) {
+          pendingTx.reference = monnifyReference;
+          await pendingTx.save();
+        }
+      } else {
+        // CORRECTED: Pass arguments individually
+        await walletService.recordTransaction(
+          wallet._id, // walletId
+          monnifyReference, // reference
+          actualAmount, // amount
+          "deposit", // type
+          "pending", // status
+          paymentData.paymentMethod // paymentMethod
+        );
+      }
+    } catch (dbError) {
+      console.error(
+        "Error recording/updating transaction after Monnify initiation:",
+        dbError
+      );
+    }
 
     res.json({
-      reference: response.data.responseBody.transactionReference,
+      reference: monnifyReference,
       url: response.data.responseBody.checkoutUrl,
     });
   } catch (error) {
@@ -331,9 +444,12 @@ const depositWalletWithMonnify = async (req, res) => {
       "Error initiating deposit with Monnify:",
       error.response ? error.response.data : error
     );
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
     res.status(500).json({
       message: "Error initiating deposit with Monnify",
-      error: error.response ? error.response.data : error,
+      error: error.response ? error.response.data : "Internal Server Error",
     });
   }
 };
@@ -349,249 +465,368 @@ const verifyMonnifyTransaction = async (req, res) => {
     "base64"
   );
 
+  let transaction;
+
   try {
-    const getAmount = await Transaction.findOne({
-      reference: ref,
-      status: "pending",
-    });
+    transaction = await walletService.findTransactionByReference(ref);
 
-    const existingTransaction = await Transaction.findOne({
-      reference: ref,
-      status: "completed",
-    });
-
-    if (existingTransaction) {
-      return res
-        .status(400)
-        .json({ message: "Transaction already completed." });
+    if (!transaction) {
+      console.warn(
+        `Verification request for unknown transaction reference: ${ref}`
+      );
+      return res.status(404).json({ message: "Transaction record not found." });
     }
 
-    const accessToken = await authenticateMonnify(base64Credentials);
-    const transactionData = await fetchTransaction(encodedRef, accessToken);
+    if (transaction.status === "completed") {
+      console.log(
+        `Verification request for already completed transaction reference: ${ref}`
+      );
+      return res
+        .status(200)
+        .json({
+          status: "completed",
+          message: "Transaction already completed.",
+        });
+    }
 
-    const actualAmount = getAmount.amount;
+    const accessToken = await walletService.authenticateMonnify(
+      base64Credentials
+    );
+    const monnifyTransactionData = await walletService.fetchMonnifyTransaction(
+      encodedRef,
+      accessToken
+    );
 
-    const wallet = await Wallet.findOne({ userId });
-    const settlementAmount = actualAmount;
+    const monnifyAmount = monnifyTransactionData.responseBody?.amount;
+    const localAmount = transaction.amount;
 
-    if (transactionData.responseBody.paymentStatus === "PAID") {
-      await updateWalletBalance(wallet, settlementAmount);
-      await updateTransactionStatus(ref, "completed");
+    const wallet = await Wallet.findById(transaction.walletId); // Direct model find here
+    if (!wallet) {
+      console.error(
+        `Wallet not found for transaction ${ref} (walletId: ${transaction.walletId}) during verification.`
+      );
+      await walletService.updateTransactionStatus(ref, "failed");
+      return res
+        .status(500)
+        .json({ message: "Associated user wallet not found." });
+    }
+
+    if (monnifyTransactionData.responseBody.paymentStatus === "PAID") {
+      await walletService.creditWallet(wallet, localAmount);
+
+      const completedTransaction = await walletService.updateTransactionStatus(
+        ref,
+        "completed"
+      );
+      transaction.status = "completed";
+
+      await walletService.handleReferralDepositReward(
+        wallet.userId,
+        localAmount
+      );
+
+      const user = await dbService.findUserById(wallet.userId);
+
+      await sendTransactionEmailNotification(user.email, user.username, {
+        type: completedTransaction.type,
+        product_name: "Monnify Deposit",
+        status: completedTransaction.status,
+        amount: completedTransaction.amount,
+        balance: wallet.balance,
+        reference: completedTransaction.reference,
+      });
 
       return res.status(200).json({
         status: "paid",
         message: "Transaction successful",
-        transactionData,
+        transactionData: monnifyTransactionData,
       });
-    } else if (transactionData.responseBody.paymentStatus === "PENDING") {
-      await updateTransactionStatus(ref, "pending");
+    } else if (
+      monnifyTransactionData.responseBody.paymentStatus === "PENDING"
+    ) {
+      await walletService.updateTransactionStatus(ref, "pending");
+      transaction.status = "pending";
       return res.status(200).json({
         status: "pending",
         message: "Transaction pending",
-        transactionData,
+        transactionData: monnifyTransactionData,
       });
     } else {
-      await updateTransactionStatus(ref, "failed");
+      await walletService.updateTransactionStatus(ref, "failed");
+      transaction.status = "failed";
       return res.status(200).json({
         status: "failed",
         message: "Transaction failed",
-        transactionData,
+        transactionData: monnifyTransactionData,
       });
     }
   } catch (error) {
     console.error(
-      "Error verifying transaction:",
+      "Error verifying Monnify transaction:",
       error.response?.data || error
     );
+    if (transaction && transaction.status !== "completed") {
+      try {
+        await walletService.updateTransactionStatus(
+          transaction.reference,
+          "failed"
+        );
+        console.log(
+          `Transaction ${transaction.reference} marked as failed due to verification error.`
+        );
+      } catch (updateError) {
+        console.error(
+          "Failed to mark transaction as failed after verification error:",
+          updateError
+        );
+      }
+    }
+
     res.status(500).json({
-      message: "Error verifying transaction",
-      error: error.response?.data || "Internal server error",
+      message: error.message || "Internal server error",
+      error: error.response?.data || error.message,
     });
-  }
-};
-
-const authenticateMonnify = async (base64Credentials) => {
-  const response = await axios.post(
-    `${process.env.MONNIFY_URL}/api/v1/auth/login`,
-    {},
-    {
-      headers: {
-        Authorization: `Basic ${base64Credentials}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-  return response.data.responseBody.accessToken;
-};
-
-const fetchTransaction = async (encodedRef, accessToken) => {
-  const response = await axios.get(
-    `${process.env.MONNIFY_URL}/api/v2/transactions/${encodedRef}`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-  return response.data;
-};
-
-const monnifyWithdrawUrl = async (accessToken, data) => {
-  const response = await axios.post(
-    `${process.env.MONNIFY_URL}/api/v2/disbursements/single`,
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-  return response.data;
-};
-
-const monnifyWithdrawUrlAuthorize = async (accessToken, data) => {
-  const response = await axios.post(
-    `${process.env.MONNIFY_URL}/api/v2/disbursements/single/validate-otp`,
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-  return response.data;
-};
-
-const updateWalletBalance = async (wallet, amount) => {
-  if (wallet) {
-    wallet.balance += amount;
-    await wallet.save();
-  }
-};
-
-const recordTransaction = async (
-  walletId,
-  reference,
-  amount,
-  type,
-  status,
-  paymentMethod
-) => {
-  const transaction = new Transaction({
-    walletId,
-    amount,
-    type,
-    status,
-    reference,
-    paymentMethod,
-  });
-  await transaction.save();
-};
-
-const updateTransactionStatus = async (reference, newStatus) => {
-  try {
-    const transaction = await Transaction.findOne({ reference });
-
-    if (!transaction) {
-      throw new Error("Transaction not found");
-    }
-    transaction.status = newStatus;
-
-    await transaction.save();
-
-    return transaction;
-  } catch (error) {
-    console.error("Error updating transaction status:", error);
-    throw error;
   }
 };
 
 const verifyPaystackTransaction = async (req, res) => {
   const { reference, userId } = req.body;
 
+  if (!reference) {
+    return res
+      .status(400)
+      .json({ message: "Transaction reference is required." });
+  }
+
+  let transaction;
+
   try {
-    const { data } = await axios.get(
-      `https://api.paystack.co/transaction/verify/${reference}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        },
+    transaction = await walletService.findTransactionByReference(reference);
+
+    if (!transaction) {
+      console.warn(
+        `Paystack verification request for unknown transaction reference: ${reference}`
+      );
+    } else if (transaction.status === "completed") {
+      console.log(
+        `Paystack verification request for already completed transaction: ${reference}`
+      );
+      return res
+        .status(200)
+        .json({
+          message: "Transaction already completed.",
+          transactionData: null,
+        });
+    }
+
+    const paystackTransactionData =
+      await walletService.fetchPaystackTransaction(reference);
+
+    const userIdToCredit = transaction
+      ? (await Wallet.findById(transaction.walletId))?.userId
+      : userId; // Direct model find here
+    if (!userIdToCredit) {
+      console.error(
+        `Cannot determine user ID for crediting for transaction reference: ${reference}`
+      );
+      if (transaction && transaction.status !== "completed") {
+        await walletService.updateTransactionStatus(reference, "failed");
+      } else if (!transaction) {
+        // CORRECTED: Pass arguments individually
+        await walletService.recordTransaction(
+          null, // walletId (unknown)
+          reference, // reference
+          paystackTransactionData.amount / 100, // amount
+          "deposit", // type
+          "failed", // status (failed due to missing wallet)
+          "paystack", // paymentMethod
+          {
+            gatewayResponse: paystackTransactionData,
+            error: "Wallet not found for user during verification",
+          } // details
+        );
       }
-    );
+      return res
+        .status(500)
+        .json({ message: "Could not identify user for crediting." });
+    }
 
-    const transactionData = data.data;
-
-    switch (transactionData.status) {
+    switch (paystackTransactionData.status) {
       case "success":
-        const wallet = await Wallet.findOne({ userId });
+        const wallet = await dbService.findWalletByUserId(userIdToCredit); // Use dbService
         if (!wallet) {
-          return res.status(404).json({ message: "Wallet not found." });
+          console.error(
+            `Paystack transaction success for ref ${reference}, but wallet not found for userId ${userIdToCredit}`
+          );
+          if (transaction && transaction.status !== "completed") {
+            await walletService.updateTransactionStatus(reference, "failed");
+          } else if (!transaction) {
+            // CORRECTED: Pass arguments individually
+            await walletService.recordTransaction(
+              null, // walletId
+              reference, // reference
+              paystackTransactionData.amount / 100, // amount
+              "deposit", // type
+              "failed", // status (failed due to missing wallet)
+              "paystack", // paymentMethod
+              {
+                gatewayResponse: paystackTransactionData,
+                error: "Wallet not found for user during verification",
+              } // details
+            );
+          }
+          return res
+            .status(404)
+            .json({ message: "Wallet not found for crediting." });
         }
 
-        wallet.balance += transactionData.amount / 100;
-        await wallet.save();
+        const paystackAmount = paystackTransactionData.amount / 100;
+        const localAmount = transaction?.amount;
 
-        const successTransaction = new Transaction({
-          walletId: wallet._id,
-          amount: transactionData.amount / 100,
-          type: "deposit",
-          status: "completed",
-          reference,
-          paymentMethod: "paystack",
+        await walletService.creditWallet(wallet, paystackAmount);
+
+        let completedTransaction;
+        if (transaction) {
+          completedTransaction = await walletService.updateTransactionStatus(
+            reference,
+            "completed"
+          );
+          transaction.status = "completed";
+          transaction.amount = paystackAmount;
+          if (!transaction.walletId) transaction.walletId = wallet._id;
+          transaction.gatewayResponse = paystackTransactionData;
+          await transaction.save();
+        } else {
+          // CORRECTED: Pass arguments individually
+          completedTransaction = await walletService.recordTransaction(
+            wallet._id, // walletId
+            reference, // reference
+            paystackAmount, // amount
+            "deposit", // type
+            "completed", // status
+            "paystack", // paymentMethod
+            { gatewayResponse: paystackTransactionData } // details
+          );
+          wallet.transactions.push(completedTransaction._id);
+          await wallet.save();
+          transaction = completedTransaction;
+        }
+
+        await walletService.handleReferralDepositReward(
+          userIdToCredit,
+          paystackAmount
+        );
+
+        const user = await dbService.findUserById(userIdToCredit);
+
+        await sendTransactionEmailNotification(user.email, user.username, {
+          type: completedTransaction.type,
+          product_name: "Paystack Deposit",
+          status: completedTransaction.status,
+          amount: completedTransaction.amount,
+          balance: wallet.balance,
+          reference: completedTransaction.reference,
         });
-        await successTransaction.save();
 
         return res.status(200).json({
           message: "Transaction successful",
-          transactionData,
+          transactionData: paystackTransactionData,
+          wallet: { balance: wallet.balance },
         });
 
       case "pending":
-        const pendingTransaction = new Transaction({
-          walletId: null,
-          amount: transactionData.amount / 100,
-          type: "deposit",
-          status: "pending",
-          reference,
-          paymentMethod: "paystack",
-        });
-        await pendingTransaction.save();
+        if (!transaction) {
+          // CORRECTED: Pass arguments individually
+          await walletService.recordTransaction(
+            null, // walletId (unknown initially)
+            reference, // reference
+            paystackTransactionData.amount / 100, // amount
+            "deposit", // type
+            "pending", // status
+            "paystack", // paymentMethod
+            { gatewayResponse: paystackTransactionData } // details
+          );
+        } else if (transaction.status !== "pending") {
+          await walletService.updateTransactionStatus(reference, "pending");
+        }
 
         return res.status(202).json({
           message: "Transaction is pending",
-          transactionData,
+          transactionData: paystackTransactionData,
         });
 
       case "failed":
-        const failedTransaction = new Transaction({
-          walletId: null,
-          amount: transactionData.amount / 100,
-          type: "deposit",
-          status: "failed",
-          reference,
-          paymentMethod: "paystack",
-        });
-        await failedTransaction.save();
+        if (!transaction) {
+          // CORRECTED: Pass arguments individually
+          await walletService.recordTransaction(
+            null, // walletId
+            reference, // reference
+            paystackTransactionData.amount / 100, // amount
+            "deposit", // type
+            "failed", // status
+            "paystack", // paymentMethod
+            { gatewayResponse: paystackTransactionData } // details
+          );
+        } else if (transaction.status !== "failed") {
+          await walletService.updateTransactionStatus(reference, "failed");
+        }
 
         return res.status(400).json({
           message: "Transaction failed",
-          transactionData,
+          transactionData: paystackTransactionData,
         });
 
       default:
+        console.error(
+          `Paystack returned unknown status for reference ${reference}: ${paystackTransactionData.status}`
+        );
+        if (!transaction) {
+          // CORRECTED: Pass arguments individually
+          await walletService.recordTransaction(
+            null, // walletId
+            reference, // reference
+            paystackTransactionData.amount / 100, // amount
+            "deposit", // type
+            "failed", // status
+            "paystack", // paymentMethod
+            { gatewayResponse: paystackTransactionData } // details
+          );
+        } else if (transaction.status !== "failed") {
+          await walletService.updateTransactionStatus(reference, "failed");
+        }
+
         return res.status(400).json({
-          message: "Unknown transaction status",
-          transactionData,
+          message: "Unknown transaction status from Paystack",
+          transactionData: paystackTransactionData,
         });
     }
   } catch (error) {
     console.error(
-      "Error verifying transaction:",
+      "Error verifying Paystack transaction:",
       error.response?.data || error.message
     );
+
+    if (transaction && transaction.status !== "completed") {
+      try {
+        await walletService.updateTransactionStatus(
+          transaction.reference,
+          "failed"
+        );
+        console.log(
+          `Transaction ${transaction.reference} marked failed due to verification error.`
+        );
+      } catch (updateError) {
+        console.error(
+          "Failed to mark transaction as failed after verification error:",
+          updateError
+        );
+      }
+    } else if (!transaction && reference) {
+      console.error(
+        `Error during Paystack verification for unknown reference ${reference}:`,
+        error.message
+      );
+    }
 
     return res.status(500).json({
       message: "Error verifying transaction",
@@ -601,38 +836,46 @@ const verifyPaystackTransaction = async (req, res) => {
 };
 
 const withdrawWallet = async (req, res) => {
+  const userId = req.user.id;
   const { amount, bankName, accountNumber, bankCode } = req.body;
 
   try {
-    const wallet = await Wallet.findOne({ userId: req.user.id });
+    const wallet = await dbService.findWalletByUserId(userId);
+    walletService.checkWalletForDebit(wallet, amount);
 
-    if (!wallet) {
-      return res.status(404).json({ message: "Wallet not found" });
-    }
+    await walletService.debitWallet(wallet, amount);
 
-    if (wallet.balance < amount) {
-      return res.status(400).json({ error: "Insufficient funds" });
-    }
-
-    wallet.balance -= amount;
-    const transaction = new Transaction({
-      walletId: wallet._id,
-      amount,
-      type: "withdrawal",
-      bankName,
-      accountNumber,
-      bankCode,
-      status: "pending",
-      paymentMethod: "naira_wallet",
-      reference: `txn-${Date.now()}`,
-    });
-    await transaction.save();
+    // CORRECTED: Pass arguments individually
+    const transaction = await walletService.recordTransaction(
+      wallet._id, // walletId
+      `txn-${Date.now()}`, // reference
+      amount, // amount
+      "withdrawal", // type
+      "completed", // status
+      "naira_wallet", // paymentMethod
+      {
+        // details object
+        bankName,
+        accountNumber,
+        bankCode,
+      }
+    );
 
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
-    transaction.status = "completed";
-    await transaction.save();
+    const user = await dbService.findUserById(userId);
+
+    await sendTransactionEmailNotification(user.email, user.username, {
+      type: transaction.type,
+      product_name: "Wallet Withdrawal",
+      status: transaction.status,
+      amount: transaction.amount,
+      balance: wallet.balance,
+      reference: transaction.reference,
+      bankName: transaction.bankName,
+      accountNumber: transaction.accountNumber,
+    });
 
     return res.status(200).json({
       message: "Withdrawal successful",
@@ -647,15 +890,18 @@ const withdrawWallet = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-
-    return res
+    console.error("Error in withdrawWallet:", error);
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
+    res
       .status(500)
       .json({ message: "Error withdrawing from wallet", error: error.message });
   }
 };
 
 const withdrawFromWallet = async (req, res, isOTP = false) => {
+  const userId = req.user.id;
   const {
     amount,
     bankName,
@@ -666,14 +912,10 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
   } = req.body;
 
   try {
-    const wallet = await Wallet.findOne({ userId: req.user.id });
+    const wallet = await dbService.findWalletByUserId(userId);
 
-    if (!wallet) {
-      return res.status(404).json({ message: "Wallet not found" });
-    }
-
-    if (wallet.balance < amount) {
-      return res.status(400).json({ error: "Insufficient funds" });
+    if (!isOTP) {
+      walletService.checkWalletForDebit(wallet, amount);
     }
 
     const apiKey = process.env.MONNIFY_API_KEY;
@@ -682,66 +924,124 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
       "base64"
     );
 
-    const data = isOTP
-      ? { reference, authorizationCode }
-      : {
-          amount,
-          reference: `txn-${Date.now()}`,
-          narration: "Withdrawal Request",
-          destinationBankCode: bankCode,
-          destinationAccountNumber: accountNumber,
-          currency: "NGN",
-          sourceAccountNumber: process.env.MONNIFY_ACCOUNT_NUMBER,
-          async: true,
-        };
-
-    const accessToken = await authenticateMonnify(base64Credentials);
-    const withdrawData = isOTP
-      ? await monnifyWithdrawUrlAuthorize(accessToken, data)
-      : await monnifyWithdrawUrl(accessToken, data);
-
-    if (!withdrawData.requestSuccessful) {
-      return res.status(400).json({
-        message: withdrawData.responseMessage,
-        code: withdrawData.responseCode,
-      });
-    }
+    const accessToken = await walletService.authenticateMonnify(
+      base64Credentials
+    );
 
     if (!isOTP) {
-      const transaction = new Transaction({
-        walletId: wallet._id,
+      const transactionReference = `txn-${Date.now()}`;
+      const monnifyData = {
         amount,
-        type: "withdrawal",
-        bankName,
-        accountNumber,
-        bankCode,
-        status: "pending",
-        paymentMethod: "naira_wallet",
-        reference: data.reference,
-      });
-      await transaction.save();
+        reference: transactionReference,
+        narration: "Withdrawal Request",
+        destinationBankCode: bankCode,
+        destinationAccountNumber: accountNumber,
+        currency: "NGN",
+        sourceAccountNumber: process.env.MONNIFY_ACCOUNT_NUMBER,
+        async: true,
+      };
+      const withdrawData = await walletService.initiateMonnifyWithdrawal(
+        accessToken,
+        monnifyData
+      );
+
+      // CORRECTED: Pass arguments individually
+      const transaction = await walletService.recordTransaction(
+        wallet._id, // walletId
+        transactionReference, // reference
+        amount, // amount
+        "withdrawal", // type
+        "pending", // status
+        "monnify", // paymentMethod
+        {
+          // details
+          bankName,
+          accountNumber,
+          bankCode,
+          gatewayReference: withdrawData.responseBody?.disbursementReference, // Store Monnify's reference
+        }
+      );
+
+      wallet.transactions.push(transaction._id);
+      await wallet.save();
 
       return res.status(200).json({
-        message: "Withdrawal processing",
+        message:
+          "Withdrawal processing started. Please complete authorization.",
         transaction: {
           id: transaction._id,
           amount: transaction.amount,
           status: transaction.status,
           reference: transaction.reference,
+          monnifyDisbursementRef:
+            withdrawData.responseBody?.disbursementReference,
         },
+        monnifyResponse: withdrawData.responseBody,
       });
     } else {
-      const transaction = await Transaction.findOne({ reference });
+      const transaction = await walletService.findTransactionByReference(
+        reference
+      );
 
       if (!transaction) {
-        return res.status(404).json({ message: "Transaction not found" });
+        return res
+          .status(404)
+          .json({
+            message: "Pending transaction not found with this reference.",
+          });
       }
 
-      wallet.balance -= amount;
-      await wallet.save();
+      if (transaction.status !== "pending") {
+        return res
+          .status(400)
+          .json({
+            message: `Transaction status is ${transaction.status}, not pending for authorization.`,
+          });
+      }
+      if (
+        !transaction.walletId ||
+        transaction.walletId.toString() !== wallet._id.toString()
+      ) {
+        console.error(
+          `Security Alert: Transaction ${reference} wallet ID mismatch. User ${userId}, Tx Wallet ID ${transaction.walletId}`
+        );
+        return res
+          .status(403)
+          .json({ message: "Transaction does not belong to your wallet." });
+      }
 
+      const authorizationData = { reference, authorizationCode };
+
+      const withdrawData = await walletService.authorizeMonnifyWithdrawal(
+        accessToken,
+        authorizationData
+      );
+
+      await walletService.debitWallet(wallet, transaction.amount);
+
+      const completedTransaction = await walletService.updateTransactionStatus(
+        reference,
+        "completed"
+      );
       transaction.status = "completed";
-      await transaction.save();
+
+      if (!wallet.transactions.includes(transaction._id)) {
+        wallet.transactions.push(transaction._id);
+        await wallet.save();
+      }
+
+      const user = await dbService.findUserById(userId);
+
+      await sendTransactionEmailNotification(user.email, user.username, {
+        type: completedTransaction.type,
+        product_name: "Monnify Withdrawal",
+        status: completedTransaction.status,
+        amount: completedTransaction.amount,
+        balance: wallet.balance,
+        reference: completedTransaction.reference,
+        bankName: completedTransaction.bankName,
+        accountNumber: completedTransaction.accountNumber,
+      });
 
       return res.status(200).json({
         message: "Withdrawal successful",
@@ -753,122 +1053,124 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
           id: transaction._id,
           amount: transaction.amount,
           status: transaction.status,
+          reference: transaction.reference,
         },
+        monnifyResponse: withdrawData.responseBody,
       });
     }
   } catch (error) {
-    console.error(error);
-    return res
+    console.error("Error in withdrawFromWallet (Monnify):", error);
+    if (reference) {
+      try {
+        const tx = await walletService.findTransactionByReference(reference);
+        if (tx && tx.status === "pending") {
+          await walletService.updateTransactionStatus(reference, "failed");
+          console.log(
+            `Transaction ${reference} marked as failed due to withdrawal error.`
+          );
+        } else if (!tx) {
+          console.error(
+            `Withdrawal error for unknown transaction reference ${reference}`
+          );
+        }
+      } catch (updateError) {
+        console.error(
+          `Failed to mark transaction ${reference} as failed after withdrawal error:`,
+          updateError
+        );
+      }
+    }
+
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    }
+    res
       .status(500)
-      .json({ message: "Error processing withdrawal", error: error.message });
+      .json({ message: error.message || "Error processing withdrawal" });
   }
 };
 
-const withdrawMonnifyWallet = (req, res) => withdrawFromWallet(req, res);
+const withdrawMonnifyWallet = (req, res) => withdrawFromWallet(req, res, false);
+
 const withdrawMonnifyWalletOTP = (req, res) =>
   withdrawFromWallet(req, res, true);
 
 const withdrawWalletPaystack = async (req, res) => {
+  const userId = req.user.id;
   const { name, bankName, amount, accountNumber, bankCode } = req.body;
 
   try {
-    // Find the user's wallet
-    const wallet = await Wallet.findOne({ userId: req.user.id });
-    if (!wallet) {
-      return res.status(404).json({ message: "Wallet not found" });
-    }
+    const wallet = await dbService.findWalletByUserId(userId);
+    walletService.checkWalletForDebit(wallet, amount);
 
-    // Check for sufficient funds
-    if (wallet.balance < amount) {
-      return res.status(400).json({ error: "Insufficient funds" });
-    }
+    const transactionReference = `txn-${Date.now()}`;
 
-    // Prepare data for Paystack recipient creation
     const recipientData = {
       type: "nuban",
-      name,
-      account_number: accountNumber, // Use a test account number
-      bank_code: bankCode, // Use a test bank code
+      name: name || `Withdrawal by ${userId}`,
+      account_number: accountNumber,
+      bank_code: bankCode,
       currency: "NGN",
+      metadata: { userId: userId.toString() },
     };
 
-    // Create a recipient on Paystack
-    const recipientResponse = await axios.post(
-      `https://api.paystack.co/transferrecipient`,
-      recipientData,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        },
-      }
+    const recipientDetails = await walletService.createPaystackRecipient(
+      recipientData
     );
+    const recipientCode = recipientDetails.recipient_code;
 
-    if (!recipientResponse.data.data.recipient_code) {
-      return res
-        .status(500)
-        .json({ error: "Failed to create Paystack recipient" });
-    }
-
-    const newTransaction = {
+    const transferData = {
       source: "balance",
-      amount,
-      reference: `txn-${Date.now()}`,
-      recipient: recipientResponse.data.data.recipient_code,
-      reason: "Withdrawal request",
+      amount: amount * 100,
+      reference: transactionReference,
+      recipient: recipientCode,
+      reason: `Withdrawal request by user ${userId}`,
+      metadata: { walletId: wallet._id.toString() },
     };
 
-    // Initiate transfer
-    const transferResponse = await axios.post(
-      `https://api.paystack.co/transfer`,
-      newTransaction,
+    const transferDetails = await walletService.initiatePaystackTransfer(
+      transferData
+    );
+
+    await walletService.debitWallet(wallet, amount);
+
+    // CORRECTED: Pass arguments individually
+    const transaction = await walletService.recordTransaction(
+      wallet._id, // walletId
+      transactionReference, // reference
+      amount, // amount
+      "withdrawal", // type
+      "pending", // status
+      "paystack_transfer", // paymentMethod
       {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        },
+        // details
+        bankName,
+        accountNumber,
+        bankCode,
+        recipientCode: recipientCode,
+        paystackStatus: transferDetails.status,
+        gatewayReference: transferDetails.reference,
+        transferCode: transferDetails.transfer_code,
       }
     );
 
-    // Check for transfer response errors
-    if (transferResponse.data.status === false) {
-      const errorMessage = transferResponse.data.message;
-
-      // Handle specific error for starter businesses
-      if (transferResponse.data.code === "transfer_unavailable") {
-        return res.status(403).json({
-          error:
-            "Transfer unavailable: You cannot initiate third-party payouts as a starter business.",
-        });
-      }
-
-      return res.status(500).json({ error: errorMessage });
-    }
-
-    // Update wallet balance and log the transaction
-    wallet.balance -= amount;
-
-    const transaction = new Transaction({
-      walletId: wallet._id,
-      amount,
-      type: "withdrawal",
-      bankName,
-      accountNumber,
-      bankCode,
-      status: "pending",
-      paymentMethod: "naira_wallet",
-      reference: newTransaction.reference,
-    });
-
-    await transaction.save();
     wallet.transactions.push(transaction._id);
     await wallet.save();
 
-    // Update transaction status to completed
-    transaction.status = "completed";
-    await transaction.save();
+    const user = await dbService.findUserById(userId);
+    await sendTransactionEmailNotification(user.email, user.username, {
+      type: transaction.type,
+      product_name: "Paystack Withdrawal Initiation",
+      status: transaction.status,
+      amount: transaction.amount,
+      balance: wallet.balance,
+      reference: transaction.reference,
+      bankName: transaction.bankName,
+      accountNumber: transaction.accountNumber,
+    });
 
-    // Respond to the client
     return res.status(200).json({
-      message: "Withdrawal successful",
+      message: "Withdrawal initiated successfully. Please await bank credit.",
       wallet: {
         balance: wallet.balance,
         transactions: wallet.transactions,
@@ -877,14 +1179,48 @@ const withdrawWalletPaystack = async (req, res) => {
         id: transaction._id,
         amount: transaction.amount,
         status: transaction.status,
+        reference: transaction.reference,
+        paystackTransferCode: transferDetails.transfer_code,
       },
+      paystackResponse: transferDetails,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in withdrawWalletPaystack:", error);
 
-    return res.status(500).json({
-      message: "Error withdrawing from wallet",
-      error: error.message,
+    if (error.status) {
+      return res.status(error.status).json({ message: error.message });
+    } else if (error.cause?.code === "transfer_unavailable") {
+      return res.status(403).json({ message: error.message });
+    }
+    if (transactionReference) {
+      try {
+        const tx = await walletService.findTransactionByReference(
+          transactionReference
+        );
+        if (tx && tx.status === "pending") {
+          await walletService.updateTransactionStatus(
+            transactionReference,
+            "failed"
+          );
+          console.log(
+            `Transaction ${transactionReference} marked as failed due to Paystack withdrawal error.`
+          );
+        } else if (!tx) {
+          console.error(
+            `Paystack withdrawal failed before transaction record for ref ${transactionReference}`
+          );
+        }
+      } catch (updateError) {
+        console.error(
+          `Failed to mark transaction ${transactionReference} as failed after withdrawal error:`,
+          updateError
+        );
+      }
+    }
+
+    res.status(500).json({
+      message: error.message || "Error withdrawing from wallet",
+      error: error.cause?.details || error.message,
     });
   }
 };
@@ -906,6 +1242,7 @@ const toggleWalletStatus = async (req, res) => {
       wallet,
     });
   } catch (error) {
+    console.error("Error toggling wallet status:", error);
     res.status(500).json({ message: "Error toggling wallet status", error });
   }
 };
@@ -936,7 +1273,7 @@ const getAllTransactions = async (req, res) => {
       })
       .skip(skip)
       .limit(limit)
-      .sort({ transactionDate: -1 })
+      .sort({ createdAt: -1 })
       .exec();
 
     const transactionsWithUserDetails = transactions.map((transaction) => ({
@@ -944,12 +1281,17 @@ const getAllTransactions = async (req, res) => {
       reference: transaction.reference,
       amount: transaction.amount,
       type: transaction.type,
-      timestamp: transaction.timestamp,
+      timestamp: transaction.createdAt,
       status: transaction.status,
+      bankName: transaction.bankName || null,
+      accountNumber: transaction.accountNumber || null,
+      bankCode: transaction.bankCode || null,
       user: {
-        username: transaction.walletId.userId.username,
-        email: transaction.walletId.userId.email,
+        username: transaction.walletId?.userId?.username || "N/A",
+        email: transaction.walletId?.userId?.email || "N/A",
+        userId: transaction.walletId?.userId?._id || null,
       },
+      walletId: transaction.walletId?._id || null,
     }));
 
     const totalTransactions = await Transaction.countDocuments(query);
@@ -962,6 +1304,7 @@ const getAllTransactions = async (req, res) => {
       transactions: transactionsWithUserDetails,
     });
   } catch (error) {
+    console.error("Error fetching all transactions:", error);
     res.status(500).json({ message: "Error fetching transactions", error });
   }
 };
@@ -971,16 +1314,7 @@ const getTransactionsByUser = async (req, res) => {
   const { type, page = 1, limit = 10, reference } = req.query;
 
   try {
-    const wallet = await Wallet.findOne({ userId: userId });
-
-    if (!wallet) {
-      return res.json({
-        totalTransactions: 0,
-        totalPages: 0,
-        currentPage: Number(page),
-        transactions: [],
-      });
-    }
+    const wallet = await dbService.findWalletByUserId(userId);
 
     const filters = {
       walletId: wallet._id,
@@ -991,7 +1325,7 @@ const getTransactionsByUser = async (req, res) => {
     }
 
     if (reference) {
-      filters.reference = { $regex: reference, $options: 'i' };
+      filters.reference = { $regex: reference, $options: "i" };
     }
 
     const totalTransactions = await Transaction.countDocuments(filters);
@@ -1007,14 +1341,23 @@ const getTransactionsByUser = async (req, res) => {
       .limit(limitNumber)
       .exec();
 
+    const formattedTransactions = transactions.map((tx) => ({
+      ...tx.toJSON(),
+      ...(tx.type === "withdrawal" && {
+        bankName: tx.bankName,
+        accountNumber: tx.accountNumber,
+        bankCode: tx.bankCode,
+      }),
+    }));
+
     res.json({
       totalTransactions,
       totalPages,
       currentPage: pageNumber,
-      transactions: transactions,
+      transactions: formattedTransactions,
     });
-
   } catch (error) {
+    console.error("Error fetching user transactions:", error);
     handleServiceError(error, res);
   }
 };
@@ -1027,6 +1370,15 @@ const getBanks = async (req, res) => {
         "Content-Type": "application/json",
       },
     });
+
+    if (!response.data || !response.data.status || !response.data.data) {
+      console.error("Paystack bank fetch failed:", response.data);
+      return res
+        .status(500)
+        .json({
+          message: "Invalid response from Paystack when fetching banks.",
+        });
+    }
 
     res.json(response.data);
   } catch (error) {
