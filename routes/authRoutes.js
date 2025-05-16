@@ -21,13 +21,12 @@ const setStoredTokens = (accessToken, accessSecret) => {
 
 const router = express.Router();
 
-// Session middleware configuration
 router.use(
   session({
     secret: process.env.SESSION_SECRET || "your_secret_key",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // Change to true in production with HTTPS
+    cookie: { secure: true },
   })
 );
 
@@ -41,8 +40,7 @@ router.get("/x", async (req, res) => {
     }
     const client = new TwitterApi({ appKey, appSecret });
 
-    const callbackUrlGenerated = `${"http://localhost:5173"
-    }/api/users/admin/auth/x/callback`;
+    const callbackUrlGenerated = `${process.env.CLIENT_URL}/api/users/admin/auth/x/callback`;
     console.log("Backend generated Callback URL:", callbackUrlGenerated);
 
     const authLink = await client.generateAuthLink(callbackUrlGenerated, {
