@@ -137,12 +137,15 @@ const createNotification = async (req, res, next) => {
             "username email"
           );
           if (user) {
-            await sendNotificationEmail(user.email, user.username, {
-              status: "New Notification",
-              product_name: title,
-              amount: message,
-              type: "Notification",
-            });
+            let link = "https://ohtopup.onrender.com/dashboard";
+
+            await sendNotificationEmail(
+              user.email,
+              user.username,
+              title,
+              message,
+              link
+            );
           }
           return {
             ...notif.toObject(),
