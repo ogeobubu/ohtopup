@@ -517,3 +517,12 @@ export const getUtilityBalance = async () => {
     console.error(error);
   }
 };
+
+export const requeryTransaction = async (data) => {
+  try {
+    const response = await instance.post(`/requery-transaction`, data);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error logging user");
+  }
+};

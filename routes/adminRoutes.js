@@ -29,7 +29,8 @@ const {
   getAllUtilityTransactions,
   getAnalytics,
   variationCodes,
-  vtpassWalletBalance
+  vtpassWalletBalance,
+  requeryTransactionHandler,
 } = require("../controllers/utilityController");
 
 const {
@@ -52,7 +53,9 @@ const {
   updateTicket,
 } = require("../controllers/ticketController");
 
-const { generateMarketingContent } = require("../controllers/contentController");
+const {
+  generateMarketingContent,
+} = require("../controllers/contentController");
 
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
@@ -83,6 +86,12 @@ router.get(
   authUser,
   authAdmin,
   getAllUtilityTransactions
+);
+router.post(
+  "/requery-transaction",
+  authUser,
+  authAdmin,
+  requeryTransactionHandler
 );
 router.get("/utility-analytic", authUser, authAdmin, getAnalytics);
 
