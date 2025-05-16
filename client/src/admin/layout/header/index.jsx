@@ -84,7 +84,7 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className="bg-white dark:bg-gray-900 py-2 flex flex-wrap lg:justify-between justify-center items-center md:mt-0 mt-5 px-4">
+    <nav className="bg-white dark:bg-gray-900 py-2 flex flex-wrap md:justify-between justify-center items-center md:mt-0 mt-5 px-4">
       <div className="text-gray-800 dark:text-white text-lg md:text-xl font-bold">
         Hello, <span className="text-sm">{user?.username} 👋</span>
       </div>

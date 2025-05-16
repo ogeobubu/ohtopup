@@ -13,25 +13,27 @@ const Verify = ({ darkMode }) => {
     JSON.parse(localStorage.getItem("ohtopup-create")) || null;
   const inputRefs = useRef([]);
 
-  useEffect(() => {
-    const inputFields = inputRefs.current;
+ useEffect(() => {
+  const inputFields = inputRefs.current;
 
-    inputFields.forEach((input, index) => {
-      input.addEventListener("input", (event) => {
+  inputFields.forEach((input, index) => {
+    if (input) {
+      const handleInput = (event) => {
         if (event.target.value.length === 1) {
           if (index < inputFields.length - 1) {
             inputFields[index + 1].focus();
           }
         }
-      });
-    });
+      };
 
-    return () => {
-      inputFields.forEach((input) => {
-        input.removeEventListener("input", () => {});
-      });
-    };
-  }, []);
+      input.addEventListener("input", handleInput);
+
+      return () => {
+        input.removeEventListener("input", handleInput);
+      };
+    }
+  });
+}, []);
 
   const handlePaste = (event, index) => {
     const pastedData = event.clipboardData.getData("text").slice(0, 4);
@@ -79,7 +81,7 @@ const Verify = ({ darkMode }) => {
             </p>
             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
               <strong className="font-bold">Note:</strong>
-              <span className="block sm:inline"> If you don't see the email, please check your spam folder.</span>
+              <span className="block sm:inline"> If you don't see the email in your inbox, please check your spam folder.</span>
             </div>
             <Formik
               initialValues={{ confirmationCode: "" }}
