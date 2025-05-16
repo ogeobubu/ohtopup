@@ -136,12 +136,12 @@ const Wallet = () => {
   const closeDepositModal = () => setIsDepositModalOpen(false);
 
   const handleAmountChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-  
-    if (value === '' || !isNaN(value)) {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+
+    if (value === "" || !isNaN(value)) {
       setAmount(value);
-  
-      if (value === '') {
+
+      if (value === "") {
         setTotalAmount(0);
       } else {
         const parsedValue = parseFloat(value);
@@ -168,7 +168,7 @@ const Wallet = () => {
 
         if (response) {
           toast.success("Payment successful!");
-          setIsDepositModalOpen(false)
+          setIsDepositModalOpen(false);
           queryClient.invalidateQueries(["wallet"]);
           queryClient.invalidateQueries(["transactions"]);
         }
@@ -556,42 +556,36 @@ const Wallet = () => {
           </Modal>
 
           <Modal
-  isOpen={isDepositModalOpen}
-  closeModal={closeDepositModal}
-  title="Add Funds"
-  isDarkMode={isDarkMode}
->
-  <p style={{ color: 'red', fontWeight: 'bold' }}>
-    Please note: The minimum deposit amount is 1000.
-  </p>
-  
-  <TextField
-    name="amount"
-    label="Amount"
-    placeholder="Enter amount"
-    value={formattedAmount}
-    onChange={handleAmountChange}
-    helperText={`Total Amount (including fees): ${formatNairaAmount(totalAmount)}`}
-  />
-  
-  <div className="my-2">
-    <Button 
-      loading={loading} 
-      disabled={amount < 1000 || loading}
-      {...componentProps}
-    >
-      <PaystackButton 
-        {...componentProps} 
-        disabled={amount < 1000}
-      />
-    </Button>
-    {amount > 0 && amount < 1000 && (
-      <p className="text-red-500 text-sm mt-2">
-        Minimum deposit amount is ₦1000
-      </p>
-    )}
-  </div>
-</Modal>
+            isOpen={isDepositModalOpen}
+            closeModal={closeDepositModal}
+            title="Add Funds"
+            isDarkMode={isDarkMode}
+          >
+            <p style={{ color: "red", fontWeight: "bold" }}>
+              Please note: The minimum deposit amount is ₦100.
+            </p>
+
+            <TextField
+              name="amount"
+              label="Amount"
+              placeholder="Enter amount"
+              value={formattedAmount}
+              onChange={handleAmountChange}
+              helperText={`Total Amount (including fees): ${formatNairaAmount(
+                totalAmount
+              )}`}
+            />
+
+            <div className="my-2">
+              <Button
+                loading={loading}
+                disabled={amount < 100 || loading}
+                {...componentProps}
+              >
+                <PaystackButton {...componentProps} disabled={amount < 100} />
+              </Button>
+            </div>
+          </Modal>
 
           <Modal
             isOpen={isWithdrawModalOpen}
