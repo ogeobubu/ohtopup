@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Routes from "./routes";
 import { getUser } from "./api"
 import { setUser } from "./actions/userActions";
+import { setAdminUser } from "./actions/adminActions";
 import { useSelector, useDispatch } from "react-redux";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -12,6 +13,7 @@ const App = () => {
   const dispatch = useDispatch();
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
   const savedUser = useSelector(state => state.user.user)
+  const savedAdminUser = useSelector(state => state.admin.user)
 
   const { data: user, isLoading: userLoading, isError: userError } = useQuery({
     queryKey: ["user"],
@@ -25,6 +27,14 @@ const App = () => {
       dispatch(setUser(user));
     }
   }, [savedUser, user, dispatch])
+
+  useEffect(() => {
+    if(savedAdminUser) {
+      return;
+    } else {
+      dispatch(setAdminUser(user));
+    }
+  }, [savedAdminUser, user, dispatch])
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { getUser, getAllUsers, getUtilityAnalytics } from "../../api";
-import { setUser, setUsers } from "../../../actions/adminActions";
+import { setAdminUser, setUsers } from "../../../actions/adminActions";
 import Card from "./card";
 import { FaMoneyCheckAlt, FaCheckCircle, FaClock, FaTimesCircle } from "react-icons/fa";
 import MyBarChart from "./chart";
@@ -45,7 +45,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      dispatch(setUser(user));
+      dispatch(setAdminUser(user));
     }
   }, [user, dispatch]);
 

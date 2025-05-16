@@ -508,3 +508,12 @@ export const getRandomContent = async () => {
     console.error(error);
   }
 };
+
+export const getUtilityBalance = async () => {
+  try {
+    const response = await instance.get("/utility-balance");
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+  }
+};

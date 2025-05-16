@@ -29,6 +29,7 @@ const {
   getAllUtilityTransactions,
   getAnalytics,
   variationCodes,
+  vtpassWalletBalance
 } = require("../controllers/utilityController");
 
 const {
@@ -105,5 +106,7 @@ router.post("/rates", authUser, authAdmin, setRates);
 router.patch("/notification/:id", authUser, authAdmin, readNotification);
 
 router.get("/ai/random-content", authUser, authAdmin, generateMarketingContent);
+
+router.get("/utility-balance", authUser, authAdmin, vtpassWalletBalance);
 
 module.exports = router;
