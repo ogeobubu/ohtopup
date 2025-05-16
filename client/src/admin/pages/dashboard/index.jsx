@@ -59,10 +59,6 @@ const Dashboard = () => {
     return <div className="text-red-500 text-center">Error loading user data: {userError.message}</div>;
   }
 
-  // if (isAnalyticError) {
-  //   return <div className="text-red-500 text-center">Error loading analytics: {analyticError.message}</div>;
-  // }
-
   return (
     <div className="md:p-4">
       <h1 className="text-2xl font-bold mb-5">Dashboard</h1>

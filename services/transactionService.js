@@ -4,6 +4,7 @@ const User = require("../model/User");
 const walletService = require("./walletService");
 const {
   sendTransactionEmailNotification,
+  sendTransactionEmailAdminNotification
 } = require("../controllers/email/sendTransactionEmailNotification");
 
 const processPaymentApiResponse = (
@@ -128,6 +129,12 @@ const handlePaymentOutcome = async (
         amount: transaction.amount,
       });
     }
+
+    await sendTransactionEmailAdminNotification(process.env.EMAIL_USER, "Admin", {
+      product_name: transaction.product_name,
+      status: notificationStatus,
+      amount: transaction.amount,
+    });
 
     const notification = new Notification({
       userId: userId,

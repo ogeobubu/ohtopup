@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   FaHome,
@@ -18,6 +18,7 @@ const Sidebar = () => {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const sidebarRef = useRef(null);
 
   const links = [
     { label: "Home", icon: FaHome, to: "/admin/dashboard" },
@@ -26,9 +27,22 @@ const Sidebar = () => {
     { label: "Referral", icon: FaUserFriends, to: "/admin/referral" },
     { label: "User Management", icon: FaUserFriends, to: "/admin/users" },
     { label: "Settings", icon: FaCog, to: "/admin/settings" },
-    { label: "Waitlist", icon: FaQuestionCircle, to: "/admin/waitlist" },
     { label: "Help & Support", icon: FaQuestionCircle, to: "/admin/support" },
   ];
+
+  const handleClickOutside = (event) => {
+    if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="absolute">
@@ -39,6 +53,7 @@ const Sidebar = () => {
       </div>
 
       <div
+        ref={sidebarRef}
         className={`fixed z-10 top-0 left-0 w-56 h-full p-6 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out md:translate-x-0 md:block`}
@@ -48,7 +63,7 @@ const Sidebar = () => {
         }}
       >
         <div className="mb-4 flex justify-between items-center">
-        {isDarkMode ? (
+          {isDarkMode ? (
             <img src={logoWhite} alt="Logo" className="w-auto h-12 mx-auto" />
           ) : (
             <img src={logo} alt="Logo" className="w-auto h-12 mx-auto" />
@@ -58,12 +73,13 @@ const Sidebar = () => {
           </button>
         </div>
 
-        <nav className="overflow-y-auto max-h-[calc(100vh-100px)]">
+        <nav className="overflow-y-auto h-[calc(100vh-120px)]"> {/* Adjusted height */}
           <ul className="space-y-4">
             {links.map((link, index) => (
               <li key={index}>
                 <Link
                   to={link.to}
+                  onClick={() => setIsOpen(false)} // Close sidebar on link click
                   className={`flex items-center space-x-4 ${
                     location.pathname === link.to
                       ? "bg-green-600 rounded-md px-4 py-2 text-white"

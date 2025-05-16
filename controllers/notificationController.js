@@ -1,4 +1,8 @@
 const notificationService = require("../services/notificationService");
+const {
+  sendNotificationEmail,
+} = require("../controllers/email/sendTransactionEmailNotification");
+const User = require('../model/User');
 
 const createNotification = async (req, res, next) => {
   const { userId, title, message, link } = req.body;
@@ -24,6 +28,14 @@ const createNotification = async (req, res, next) => {
           const user = await User.findById(notif.userId).select(
             "username email"
           );
+          if (user) {
+            await sendNotificationEmail(user.email, user.username, {
+              status: "New Notification",
+              product_name: title,
+              amount: message,
+              type: "Notification",
+            });
+          }
           return {
             ...notif.toObject(),
             user: user
@@ -39,11 +51,20 @@ const createNotification = async (req, res, next) => {
     } else {
       const user = await User.findById(result.userId).select("username email");
       if (!user) {
+        console.log("testing......")
         console.warn(
           `Notification created for user ID ${result.userId} but user not found for response.`
         );
         return res.status(201).json({ notification: result.toObject() });
       }
+
+      await sendNotificationEmail(user.email, user.username, {
+        status: "New Notification",
+        product_name: title,
+        amount: message,
+        type: "Notification",
+      });
+
       return res.status(201).json({
         notification: {
           ...result.toObject(),

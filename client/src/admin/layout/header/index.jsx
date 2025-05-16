@@ -50,7 +50,9 @@ const Header = () => {
   });
 
   const notifications = notificationsData.notifications || [];
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const unreadCount = notifications.filter(
+    (notification) => !notification.read
+  ).length;
 
   const toggleNotification = () => {
     setIsNotificationOpen((prev) => !prev);
@@ -64,7 +66,10 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
         setIsNotificationOpen(false);
       }
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -79,13 +84,13 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className="bg-white dark:bg-gray-800 py-2 flex flex-wrap justify-between items-center md:mt-0 mt-5 px-4">
+    <nav className="bg-white dark:bg-gray-900 py-2 flex flex-wrap lg:justify-between justify-center items-center md:mt-0 mt-5 px-4">
       <div className="text-gray-800 dark:text-white text-lg md:text-xl font-bold">
-        Hello, {user?.username} 👋
+        Hello, <span className="text-sm">{user?.username} 👋</span>
       </div>
       <div className="flex items-center space-x-2 md:space-x-4">
         <button
-          className="bg-gray-100 dark:bg-gray-700 p-2 rounded-full"
+          className="bg-gray-100 dark:bg-gray-700 p-2 rounded-full transition-colors duration-200"
           onClick={() => dispatch(toggleDarkMode())}
         >
           {isDarkMode ? (
@@ -96,7 +101,7 @@ const Header = () => {
         </button>
         <div className="relative" ref={notificationRef}>
           <button
-            className="bg-gray-100 p-2 rounded-full"
+            className="bg-gray-100 p-2 rounded-full transition-colors duration-200"
             onClick={toggleNotification}
           >
             <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-300 cursor-pointer" />
@@ -109,7 +114,9 @@ const Header = () => {
 
           {isNotificationOpen && (
             <div className="absolute z-10 left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-md p-4">
-              <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
+              <h3 className="font-semibold text-gray-800 dark:text-white">
+                Notifications
+              </h3>
               {isLoading ? (
                 <p className="text-gray-500">Loading notifications...</p>
               ) : error ? (
@@ -120,13 +127,26 @@ const Header = () => {
                     <li
                       key={notification.id}
                       onClick={() => handleNotificationClick(notification)}
-                      className={`flex items-start py-2 ${!notification.read ? "bg-gray-100 dark:bg-gray-700" : ""} cursor-pointer`}
+                      className={`flex items-start py-2 ${
+                        !notification.read ? "bg-gray-100 dark:bg-gray-700" : ""
+                      } cursor-pointer`}
                     >
-                      <FaCircle className={`w-2 h-2 mr-2 ${!notification.read ? "text-blue-500" : "text-gray-400"}`} />
+                      <FaCircle
+                        className={`w-2 h-2 mr-2 ${
+                          !notification.read ? "text-blue-500" : "text-gray-400"
+                        }`}
+                      />
                       <div className="flex-1">
-                        <span className="font-medium">{notification.message}</span>
+                        <span className="font-bold">
+                          {notification.title}
+                        </span>
+                        <p className="text-sm">
+                          {notification.message}
+                        </p>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {new Date(notification.createdAt).toLocaleTimeString()}
+                          {new Date(
+                            notification.createdAt
+                          ).toLocaleTimeString()}
                         </p>
                       </div>
                     </li>
@@ -139,20 +159,22 @@ const Header = () => {
 
         <div ref={dropdownRef}>
           <button
-            className="bg-gray-100 p-2 rounded-full text-gray-700 hover:bg-gray-300"
+            className="bg-gray-100 p-2 rounded-full text-gray-700 hover:bg-gray-300 transition-colors duration-200"
             onClick={toggleDropdown}
           >
             <FaUserCircle className="text-gray-500 w-4 h-4" />
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded-md p-2 z-10">
+            <div className="dark:bg-gray-900 absolute right-0 mt-2 w-48 bg-white shadow-md rounded-md p-2 z-10">
               <ul>
-                <li className="py-2 px-4 hover:bg-gray-100 flex items-center">
+                <li className="py-2 px-4 hover:bg-gray-100 flex items-center cursor-pointer">
                   <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
                   <div className="flex flex-col">
                     <span className="text-[18px]">Profile</span>
-                    <small className="text-[14px] text-gray-400">View my profile</small>
+                    <small className="text-[14px] text-gray-400">
+                      View my profile
+                    </small>
                   </div>
                 </li>
                 <li
@@ -162,7 +184,9 @@ const Header = () => {
                   <FaSignOutAlt className="text-blue-500 w-5 h-5 mr-2" />
                   <div className="flex flex-col">
                     <span className="text-[18px]">Logout</span>
-                    <small className="text-[14px] text-gray-400">Logout of your account</small>
+                    <small className="text-[14px] text-gray-400">
+                      Logout of your account
+                    </small>
                   </div>
                 </li>
               </ul>

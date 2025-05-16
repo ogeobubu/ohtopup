@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const session = require("express-session");
 const { TwitterApi } = require("twitter-api-v2");
 require("dotenv").config();
 
@@ -19,36 +19,50 @@ const setStoredTokens = (accessToken, accessSecret) => {
   storedAccessSecret = accessSecret;
 };
 
+const router = express.Router();
+
+// Session middleware configuration
+router.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your_secret_key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Change to true in production with HTTPS
+  })
+);
+
 router.get("/x", async (req, res) => {
-    try {
-      if (!appKey || !appSecret) {
-        console.error("X API Consumer Keys not set.");
-        return res
-          .status(500)
-          .send("Backend configuration error: X API keys missing.");
-      }
-      const client = new TwitterApi({ appKey, appSecret });
-  
-      const callbackUrlGenerated = `${process.env.CLIENT_URL}/api/users/admin/auth/x/callback`;
-      console.log("Backend generated Callback URL:", callbackUrlGenerated);
-  
-      const authLink = await client.generateAuthLink(
-        callbackUrlGenerated,
-        { linkMode: "authorize" }
-      );
-  
-      req.session.oauth_token_secret = authLink.oauth_token_secret;
-  
-      res.redirect(authLink.url);
-    } catch (error) {
-      console.error("Error initiating X OAuth:", error);
-      res.status(500).send("Error initiating X authentication.");
+  try {
+    if (!appKey || !appSecret) {
+      console.error("X API Consumer Keys not set.");
+      return res
+        .status(500)
+        .send("Backend configuration error: X API keys missing.");
     }
-  });
+    const client = new TwitterApi({ appKey, appSecret });
+
+    const callbackUrlGenerated = `${"http://localhost:5173"
+    }/api/users/admin/auth/x/callback`;
+    console.log("Backend generated Callback URL:", callbackUrlGenerated);
+
+    const authLink = await client.generateAuthLink(callbackUrlGenerated, {
+      linkMode: "authorize",
+    });
+    req.session.oauth_token_secret = authLink.oauth_token_secret;
+
+    res.redirect(authLink.url);
+  } catch (error) {
+    console.error("Error initiating X OAuth:", error);
+    res.status(500).send("Error initiating X authentication.");
+  }
+});
 
 router.get("/x/callback", async (req, res) => {
   const { oauth_token, oauth_verifier } = req.query;
   const oauth_token_secret = req.session.oauth_token_secret;
+
+  console.log("OAuth Callback Params:", req.query);
+  console.log("OAuth Token Secret:", oauth_token_secret);
 
   delete req.session.oauth_token_secret;
 

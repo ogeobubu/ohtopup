@@ -80,7 +80,7 @@ const Notification = () => {
     onSubmit: async (values) => {
       const notificationData = {
         userId: values.user.value === "all" ? "all" : values.user.value,
-        type: values.type,
+        title: values.type,
         message: values.message,
       };
 

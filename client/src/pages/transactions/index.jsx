@@ -10,7 +10,7 @@ import { formatNairaAmount } from "../../utils";
 const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [activeTab, setActiveTab] = useState("Airtime Recharge");
+  const [activeTab, setActiveTab] = useState("Data Services");
   const [requestId, setRequestId] = useState("");
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
@@ -165,8 +165,8 @@ const Transactions = () => {
         } py-1 px-1`}
       >
         {[
-          "Airtime Recharge",
           "Data Services",
+          "Airtime Recharge",
           "Electricity Bill",
           "TV Subscription",
         ].map((tab) => (
