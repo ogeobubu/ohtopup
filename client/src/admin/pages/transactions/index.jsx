@@ -9,7 +9,7 @@ import { formatNairaAmount } from "../../../utils"
 const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [activeTab, setActiveTab] = useState("Electricity Bill");
+  const [activeTab, setActiveTab] = useState("Data Services");
   const [requestId, setRequestId] = useState("");
 
   const handleSearchChange = (e) => {
@@ -41,10 +41,10 @@ const Transactions = () => {
       </h1>
       <div className="mb-3 flex md:flex-row flex-col rounded-lg border border-solid max-w-sm border-gray-300 dark:border-gray-600 bg-[#F7F9FB] dark:bg-gray-700 py-1 px-1">
         {[
-          "Electricity Bill",
-          "TV Subscription",
           "Data Services",
           "Airtime Recharge",
+          "Electricity Bill",
+          "TV Subscription",
         ].map((tab) => (
           <button
             key={tab}

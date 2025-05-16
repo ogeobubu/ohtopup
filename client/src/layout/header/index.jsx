@@ -69,7 +69,7 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className={`bg-white dark:bg-gray-800 py-2 flex flex-col md:flex-row justify-between items-center md:mt-0 mt-5`}>
+    <nav className={`bg-white dark:bg-gray-900 py-2 flex flex-col md:flex-row justify-between items-center md:mt-0 mt-5`}>
       <div className="text-gray-800 dark:text-white">
         <span className="text-xl font-bold">Hello</span>, {user?.username} 👋
       </div>
@@ -82,7 +82,7 @@ const Header = () => {
           {isDarkMode ? (
             <FaSun className="w-4 h-4 text-yellow-500" />
           ) : (
-            <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+            <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-800" />
           )}
         </button>
         <div className="relative" ref={notificationRef}>
@@ -91,7 +91,7 @@ const Header = () => {
             onClick={toggleNotification}
             aria-label="Notifications"
           >
-            <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-300 cursor-pointer" />
+            <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-800 cursor-pointer" />
             {unreadCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
                 {unreadCount}
@@ -134,7 +134,7 @@ const Header = () => {
             onClick={toggleDropdown}
             aria-label="User Menu"
           >
-            <FaUserCircle className="text-gray-500 w-4 h-4" />
+            <FaUserCircle className="text-gray-500 dark:text-gray-800 w-4 h-4" />
           </button>
 
           {isDropdownOpen && (

@@ -154,13 +154,13 @@ const sendTransactionEmailNotification = async (
     transactionDetails.product_name || "Wallet Credit/Debit";
   const transactionStatus = transactionDetails.status || "completed";
   const transactionAmount = transactionDetails.amount || "N/A";
-  const transactionType = transactionDetails.type || "Transaction"; // Added type for clarity
+  const transactionType = transactionDetails.type || "Transaction";
 
   const transporter = nodemailer.createTransport({
     service: "gmail", // Using Gmail service
     auth: {
       user: process.env.EMAIL_USER, // Your Gmail address
-      pass: process.env.EMAIL_PASS, // Your Gmail app password or password
+      pass: process.env.EMAIL_PASS,
     },
   });
 
@@ -178,6 +178,80 @@ const sendTransactionEmailNotification = async (
         <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
           <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello ${username},</p>
           <p style="font-size: 16px; line-height: 1.5; color: #555;">Your recent transaction is <strong>${transactionStatus}</strong>.</p>
+
+          <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #007bff; border-radius: 4px;">
+              <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Type:</strong> ${transactionType}</p>
+              <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Description:</strong> ${subjectProductName}</p>
+              <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Amount:</strong> ${transactionAmount}</p>
+              ${
+                transactionDetails.balance
+                  ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>New Balance:</strong> ${transactionDetails.balance}</p>`
+                  : ""
+              }
+              ${
+                transactionDetails.reference
+                  ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Reference:</strong> ${transactionDetails.reference}</p>`
+                  : ""
+              }
+          </div>
+
+
+          <p style="font-size: 14px; color: #888; margin-top: 20px;">If you have any questions, please contact our support team.</p>
+          <p style="font-size: 14px; color: #888; margin-top: 5px;">Thank you for using our service.</p>
+        </div>
+         <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
+            <p>&copy; ${new Date().getFullYear()} OhTopUp Inc. All rights reserved.</p>
+         </div>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Transaction notification email sent successfully!");
+  } catch (error) {
+    console.error("Error sending transaction email:", error);
+    // Log specific Nodemailer errors if possible
+    if (error.response) {
+      console.error("Nodemailer SMTP response:", error.response);
+    }
+  }
+};
+
+const sendTransactionEmailAdminNotification = async (
+  email,
+  username,
+  transactionDetails
+) => {
+  // Ensure required details are present, provide defaults if necessary
+  const subjectProductName =
+    transactionDetails.product_name || "Wallet Credit/Debit";
+  const transactionStatus = transactionDetails.status || "completed";
+  const transactionAmount = transactionDetails.amount || "N/A";
+  const transactionType = transactionDetails.type || "Transaction";
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail", // Using Gmail service
+    auth: {
+      user: process.env.EMAIL_USER, // Your Gmail address
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    to: email,
+    from: process.env.EMAIL_USER, // Sender address
+    // Subject can be dynamic based on type or status
+    subject: `${transactionType} ${transactionStatus}: ${subjectProductName}`,
+    html: `
+      <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="text-align: center; padding-bottom: 20px;">
+           <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
+           <h1 style="color: #333; font-size: 24px; font-weight: bold;">Transaction Update</h1>
+        </div>
+        <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
+          <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello ${username},</p>
+          <p style="font-size: 16px; line-height: 1.5; color: #555;">The recent transaction is <strong>${transactionStatus}</strong>.</p>
 
           <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #007bff; border-radius: 4px;">
               <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Type:</strong> ${transactionType}</p>
@@ -239,6 +313,43 @@ const sendLoginNotificationEmail = async (userEmail) => {
   await transporter.sendMail(mailOptions);
 };
 
+const sendNotificationEmail = async (email, username, title, message, link) => {
+  const transporter = createTransporter();
+
+  const mailOptions = {
+    to: email,
+    from: process.env.EMAIL_USER,
+    subject: `Notification: ${title}`,
+    html: `
+      <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      
+        <div style="text-align: center; padding-bottom: 20px;">
+           <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
+           <h1 style="color: #333; font-size: 24px; font-weight: bold;">New Notification</h1>
+        </div>
+        <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
+          <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello ${username},</p>
+          <p style="font-size: 16px; line-height: 1.5; color: #555;">You have received a new notification:</p>
+          <h2 style="color: #007bff; font-size: 20px;">${title}</h2>
+          <p style="font-size: 16px; line-height: 1.5; color: #555;">${message}</p>
+          ${
+            link
+              ? `<p style="font-size: 16px; line-height: 1.5; color: #007bff;"><a href="${link}">View Details</a></p>`
+              : ""
+          }
+          <p style="font-size: 14px; color: #888; margin-top: 20px;">If you have any questions, feel free to reach out to our support team.</p>
+          <p style="font-size: 14px; color: #888; margin-top: 5px;">Thank you for being with us.</p>
+        </div>
+         <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
+            <p>&copy; ${new Date().getFullYear()} OhTopUp Inc. All rights reserved.</p>
+         </div>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 module.exports = {
   sendTransactionEmailNotification,
   sendForgotPasswordEmail,
@@ -246,4 +357,6 @@ module.exports = {
   sendConfirmationEmail,
   sendVerificationEmail,
   sendLoginNotificationEmail,
+  sendTransactionEmailAdminNotification,
+  sendNotificationEmail,
 };

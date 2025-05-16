@@ -11,6 +11,7 @@ const serviceCatalogService = require("../services/serviceCatalogService");
 const rateService = require("../services/rateService");
 const {
   sendTransactionEmailNotification,
+  sendNotificationEmail,
 } = require("./email/sendTransactionEmailNotification");
 
 const loginAdmin = async (req, res, next) => {
@@ -114,6 +115,13 @@ const getUserAnalytics = async (req, res, next) => {
 const createNotification = async (req, res, next) => {
   const { userId, title, message, link } = req.body;
 
+  if (!userId || !title || !message) {
+    return next({
+      status: 400,
+      message: "User ID, title, and message are required.",
+    });
+  }
+
   try {
     const result = await notificationService.createNotification(
       userId,
@@ -128,6 +136,14 @@ const createNotification = async (req, res, next) => {
           const user = await User.findById(notif.userId).select(
             "username email"
           );
+          if (user) {
+            await sendNotificationEmail(user.email, user.username, {
+              status: "New Notification",
+              product_name: title,
+              amount: message,
+              type: "Notification",
+            });
+          }
           return {
             ...notif.toObject(),
             user: user
@@ -148,6 +164,17 @@ const createNotification = async (req, res, next) => {
         );
         return res.status(201).json({ notification: result.toObject() });
       }
+
+      let link = "https://ohtopup.onrender.com/dashboard";
+
+      await sendNotificationEmail(
+        user.email,
+        user.username,
+        title,
+        message,
+        link
+      );
+
       return res.status(201).json({
         notification: {
           ...result.toObject(),
