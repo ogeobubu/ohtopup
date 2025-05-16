@@ -36,7 +36,7 @@ const Wallet = () => {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
   const [selectedCard, setSelectedCard] = useState("Naira Wallet");
-  const [activeTab, setActiveTab] = useState("withdrawal");
+  const [activeTab, setActiveTab] = useState("deposit");
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -431,6 +431,16 @@ const Wallet = () => {
                       : "border-gray-300 bg-[#F7F9FB]"
                   } py-1 px-1`}
                 >
+                 <button
+                    className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
+                      activeTab === "deposit"
+                        ? "text-blue-500 bg-white rounded-lg w-40"
+                        : "text-gray-500 hover:text-gray-800 w-40"
+                    }`}
+                    onClick={() => handleTabClick("deposit")}
+                  >
+                    Topup
+                  </button>
                   <button
                     className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
                       activeTab === "withdrawal"
@@ -441,16 +451,7 @@ const Wallet = () => {
                   >
                     Withdrawal
                   </button>
-                  <button
-                    className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
-                      activeTab === "deposit"
-                        ? "text-blue-500 bg-white rounded-lg w-40"
-                        : "text-gray-500 hover:text-gray-800 w-40"
-                    }`}
-                    onClick={() => handleTabClick("deposit")}
-                  >
-                    Topup
-                  </button>
+                 
                 </div>
 
                 <div className="mt-6">
