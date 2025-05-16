@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getAllUtilityTransactions } from "../../api";
+import { getAllUtilityTransactions, requeryTransaction } from "../../api";
 import Table from "../../components/table";
 import Chip from "../../../components/ui/chip";
 import Pagination from "../../components/pagination";
-import { formatNairaAmount } from "../../../utils"
+import { formatNairaAmount } from "../../../utils";
+import { MdRefresh } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,12 +19,6 @@ const Transactions = () => {
     setCurrentPage(1);
   };
 
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-    setCurrentPage(1);
-    setRequestId("");
-  };
-
   const { data, error, isLoading } = useQuery({
     queryKey: ["transactions", currentPage, limit, activeTab, requestId],
     queryFn: () =>
@@ -30,8 +26,23 @@ const Transactions = () => {
     keepPreviousData: true,
   });
 
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+    setRequestId("");
+  };
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleRequery = async (requestId) => {
+    try {
+      await requeryTransaction({ request_id: requestId });
+      toast.success("Requery successful for Request ID: " + requestId);
+    } catch (error) {
+      toast.error("Requery failed: " + error.message);
+    }
   };
 
   return (
@@ -79,115 +90,41 @@ const Transactions = () => {
             </div>
             <div className="overflow-x-auto">
               <Table
-                columns={
-                  activeTab === "Electricity Bill"
-                    ? [
-                        {
-                          header: "Units",
-                          render: (row) => <p>{row.units}</p>,
-                        },
-                        {
-                          header: "Status",
-                          render: (row) => <Chip status={row.status} />,
-                        },
-                        {
-                          header: "Token",
-                          render: (row) => <p>{row?.token?.split(":")[1]}</p>,
-                        },
-                        {
-                          header: "Amount",
-                          render: (row) => <p>{formatNairaAmount(row.amount)}</p>,
-                        },
-                        {
-                          header: "Meter Number",
-                          render: (row) => <p>{row.phone}</p>,
-                        },
-                        {
-                          header: "Date",
-                          render: (row) => (
-                            <p>{new Date(row.createdAt).toLocaleString()}</p>
-                          ),
-                        },
-                      ]
-                    : activeTab === "TV Subscription"
-                    ? [
-                        {
-                          header: "Service",
-                          render: (row) => (
-                            <p className="text-capitalize">{row.serviceID}</p>
-                          ),
-                        },
-                        {
-                          header: "Status",
-                          render: (row) => <Chip status={row.status} />,
-                        },
-                        {
-                          header: "Amount",
-                          render: (row) => <p>₦{row.amount.toFixed(2)}</p>,
-                        },
-                        {
-                          header: "Smartcard Number",
-                          render: (row) => <p>{row.phone}</p>,
-                        },
-                        {
-                          header: "Date",
-                          render: (row) => (
-                            <p>{new Date(row.createdAt).toLocaleString()}</p>
-                          ),
-                        },
-                      ]
-                    : activeTab === "Data Services"
-                    ? [
-                        {
-                          header: "Product Name",
-                          render: (row) => <p>{row.product_name}</p>,
-                        },
-                        {
-                          header: "Status",
-                          render: (row) => <Chip status={row.status} />,
-                        },
-                        {
-                          header: "Amount",
-                          render: (row) => <p>₦{row.amount.toFixed(2)}</p>,
-                        },
-                        {
-                          header: "Phone Number",
-                          render: (row) => <p>{row.phone}</p>,
-                        },
-                        {
-                          header: "Date",
-                          render: (row) => (
-                            <p>{new Date(row.createdAt).toLocaleString()}</p>
-                          ),
-                        },
-                      ]
-                    : [
-                        {
-                          header: "Product Name",
-                          render: (row) => (
-                            <p className="text-sm">{row.product_name}</p>
-                          ),
-                        },
-                        {
-                          header: "Status",
-                          render: (row) => <Chip status={row.status} />,
-                        },
-                        {
-                          header: "Amount",
-                          render: (row) => <p>₦{row.amount.toFixed(2)}</p>,
-                        },
-                        {
-                          header: "Phone Number",
-                          render: (row) => <p>{row.phone}</p>,
-                        },
-                        {
-                          header: "Date",
-                          render: (row) => (
-                            <p>{new Date(row.createdAt).toLocaleString()}</p>
-                          ),
-                        },
-                      ]
-                }
+                columns={[
+                  {
+                    header: "Product Name",
+                    render: (row) => <p>{row.product_name}</p>,
+                  },
+                  {
+                    header: "Status",
+                    render: (row) => <Chip status={row.status} />,
+                  },
+                  {
+                    header: "Amount",
+                    render: (row) => <p>₦{row.amount.toFixed(2)}</p>,
+                  },
+                  {
+                    header: "Phone Number",
+                    render: (row) => <p>{row.phone}</p>,
+                  },
+                  {
+                    header: "Date",
+                    render: (row) => (
+                      <p>{new Date(row.createdAt).toLocaleString()}</p>
+                    ),
+                  },
+                  {
+                    header: "Action",
+                    render: (row) => row.status !== "delivered" && (
+                      <button
+                        onClick={() => handleRequery(row.requestId)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <MdRefresh />
+                      </button>
+                    ),
+                  },
+                ]}
                 data={data.transactions}
               />
             </div>

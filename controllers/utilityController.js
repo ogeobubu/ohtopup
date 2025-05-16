@@ -7,6 +7,7 @@ const axios = require("axios");
 const { generateRequestId } = require("../utils");
 const cron = require("node-cron");
 const moment = require("moment");
+const vtpassService = require("../services/vtpassService");
 
 const vtpassWalletBalance = async (req, res) => {
   const VTPASS_URL = process.env.VTPASS_URL;
@@ -421,6 +422,45 @@ const resetRankings = async (req, res) => {
   }
 };
 
+const requeryTransactionHandler = async (req, res, next) => {
+  try {
+    const { request_id } = req.body;
+    if (!request_id) {
+      return res.status(400).json({ message: "Request ID is required." });
+    }
+
+    const VTPASS_URL = process.env.VTPASS_URL;
+    const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
+    const VTPASS_SECRET_KEY = process.env.VTPASS_SECRET_KEY;
+
+    const transactionData = await vtpassService.requeryTransaction(
+      VTPASS_URL,
+      VTPASS_API_KEY,
+      VTPASS_SECRET_KEY,
+      request_id
+    );
+
+    const updatedTransaction = await Utility.findOneAndUpdate(
+      { requestId: request_id },
+      {
+        status: transactionData.status,
+      },
+      { new: true }
+    );
+
+    if (!updatedTransaction) {
+      return res.status(404).json({ message: "Transaction not found." });
+    }
+
+    res.status(200).json({
+      message: "Transaction requery successful.",
+      transaction: updatedTransaction,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // cron.schedule("0 0 * * 0", async () => {
 //   await resetRankings();
 // });
@@ -436,4 +476,5 @@ module.exports = {
   usersRank,
   resetRankings,
   vtpassWalletBalance,
+  requeryTransactionHandler
 };
