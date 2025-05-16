@@ -96,7 +96,7 @@ const Header = () => {
           {isDarkMode ? (
             <FaSun className="w-4 h-4 text-yellow-500" />
           ) : (
-            <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+            <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-800" />
           )}
         </button>
         <div className="relative" ref={notificationRef}>
@@ -104,7 +104,7 @@ const Header = () => {
             className="bg-gray-100 p-2 rounded-full transition-colors duration-200"
             onClick={toggleNotification}
           >
-            <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-300 cursor-pointer" />
+            <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-800 cursor-pointer" />
             {unreadCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
                 {unreadCount}
@@ -162,7 +162,7 @@ const Header = () => {
             className="bg-gray-100 p-2 rounded-full text-gray-700 hover:bg-gray-300 transition-colors duration-200"
             onClick={toggleDropdown}
           >
-            <FaUserCircle className="text-gray-500 w-4 h-4" />
+            <FaUserCircle className="text-gray-500 dark:text-gray-800 w-4 h-4" />
           </button>
 
           {isDropdownOpen && (

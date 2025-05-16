@@ -146,6 +146,30 @@ const resendVerificationCode = async (email) => {
   return { message: "New confirmation code sent to your email." };
 };
 
+const loginAdminUser = async (email, password) => {
+  const user = await User.findOne({ email, isDeleted: false });
+
+  if (!user) {
+    throw { status: 401, message: "Invalid email or password" };
+  }
+
+  if (user.role !== "admin") {
+    throw { status: 403, message: "Access denied. Admins only." };
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    throw { status: 401, message: "Invalid email or password" };
+  }
+
+  const payload = { user: { id: user._id, role: user.role } };
+  const secret = process.env.JWT_SECRET;
+  const token = jwt.sign(payload, secret, { expiresIn: "7d" });
+
+  return token;
+};
+
 const loginUser = async (email, password) => {
   const user = await User.findOne({ email, isDeleted: false });
 
@@ -250,4 +274,5 @@ module.exports = {
   forgotPassword,
   verifyOtpAndResetPassword,
   resendOtp,
+  loginAdminUser
 };
