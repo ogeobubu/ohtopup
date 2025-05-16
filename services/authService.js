@@ -171,7 +171,7 @@ const loginUser = async (email, password) => {
 
   const payload = { user: { id: user._id, role: user.role } };
   const secret = process.env.JWT_SECRET;
-  const token = jwt.sign(payload, secret, { expiresIn: "1d" });
+  const token = jwt.sign(payload, secret, { expiresIn: "7d" });
 
   return { message: "Login successful!", token };
 };
