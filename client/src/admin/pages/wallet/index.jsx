@@ -20,6 +20,7 @@ import {
   getAllTransactions,
   getRates,
   setRates,
+  getUtilityBalance
 } from "../../api";
 import Textfield from "../../../components/ui/forms/input";
 import { Formik, Form, Field } from "formik";
@@ -48,6 +49,16 @@ const AdminWalletManagement = () => {
 
   const [withdrawalRate, setWithdrawalRate] = useState("");
   const [depositRate, setDepositRate] = useState("");
+
+  const {
+    data: balance,
+    isLoading: loadingBalance,
+    error: balanceError,
+    refetch: refetchBalance,
+  } = useQuery({
+    queryKey: ["balance"],
+    queryFn: getUtilityBalance,
+  });
 
   const {
     data: rates,
@@ -196,10 +207,16 @@ const AdminWalletManagement = () => {
   return (
     <>
       <h1 className="text-2xl font-bold mb-5">Admin Wallet Management</h1>
-      <div className="mb-3">
+      <div className="mb-3 flex gap-3 flex-wrap">
         <Card
           title="Total Balance"
           count={formatNairaAmount(wallets?.totalWalletAmount)}
+          icon={FaMoneyBill}
+          bgColor="bg-blue-200"
+        />
+         <Card
+          title="VTPass Balance"
+          count={formatNairaAmount(balance?.balance)}
           icon={FaMoneyBill}
           bgColor="bg-blue-200"
         />

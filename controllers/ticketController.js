@@ -1,7 +1,9 @@
 const Ticket = require("../model/Ticket");
 const Notification = require("../model/Notification");
 const User = require("../model/User");
-const { sendWaitlistEmail } = require("./email");
+const {
+  sendWaitlistEmail,
+} = require("./email/sendTransactionEmailNotification");
 
 const generateTicketId = () => {
   const randomDigits = Math.floor(100000 + Math.random() * 900000);

@@ -14,7 +14,7 @@ const Card = ({ title, count, icon: Icon, bgColor }) => {
         </div>
         <div className="ml-3">
           <span className="text-sm text-gray-700">{title}</span>
-          <span className="block text-xl font-bold text-gray-900">
+          <span className="block text-sm font-bold text-gray-900">
             {count}
           </span>
         </div>

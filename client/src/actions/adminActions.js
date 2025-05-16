@@ -1,4 +1,4 @@
-export const setUser = (userData) => ({
+export const setAdminUser = (userData) => ({
   type: "FETCH_ADMIN_SUCCESS",
   payload: userData,
 });

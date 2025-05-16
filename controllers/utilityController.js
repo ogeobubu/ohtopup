@@ -8,13 +8,30 @@ const { generateRequestId } = require("../utils");
 const cron = require("node-cron");
 const moment = require("moment");
 
+const vtpassWalletBalance = async (req, res) => {
+  const VTPASS_URL = process.env.VTPASS_URL;
+  const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
+  const VTPASS_PUBLIC_KEY = process.env.VTPASS_PUBLIC_KEY;
+
+  try {
+    const response = await axios.get(`${VTPASS_URL}/api/balance`, {
+      headers: {
+        "api-key": `${VTPASS_API_KEY}`,
+        "public-key": `${VTPASS_PUBLIC_KEY}`,
+      },
+    });
+    res.status(200).json(response.data.contents);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const variationCodes = async (req, res) => {
   const { serviceID } = req.query;
 
   const VTPASS_URL = process.env.VTPASS_URL;
   const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
   const VTPASS_PUBLIC_KEY = process.env.VTPASS_PUBLIC_KEY;
-  const VTPASS_SECRET_KEY = process.env.VTPASS_SECRET_KEY;
 
   const response = await axios.get(
     `${VTPASS_URL}/api/service-variations?serviceID=${serviceID}`,
@@ -418,4 +435,5 @@ module.exports = {
   getAnalytics,
   usersRank,
   resetRankings,
+  vtpassWalletBalance,
 };
