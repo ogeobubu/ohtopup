@@ -182,8 +182,8 @@ const depositPaystackWallet = async (req, res) => {
       .status(400)
       .json({ message: "Amount must be a positive number." });
   }
-  if (amount < 1000) {
-    return res.status(400).json({ message: "Amount must be at least 1000." });
+  if (amount < 100) {
+    return res.status(400).json({ message: "Amount must be at least 100." });
   }
 
   try {
