@@ -7,6 +7,7 @@ import Card from "./card";
 import { FaMoneyCheckAlt, FaCheckCircle, FaClock, FaTimesCircle } from "react-icons/fa";
 import MyBarChart from "./chart";
 import Shortcut from "./shortcut";
+import Spinner from "../../components/spinner"
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -52,7 +53,7 @@ const Dashboard = () => {
   const chartData = analytic ? prepareChartData(analytic.monthly) : [];
 
   if (isUserLoading || isAnalyticLoading || isUsersLoading) {
-    return <div className="text-center">Loading...</div>;
+    return <Spinner />;
   }
 
   if (isUserError) {

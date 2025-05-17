@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux"; // Import useSelector for Redux
 import ibadan from "../../../assets/ibadan.png";
 import dstv from "../../../assets/dstv.png";
 import mtn from "../../../assets/mtn.png";
@@ -13,7 +12,7 @@ const Partners = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % (partners.length + 1));
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % partners.length);
   };
 
   useEffect(() => {
@@ -21,29 +20,18 @@ const Partners = () => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (currentIndex === partners.length) {
-      const timer = setTimeout(() => {
-        setCurrentIndex(0);
-      }, 500); // Wait for the transition before resetting
-      return () => clearTimeout(timer);
-    }
-  }, [currentIndex]);
-
   return (
-    <section id="pricing" className="py-20 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white">
-      <div className="container mx-auto text-center">
-        <h3 className="text-3xl font-bold mb-6">Our Partners</h3>
+    <section id="partners" className="py-20 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+      <div className="container mx-auto text-center px-4">
+        <h3 className="text-2xl md:text-3xl font-bold mb-6">Our Partners</h3>
         <div className="relative overflow-hidden">
           <div
             className="flex transition-transform duration-500"
             style={{
-              transform: `translateX(-${
-                currentIndex * (100 / (partners.length + 1))
-              }%)`,
+              transform: `translateX(-${currentIndex * (100 / partners.length)}%)`,
             }}
           >
-            {[...partners, partners[0]].map((partner, index) => (
+            {partners.map((partner, index) => (
               <div key={index} className="flex-shrink-0 w-32 sm:w-40 mx-4">
                 <img
                   src={partner}
