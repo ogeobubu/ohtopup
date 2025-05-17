@@ -19,29 +19,16 @@ const AboutUs = () => {
           About Us
         </h1>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
-          At OhTopUp, we are dedicated to providing our customers with the
-          highest quality service and support. Founded in 2024, we are growing
-          as a startup to be a renowned trusted provider in the industry, offering
-          a range of affordable and reliable plans designed to meet the diverse
-          needs of our customers.
+          At OhTopUp, we are dedicated to providing our customers with the highest quality service and support. Founded in 2024, we are growing as a startup to be a renowned trusted provider in the industry, offering a range of affordable and reliable plans designed to meet the diverse needs of our customers.
         </p>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
-          Our mission is to make quality data services accessible to everyone.
-          We believe that everyone deserves to stay connected without breaking
-          the bank. Our team works tirelessly to ensure that we offer
-          competitive pricing without compromising on quality.
+          Our mission is to make quality data services accessible to everyone. We believe that everyone deserves to stay connected without breaking the bank. Our team works tirelessly to ensure that we offer competitive pricing without compromising on quality.
         </p>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
-          We pride ourselves on our customer-centric approach. Your satisfaction
-          is our top priority, and we are committed to providing you with the
-          support you need every step of the way. Whether you have questions
-          about our plans or need assistance, our friendly customer service team
-          is here to help.
+          We pride ourselves on our customer-centric approach. Your satisfaction is our top priority, and we are committed to providing you with the support you need every step of the way. Whether you have questions about our plans or need assistance, our friendly customer service team is here to help.
         </p>
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
-          Thank you for choosing OhTopUp. We look forward to helping you find
-          the perfect plan to suit your lifestyle and keep you connected to what
-          matters most.
+          Thank you for choosing OhTopUp. We look forward to helping you find the perfect plan to suit your lifestyle and keep you connected to what matters most.
         </p>
       </div>
       <Partners />

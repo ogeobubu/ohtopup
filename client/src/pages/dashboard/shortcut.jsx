@@ -17,7 +17,7 @@ const Shortcut = () => {
             <FaWifi className="text-white text-3xl" />
           </div>
           <h3 className="text-lg font-bold text-center">Buy Data</h3>
-          <p className="text-sm text-center">Get more data for your device</p>
+          <p className="text-sm text-center">Get more data for your device.</p>
         </Link>
 
         <Link
@@ -28,7 +28,7 @@ const Shortcut = () => {
             <FaPhone className="text-white text-3xl" />
           </div>
           <h3 className="text-lg font-bold text-center">Buy Airtime</h3>
-          <p className="text-sm text-center">Recharge your phone with ease</p>
+          <p className="text-sm text-center">Recharge your phone with ease.</p>
         </Link>
 
         <Link
@@ -39,7 +39,7 @@ const Shortcut = () => {
             <FaTv className="text-white text-3xl" />
           </div>
           <h3 className="text-lg font-bold text-center">Buy Cable</h3>
-          <p className="text-sm text-center">Subscribe to your favorite channels</p>
+          <p className="text-sm text-center">Subscribe to your favorite channels.</p>
         </Link>
 
         <Link

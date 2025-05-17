@@ -13,14 +13,14 @@ const storeToken = (token) => {
   localStorage.setItem('ohtopup-token', token);
 };
 
-const Login = ({ darkMode, toggleDarkMode }) => {
-  const navigate = useNavigate()
+const Login = ({ darkMode }) => {
+  const navigate = useNavigate();
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      storeToken(data.token)
+      storeToken(data.token);
       toast.success("Login successful!");
-      navigate("/dashboard")
+      navigate("/dashboard");
     },
     onError: (error) => {
       toast.error("Login failed: " + error);
@@ -38,9 +38,11 @@ const Login = ({ darkMode, toggleDarkMode }) => {
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-4">
           <Logo href="/" className="mx-auto w-auto" darkMode={darkMode} />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
-            <h3 className="text-lg font-semibold">Welcome Back,</h3>
-            <p className="text-gray-600">
-              Kindly enter your details to log in.
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Welcome Back!
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              Please enter your credentials to log in.
             </p>
             <Formik
               initialValues={{ email: "", password: "" }}
@@ -83,7 +85,7 @@ const Login = ({ darkMode, toggleDarkMode }) => {
                     className="text-blue-500 hover:text-blue-700 focus:text-blue-700 underline font-semibold"
                     to="/forgot"
                   >
-                    Forgot Password
+                    Forgot Password?
                   </Link>
                   <div className="my-3">
                     <Button
@@ -113,8 +115,8 @@ const Login = ({ darkMode, toggleDarkMode }) => {
       </div>
 
       <div className="hidden md:flex bg-gradient-to-r from-blue-400 to-blue-600 rounded-tl-lg rounded-bl-lg shadow-lg min-h-screen w-full flex items-center justify-center">
-        <p className="p-8 text-white text-5xl font-semibold text-center ">
-          Purchase Utility Bills for a Cheap Price Here
+        <p className="p-8 text-white text-5xl font-semibold text-center">
+          Purchase Utility Bills at Competitive Prices!
         </p>
       </div>
     </div>

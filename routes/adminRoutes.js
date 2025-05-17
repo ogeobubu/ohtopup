@@ -64,7 +64,7 @@ const router = express.Router();
 
 router.post("/login", loginAdmin);
 router.get("/referrals", getAdminReferrals);
-router.get("/", authUser, authAdmin, getAdmin);
+router.get("/", authAdmin, getAdmin);
 router.patch("/", authUser, authAdmin, updateAdmin);
 router.get("/users", authUser, authAdmin, getAllUsers);
 router.get("/users/analytics", getUserAnalytics);
