@@ -59,9 +59,8 @@ const Create = ({ darkMode }) => {
       navigate("/verify");
     },
     onError: (error) => {
-      console.error("Error creating account:", error); // Log the error for debugging
-      const errorMessage =
-        error.response?.data?.message || "Error creating account";
+      console.error("Error creating account:", error);
+      const errorMessage = error.response?.data?.message || "Error creating account";
       toast.error(errorMessage);
     },
   });
@@ -84,9 +83,11 @@ const Create = ({ darkMode }) => {
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-4">
           <Logo className="mx-auto w-auto" darkMode={darkMode} />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
-            <h3 className="text-lg font-semibold">Welcome Back,</h3>
-            <p className="text-gray-600">
-              Kindly enter your details to log in.
+            <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+              Create Your Account
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              Please fill in the details below to sign up.
             </p>
             <Formik
               initialValues={{
@@ -215,8 +216,8 @@ const Create = ({ darkMode }) => {
                     </Link>
                   </p>
                   <div className="my-4">
-                    <p className="text-sm text-gray-500 text-lead text-center text-[16px]">
-                      By clicking on “Create Account”, you have agreed to our{" "}
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-lead text-center text-[16px]">
+                      By clicking on “Create Account”, you agree to our{" "}
                       <Link to="/terms" className="text-sm text-green-600 text-[16px]">
                         Terms & Conditions.
                       </Link>
@@ -230,8 +231,8 @@ const Create = ({ darkMode }) => {
       </div>
 
       <div className="hidden md:flex bg-gradient-to-r from-blue-400 to-blue-600 rounded-tl-lg rounded-bl-lg shadow-lg min-h-screen w-full flex items-center justify-center">
-        <p className="p-8 text-white text-5xl font-semibold text-center">
-          Purchase Utility Bills for a Cheap Price Here
+        <p className="p-8 text-white text-4xl md:text-5xl font-semibold text-center">
+          Purchase Utility Bills at Competitive Prices!
         </p>
       </div>
     </div>

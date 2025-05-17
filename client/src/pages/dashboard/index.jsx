@@ -10,12 +10,8 @@ import Shortcut from "./shortcut";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const {
-    data: user,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  
+  const { data: user, isLoading, isError, error } = useQuery({
     queryKey: ["user"],
     queryFn: getUser,
   });
@@ -31,8 +27,11 @@ const Dashboard = () => {
     }
   }, [user, dispatch]);
 
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {error.message}</div>;
+
   return (
-    <div>
+    <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         <Wallet data={walletData} />
         <Gift />

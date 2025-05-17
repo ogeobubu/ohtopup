@@ -1,6 +1,6 @@
 import React from "react";
 import { toast } from "react-toastify";
-import { Link , useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -9,8 +9,8 @@ import Textarea from "../../components/ui/forms/input";
 import Button from "../../components/ui/forms/button";
 import { forgotUser } from "../../api";
 
-const Forgot = ({ darkMode, toggleDarkMode }) => {
-  const navigate = useNavigate()
+const Forgot = ({ darkMode }) => {
+  const navigate = useNavigate();
   const validationSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Email is required"),
   });
@@ -19,7 +19,7 @@ const Forgot = ({ darkMode, toggleDarkMode }) => {
     mutationFn: forgotUser,
     onSuccess: () => {
       toast.success("Password reset email sent!");
-      navigate("/reset")
+      navigate("/reset");
     },
     onError: (error) => {
       toast.error("Error: " + error.message);
@@ -32,9 +32,11 @@ const Forgot = ({ darkMode, toggleDarkMode }) => {
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-6">
           <Logo className="mx-auto w-auto" darkMode={darkMode} />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
-            <h3 className="text-lg font-semibold">Forgot Password</h3>
-            <p className="text-gray-600">
-              Enter your registered email to reset password.
+            <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+              Forgot Password
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              Enter your registered email to reset your password.
             </p>
             <Formik
               initialValues={{ email: "" }}
@@ -82,8 +84,8 @@ const Forgot = ({ darkMode, toggleDarkMode }) => {
       </div>
 
       <div className="hidden md:flex bg-gradient-to-r from-blue-400 to-blue-600 rounded-tl-lg rounded-bl-lg shadow-lg min-h-screen w-full flex items-center justify-center">
-        <p className="p-8 text-white text-5xl font-semibold text-center ">
-          Purchase Utility Bills for a Cheap Price Here
+        <p className="p-8 text-white text-4xl md:text-5xl font-semibold text-center">
+          Purchase Utility Bills at Competitive Prices!
         </p>
       </div>
     </div>
