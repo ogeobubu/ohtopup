@@ -34,7 +34,7 @@ const Footer = () => {
 
       <div className="flex justify-center social mb-4">
         {[
-          { icon: <FaFacebook />, link: "https://facebook.com/retoholdingsservices" },
+          { icon: <FaFacebook />, link: "https://facebook.com/ohtopup" },
           { icon: <FaTwitter />, link: "https://twitter.com/ohtopup" },
           { icon: <FaInstagram />, link: "https://instagram.com/" },
           { icon: <FaLinkedin />, link: "https://linkedin.com/" },

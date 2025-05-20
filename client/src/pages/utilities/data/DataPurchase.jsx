@@ -101,7 +101,6 @@ const DataPurchase = ({ isDarkMode }) => {
         phone: formatPhoneNumber(user?.phoneNumber),
       });
     } catch (error) {
-      console.error("Purchase error:", error);
     } finally {
       setIsConfirming(false);
     }

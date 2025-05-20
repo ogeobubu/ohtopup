@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleDarkMode } from "../../../actions/themeActions";
 import logo from "../../../assets/logo/logo-app.png";
 import logoDark from "../../../assets/logo/new-dark.png";
+import { FaMoon, FaSun } from "react-icons/fa"; // Import icons
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+  const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Create refs for the menu and the toggle button
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
@@ -19,10 +23,8 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Effect to handle clicks outside the menu
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      // Check if the menu is open and the click is outside the menu ref and the button ref
       if (
         isMenuOpen &&
         menuRef.current &&
@@ -34,16 +36,12 @@ const Navbar = () => {
       }
     };
 
-    // Add the event listener
     document.addEventListener("mousedown", handleOutsideClick);
-
-    // Clean up the event listener on component unmount or when menu state changes
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
-  }, [isMenuOpen]); // Re-run effect if isMenuOpen changes
+  }, [isMenuOpen]);
 
-  // Effect to handle scroll for navbar background
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => {
@@ -64,31 +62,33 @@ const Navbar = () => {
           <Link to="/">
             <img
               className="h-12"
-              src={isScrolled ? logoDark : logo}
+              src={
+                isScrolled
+                  ? (isDarkMode ? logo : logoDark)
+                  : (isDarkMode ? logoDark : logo)
+              }
               alt="OhTopUp Logo"
             />
           </Link>
-          <div className="hidden md:flex space-x-4">
-            <Link to="/" className="hover:underline">
-              Home
-            </Link>
-            <Link to="/about" className="hover:underline">
-              About Us
-            </Link>
-            <Link to="/pricing" className="hover:underline">
-              Data Pricing
-            </Link>
+          <div className="hidden md:flex space-x-4 items-center">
+            <Link to="/" className="hover:underline">Home</Link>
+            <Link to="/about" className="hover:underline">About Us</Link>
+            <Link to="/pricing" className="hover:underline">Data Pricing</Link>
+            <button
+              onClick={() => dispatch(toggleDarkMode())}
+              aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="flex items-center"
+            >
+              {isDarkMode ? <FaSun className="w-5 h-5" /> : <FaMoon className="w-5 h-5" />}
+            </button>
           </div>
-          {/* Assign the ref to the button */}
           <button
             ref={buttonRef}
             className="md:hidden focus:outline-none"
             onClick={toggleMenu}
           >
             <svg
-              className={`w-6 h-6 ${
-                isScrolled ? "text-gray-800" : "text-white"
-              }`}
+              className={`w-6 h-6 ${isScrolled ? (isDarkMode ? "text-white" : "text-gray-800") : "text-white"}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -114,7 +114,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Assign the ref to the mobile menu div */}
+      {/* Mobile menu */}
       <div
         ref={menuRef}
         className={`fixed z-20 top-0 right-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ${
@@ -122,34 +122,23 @@ const Navbar = () => {
         }`}
       >
         <div className="flex flex-col items-center justify-center h-full">
-          <button
-            className="self-end p-4 absolute top-0 right-0"
-            onClick={toggleMenu}
-          >
-            <svg
-              className="w-6 h-6 text-gray-800 dark:text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-          <Link to="/" className="py-2 hover:underline" onClick={toggleMenu}> {/* Added onClick to close menu on link click */}
+          <Link to="/" className="py-2 hover:underline" onClick={toggleMenu}>
             Home
           </Link>
-          <Link to="/about" className="py-2 hover:underline" onClick={toggleMenu}> {/* Added onClick to close menu on link click */}
+          <Link to="/about" className="py-2 hover:underline" onClick={toggleMenu}>
             About Us
           </Link>
-          <Link to="/pricing" className="py-2 hover:underline" onClick={toggleMenu}> {/* Added onClick to close menu on link click */}
+          <Link to="/pricing" className="py-2 hover:underline" onClick={toggleMenu}>
             Data Pricing
           </Link>
+          {/* Dark Mode Toggle for Mobile */}
+          <button
+            onClick={() => dispatch(toggleDarkMode())}
+            aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className="flex items-center mt-4"
+          >
+            {isDarkMode ? <FaSun className="w-5 h-5" /> : <FaMoon className="w-5 h-5" />}
+          </button>
         </div>
       </div>
     </div>

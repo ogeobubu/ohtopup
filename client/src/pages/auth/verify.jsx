@@ -9,31 +9,29 @@ import Button from "../../components/ui/forms/button";
 import { verifyUser, resendCodeUser } from "../../api";
 
 const Verify = ({ darkMode }) => {
-  const emailStorage =
-    JSON.parse(localStorage.getItem("ohtopup-create")) || null;
+  const emailStorage = JSON.parse(localStorage.getItem("ohtopup-create")) || null;
   const inputRefs = useRef([]);
 
- useEffect(() => {
-  const inputFields = inputRefs.current;
+  useEffect(() => {
+    const inputFields = inputRefs.current;
 
-  inputFields.forEach((input, index) => {
-    if (input) {
-      const handleInput = (event) => {
-        if (event.target.value.length === 1) {
-          if (index < inputFields.length - 1) {
-            inputFields[index + 1].focus();
+    inputFields.forEach((input, index) => {
+      if (input) {
+        const handleInput = (event) => {
+          if (event.target.value.length === 1) {
+            if (index < inputFields.length - 1) {
+              inputFields[index + 1].focus();
+            }
           }
-        }
-      };
+        };
 
-      input.addEventListener("input", handleInput);
-
-      return () => {
-        input.removeEventListener("input", handleInput);
-      };
-    }
-  });
-}, []);
+        input.addEventListener("input", handleInput);
+        return () => {
+          input.removeEventListener("input", handleInput);
+        };
+      }
+    });
+  }, []);
 
   const handlePaste = (event, index) => {
     const pastedData = event.clipboardData.getData("text").slice(0, 4);
@@ -70,13 +68,13 @@ const Verify = ({ darkMode }) => {
   });
 
   return (
-    <div className="flex md:flex-row justify-between">
+    <div className={`flex md:flex-row justify-between ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="w-full py-0 md:py-4">
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-6">
           <Logo className="mx-auto w-auto" darkMode={darkMode} />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg font-semibold">Verify Email</h3>
-            <p className="text-gray-600">
+            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Enter your confirmation code to verify your email address.
             </p>
             <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
@@ -104,8 +102,7 @@ const Verify = ({ darkMode }) => {
                 <Form>
                   <div className="flex gap-2 items-center justify-between w-full mb-5">
                     {[...Array(4)].map((_, index) => {
-                      const isError =
-                        errors.confirmationCode && touched.confirmationCode;
+                      const isError = errors.confirmationCode && touched.confirmationCode;
 
                       return (
                         <input
@@ -114,7 +111,7 @@ const Verify = ({ darkMode }) => {
                           type="text"
                           className={`w-12 md:w-20 h-12 border rounded-md text-center font-bold text-2xl 
                             ${isError ? "border-red-500" : "border-blue-500"} 
-                            focus:outline-none focus:border-blue-600`}
+                            focus:outline-none focus:border-blue-600 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
                           maxLength="1"
                           onPaste={(e) => handlePaste(e, index)}
                           onChange={(e) => {
@@ -191,7 +188,7 @@ const Verify = ({ darkMode }) => {
 
       <div className="hidden md:flex bg-gradient-to-r from-blue-400 to-blue-600 rounded-tl-lg rounded-bl-lg shadow-lg min-h-screen w-full flex items-center justify-center">
         <p className="p-8 text-white text-5xl font-semibold text-center ">
-          Purchase Utility Bills for a Cheap Price Here
+          Purchase Utility Bills at Competitive Prices!
         </p>
       </div>
     </div>

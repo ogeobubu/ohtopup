@@ -34,7 +34,6 @@ const Chat = () => {
       refetch(); // Refetch messages after sending a new message
     },
     onError: (error) => {
-      console.error("Error sending message:", error.message);
     },
   });
 
