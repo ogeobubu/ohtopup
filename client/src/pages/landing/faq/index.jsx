@@ -62,7 +62,7 @@ const FAQ = () => {
         </h3>
         <div className="flex flex-col space-y-4">
           {faqs.map((faq, index) => (
-            <div key={index} className="bg-white shadow-md rounded-lg">
+            <div key={index} className="bg-white dark:bg-gray-700 shadow-md rounded-lg overflow-hidden">
               <div
                 className="flex justify-between items-center p-4 cursor-pointer"
                 onClick={() => toggleFAQ(index)}
@@ -74,11 +74,15 @@ const FAQ = () => {
                   {activeIndex === index ? '-' : '+'}
                 </span>
               </div>
-              {activeIndex === index && (
+              <div
+                className={`transition-max-height duration-300 ease-in-out overflow-hidden ${
+                  activeIndex === index ? "max-h-40" : "max-h-0"
+                }`}
+              >
                 <div className="p-4 text-gray-600 dark:text-gray-300">
                   {faq.answer}
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </div>

@@ -173,7 +173,6 @@ const Wallet = () => {
           queryClient.invalidateQueries(["transactions"]);
         }
       } catch (error) {
-        console.log(error);
         toast.error("Error during deposit: " + error.message);
       } finally {
         setLoading(false);
@@ -391,7 +390,7 @@ const Wallet = () => {
                           -
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600">Withdraw</span>
+                      <span className="text-sm text-gray-600 dark:text-white">Withdraw</span>
                     </div>
 
                     <div className="flex flex-col justify-center items-center gap-1">
@@ -403,7 +402,7 @@ const Wallet = () => {
                           +
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600">Add Funds</span>
+                      <span className="text-sm text-gray-600 dark:text-white">Add Funds</span>
                     </div>
 
                     <div className="flex flex-col justify-center items-center gap-1">
@@ -415,7 +414,7 @@ const Wallet = () => {
                           <FaBuilding size={12} />
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-white">
                         Bank Account
                       </span>
                     </div>

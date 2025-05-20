@@ -57,7 +57,6 @@ const AirtimePurchase = ({ isDarkMode }) => {
         phone: formatPhoneNumber(transactionDetails.phoneNumber),
       });
     } catch (error) {
-      console.error("Purchase error:", error);
     } finally {
       setIsConfirming(false);
     }

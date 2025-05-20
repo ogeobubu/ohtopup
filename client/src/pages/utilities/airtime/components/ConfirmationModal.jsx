@@ -14,7 +14,6 @@ const ConfirmationModal = ({
       try {
         await onConfirm();
       } catch (error) {
-        console.error("Confirmation error:", error);
       }
     }
   };

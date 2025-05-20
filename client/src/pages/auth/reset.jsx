@@ -17,19 +17,34 @@ const Reset = ({ darkMode }) => {
     const inputFields = inputRefs.current;
 
     inputFields.forEach((input, index) => {
-      input.addEventListener("input", (event) => {
+      const handleInput = (event) => {
         if (event.target.value.length === 1 && index < inputFields.length - 1) {
           inputFields[index + 1].focus();
         }
-      });
+      };
+
+      input.addEventListener("input", handleInput);
+      
+      return () => {
+        input.removeEventListener("input", handleInput);
+      };
+    });
+  }, []);
+
+  const handlePaste = (event) => {
+    const pastedData = event.clipboardData.getData("text").slice(0, 4);
+    const inputs = pastedData.split("");
+
+    inputs.forEach((value, i) => {
+      if (i < inputRefs.current.length) {
+        inputRefs.current[i].value = value;
+        inputRefs.current[i].dispatchEvent(new Event("input")); // Trigger input event
+      }
     });
 
-    return () => {
-      inputFields.forEach((input) => {
-        input?.removeEventListener("input", () => {});
-      });
-    };
-  }, []);
+    event.preventDefault();
+    inputRefs.current[Math.min(inputs.length, inputRefs.current.length - 1)].focus();
+  };
 
   const validationSchema = Yup.object().shape({
     otp: Yup.string()
@@ -52,17 +67,21 @@ const Reset = ({ darkMode }) => {
   });
 
   return (
-    <div className="flex md:flex-row justify-between">
+    <div className={`flex md:flex-row justify-between ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="w-full py-0 md:py-4">
         <div className="max-w-md flex justify-center flex-col w-auto m-auto space-y-6">
           <Logo className="mx-auto w-auto" darkMode={darkMode} />
           <div className="flex justify-center flex-col gap-3 px-2 md:px-12">
-            <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg md:text-xl font-semibold">
               Reset Password
             </h3>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Enter your confirmation code to reset your password.
             </p>
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Note:</strong>
+              <span className="block sm:inline"> If you don't see the email in your inbox, please check your spam folder.</span>
+            </div>
             <Formik
               initialValues={{ otp: "", newPassword: "" }}
               validationSchema={validationSchema}
@@ -70,13 +89,14 @@ const Reset = ({ darkMode }) => {
                 const code = inputRefs.current.map((input) => input.value).join("");
                 mutation.mutate(
                   {
-                    email: emailStorage?.email || "ogeobubu@gmail.com",
+                    email: emailStorage?.email || "ohtopup@gmail.com",
                     otp: code,
                     newPassword: values.newPassword,
                   },
                   {
                     onSettled: () => {
                       resetForm();
+                      inputRefs.current.forEach(input => input.value = "");
                     },
                   }
                 );
@@ -93,8 +113,9 @@ const Reset = ({ darkMode }) => {
                         type="text"
                         className={`w-12 md:w-20 h-12 border rounded-md text-center font-bold text-2xl 
                           ${errors.otp && touched.otp ? "border-red-500" : "border-blue-500"} 
-                          focus:outline-none focus:border-blue-600`}
+                          focus:outline-none focus:border-blue-600 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
                         maxLength="1"
+                        onPaste={index === 0 ? handlePaste : undefined} // Only attach to the first input
                         onChange={(e) => {
                           setFieldValue(
                             "otp",
@@ -124,6 +145,7 @@ const Reset = ({ darkMode }) => {
                         label="New Password"
                         {...field}
                         error={meta.touched && meta.error ? meta.error : undefined}
+                        className={darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}
                       />
                     )}
                   </Field>
@@ -132,7 +154,7 @@ const Reset = ({ darkMode }) => {
                     onClick={async () => {
                       try {
                         const response = await resendResetCodeUser({
-                          email: emailStorage?.email || "ogeobubu@gmail.com",
+                          email: emailStorage?.email || "ohtopup@gmail.com",
                         });
                         toast.success(response.message);
                       } catch (error) {

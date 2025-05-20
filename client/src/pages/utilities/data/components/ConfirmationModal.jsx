@@ -9,7 +9,6 @@ const ConfirmationModal = ({
   isDarkMode,
   isLoading
 }) => {
-    console.log(isLoading)
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
@@ -17,7 +16,6 @@ const ConfirmationModal = ({
       try {
         await onConfirm();
       } catch (error) {
-        console.error("Confirmation error:", error);
       }
     }
   };

@@ -59,7 +59,6 @@ const Create = ({ darkMode }) => {
       navigate("/verify");
     },
     onError: (error) => {
-      console.error("Error creating account:", error);
       const errorMessage = error.response?.data?.message || "Error creating account";
       toast.error(errorMessage);
     },
