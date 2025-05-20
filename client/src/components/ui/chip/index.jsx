@@ -28,7 +28,7 @@ const StatusChip = ({ status }) => {
     <span
       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${chipColor} ${textColor}`}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status?.charAt(0)?.toUpperCase() + status?.slice(1)}
     </span>
   );
 };

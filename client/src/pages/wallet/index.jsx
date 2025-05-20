@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PaystackButton } from "react-paystack";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Card from "./card";
-import { FaBuilding, FaExclamationCircle } from "react-icons/fa";
+import { FaBuilding, FaExclamationCircle, FaCopy } from "react-icons/fa";
 import Table from "../../components/ui/table";
 import Button from "../../components/ui/forms/button";
 import {
@@ -52,6 +52,20 @@ const Wallet = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
   const [reference, setReference] = useState("");
+  // New state to manage deposit option
+  const [depositOption, setDepositOption] = useState(null);
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success("Account number copied!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+        toast.error("Failed to copy account number.");
+      });
+  };
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -60,9 +74,15 @@ const Wallet = () => {
 
   const closeModal = () => setIsModalOpen(false);
 
-  const openDepositModal = () => setIsDepositModalOpen(true);
+  const openDepositModal = () => {
+    setIsDepositModalOpen(true);
+    setDepositOption(null); // Reset deposit option when opening the modal
+  };
 
-  // const openWithdrawModal = () => setIsWithdrawModalOpen(true);
+  const closeDepositModal = () => {
+    setIsDepositModalOpen(false);
+    setDepositOption(null); // Reset deposit option when closing the modal
+  };
 
   const closeWithdrawModal = () => setIsWithdrawModalOpen(false);
 
@@ -132,8 +152,6 @@ const Wallet = () => {
       setBanks(formattedBanks);
     }
   }, [bankData]);
-
-  const closeDepositModal = () => setIsDepositModalOpen(false);
 
   const handleAmountChange = (e) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
@@ -390,7 +408,9 @@ const Wallet = () => {
                           -
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600 dark:text-white">Withdraw</span>
+                      <span className="text-sm text-gray-600 dark:text-white">
+                        Withdraw
+                      </span>
                     </div>
 
                     <div className="flex flex-col justify-center items-center gap-1">
@@ -402,7 +422,9 @@ const Wallet = () => {
                           +
                         </div>
                       </button>
-                      <span className="text-sm text-gray-600 dark:text-white">Add Funds</span>
+                      <span className="text-sm text-gray-600 dark:text-white">
+                        Add Funds
+                      </span>
                     </div>
 
                     <div className="flex flex-col justify-center items-center gap-1">
@@ -430,7 +452,7 @@ const Wallet = () => {
                       : "border-gray-300 bg-[#F7F9FB]"
                   } py-1 px-1`}
                 >
-                 <button
+                  <button
                     className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
                       activeTab === "deposit"
                         ? "text-blue-500 bg-white rounded-lg w-40"
@@ -450,7 +472,6 @@ const Wallet = () => {
                   >
                     Withdrawal
                   </button>
-                 
                 </div>
 
                 <div className="mt-6">
@@ -561,30 +582,83 @@ const Wallet = () => {
             title="Add Funds"
             isDarkMode={isDarkMode}
           >
-            <p style={{ color: "red", fontWeight: "bold" }}>
-              Please note: The minimum deposit amount is ₦100.
-            </p>
+            {!depositOption ? (
+              <div className="flex flex-col gap-4">
+                <Button onClick={() => setDepositOption("automated")}>
+                  Automated Deposit
+                </Button>
+                <Button onClick={() => setDepositOption("manual")}>
+                  Manual Deposit
+                </Button>
+              </div>
+            ) : depositOption === "automated" ? (
+              <>
+                <p style={{ color: "red", fontWeight: "bold" }}>
+                  Please note: The minimum deposit amount is ₦100.
+                </p>
 
-            <TextField
-              name="amount"
-              label="Amount"
-              placeholder="Enter amount"
-              value={formattedAmount}
-              onChange={handleAmountChange}
-              helperText={`Total Amount (including fees): ${formatNairaAmount(
-                totalAmount
-              )}`}
-            />
+                <TextField
+                  name="amount"
+                  label="Amount"
+                  placeholder="Enter amount"
+                  value={formattedAmount}
+                  onChange={handleAmountChange}
+                  helperText={`Total Amount (including fees): ${formatNairaAmount(
+                    totalAmount
+                  )}`}
+                />
 
-            <div className="my-2">
-              <Button
-                loading={loading}
-                disabled={amount < 100 || loading}
-                {...componentProps}
+                <div className="my-2">
+                  <Button
+                    loading={loading}
+                    disabled={amount < 100 || loading}
+                    {...componentProps}
+                  >
+                    <PaystackButton
+                      {...componentProps}
+                      disabled={amount < 100}
+                    />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              // Manual Deposit Info Alert
+              <div
+                className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4"
+                role="alert"
               >
-                <PaystackButton {...componentProps} disabled={amount < 100} />
-              </Button>
-            </div>
+                <p className="font-bold">Manual Deposit Instructions</p>
+                <p>
+                  Please transfer the desired amount to the following bank
+                  details:
+                </p>
+                <ul className="list-disc list-inside mt-2">
+                  <li className="flex items-center">
+                    <strong className="mr-2">Bank Name:</strong>{" "}
+                    <span>VFD Microfinance Bank</span>
+                  </li>
+                  <li className="flex items-center">
+                    <strong className="mr-2">Account Name:</strong>{" "}
+                    <span>ohtopup</span>
+                  </li>
+                  <li className="flex items-center">
+                    <strong className="mr-2">Account Number:</strong>
+                    <span>1015839624</span>
+                    <button
+                      onClick={() => copyToClipboard("1015839624")}
+                      className="ml-2 p-1 rounded-full text-yellow-600 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50"
+                      aria-label="Copy account number"
+                    >
+                      <FaCopy size={16} />
+                    </button>
+                  </li>
+                </ul>
+                <p className="mt-2">
+                  After transfer, please contact support with your transaction
+                  reference for confirmation.
+                </p>
+              </div>
+            )}
           </Modal>
 
           <Modal

@@ -7,7 +7,7 @@ const Wallet = ({ data }) => {
   const navigate = useNavigate();
   const [selectedCurrency, setSelectedCurrency] = useState("NGN");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(true); // Default to true to show balance
   const dropdownRef = useRef(null);
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
@@ -37,8 +37,9 @@ const Wallet = ({ data }) => {
     };
   }, [dropdownRef]);
 
-  const formattedBalance = showBalance && data?.balance
-    ? data.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  // Ensure balance is always formatted unless showBalance is false
+  const formattedBalance = showBalance
+    ? (data?.balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : "***";
 
   return (
