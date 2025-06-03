@@ -25,7 +25,7 @@ const sendConfirmationEmail = async (email, username, confirmationCode) => {
     subject: "Confirm Your OhTopUp Account",
     html: `
         <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
           <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Welcome to OhTopUp, ${username}!</h2>
           <p style="font-size: 16px; line-height: 1.5;">Thank you for creating an account. Please verify your email address to activate your account and start using our services.</p>
           <p style="font-size: 16px; line-height: 1.5;">Your confirmation code is:</p>
@@ -62,7 +62,7 @@ const sendForgotPasswordEmail = async (email, user, fullName) => {
     subject: "Reset Your OhTopUp Password",
     html: `
         <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
           <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Hi ${fullName},</h2>
           <p style="font-size: 16px; line-height: 1.5;">We received a request to reset your password. Use the code below to complete your password reset:</p>
           <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
@@ -97,7 +97,7 @@ const sendResendResetOTPEmail = async (username, email, otpCode) => {
     subject: "Your OTP Code for Password Reset - OhTopUp",
     html: `
       <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-        <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+        <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
         <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Hello, ${username}!</h2>
         <p style="font-size: 16px; line-height: 1.5;">We received a request to reset your password. To proceed, please use the One-Time Password (OTP) provided below:</p>
         <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
@@ -127,7 +127,7 @@ const sendVerificationEmail = async (username, email, confirmationCode) => {
     subject: "Verification Code - OhTopUp",
     html: `
         <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
           <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Welcome to OhTopUp, ${username}!</h2>
           <p style="font-size: 16px; line-height: 1.5;">Thank you for creating an account. Please verify your email address to activate your account and start using our services.</p>
           <p style="font-size: 16px; line-height: 1.5;">We noticed that you requested a new verification code. Here it is:</p>
@@ -172,7 +172,7 @@ const sendTransactionEmailNotification = async (
     html: `
       <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <div style="text-align: center; padding-bottom: 20px;">
-           <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
+           <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
            <h1 style="color: #333; font-size: 24px; font-weight: bold;">Transaction Update</h1>
         </div>
         <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
@@ -246,7 +246,7 @@ const sendTransactionEmailAdminNotification = async (
     html: `
       <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <div style="text-align: center; padding-bottom: 20px;">
-           <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
+           <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
            <h1 style="color: #333; font-size: 24px; font-weight: bold;">Transaction Update</h1>
         </div>
         <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
@@ -301,7 +301,7 @@ const sendLoginNotificationEmail = async (userEmail) => {
     subject: "User Login Notification",
     html: `
       <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-        <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+        <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
         <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">User Login Notification</h2>
         <p style="font-size: 16px; line-height: 1.5;">A user has successfully logged in:</p>
         <p style="font-size: 16px; line-height: 1.5;"><strong>Email:</strong> ${userEmail}</p>
@@ -324,7 +324,7 @@ const sendNotificationEmail = async (email, username, title, message, link) => {
       <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
       
         <div style="text-align: center; padding-bottom: 20px;">
-           <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
+           <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
            <h1 style="color: #333; font-size: 24px; font-weight: bold;">New Notification</h1>
         </div>
         <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
@@ -363,7 +363,7 @@ const sendWaitlistEmail = async (
     subject,
     html: `
         <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/tCjf8sv/ohtopup-high-resolution-logo-transparent.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
+          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
           <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">OhTopUp Waitlist!</h2>
           <p style="font-size: 16px; line-height: 1.5;">${message}</p>
           <p style="font-size: 16px; line-height: 1.5;">We will notify you when we launch!</p>
