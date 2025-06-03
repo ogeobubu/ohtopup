@@ -271,6 +271,29 @@ const addPoint = async (req, res, next) => {
   try {
     const updatedUser = await userService.addPointsToUser(userId, pointsToAdd);
 
+    const user = await userService.findUserById(userId)
+    
+    if (user) {
+      const notificationTitle = "Points Added to Your Account";
+      const notificationMessage = `${pointsToAdd} points have been added to your account. Your new balance is ${updatedUser.points} points.`;
+      const link = "/wallet";
+
+      await notificationService.createNotification(
+        userId,
+        notificationTitle,
+        notificationMessage,
+        link
+      );
+
+      await sendNotificationEmail(
+        user.email,
+        user.username,
+        notificationTitle,
+        notificationMessage,
+        "https://ohtopup.onrender.com/wallet"
+      );
+    }
+
     res.json({
       message: "Points added successfully",
       user: {

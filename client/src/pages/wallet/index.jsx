@@ -587,7 +587,7 @@ const Wallet = () => {
                 <Button onClick={() => setDepositOption("automated")}>
                   Automated Deposit
                 </Button>
-                <Button onClick={() => setDepositOption("manual")}>
+                <Button disabled={true} onClick={() => setDepositOption("manual")}>
                   Manual Deposit
                 </Button>
               </div>
