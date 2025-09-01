@@ -40,17 +40,18 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "none",
     },
   })
 );
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true, // if you use cookies for auth
+    origin: process.env.CLIENT_URL,
+    credentials: true,
   })
 );
+
 
 app.use(express.json());
 
