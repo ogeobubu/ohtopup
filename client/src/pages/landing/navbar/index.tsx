@@ -81,6 +81,8 @@ const Navbar = () => {
             >
               {isDarkMode ? <FaSun className="w-5 h-5" /> : <FaMoon className="w-5 h-5" />}
             </button>
+            <Link to="/login" className="px-4 py-2 rounded-lg border border-current hover:bg-gray-100 dark:hover:bg-gray-800">Login</Link>
+            <Link to="/create" className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Sign Up</Link>
           </div>
           <button
             ref={buttonRef}
@@ -130,6 +132,12 @@ const Navbar = () => {
           </Link>
           <Link to="/pricing" className="py-2 hover:underline" onClick={toggleMenu}>
             Data Pricing
+          </Link>
+          <Link to="/login" className="mt-2 px-4 py-2 rounded-lg border border-current" onClick={toggleMenu}>
+            Login
+          </Link>
+          <Link to="/create" className="mt-2 px-4 py-2 rounded-lg bg-blue-600 text-white" onClick={toggleMenu}>
+            Sign Up
           </Link>
           {/* Dark Mode Toggle for Mobile */}
           <button

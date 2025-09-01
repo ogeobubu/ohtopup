@@ -9,12 +9,20 @@ const FAQ = () => {
       answer: "To create an account, click on the 'Sign Up' button and fill in the required information."
     },
     {
+      question: "What can I pay for on OhTopUp?",
+      answer: "Airtime, data, TV subscriptions, and electricity bills across major networks and providers."
+    },
+    {
       question: "What payment methods do you accept?",
       answer: "We accept various payment methods including credit/debit cards, bank transfers, and mobile payments."
     },
     {
       question: "How can I reset my password?",
       answer: "You can reset your password by clicking on the 'Forgot Password?' link on the login page."
+    },
+    {
+      question: "Are there fees?",
+      answer: "We keep pricing competitive and transparent. Any fees are shown clearly before you pay."
     },
     {
       question: "Is my data secure?",
@@ -39,6 +47,10 @@ const FAQ = () => {
     {
       question: "How long does a transaction take?",
       answer: "Transactions are usually processed instantly, but some payments may take a few minutes depending on the method used."
+    },
+    {
+      question: "Do you have a mobile app?",
+      answer: "Yes. Use the Download App button on the homepage to install it."
     },
     {
       question: "Can I cancel a transaction?",

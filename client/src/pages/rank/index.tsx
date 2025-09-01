@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getRanking } from "../../api";
 import { FaTrophy, FaUser } from "react-icons/fa";
@@ -31,7 +31,7 @@ const Rank = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const formatCountdown = (seconds) => {
+  const formatCountdown = (seconds: number) => {
     const days = Math.floor(seconds / (3600 * 24));
     const hours = Math.floor((seconds % (3600 * 24)) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -74,7 +74,7 @@ const Rank = () => {
             <div className="text-red-500 text-center">Error fetching rankings: {error.message}</div>
           ) : (
             <div className="mt-2">
-              {data?.rankings?.map((winner, index) => (
+              {data?.rankings?.map((winner: any, index: number) => (
                 <div
                   key={index}
                   className={`flex justify-between items-center border-b py-2 hover:bg-gray-100 transition-colors ${isDarkMode ? 'border-gray-600' : 'border-gray-300'}`}

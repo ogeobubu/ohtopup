@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +6,15 @@ import { FaBell, FaUserCircle, FaSignOutAlt, FaMoon, FaSun, FaCircle } from "rea
 import { clearUserData } from "../../actions/userActions";
 import { getNotifications, readNotification } from "../../api";
 import { toggleDarkMode } from "../../actions/themeActions";
+
+type NotificationItem = {
+  _id: string;
+  title: string;
+  message: string;
+  read: boolean;
+  link: string;
+  createdAt: string | number | Date;
+};
 
 const Header = () => {
   const user = useSelector(state => state.user.user);
@@ -37,19 +46,54 @@ const Header = () => {
     setIsNotificationOpen(!isNotificationOpen);
   };
 
-  const { data: notificationsData = [], isLoading, error, refetch } = useQuery({
+  const { data: notificationsData = [], isLoading, error, refetch } = useQuery<NotificationItem[]>({
     queryKey: ['notifications', user?._id],
-    queryFn: () => getNotifications(user._id),
+    queryFn: () => getNotifications(),
     enabled: !!user?._id,
+    refetchInterval: 15000,
   });
 
-  const unreadCount = notificationsData.filter(notification => !notification.read).length;
+  const unreadCount = useMemo(() => notificationsData.filter((n) => !n.read).length, [notificationsData]);
 
-  const handleNotificationClick = async (notification) => {
+  const timeAgo = (dateInput: string | number | Date) => {
+    const date = new Date(dateInput);
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+    const intervals: [number, Intl.RelativeTimeFormatUnit][] = [
+      [60, 'second'],
+      [60, 'minute'],
+      [24, 'hour'],
+      [7, 'day'],
+      [4.345, 'week'],
+      [12, 'month'],
+      [Number.POSITIVE_INFINITY, 'year'],
+    ];
+    let unit: Intl.RelativeTimeFormatUnit = 'second';
+    let value = seconds;
+    let acc = 1;
+    for (const [limit, nextUnit] of intervals) {
+      if (value < limit) {
+        unit = nextUnit;
+        break;
+      }
+      value = Math.floor(value / limit);
+    }
+    return rtf.format(-value, unit);
+  };
+
+  const handleNotificationClick = async (notification: NotificationItem) => {
     await readNotification(notification._id);
     refetch();
     navigate(`${notification.link}`);
     setIsNotificationOpen(false);
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const unread = notificationsData.filter((n) => !n.read);
+      await Promise.all(unread.map((n) => readNotification(n._id)));
+      refetch();
+    } catch (_) {}
   };
 
   useEffect(() => {
@@ -100,32 +144,49 @@ const Header = () => {
           </button>
 
           {isNotificationOpen && (
-  <div className="absolute z-10 left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-md p-4">
-    <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
-    {isLoading ? (
-      <p className="text-gray-500">Loading notifications...</p>
-    ) : error ? (
-      <p className="text-red-500">Error loading notifications.</p>
-    ) : (
-      <ul className="mt-2 max-h-48 overflow-y-auto">
-        {notificationsData.map((notification) => (
-          <li
-            key={notification.id}
-            onClick={() => handleNotificationClick(notification)}
-            className={`flex items-start py-2 ${!notification.read ? 'bg-gray-100 dark:bg-gray-700' : ''} cursor-pointer`}
-          >
-            <FaCircle className={`w-2 h-2 mr-2 ${!notification.read ? 'text-blue-500' : 'text-gray-400'}`} />
-            <div className="flex-1">
-              <span className="font-medium">{notification.title}</span>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{notification.message}</p>
-              <small className="text-xs text-gray-500">{new Date(notification.createdAt).toLocaleTimeString()}</small>
+            <div className="absolute z-10 right-0 mt-2 w-80 bg-white dark:bg-gray-800 shadow-lg rounded-md p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
+                <button
+                  onClick={markAllAsRead}
+                  className="text-xs text-blue-600 hover:underline disabled:text-gray-400"
+                  disabled={unreadCount === 0}
+                >
+                  Mark all as read
+                </button>
+              </div>
+              {isLoading ? (
+                <div className="mt-3 space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="animate-pulse h-12 bg-gray-100 dark:bg-gray-700 rounded" />
+                  ))}
+                </div>
+              ) : error ? (
+                <p className="text-red-500 mt-2">Error loading notifications.</p>
+              ) : notificationsData.length === 0 ? (
+                <div className="mt-3 text-sm text-gray-500">No notifications yet.</div>
+              ) : (
+                <ul className="mt-2 max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
+                  {notificationsData.map((notification) => (
+                    <li
+                      key={notification._id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={`flex items-start py-2 px-1 ${!notification.read ? 'bg-gray-50 dark:bg-gray-700/40' : ''} cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700`}
+                    >
+                      <FaCircle className={`mt-2 w-2 h-2 mr-3 ${!notification.read ? 'text-blue-500' : 'text-gray-400'}`} />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm text-gray-900 dark:text-white">{notification.title}</span>
+                          <small className="text-xs text-gray-500">{timeAgo(notification.createdAt)}</small>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{notification.message}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-)}
+          )}
         </div>
 
         <div className="relative inline-block" ref={dropdownRef}>

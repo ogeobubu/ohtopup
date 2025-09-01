@@ -12,28 +12,56 @@ const xRoutes = require("./routes/xRoutes");
 require("dotenv").config();
 const path = require("path");
 const xController = require("./controllers/xController");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const csurf = require("csurf");
 
 const { handleServiceError } = require('./middleware/errorHandler');
 
 const app = express();
+
+// Use helmet to set secure HTTP headers
+app.use(helmet());
+
+// Rate limiting: max 100 requests per 15 minutes per IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "your_default_secret",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === "production" },
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "strict",
+    },
   })
 );
 
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true, // if you use cookies for auth
   })
 );
+
 app.use(express.json());
 
-const PORT = process.env.PORT || 5000;
+// CSRF protection (after session/cookie parser, before routes)
+app.use(csurf());
+
+app.get("/api/csrf-token", (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
+const PORT = process.env.PORT || 5001;
 
 const connectToDatabase = async () => {
   try {
@@ -64,6 +92,14 @@ app.use(express.static(frontendBuildPath));
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(frontendBuildPath, "index.html"));
+});
+
+// Error handler for CSRF errors (add before your main error handler)
+app.use((err, req, res, next) => {
+  if (err.code === "EBADCSRFTOKEN") {
+    return res.status(403).json({ message: "Invalid CSRF token" });
+  }
+  next(err);
 });
 
 app.use(handleServiceError);

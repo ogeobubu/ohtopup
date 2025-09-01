@@ -81,6 +81,18 @@ const Referral = () => {
             <p className={`mt-2 text-center text-sm md:text-base ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
               Earn referral bonus when your friends sign up with your referral code and make transactions successfully.
             </p>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
+              {[
+                { k: 'Sign up', v: 'They join with your code' },
+                { k: 'They transact', v: 'Their first purchase' },
+                { k: 'You earn', v: 'Bonus credited instantly' },
+              ].map((s) => (
+                <div key={s.k} className={`rounded p-2 ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                  <div className="font-semibold text-sm">{s.k}</div>
+                  <div className="text-xs text-gray-500">{s.v}</div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="mt-4 flex items-center justify-center mx-auto">
             <span className={`bg-white border border-solid border-gray-300 py-2 px-4 rounded ${isDarkMode ? "bg-gray-700 border-gray-600" : ""}`}>
@@ -123,13 +135,15 @@ const Referral = () => {
                     <tr>
                       <th className="py-3 px-4 text-left">Username</th>
                       <th className="py-3 px-4 text-left">Email</th>
+                      <th className="py-3 px-4 text-left">Joined</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-300">
-                    {referrals.users.map((user) => (
-                      <tr key={user._id} className="hover:bg-gray-50 transition duration-200">
-                        <td className="py-3 px-4">{user.username}</td>
-                        <td className="py-3 px-4">{user.email}</td>
+                    {referrals.users.map((u) => (
+                      <tr key={u._id} className="hover:bg-gray-50 transition duration-200">
+                        <td className="py-3 px-4">{u.username}</td>
+                        <td className="py-3 px-4">{u.email}</td>
+                        <td className="py-3 px-4 text-sm text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>

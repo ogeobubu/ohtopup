@@ -30,6 +30,11 @@ const Hero = ({ heading, subheading, buttonText, secondButtonText, href }) => {
             </Link>
           )}
         </div>
+        <div className="mt-6 flex items-center space-x-4 text-sm text-gray-200">
+          <span className="inline-flex items-center"><span className="mr-2">✅</span> Trusted by 10,000+ users</span>
+          <span className="inline-flex items-center"><span className="mr-2">🔒</span> Secured payments</span>
+          <span className="inline-flex items-center"><span className="mr-2">⚡</span> Instant delivery</span>
+        </div>
       </div>
     </section>
   );
