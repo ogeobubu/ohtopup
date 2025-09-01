@@ -2,8 +2,24 @@ import axios from "axios";
 
 const API_URL = "/api/users";
 
+// Add this import for CSRF token fetching
+let csrfToken = null;
+
+// Function to fetch CSRF token from backend
+const fetchCsrfToken = async () => {
+  try {
+    const response = await axios.get("/api/csrf-token", { withCredentials: true });
+    csrfToken = response.data.csrfToken;
+    return csrfToken;
+  } catch (error) {
+    console.error("Failed to fetch CSRF token:", error);
+    return null;
+  }
+};
+
 const instance = axios.create({
   baseURL: API_URL,
+  withCredentials: true, // Ensure cookies are sent
 });
 
 const getToken = () => {
@@ -11,11 +27,23 @@ const getToken = () => {
   return token;
 };
 
+// Interceptor to attach CSRF token to requests
 instance.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Attach CSRF token for state-changing requests
+    if (
+      ["post", "put", "patch", "delete"].includes(config.method)
+    ) {
+      if (!csrfToken) {
+        await fetchCsrfToken();
+      }
+      if (csrfToken) {
+        config.headers["CSRF-Token"] = csrfToken;
+      }
     }
     return config;
   },
@@ -25,25 +53,17 @@ instance.interceptors.request.use(
   }
 );
 
+// Optionally, refresh CSRF token on 403 error (invalid/expired token)
 instance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response) {
-      console.log(error);
-      if (error.response.status === 401) {
-        console.error("Response Error:", error.response.data);
-      } else if (error.response.status === 403) {
-        if(error.response.data.message === "Invalid token") {
-          localStorage.removeItem("ohtopup-token")
-        window.location.href = "/login";
-        }
-      } else {
-        console.error("Response Error:", error.response.data);
-      }
-    } else {
-      console.error("Error:", error.message);
+  (response) => response,
+  async (error) => {
+    if (
+      error.response &&
+      error.response.status === 403 &&
+      error.response.data.message === "Invalid CSRF token"
+    ) {
+      csrfToken = null; // Reset token
+      await fetchCsrfToken(); // Try to refresh
     }
     return Promise.reject(error);
   }
@@ -448,7 +468,7 @@ export const getChatMessages = async (id) => {
   }
 };
 
-export const getPricing = async (id) => {
+export const getPricing = async () => {
   try {
     const response = await instance.get(`/pricing`);
     return response?.data;

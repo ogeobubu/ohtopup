@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { sendMessage as sendMessageAPI, getChatMessages as getChatMessagesAPI, getUser } from "../../../api"; // Adjust path accordingly
 
+type ChatMessage = {
+  _id: string;
+  sender: string;
+  receiver: string;
+  message: string;
+  timestamp: string | number | Date;
+  name?: string;
+};
+
 const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
-  const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const adminName = "Admin";
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useQuery({
     queryKey: ['user'],
@@ -20,10 +30,11 @@ const Chat = () => {
   }, [user])
 
   // Fetching chat messages using useQuery
-  const { data: messages = [], refetch, isLoading, isError } = useQuery({
+  const { data: messages = [], refetch, isLoading, isError } = useQuery<ChatMessage[]>({
     queryKey: ['messages', userId], 
-    queryFn: () => getChatMessagesAPI(userId),
+    queryFn: () => getChatMessagesAPI(userId as string),
     enabled: !!userId,
+    refetchInterval: 10000,
   });
 
   // Mutation to send a message
@@ -49,6 +60,10 @@ const Chat = () => {
       sendMessage(messageData);
     }
   };
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Function to format the time to a readable format
   const formatTime = (date) => {
@@ -77,14 +92,15 @@ const Chat = () => {
             <div className={`max-w-xs p-3 rounded-lg ${msg.sender === userId ? "bg-blue-500 text-white" : "bg-gray-300 text-black"}`}>
               {msg.sender === "6749f188695e72f734794e58" && (
                 <>
-                  <div className="font-bold text-sm">{msg.name}</div>
-                  <div className="text-xs text-gray-500">{formatTime(msg.timestamp)}</div>
+                  <div className="font-bold text-sm">{msg.name || adminName}</div>
+                  <div className="text-xs text-gray-500">{formatTime(new Date(msg.timestamp as any))}</div>
                 </>
               )}
               {msg.message}
             </div>
           </div>
         ))}
+        <div ref={bottomRef} />
       </div>
       
       {/* Message Input and Send Button */}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUtilityTransactions } from "../../api";
 import Table from "../../components/ui/table";
@@ -31,6 +31,9 @@ const Transactions = () => {
       getAllUtilityTransactions(currentPage, limit, activeTab, requestId),
     keepPreviousData: true,
   });
+
+  const totalPages = data ? data.totalPages : 0;
+  const transactions = data?.transactions ?? [];
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -139,11 +142,11 @@ const Transactions = () => {
           />
         </div>
         <div className="overflow-x-auto">
-          <Table columns={columns} data={data?.transactions} />
+          <Table columns={columns} data={transactions} />
         </div>
         <Pagination
           currentPage={currentPage}
-          totalPages={data ? data.totalPages : 0}
+          totalPages={totalPages}
           onPageChange={handlePageChange}
         />
       </>

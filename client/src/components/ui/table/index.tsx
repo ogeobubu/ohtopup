@@ -2,7 +2,17 @@ import React from "react";
 import emptyImage from "../../../assets/undraw_receipt_re_fre3.svg";
 import { useSelector } from "react-redux";
 
-const Table = ({ columns, data }) => {
+type Column<T> = {
+  header: string;
+  render: (row: T) => React.ReactNode;
+};
+
+type TableProps<T> = {
+  columns: Column<T>[];
+  data: T[];
+};
+
+function Table<T>({ columns, data }: TableProps<T>) {
   const isDarkMode = useSelector(state => state.theme.isDarkMode);
 
   return (
@@ -61,6 +71,6 @@ const Table = ({ columns, data }) => {
       </table>
     </div>
   );
-};
+}
 
-export default Table;
+export default Table as unknown as <T>(props: TableProps<T>) => JSX.Element;
