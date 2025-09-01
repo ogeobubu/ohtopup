@@ -63,8 +63,15 @@ instance.interceptors.response.use(
       error.response.status === 403 &&
       error.response.data.message === "Invalid CSRF token"
     ) {
-      csrfToken = null; // Reset token
-      await fetchCsrfToken(); // Try to refresh
+      csrfToken = null;
+      await fetchCsrfToken();
+      // Retry the original request with the new token
+      const config = error.config;
+      if (csrfToken && config && !config._retry) {
+        config._retry = true;
+        config.headers["X-CSRF-Token"] = csrfToken;
+        return instance(config);
+      }
     }
     return Promise.reject(error);
   }
