@@ -34,17 +34,17 @@ instance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     // Attach CSRF token for state-changing requests
-    if (
-      ["post", "put", "patch", "delete"].includes(config.method)
-    ) {
+    if (["post", "put", "patch", "delete"].includes(config.method)) {
       if (!csrfToken) {
         await fetchCsrfToken();
       }
       if (csrfToken) {
-        config.headers["CSRF-Token"] = csrfToken;
+        config.headers["X-CSRF-Token"] = csrfToken;
       }
     }
+
     return config;
   },
   (error) => {
@@ -52,6 +52,7 @@ instance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 
 // Optionally, refresh CSRF token on 403 error (invalid/expired token)
 instance.interceptors.response.use(
