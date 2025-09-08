@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: ohtopup
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false # Set this in Render dashboard
+      - key: JWT_SECRET
+        sync: false # Set this in Render dashboard
+      - key: SESSION_SECRET
+        sync: false # Set this in Render dashboard
+      - key: CLIENT_URL
+        fromService:
+          type: web
+          name: ohtopup
+          property: host
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: ohtopup
+          property: host
+      # Add other required env vars from .env.example as needed
