@@ -57,44 +57,44 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-2 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-8">
         {/* Welcome Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-8 shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            <div className="flex-1">
+              <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3">
                 Welcome back, {user?.username || 'User'}! 👋
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-lg">
                 Here's what's happening with your account today.
               </p>
             </div>
-            <div className="hidden md:block">
-              <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-                <span className="text-3xl">🎉</span>
+            <div className="ml-4 flex-shrink-0">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+                <span className="text-2xl md:text-3xl">🎉</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 items-stretch">
+          <div className="sm:col-span-1 lg:col-span-1">
             <Wallet data={walletData} />
           </div>
-          <div className="lg:col-span-1">
+          <div className="sm:col-span-1 lg:col-span-1">
             <Gift />
           </div>
-          <div className="lg:col-span-1">
+          <div className="sm:col-span-2 lg:col-span-1">
             <Refer />
           </div>
         </div>
 
         {/* Quick Actions Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 md:p-6">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
               Quick Actions
             </h2>
             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
@@ -106,11 +106,11 @@ const Dashboard = () => {
 
         {/* Recent Activity */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="bg-gray-50 dark:bg-gray-700 p-6 border-b border-gray-200 dark:border-gray-600">
+          <div className="bg-gray-50 dark:bg-gray-700 p-3 md:p-6 border-b border-gray-200 dark:border-gray-600">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Activity</h2>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">Your latest transactions and account activities</p>
+                <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">Recent Activity</h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs md:text-base">Your latest transactions and account activities</p>
               </div>
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <span className="text-blue-600 dark:text-blue-400">📊</span>
@@ -139,97 +139,169 @@ const Dashboard = () => {
             <p className="text-gray-600 dark:text-gray-400">Your recent transactions will appear here</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {transactionsData.transactions.slice(0, 5).map((transaction, index) => (
-                  <tr key={transaction._id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                          transaction.type === 'deposit'
-                            ? 'bg-green-100 dark:bg-green-900/20'
-                            : transaction.type === 'withdrawal'
-                            ? 'bg-red-100 dark:bg-red-900/20'
-                            : 'bg-blue-100 dark:bg-blue-900/20'
-                        }`}>
-                          {transaction.type === 'deposit' ? (
-                            <FaArrowDown className="text-green-600 dark:text-green-400 text-sm" />
-                          ) : transaction.type === 'withdrawal' ? (
-                            <FaArrowUp className="text-red-600 dark:text-red-400 text-sm" />
-                          ) : (
-                            <FaClock className="text-blue-600 dark:text-blue-400 text-sm" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white capitalize">
-                            {transaction.type}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {transaction.reference ? `Ref: ${transaction.reference.slice(-8)}` : 'N/A'}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {formatNairaAmount(transaction.amount)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {transaction.status === 'delivered' || transaction.status === 'successful' ? (
-                          <div className="flex items-center text-green-600 dark:text-green-400">
-                            <FaCheckCircle className="w-4 h-4 mr-2" />
-                            <span className="text-sm font-medium">Success</span>
-                          </div>
-                        ) : transaction.status === 'pending' ? (
-                          <div className="flex items-center text-yellow-600 dark:text-yellow-400">
-                            <FaSpinner className="w-4 h-4 mr-2 animate-spin" />
-                            <span className="text-sm font-medium">Pending</span>
-                          </div>
+          <>
+            {/* Mobile Card Layout */}
+            <div className="block md:hidden space-y-3 p-3">
+              {transactionsData.transactions.slice(0, 5).map((transaction, index) => (
+                <div key={transaction._id || index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                        transaction.type === 'deposit'
+                          ? 'bg-green-100 dark:bg-green-900/20'
+                          : transaction.type === 'withdrawal'
+                          ? 'bg-red-100 dark:bg-red-900/20'
+                          : 'bg-blue-100 dark:bg-blue-900/20'
+                      }`}>
+                        {transaction.type === 'deposit' ? (
+                          <FaArrowDown className="text-green-600 dark:text-green-400" />
+                        ) : transaction.type === 'withdrawal' ? (
+                          <FaArrowUp className="text-red-600 dark:text-red-400" />
                         ) : (
-                          <div className="flex items-center text-red-600 dark:text-red-400">
-                            <FaTimesCircle className="w-4 h-4 mr-2" />
-                            <span className="text-sm font-medium">Failed</span>
-                          </div>
+                          <FaClock className="text-blue-600 dark:text-blue-400" />
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                          {transaction.type}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {transaction.reference ? `Ref: ${transaction.reference.slice(-8)}` : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {formatNairaAmount(transaction.amount)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      {transaction.status === 'delivered' || transaction.status === 'successful' ? (
+                        <div className="flex items-center text-green-600 dark:text-green-400">
+                          <FaCheckCircle className="w-4 h-4 mr-2" />
+                          <span className="text-sm font-medium">Success</span>
+                        </div>
+                      ) : transaction.status === 'pending' ? (
+                        <div className="flex items-center text-yellow-600 dark:text-yellow-400">
+                          <FaSpinner className="w-4 h-4 mr-2 animate-spin" />
+                          <span className="text-sm font-medium">Pending</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-red-600 dark:text-red-400">
+                          <FaTimesCircle className="w-4 h-4 mr-2" />
+                          <span className="text-sm font-medium">Failed</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </div>
                       <div className="text-xs text-gray-400 dark:text-gray-500">
                         {new Date(transaction.createdAt).toLocaleTimeString()}
                       </div>
-                    </td>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table Layout */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Date
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {transactionsData.transactions.slice(0, 5).map((transaction, index) => (
+                    <tr key={transaction._id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                            transaction.type === 'deposit'
+                              ? 'bg-green-100 dark:bg-green-900/20'
+                              : transaction.type === 'withdrawal'
+                              ? 'bg-red-100 dark:bg-red-900/20'
+                              : 'bg-blue-100 dark:bg-blue-900/20'
+                          }`}>
+                            {transaction.type === 'deposit' ? (
+                              <FaArrowDown className="text-green-600 dark:text-green-400 text-sm" />
+                            ) : transaction.type === 'withdrawal' ? (
+                              <FaArrowUp className="text-red-600 dark:text-red-400 text-sm" />
+                            ) : (
+                              <FaClock className="text-blue-600 dark:text-blue-400 text-sm" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                              {transaction.type}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {transaction.reference ? `Ref: ${transaction.reference.slice(-8)}` : 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {formatNairaAmount(transaction.amount)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {transaction.status === 'delivered' || transaction.status === 'successful' ? (
+                            <div className="flex items-center text-green-600 dark:text-green-400">
+                              <FaCheckCircle className="w-4 h-4 mr-2" />
+                              <span className="text-sm font-medium">Success</span>
+                            </div>
+                          ) : transaction.status === 'pending' ? (
+                            <div className="flex items-center text-yellow-600 dark:text-yellow-400">
+                              <FaSpinner className="w-4 h-4 mr-2 animate-spin" />
+                              <span className="text-sm font-medium">Pending</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-red-600 dark:text-red-400">
+                              <FaTimesCircle className="w-4 h-4 mr-2" />
+                              <span className="text-sm font-medium">Failed</span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(transaction.createdAt).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500">
+                          {new Date(transaction.createdAt).toLocaleTimeString()}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* View All Link */}
         {transactionsData?.transactions && transactionsData.transactions.length > 0 && (
-          <div className="p-6 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
             <a
               href="/transactions"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium flex items-center justify-center transition-colors duration-200"

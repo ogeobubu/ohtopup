@@ -373,9 +373,9 @@ const Wallet = () => {
 
   return (
     <>
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <h1
-          className={`text-3xl font-bold mb-2 ${
+          className={`text-2xl md:text-3xl font-bold mb-2 ${
             isDarkMode ? "text-white" : "text-gray-900"
           }`}
         >
@@ -387,7 +387,7 @@ const Wallet = () => {
       </div>
 
       {/* Wallet Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         <Card
           title="Naira Wallet"
           balance={walletData?.balance}
@@ -413,19 +413,19 @@ const Wallet = () => {
             />
           ) : (
             /* Wallet Balance Card */
-            <div className={`rounded-xl shadow-lg p-6 mb-6 ${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-3 rounded-full ${
+            <div className={`rounded-xl shadow-lg p-4 md:p-6 mb-4 md:mb-6 ${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <div className="flex items-center space-x-2 md:space-x-3">
+                    <div className={`p-2 md:p-3 rounded-full ${
                       isDarkMode ? "bg-blue-600" : "bg-blue-100"
                     }`}>
-                      <FaWallet className={`text-xl ${
+                      <FaWallet className={`text-lg md:text-xl ${
                         isDarkMode ? "text-white" : "text-blue-600"
                       }`} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">Naira Balance</h3>
-                      <p className={`text-sm ${
+                      <h3 className="text-base md:text-lg font-semibold">Naira Balance</h3>
+                      <p className={`text-xs md:text-sm ${
                         isDarkMode ? "text-gray-400" : "text-gray-600"
                       }`}>
                         Available funds
@@ -433,57 +433,57 @@ const Wallet = () => {
                     </div>
                   </div>
                   {walletError && (
-                    <div className="flex items-center text-red-500 text-sm">
+                    <div className="flex items-center text-red-500 text-xs md:text-sm">
                       <FaExclamationCircle className="mr-1" />
                       <span>{walletError.message}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="mb-6">
-                  <div className={`text-4xl font-bold ${
+                <div className="mb-4 md:mb-6">
+                  <div className={`text-2xl md:text-4xl font-bold ${
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}>
-                    <span className="text-2xl text-gray-500">₦</span>
+                    <span className="text-lg md:text-2xl text-gray-500">₦</span>
                     {whole}
-                    <span className="text-2xl text-gray-500">.{decimal}</span>
+                    <span className="text-lg md:text-2xl text-gray-500">.{decimal}</span>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3 md:gap-4">
                   <button
                     onClick={openDepositModal}
-                    className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-green-300 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 group"
+                    className="flex flex-col items-center justify-center p-3 md:p-4 rounded-lg border-2 border-dashed border-green-300 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 group"
                   >
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                      <FaPlus className="text-white text-lg" />
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-green-500 rounded-full flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform">
+                      <FaPlus className="text-white text-base md:text-lg" />
                     </div>
-                    <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                    <span className="text-xs md:text-sm font-medium text-green-700 dark:text-green-400 text-center">
                       Add Funds
                     </span>
                   </button>
 
                   <button
                     onClick={() => toast.error("Feature not available. Try again later!")}
-                    className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-red-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group opacity-60"
+                    className="flex flex-col items-center justify-center p-3 md:p-4 rounded-lg border-2 border-dashed border-red-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group opacity-60"
                   >
-                    <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                      <FaMinus className="text-white text-lg" />
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-red-500 rounded-full flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform">
+                      <FaMinus className="text-white text-base md:text-lg" />
                     </div>
-                    <span className="text-sm font-medium text-red-700 dark:text-red-400">
+                    <span className="text-xs md:text-sm font-medium text-red-700 dark:text-red-400 text-center">
                       Withdraw
                     </span>
                   </button>
 
                   <button
                     onClick={handleShowBanks}
-                    className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-blue-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 group md:col-span-1 col-span-2"
+                    className="flex flex-col items-center justify-center p-3 md:p-4 rounded-lg border-2 border-dashed border-blue-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 group"
                   >
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                      <FaUniversity className="text-white text-lg" />
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500 rounded-full flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform">
+                      <FaUniversity className="text-white text-base md:text-lg" />
                     </div>
-                    <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                    <span className="text-xs md:text-sm font-medium text-blue-700 dark:text-blue-400 text-center">
                       Bank Account
                     </span>
                   </button>
@@ -492,27 +492,27 @@ const Wallet = () => {
 
               <div className="mt-5">
                 <div
-                  className={`flex md:flex-row flex-col rounded-lg border border-solid max-w-xs ${
+                  className={`flex md:flex-row flex-col rounded-lg border border-solid w-full max-w-xs md:max-w-sm ${
                     isDarkMode
                       ? "border-gray-600 bg-gray-700"
                       : "border-gray-300 bg-[#F7F9FB]"
                   } py-1 px-1`}
                 >
                   <button
-                    className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
+                    className={`py-2 px-2 md:px-1 md:py-1 md:w-40 w-full font-medium text-sm transition-colors duration-300 ${
                       activeTab === "deposit"
-                        ? "text-blue-500 bg-white rounded-lg w-40"
-                        : "text-gray-500 hover:text-gray-800 w-40"
+                        ? "text-blue-500 bg-white rounded-lg"
+                        : "text-gray-500 hover:text-gray-800"
                     }`}
                     onClick={() => handleTabClick("deposit")}
                   >
                     Topup
                   </button>
                   <button
-                    className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
+                    className={`py-2 px-2 md:px-1 md:py-1 md:w-40 w-full font-medium text-sm transition-colors duration-300 ${
                       activeTab === "withdrawal"
-                        ? "text-blue-500 bg-white rounded-lg w-40"
-                        : "text-gray-500 hover:text-gray-800 w-40"
+                        ? "text-blue-500 bg-white rounded-lg"
+                        : "text-gray-500 hover:text-gray-800"
                     }`}
                     onClick={() => handleTabClick("withdrawal")}
                   >
@@ -529,16 +529,16 @@ const Wallet = () => {
                     </p>
                   ) : (
                     <>
-                      <div className="flex justify-end">
+                      <div className="flex justify-start md:justify-end">
                         <input
                           type="text"
                           placeholder="Search by Reference..."
                           value={reference}
                           onChange={handleSearchChange}
-                          className={`border rounded p-2 mb-3 ${
+                          className={`border rounded-md px-3 py-2 mb-3 w-full max-w-xs text-sm ${
                             isDarkMode
                               ? "border-gray-600 bg-gray-800 text-white"
-                              : "border-gray-300"
+                              : "border-gray-300 bg-white text-gray-900"
                           }`}
                         />
                       </div>
@@ -620,19 +620,19 @@ const Wallet = () => {
             title="Add Funds to Wallet"
             isDarkMode={isDarkMode}
           >
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {!depositOption ? (
                 <>
                   {/* Header */}
-                  <div className="text-center mb-6">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+                  <div className="text-center mb-4 md:mb-6">
+                    <div className={`inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full mb-3 md:mb-4 ${
                       isDarkMode ? 'bg-green-600' : 'bg-green-100'
                     }`}>
-                      <FaPlus className={`text-2xl ${
+                      <FaPlus className={`text-xl md:text-2xl ${
                         isDarkMode ? 'text-white' : 'text-green-600'
                       }`} />
                     </div>
-                    <h3 className={`text-xl font-semibold mb-2 ${
+                    <h3 className={`text-lg md:text-xl font-semibold mb-2 ${
                       isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>
                       Choose Deposit Method
@@ -645,25 +645,25 @@ const Wallet = () => {
                   </div>
 
                   {/* Deposit Options */}
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-3 md:gap-4">
                     <button
                       onClick={() => setDepositOption("automated")}
-                      className={`p-6 rounded-xl border-2 transition-all duration-200 text-left group ${
+                      className={`p-4 md:p-6 rounded-xl border-2 transition-all duration-200 text-left group ${
                         isDarkMode
                           ? 'border-gray-600 bg-gray-800 hover:border-blue-500 hover:bg-gray-700'
                           : 'border-gray-200 bg-white hover:border-blue-500 hover:shadow-md'
                       }`}
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-3 rounded-lg ${
+                      <div className="flex items-center space-x-3 md:space-x-4">
+                        <div className={`p-2 md:p-3 rounded-lg ${
                           isDarkMode ? 'bg-blue-600' : 'bg-blue-100'
                         }`}>
-                          <FaCreditCard className={`text-xl ${
+                          <FaCreditCard className={`text-lg md:text-xl ${
                             isDarkMode ? 'text-white' : 'text-blue-600'
                           }`} />
                         </div>
-                        <div className="flex-1">
-                          <h4 className={`font-semibold text-lg mb-1 ${
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`font-semibold text-base md:text-lg mb-1 ${
                             isDarkMode ? 'text-white' : 'text-gray-900'
                           }`}>
                             Automated Deposit
@@ -674,7 +674,7 @@ const Wallet = () => {
                             Instant deposit via card or bank transfer
                           </p>
                         </div>
-                        <div className={`text-2xl transition-transform group-hover:translate-x-1 ${
+                        <div className={`text-xl md:text-2xl transition-transform group-hover:translate-x-1 ${
                           isDarkMode ? 'text-gray-400' : 'text-gray-400'
                         }`}>
                           →
@@ -722,15 +722,15 @@ const Wallet = () => {
               ) : depositOption === "automated" ? (
                 <>
                   {/* Automated Deposit Form */}
-                  <div className="text-center mb-6">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 ${
+                  <div className="text-center mb-4 md:mb-6">
+                    <div className={`inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full mb-3 md:mb-4 ${
                       isDarkMode ? 'bg-blue-600' : 'bg-blue-100'
                     }`}>
-                      <FaCreditCard className={`text-xl ${
+                      <FaCreditCard className={`text-lg md:text-xl ${
                         isDarkMode ? 'text-white' : 'text-blue-600'
                       }`} />
                     </div>
-                    <h3 className={`text-lg font-semibold mb-2 ${
+                    <h3 className={`text-base md:text-lg font-semibold mb-2 ${
                       isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>
                       Enter Deposit Amount
@@ -738,7 +738,7 @@ const Wallet = () => {
                   </div>
 
                   {/* Amount Input */}
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     <TextField
                       name="amount"
                       label="Deposit Amount (₦)"
@@ -831,15 +831,15 @@ const Wallet = () => {
               ) : (
                 <>
                   {/* Manual Deposit Instructions */}
-                  <div className="text-center mb-6">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 ${
+                  <div className="text-center mb-4 md:mb-6">
+                    <div className={`inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full mb-3 md:mb-4 ${
                       isDarkMode ? 'bg-orange-600' : 'bg-orange-100'
                     }`}>
-                      <FaUniversity className={`text-xl ${
+                      <FaUniversity className={`text-lg md:text-xl ${
                         isDarkMode ? 'text-white' : 'text-orange-600'
                       }`} />
                     </div>
-                    <h3 className={`text-lg font-semibold mb-2 ${
+                    <h3 className={`text-base md:text-lg font-semibold mb-2 ${
                       isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>
                       Manual Deposit Instructions
@@ -923,10 +923,10 @@ const Wallet = () => {
 
               {/* Back Button for Automated/Manual views */}
               {depositOption && (
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center pt-3 md:pt-4">
                   <button
                     onClick={() => setDepositOption(null)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    className={`flex items-center space-x-2 px-3 md:px-4 py-2 rounded-lg transition-colors text-sm md:text-base ${
                       isDarkMode
                         ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'

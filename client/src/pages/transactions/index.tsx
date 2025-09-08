@@ -49,11 +49,18 @@ const Transactions = () => {
       },
       {
         header: "Amount",
-        render: (row) => <p>{formatNairaAmount(row.amount)}</p>,
+        render: (row) => <p className="font-semibold text-green-600 dark:text-green-400">{formatNairaAmount(row.amount)}</p>,
       },
       {
         header: "Date",
-        render: (row) => <p>{new Date(row.createdAt).toLocaleString()}</p>,
+        render: (row) => (
+          <p className="text-xs md:text-sm">
+            {window.innerWidth < 768
+              ? new Date(row.createdAt).toLocaleDateString()
+              : new Date(row.createdAt).toLocaleString()
+            }
+          </p>
+        ),
       },
     ];
 
@@ -67,11 +74,11 @@ const Transactions = () => {
           },
           {
             header: "Token",
-            render: (row) => <p>{row?.token?.split(":")[1]}</p>,
+            render: (row) => <p className="text-xs font-mono">{row?.token?.split(":")[1]}</p>,
           },
           {
-            header: "Meter Number",
-            render: (row) => <p>{row.phone}</p>,
+            header: window.innerWidth < 768 ? "Meter #" : "Meter Number",
+            render: (row) => <p className="text-xs md:text-sm font-mono">{row.phone}</p>,
           },
         ];
         break;
@@ -79,35 +86,43 @@ const Transactions = () => {
         specificColumns = [
           {
             header: "Service",
-            render: (row) => <p className="text-capitalize">{row.serviceID}</p>,
+            render: (row) => <p className="text-capitalize text-xs md:text-sm">{row.serviceID}</p>,
           },
           {
-            header: "Smartcard Number",
-            render: (row) => <p>{row.phone}</p>,
+            header: window.innerWidth < 768 ? "Card #" : "Smartcard Number",
+            render: (row) => <p className="text-xs md:text-sm font-mono">{row.phone}</p>,
           },
         ];
         break;
       case "Data Services":
         specificColumns = [
           {
-            header: "Product Name",
-            render: (row) => <p>{row.product_name}</p>,
+            header: window.innerWidth < 768 ? "Product" : "Product Name",
+            render: (row) => (
+              <p className="text-xs md:text-sm truncate max-w-24 md:max-w-none" title={row.product_name}>
+                {row.product_name}
+              </p>
+            ),
           },
           {
-            header: "Phone Number",
-            render: (row) => <p>{row.phone}</p>,
+            header: window.innerWidth < 768 ? "Phone" : "Phone Number",
+            render: (row) => <p className="text-xs md:text-sm font-mono">{row.phone}</p>,
           },
         ];
         break;
       case "Airtime Recharge":
         specificColumns = [
           {
-            header: "Product Name",
-            render: (row) => <p>{row.product_name}</p>,
+            header: window.innerWidth < 768 ? "Product" : "Product Name",
+            render: (row) => (
+              <p className="text-xs md:text-sm truncate max-w-24 md:max-w-none" title={row.product_name}>
+                {row.product_name}
+              </p>
+            ),
           },
           {
-            header: "Phone Number",
-            render: (row) => <p>{row.phone}</p>,
+            header: window.innerWidth < 768 ? "Phone" : "Phone Number",
+            render: (row) => <p className="text-xs md:text-sm font-mono">{row.phone}</p>,
           },
         ];
         break;
@@ -134,14 +149,14 @@ const Transactions = () => {
 
     return (
       <>
-        <div className="flex flex-col sm:flex-row justify-end items-center mb-3">
+        <div className="flex flex-col sm:flex-row justify-start sm:justify-end items-stretch sm:items-center mb-3 gap-2">
           <input
             type="text"
             placeholder="Search by RequestID..."
             value={requestId}
             onChange={handleSearchChange}
-            className={`border border-gray-300 rounded p-2 w-full sm:w-64 ${
-              isDarkMode ? "bg-gray-700 text-white" : "bg-white text-gray-800"
+            className={`border border-gray-300 rounded-md px-3 py-2 w-full sm:w-64 text-sm ${
+              isDarkMode ? "bg-gray-700 text-white border-gray-600" : "bg-white text-gray-800"
             }`}
           />
         </div>
@@ -161,11 +176,11 @@ const Transactions = () => {
     <div
       className={`${
         isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-800"
-      } md:p-4`}
+      } p-2 md:p-4`}
     >
-      <h1 className="text-2xl font-bold mb-5">Transactions</h1>
+      <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-5">Transactions</h1>
       <div
-        className={`mb-3 flex flex-wrap md:flex-row flex-col rounded-lg border border-solid max-w-sm ${
+        className={`mb-3 flex flex-wrap md:flex-row flex-col rounded-lg border border-solid w-full max-w-sm md:max-w-md ${
           isDarkMode
             ? "border-gray-600 bg-gray-800"
             : "border-gray-300 bg-[#F7F9FB]"
@@ -179,7 +194,7 @@ const Transactions = () => {
         ].map((tab) => (
           <button
             key={tab}
-            className={`flex-1 py-1 mx-1 font-medium transition-colors duration-300 ${
+            className={`flex-1 py-2 mx-1 font-medium text-sm transition-colors duration-300 ${
               activeTab === tab
                 ? "text-blue-500 bg-white rounded-lg"
                 : "text-gray-500 hover:text-gray-800"

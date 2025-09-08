@@ -14,7 +14,7 @@ const DataTable = ({ columns, data, emptyMessage = "No data available" }) => {
               {columns?.map((col, index) => (
                 <th
                   key={index}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  className="px-3 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                 >
                   {col?.header}
                 </th>
@@ -28,7 +28,7 @@ const DataTable = ({ columns, data, emptyMessage = "No data available" }) => {
                   {columns?.map((col, colIndex) => (
                     <td
                       key={colIndex}
-                      className={`px-6 py-4 text-sm text-gray-900 dark:text-white ${
+                      className={`px-3 py-3 md:px-6 md:py-4 text-sm text-gray-900 dark:text-white ${
                         colIndex === 0 ? 'whitespace-nowrap' : ''
                       }`}
                     >

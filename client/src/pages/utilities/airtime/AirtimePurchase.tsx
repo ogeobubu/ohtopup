@@ -153,16 +153,16 @@ const AirtimePurchase = ({ isDarkMode }) => {
   }, []);
 
   return (
-    <div className="border border-solid border-gray-200 rounded-xl p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="border border-solid border-gray-200 rounded-xl p-4 md:p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="text-center">
-        <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <FaMobileAlt className="text-white text-3xl" />
+        <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
+          <FaMobileAlt className="text-white text-2xl md:text-3xl" />
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Buy Airtime</h3>
-        <p className="text-gray-600 mb-6">Top up your mobile phone instantly</p>
+        <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Buy Airtime</h3>
+        <p className="text-gray-600 text-sm md:text-base mb-4 md:mb-6">Top up your mobile phone instantly</p>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm md:text-base"
         >
           Start Purchasing
         </button>
@@ -177,22 +177,22 @@ const AirtimePurchase = ({ isDarkMode }) => {
         stickyHeader={
           <div className="bg-white">
             {/* Progress Header */}
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between mb-3">
+            <div className="px-3 md:px-4 py-2 md:py-3">
+              <div className="flex items-center justify-between mb-2 md:mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <FaMobileAlt className="text-white text-sm" />
+                  <div className="w-7 h-7 md:w-8 md:h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <FaMobileAlt className="text-white text-xs md:text-sm" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">Buy Airtime</h2>
+                    <h2 className="text-base md:text-lg font-bold text-gray-900">Buy Airtime</h2>
                     <p className="text-xs text-gray-500">Quick and easy airtime purchase</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                 >
-                  <span className="text-gray-500 text-sm">×</span>
+                  <span className="text-gray-500 text-xs md:text-sm">×</span>
                 </button>
               </div>
 
@@ -228,16 +228,16 @@ const AirtimePurchase = ({ isDarkMode }) => {
             </div>
 
             {/* Balance Card */}
-            <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-blue-100">
+            <div className="px-3 md:px-4 py-2 md:py-3 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="bg-white rounded-lg p-2 md:p-3 shadow-sm border border-blue-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                      <FaCreditCard className="text-white text-sm" />
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                      <FaCreditCard className="text-white text-xs md:text-sm" />
                     </div>
                     <div>
                       <p className="text-xs font-medium text-gray-600">Available Balance</p>
-                      <p className="text-xl font-bold text-gray-900">
+                      <p className="text-lg md:text-xl font-bold text-gray-900">
                         {formatNairaAmount(walletData?.balance || 0)}
                       </p>
                     </div>
@@ -258,29 +258,29 @@ const AirtimePurchase = ({ isDarkMode }) => {
           <div className="flex flex-col bg-white rounded-2xl">
             {/* Step 1: Network Selection */}
             {currentStep === 1 && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Choose Your Network</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Your Network</h3>
                   <p className="text-sm text-gray-600">Select your mobile network provider</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                <div className="grid grid-cols-2 gap-2 md:gap-3 max-w-sm mx-auto">
                   {providers?.map(provider => (
                     <button
                       key={provider.serviceID}
                       onClick={() => {
                         handleNetworkChange(provider.serviceID);
                       }}
-                      className={`p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
+                      className={`p-3 md:p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
                         selectedNetwork === provider.serviceID
                           ? 'border-blue-500 bg-blue-50 shadow-md'
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
                     >
                       <div className="text-center">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <FaMobileAlt className="text-blue-600 text-lg" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
+                          <FaMobileAlt className="text-blue-600 text-base md:text-lg" />
                         </div>
-                        <div className="text-lg font-bold text-gray-900 mb-1">
+                        <div className="text-base md:text-lg font-bold text-gray-900 mb-1">
                           {provider.name?.toUpperCase() || provider.serviceID?.toUpperCase() || 'UNKNOWN'}
                         </div>
                       </div>
@@ -289,7 +289,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="mt-6 flex justify-end">
+                <div className="mt-4 md:mt-6 flex justify-end">
                   <button
                     onClick={() => {
                       if (selectedNetwork) {
@@ -298,7 +298,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!selectedNetwork}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-4 md:px-6 py-2 md:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -327,9 +327,9 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Step 2: Amount Selection */}
             {currentStep === 2 && selectedNetwork && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Choose Amount</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Amount</h3>
                   <p className="text-sm text-gray-600">Select airtime amount for {selectedNetwork?.toUpperCase()}</p>
                 </div>
 
@@ -349,14 +349,14 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
                 {/* Amount Input */}
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-base font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
                     Enter Amount (₦)
                   </label>
                   <input
                     type="number"
                     value={selectedAmount}
                     onChange={(e) => setSelectedAmount(e.target.value)}
-                    className="w-full px-3 py-3 border-2 border-gray-300 rounded-lg text-base font-medium bg-white focus:border-blue-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-blue-500 focus:outline-none transition-colors"
                     placeholder="Enter amount"
                     min="50"
                   />
@@ -378,10 +378,10 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="mt-4 flex justify-between">
+                <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(1)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -392,7 +392,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!selectedAmount}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -402,13 +402,13 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Step 3: Phone Number Selection */}
             {currentStep === 3 && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Confirm Phone Number</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Phone Number</h3>
                   <p className="text-sm text-gray-600">Airtime will be sent to this number</p>
                 </div>
 
-                <div className="max-w-sm mx-auto space-y-3">
+                <div className="max-w-sm mx-auto space-y-2 md:space-y-3">
                   {/* Registered Number Option */}
                   <button
                     onClick={() => {
@@ -420,20 +420,20 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         setCurrentStep(4);
                       }
                     }}
-                    className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl transition-all duration-200 hover:shadow-md hover:border-blue-300"
+                    className="w-full p-3 md:p-4 bg-white border-2 border-gray-200 rounded-xl transition-all duration-200 hover:shadow-md hover:border-blue-300"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FaUser className="text-blue-600 text-lg" />
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <FaUser className="text-blue-600 text-base md:text-lg" />
                       </div>
-                      <div className="text-left flex-1">
-                        <div className="font-semibold text-gray-900 text-base">My registered number</div>
-                        <div className="text-gray-600 text-sm">
+                      <div className="text-left flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900 text-sm md:text-base">My registered number</div>
+                        <div className="text-gray-600 text-xs md:text-sm truncate">
                           {user?.phoneNumber ? formatPhoneNumberForDisplay(user.phoneNumber) : 'No registered number'}
                         </div>
                       </div>
                       <div className="text-blue-600">
-                        <FaChevronRight className="text-lg" />
+                        <FaChevronRight className="text-base md:text-lg" />
                       </div>
                     </div>
                   </button>
@@ -441,33 +441,33 @@ const AirtimePurchase = ({ isDarkMode }) => {
                   {/* Custom Number Option */}
                   <button
                     onClick={() => setUseCustomPhone(true)}
-                    className="w-full p-4 bg-white border-2 border-gray-200 rounded-xl transition-all duration-200 hover:shadow-md hover:border-green-300"
+                    className="w-full p-3 md:p-4 bg-white border-2 border-gray-200 rounded-xl transition-all duration-200 hover:shadow-md hover:border-green-300"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <FaCheck className="text-green-600 text-lg" />
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <FaCheck className="text-green-600 text-base md:text-lg" />
                       </div>
                       <div className="text-left flex-1">
-                        <div className="font-semibold text-gray-900 text-base">Enter different number</div>
-                        <div className="text-gray-600 text-sm">Use another phone number</div>
+                        <div className="font-semibold text-gray-900 text-sm md:text-base">Enter different number</div>
+                        <div className="text-gray-600 text-xs md:text-sm">Use another phone number</div>
                       </div>
                       <div className="text-green-600">
-                        <FaChevronRight className="text-lg" />
+                        <FaChevronRight className="text-base md:text-lg" />
                       </div>
                     </div>
                   </button>
 
                   {/* Custom Phone Input */}
                   {useCustomPhone && (
-                    <div className="bg-white p-4 rounded-xl border-2 border-gray-200">
-                      <label className="block text-base font-semibold text-gray-900 mb-2">
+                    <div className="bg-white p-3 md:p-4 rounded-xl border-2 border-gray-200">
+                      <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
                         Enter Phone Number
                       </label>
                       <input
                         type="tel"
                         value={phoneNumber}
                         onChange={(e) => handlePhoneNumberChange(e.target.value)}
-                        className={`w-full px-3 py-3 border-2 rounded-lg text-base font-medium ${
+                        className={`w-full px-3 py-2 md:py-3 border-2 rounded-lg text-sm md:text-base font-medium ${
                           phoneError
                             ? 'border-red-500 focus:border-red-500'
                             : 'border-gray-300 focus:border-blue-500'
@@ -481,10 +481,10 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       <p className="text-xs text-gray-500 mt-2">
                         Enter a valid Nigerian phone number (e.g., +2348012345678, 08012345678, or 8012345678)
                       </p>
-                      <div className="flex gap-2 mt-4">
+                      <div className="flex gap-2 mt-3 md:mt-4">
                         <button
                           onClick={() => setUseCustomPhone(false)}
-                          className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                          className="flex-1 px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
                         >
                           Back
                         </button>
@@ -495,7 +495,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                             }
                           }}
                           disabled={!!phoneError || !phoneNumber}
-                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                          className="flex-1 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                         >
                           Continue
                         </button>
@@ -505,10 +505,10 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="mt-4 flex justify-between">
+                <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(2)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -519,7 +519,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!phoneNumber || !!phoneError}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Continue to Payment
                   </button>
@@ -529,17 +529,17 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Step 4: Confirmation & Purchase */}
             {currentStep === 4 && selectedNetwork && selectedAmount && phoneNumber && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
                   <p className="text-sm text-gray-600">Review your selection and complete the purchase</p>
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-white rounded-xl border-2 border-gray-200 p-4 mb-4">
-                  <h4 className="text-base font-bold text-gray-900 mb-3">Order Summary</h4>
+                <div className="bg-white rounded-xl border-2 border-gray-200 p-3 md:p-4 mb-3 md:mb-4">
+                  <h4 className="text-sm md:text-base font-bold text-gray-900 mb-2 md:mb-3">Order Summary</h4>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -589,23 +589,23 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentStep(3)}
-                    className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
                   >
                     Previous
                   </button>
                   <button
                     onClick={confirmPurchase}
                     disabled={isConfirming}
-                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
                   >
                     {isConfirming ? (
                       <div className="flex items-center justify-center gap-1">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-white"></div>
                         <span>Processing...</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center gap-1">
-                        <FaCreditCard className="text-sm" />
+                        <FaCreditCard className="text-xs md:text-sm" />
                         <span>Pay ₦{selectedAmount}</span>
                       </div>
                     )}

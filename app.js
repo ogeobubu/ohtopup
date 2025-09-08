@@ -167,8 +167,39 @@ const startServer = async () => {
     xController.startRepostJob();
 
     const frontendBuildPath = path.join(__dirname, "client/dist");
+    const clientPublicPath = path.join(__dirname, "client/public");
+
+    // Serve static files from client/dist (production build)
     app.use(express.static(frontendBuildPath));
 
+    // Serve static files from client/public (includes sitemap.xml, robots.txt)
+    app.use(express.static(clientPublicPath));
+
+    // Specific route for sitemap.xml to ensure correct content-type
+    app.get("/sitemap.xml", (req, res) => {
+      const sitemapPath = path.join(clientPublicPath, "sitemap.xml");
+      res.setHeader("Content-Type", "application/xml");
+      res.sendFile(sitemapPath, (err) => {
+        if (err) {
+          console.error("Error serving sitemap.xml:", err);
+          res.status(404).send("Sitemap not found");
+        }
+      });
+    });
+
+    // Specific route for robots.txt
+    app.get("/robots.txt", (req, res) => {
+      const robotsPath = path.join(clientPublicPath, "robots.txt");
+      res.setHeader("Content-Type", "text/plain");
+      res.sendFile(robotsPath, (err) => {
+        if (err) {
+          console.error("Error serving robots.txt:", err);
+          res.status(404).send("Robots.txt not found");
+        }
+      });
+    });
+
+    // Catch-all route for React app (must be last)
     app.get("*", (req, res) => {
       res.sendFile(path.join(frontendBuildPath, "index.html"));
     });

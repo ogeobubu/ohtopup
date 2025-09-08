@@ -166,16 +166,16 @@ const DataPurchase = ({ isDarkMode }) => {
   const isLoading = isSelectedPlansLoading || isWalletLoading || isUserLoading;
 
   return (
-    <div className="border border-solid border-gray-200 rounded-xl p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="border border-solid border-gray-200 rounded-xl p-4 md:p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="text-center">
-        <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <FaWifi className="text-white text-3xl" />
+        <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
+          <FaWifi className="text-white text-2xl md:text-3xl" />
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Buy Data</h3>
-        <p className="text-gray-600 mb-6">Get instant data for your mobile devices</p>
+        <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Buy Data</h3>
+        <p className="text-gray-600 text-sm md:text-base mb-4 md:mb-6">Get instant data for your mobile devices</p>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm md:text-base"
         >
           Start Purchasing
         </button>
@@ -190,22 +190,22 @@ const DataPurchase = ({ isDarkMode }) => {
         stickyHeader={
           <div className="bg-white">
             {/* Progress Header */}
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between mb-3">
+            <div className="px-3 md:px-4 py-2 md:py-3">
+              <div className="flex items-center justify-between mb-2 md:mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <FaWifi className="text-white text-sm" />
+                  <div className="w-7 h-7 md:w-8 md:h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <FaWifi className="text-white text-xs md:text-sm" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">Buy Data</h2>
+                    <h2 className="text-base md:text-lg font-bold text-gray-900">Buy Data</h2>
                     <p className="text-xs text-gray-500">Quick and easy data purchase</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                 >
-                  <span className="text-gray-500 text-sm">×</span>
+                  <span className="text-gray-500 text-xs md:text-sm">×</span>
                 </button>
               </div>
 
@@ -241,16 +241,16 @@ const DataPurchase = ({ isDarkMode }) => {
             </div>
 
             {/* Balance Card - Opay Style */}
-            <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-blue-100">
+            <div className="px-3 md:px-4 py-2 md:py-3 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="bg-white rounded-lg p-2 md:p-3 shadow-sm border border-blue-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                      <FaCreditCard className="text-white text-sm" />
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                      <FaCreditCard className="text-white text-xs md:text-sm" />
                     </div>
                     <div>
                       <p className="text-xs font-medium text-gray-600">Available Balance</p>
-                      <p className="text-xl font-bold text-gray-900">
+                      <p className="text-lg md:text-xl font-bold text-gray-900">
                         {formatNairaAmount(walletData?.balance || 0)}
                       </p>
                     </div>
@@ -272,29 +272,29 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 1: Network Selection */}
             {currentStep === 1 && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Choose Your Network</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Your Network</h3>
                   <p className="text-sm text-gray-600">Select your mobile network provider</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                <div className="grid grid-cols-2 gap-2 md:gap-3 max-w-sm mx-auto">
                   {availableNetworks.map(network => (
                     <button
                       key={network}
                       onClick={() => {
                         handleNetworkChange(network);
                       }}
-                      className={`p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
+                      className={`p-3 md:p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
                         selectedNetwork === network
                           ? 'border-blue-500 bg-blue-50 shadow-md'
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
                     >
                       <div className="text-center">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <FaSignal className="text-blue-600 text-lg" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
+                          <FaSignal className="text-blue-600 text-base md:text-lg" />
                         </div>
-                        <div className="text-lg font-bold text-gray-900 mb-1">
+                        <div className="text-base md:text-lg font-bold text-gray-900 mb-1">
                           {network.toUpperCase()}
                         </div>
                         <div className="text-xs text-gray-500">
@@ -306,7 +306,7 @@ const DataPurchase = ({ isDarkMode }) => {
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="mt-6 flex justify-end">
+                <div className="mt-4 md:mt-6 flex justify-end">
                   <button
                     onClick={() => {
                       if (selectedNetwork) {
@@ -315,7 +315,7 @@ const DataPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!selectedNetwork}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-4 md:px-6 py-2 md:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>

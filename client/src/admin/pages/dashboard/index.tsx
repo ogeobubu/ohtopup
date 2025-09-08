@@ -75,19 +75,19 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 md:p-4 space-y-4 md:space-y-6">
       {/* Welcome Section */}
-      <div className="bg-green-600 rounded-lg p-4 text-white">
-        <h1 className="text-xl md:text-2xl font-bold mb-1">
+      <div className="bg-green-600 rounded-lg p-4 md:p-6 text-white">
+        <h1 className="text-lg md:text-xl lg:text-2xl font-bold mb-1 md:mb-2">
           Admin Dashboard 👋
         </h1>
-        <p className="text-green-100 text-sm">
+        <p className="text-green-100 text-sm md:text-base">
           Monitor your platform's performance and manage operations.
         </p>
       </div>
 
       {/* Analytics Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card
           title="Total Transactions"
           count={analytic?.overall?.totalTransactions || 0}
@@ -115,16 +115,16 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 md:p-4">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 md:mb-3">
           Quick Actions
         </h2>
         <Shortcut />
       </div>
 
       {/* Analytics Chart Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 md:p-4">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 md:mb-3">
           Transaction Analytics
         </h2>
         <div className="w-full overflow-x-auto">
@@ -133,37 +133,37 @@ const Dashboard = () => {
       </div>
 
       {/* Additional Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 md:p-4">
+          <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-2">
             User Management
           </h3>
-          <p className="text-xl font-bold text-blue-600 mb-1">
+          <p className="text-lg md:text-xl font-bold text-blue-600 mb-1">
             {usersData?.totalCount || 0}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
             Total registered users
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 md:p-4">
+          <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-2">
             System Status
           </h3>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-green-600 font-medium text-sm">All Systems Operational</span>
+            <span className="text-green-600 font-medium text-xs md:text-sm">All Systems Operational</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 md:p-4 sm:col-span-2 lg:col-span-1">
+          <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white mb-2">
             Revenue Today
           </h3>
-          <p className="text-xl font-bold text-green-600 mb-1">
+          <p className="text-lg md:text-xl font-bold text-green-600 mb-1">
             ₦{analytic?.overall?.totalRevenue?.toLocaleString() || '0'}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
             Total revenue generated
           </p>
         </div>
