@@ -167,7 +167,7 @@ const getVariations = async (req, res) => {
 };
 
 const toggleVariation = async (req, res) => {
-  const { variation_code, serviceID } = req.query;
+  const { variation_code, serviceID } = req.body;
 
   if (!variation_code || !serviceID) {
     return res.status(400).json({ 

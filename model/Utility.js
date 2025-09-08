@@ -85,6 +85,33 @@ const utilitySchema = new mongoose.Schema(
      },
      localErrorMessage: {
          type: String,
+     },
+     // Enhanced fields for data purchases
+     provider: {
+       type: String, // 'vtpass' or 'clubkonnect'
+     },
+     network: {
+       type: String, // 'mtn', 'glo', 'airtel', '9mobile'
+     },
+     dataPlan: {
+       type: String, // Data plan details (e.g., '500MB', '1GB')
+     },
+     dataAmount: {
+       type: String, // Formatted data amount (e.g., '500MB', '1.5GB')
+     },
+     validity: {
+       type: String, // Plan validity period
+     },
+     providerStatus: {
+       type: String, // Original status from provider API
+     },
+     providerResponse: {
+       type: mongoose.Schema.Types.Mixed, // Full provider API response
+     },
+     transactionType: {
+       type: String,
+       enum: ['data', 'airtime', 'cable', 'electricity'],
+       default: 'data'
      }
   },
   { timestamps: true }

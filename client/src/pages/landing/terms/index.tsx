@@ -12,6 +12,7 @@ const Terms = () => {
         heading="Terms and Conditions"
         subheading=""
         buttonText="Explore More"
+        secondButtonText=""
         href=""
       />
       <div className="container mx-auto py-20 px-4">
@@ -66,12 +67,25 @@ const Terms = () => {
           We reserve the right to modify these Terms and Conditions at any time. Changes will be effective immediately upon posting on the website. Your continued use of the services constitutes acceptance of the revised terms.
         </p>
 
-        <h2 className="text-2xl font-semibold mb-4">10. Governing Law</h2>
+        <h2 className="text-2xl font-semibold mb-4">10. Referral Program</h2>
+        <p className="mb-4 text-sm md:text-base">
+          OhTopUp offers a referral program where users can earn rewards by referring new users to our platform. By participating in the referral program, you agree to the following terms:
+        </p>
+        <ul className="list-disc list-inside mb-4 text-sm md:text-base space-y-2">
+          <li>Referrers earn 500 points when their referred users make their first deposit of ₦1,000 or more</li>
+          <li>Referral codes are unique and must be used during the signup process</li>
+          <li>Only the first qualifying deposit (₦1,000+) per referred user will trigger the reward</li>
+          <li>Points earned through referrals can be redeemed for cash equivalent based on our redemption policy</li>
+          <li>Referral rewards are subject to verification and may be withheld if fraudulent activity is suspected</li>
+          <li>OhTopUp reserves the right to modify or terminate the referral program at any time</li>
+        </ul>
+
+        <h2 className="text-2xl font-semibold mb-4">11. Governing Law</h2>
         <p className="mb-4 text-sm md:text-base">
           These Terms and Conditions are governed by the laws of Nigeria. Any disputes will be resolved in accordance with applicable Nigerian law.
         </p>
 
-        <h2 className="text-2xl font-semibold mb-4">11. Contact Us</h2>
+        <h2 className="text-2xl font-semibold mb-4">12. Contact Us</h2>
         <p className="mb-4 text-sm md:text-base">
           For any questions or concerns regarding these Terms and Conditions, please contact us at <a href="mailto:ohtopup@gmail.com" className="text-blue-500">ohtopup@gmail.com</a>.
         </p>

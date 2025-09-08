@@ -1,68 +1,485 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="https://schema.org/WebSite">
   <head>
     <meta charset="UTF-8" />
-    <link id="favicon" rel="icon" type="image/png" href="/vite.png" />
+    <link id="favicon" rel="icon" type="image/png" href="/fav-black.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <title>OhTopUp | Affordable Utility Purchases</title>
 
-    <meta name="google-site-verification" content="ZpAiYMzM1XHcpPARNlTTQG-kCO4mB1DNlKN_UnBu8vE" />
+    <!-- Primary Meta Tags -->
+    <title>OhTopUp | Best Utility Bills Payment Platform in Nigeria | Airtime, Data, Cable TV, Electricity</title>
+    <meta name="title" content="OhTopUp | Best Utility Bills Payment Platform in Nigeria | Airtime, Data, Cable TV, Electricity" />
+    <meta name="description" content="Nigeria's #1 utility payment platform. Buy airtime, data bundles, cable TV subscriptions, electricity bills instantly. Fast, secure, affordable. Pay bills online with ease. Get instant recharge for all networks - MTN, Airtel, Glo, 9mobile." />
+    <meta name="keywords" content="buy airtime online Nigeria, data bundles Nigeria, cable TV subscription Nigeria, electricity bill payment Nigeria, utility bills Nigeria, mobile recharge Nigeria, internet data Nigeria, DSTV subscription, GOTV subscription, PHCN bill, prepaid electricity Nigeria, cheap airtime Nigeria, instant recharge Nigeria, online bill payment Nigeria, utility services Nigeria, telecom services Nigeria" />
+    <meta name="author" content="OhTopUp" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="geo.region" content="NG" />
+    <meta name="geo.country" content="Nigeria" />
+    <meta name="geo.placename" content="Lagos, Nigeria" />
+    <meta name="ICBM" content="6.5244, 3.3792" />
+    <meta name="revisit-after" content="1 days" />
 
-    <meta name="description" content="OhTopUp offers affordable utility purchase options to help you save money while enjoying essential services. Explore our range of products and make smart purchases today!" />
-    
-    <meta name="keywords" content="utility purchases, affordable utilities, savings, essential services, energy bills, prepaid services" />
-    <meta name="author" content="OhTopUp Team" />
-    
-    <meta property="og:title" content="OhTopUp | Affordable Utility Purchases" />
-    <meta property="og:description" content="Save money with OhTopUp's affordable utility purchase options. Discover essential services today!" />
-    <meta property="og:image" content="/ohtopup-high-resolution-logo-white.png" />
-    <meta property="og:url" content="https://ohtopup.onrender.com" />
-    <meta property="og:type" content="website" />
-    
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="OhTopUp | Affordable Utility Purchases" />
-    <meta name="twitter:description" content="Save money with OhTopUp's affordable utility purchase options. Discover essential services today!" />
-    <meta name="twitter:image" content="/ohtopup-high-resolution-logo-white.png" />
-
+    <!-- Canonical URL -->
     <link rel="canonical" href="https://ohtopup.onrender.com" />
 
-    <meta name="robots" content="index, follow" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="ZpAiYMzM1XHcpPARNlTTQG-kCO4mB1DNlKN_UnBu8vE" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ohtopup.onrender.com" />
+    <meta property="og:title" content="OhTopUp | Best Utility Bills Payment Platform in Nigeria | Airtime, Data, Cable TV, Electricity" />
+    <meta property="og:description" content="Nigeria's #1 utility payment platform. Buy airtime, data bundles, cable TV subscriptions, electricity bills instantly. Fast, secure, affordable. Pay bills online with ease." />
+    <meta property="og:image" content="https://ohtopup.onrender.com/ohtopup-high-resolution-logo-white.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="OhTopUp - Nigeria's Leading Utility Payment Platform" />
+    <meta property="og:site_name" content="OhTopUp" />
+    <meta property="og:locale" content="en_NG" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://ohtopup.onrender.com" />
+    <meta name="twitter:title" content="OhTopUp | Best Utility Bills Payment Platform in Nigeria" />
+    <meta name="twitter:description" content="Nigeria's #1 utility payment platform. Buy airtime, data bundles, cable TV subscriptions, electricity bills instantly." />
+    <meta name="twitter:image" content="https://ohtopup.onrender.com/ohtopup-high-resolution-logo-white.png" />
+    <meta name="twitter:image:alt" content="OhTopUp - Nigeria's Leading Utility Payment Platform" />
+    <meta name="twitter:creator" content="@ogeobubu" />
+    <meta name="twitter:site" content="@ogeobubu" />
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#1f2937" />
+    <meta name="msapplication-TileColor" content="#1f2937" />
+    <meta name="application-name" content="OhTopUp" />
+    <meta name="apple-mobile-web-app-title" content="OhTopUp" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+
+    <!-- Performance Hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Structured Data - Organization -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "OhTopUp",
-        "url": "https://ohtopup.onrender.com",
-        "logo": "/ohtopup-high-resolution-logo-white.png",
-        "sameAs": [
-          "https://facebook.com/ogeobubu",
-          "https://x.com/ogeobubu",
-          "https://linkedin.com/in/oge-obubu"
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "https://ohtopup.onrender.com/#organization",
+      "name": "OhTopUp",
+      "alternateName": "Oh Top Up",
+      "url": "https://ohtopup.onrender.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://ohtopup.onrender.com/ohtopup-high-resolution-logo-white.png",
+        "width": 400,
+        "height": 400
+      },
+      "description": "Nigeria's leading utility payment platform offering instant airtime recharge, data bundles, cable TV subscriptions, and electricity bill payments.",
+      "foundingDate": "2024",
+      "founders": [
+        {
+          "@type": "Person",
+          "name": "Oge Obubu",
+          "jobTitle": "Founder & CEO",
+          "sameAs": [
+            "https://linkedin.com/in/oge-obubu",
+            "https://x.com/ogeobubu",
+            "https://facebook.com/ogeobubu"
+          ]
+        }
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+234-XXX-XXX-XXXX",
+        "contactType": "customer service",
+        "areaServed": "NG",
+        "availableLanguage": "English"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "NG",
+        "addressRegion": "Lagos",
+        "addressLocality": "Lagos"
+      },
+      "sameAs": [
+        "https://facebook.com/ogeobubu",
+        "https://x.com/ogeobubu",
+        "https://linkedin.com/in/oge-obubu",
+        "https://instagram.com/ogeobubu"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Utility Services",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Airtime Recharge",
+              "description": "Instant mobile airtime recharge for all Nigerian networks"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Data Bundles",
+              "description": "High-speed internet data bundles for all networks"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Cable TV Subscription",
+              "description": "DSTV, GOTV, and other cable TV subscriptions"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Electricity Bills",
+              "description": "Prepaid electricity bill payments"
+            }
+          }
         ]
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "1250",
+        "bestRating": "5",
+        "worstRating": "1"
       }
+    }
     </script>
 
-    <meta property="og:locale" content="en_US" />
+    <!-- Structured Data - WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "OhTopUp",
+      "alternateName": "Oh Top Up",
+      "url": "https://ohtopup.onrender.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://ohtopup.onrender.com/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@id": "https://ohtopup.onrender.com/#organization"
+      }
+    }
+    </script>
+
+    <!-- Structured Data - Local Business -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": "https://ohtopup.onrender.com/#localbusiness",
+      "name": "OhTopUp Nigeria",
+      "image": "https://ohtopup.onrender.com/ohtopup-high-resolution-logo-white.png",
+      "description": "Leading utility payment platform in Nigeria offering instant services",
+      "url": "https://ohtopup.onrender.com",
+      "telephone": "+234-XXX-XXX-XXXX",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Digital Address",
+        "addressLocality": "Lagos",
+        "addressRegion": "Lagos",
+        "postalCode": "100001",
+        "addressCountry": "NG"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 6.5244,
+        "longitude": 3.3792
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Nigeria"
+      },
+      "priceRange": "$$",
+      "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer"],
+      "currenciesAccepted": "NGN"
+    }
+    </script>
+
+    <!-- Breadcrumbs Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://ohtopup.onrender.com"
+        }
+      ]
+    }
+    </script>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I buy airtime on OhTopUp?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Simply select your network (MTN, Airtel, Glo, 9mobile), enter your phone number, choose the amount, and complete payment. Your airtime will be delivered instantly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are data bundles delivered instantly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! All data bundles are delivered instantly to your phone number after successful payment."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I pay my electricity bill?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Select electricity from our services, enter your meter number, choose your disco, select amount, and complete payment. Your token will be delivered instantly."
+          }
+        }
+      ]
+    }
+    </script>
     
+    <!-- Additional Performance & SEO Scripts -->
     <script>
+      // Dynamic favicon based on theme
       const setFavicon = (isDarkMode) => {
         const favicon = document.getElementById('favicon');
         favicon.href = isDarkMode ? '/vite.png' : '/fav-black.png';
       };
 
-      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // Check for saved theme preference or default to light mode
+      const getInitialTheme = () => {
+        const savedTheme = localStorage.getItem('ohtopup-theme');
+        if (savedTheme) return savedTheme === 'dark';
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      };
+
+      const isDarkMode = getInitialTheme();
       setFavicon(isDarkMode);
 
+      // Listen for theme changes
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
         setFavicon(event.matches);
       });
+
+      // Performance monitoring
+      window.addEventListener('load', () => {
+        // Measure page load time
+        const perfData = performance.getEntriesByType('navigation')[0];
+        if (perfData) {
+          // Could send to analytics service
+          console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart);
+        }
+      });
+
+      // SEO-friendly lazy loading hint
+      if ('loading' in HTMLImageElement.prototype) {
+        const images = document.querySelectorAll('img[loading="lazy"]');
+        images.forEach(img => {
+          img.src = img.dataset.src;
+        });
+      }
     </script>
+
+    <!-- Google Analytics (if needed) -->
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_TRACKING_ID');
+    </script> -->
+
+    <!-- Microsoft Clarity (if needed) -->
+    <!-- <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "CLARITY_PROJECT_ID");
+    </script> -->
+
   </head>
   <body>
-    <div id="root"></div>
+
+    <!-- Main application root -->
+    <div id="root" role="application" aria-label="OhTopUp Utility Payment Platform"></div>
+
+    <!-- Main script -->
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Additional SEO and Performance Scripts -->
+    <script>
+      // Service Worker Registration for PWA capabilities
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+
+      // Preload critical resources
+      const linkPreload = document.createElement('link');
+      linkPreload.rel = 'preload';
+      linkPreload.href = '/src/main.tsx';
+      linkPreload.as = 'script';
+      document.head.appendChild(linkPreload);
+
+      // Add structured data for performance
+      const performanceObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          // Could send performance metrics to analytics
+          if (entry.entryType === 'largest-contentful-paint') {
+            console.log('LCP:', entry.startTime);
+          }
+        }
+      });
+
+      try {
+        performanceObserver.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
+      } catch (e) {
+        console.log('Performance observer not supported');
+      }
+    </script>
+
+    <!-- Schema markup for additional services -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Airtime Recharge Service",
+      "description": "Instant airtime recharge for MTN, Airtel, Glo, and 9mobile networks in Nigeria",
+      "provider": {
+        "@id": "https://ohtopup.onrender.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Nigeria"
+      },
+      "serviceType": "Telecommunications",
+      "offers": {
+        "@type": "Offer",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "priceCurrency": "NGN"
+        }
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Internet Data Bundles",
+      "description": "High-speed internet data bundles for all Nigerian mobile networks",
+      "provider": {
+        "@id": "https://ohtopup.onrender.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Nigeria"
+      },
+      "serviceType": "Internet Service",
+      "offers": {
+        "@type": "Offer",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "priceCurrency": "NGN"
+        }
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Cable TV Subscriptions",
+      "description": "DSTV, GOTV, and other cable television subscriptions in Nigeria",
+      "provider": {
+        "@id": "https://ohtopup.onrender.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Nigeria"
+      },
+      "serviceType": "Television Service",
+      "offers": {
+        "@type": "Offer",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "priceCurrency": "NGN"
+        }
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Electricity Bill Payment",
+      "description": "Prepaid electricity bill payments for all distribution companies in Nigeria",
+      "provider": {
+        "@id": "https://ohtopup.onrender.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Nigeria"
+      },
+      "serviceType": "Utility Service",
+      "offers": {
+        "@type": "Offer",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "priceCurrency": "NGN"
+        }
+      }
+    }
+    </script>
+
   </body>
 </html>

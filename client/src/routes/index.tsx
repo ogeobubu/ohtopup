@@ -3,11 +3,13 @@ import Landing from "../pages/landing/home";
 import About from "../pages/landing/about";
 import Pricing from "../pages/landing/pricing";
 import Terms from "../pages/landing/terms";
+import Unsubscribe from "../pages/unsubscribe";
 import Create from "../pages/auth/create";
 import Verify from "../pages/auth/verify";
 import Login from "../pages/auth/login";
 import Forgot from "../pages/auth/forgot";
 import Reset from "../pages/auth/reset";
+import OAuthCallback from "../pages/auth/callback";
 import MainRoutes from "./mainRoutes";
 import AdminRoutes from "./adminRoutes";
 import AdminLogin from "../admin/pages/auth/login";
@@ -52,6 +54,14 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
     {
       path: "/reset",
       element: isLogin ? <Navigate to="/dashboard" /> : <Reset darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/unsubscribe",
+      element: <Unsubscribe />,
+    },
+    {
+      path: "/auth/callback",
+      element: <OAuthCallback />,
     },
   ];
 

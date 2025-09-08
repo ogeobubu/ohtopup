@@ -206,51 +206,79 @@ const AdminWalletManagement = () => {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-5">Admin Wallet Management</h1>
-      <div className="mb-3 flex gap-3 flex-wrap">
-        <Card
-          title="Total Balance"
-          count={formatNairaAmount(wallets?.totalWalletAmount)}
-          icon={FaMoneyBill}
-          bgColor="bg-blue-200"
-        />
-         <Card
-          title="VTPass Balance"
-          count={formatNairaAmount(balance?.balance)}
-          icon={FaMoneyBill}
-          bgColor="bg-blue-200"
-        />
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Wallet Management</h1>
+        <p className="text-gray-600">Manage user wallets, view transactions, and set rates</p>
       </div>
 
-      <div className="mb-3 flex md:flex-row flex-col rounded-lg border border-solid max-w-xs border-gray-300 bg-[#F7F9FB] py-1 px-1">
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Total Wallet Balance</p>
+              <p className="text-2xl font-bold">{formatNairaAmount(wallets?.totalWalletAmount)}</p>
+            </div>
+            <FaMoneyBill className="h-8 w-8 text-blue-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium">VTPass Balance</p>
+              <p className="text-2xl font-bold">{formatNairaAmount(balance?.balance)}</p>
+            </div>
+            <FaMoneyBill className="h-8 w-8 text-green-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium">ClubKonnect Balance</p>
+              <p className="text-2xl font-bold">{formatNairaAmount(balance?.clubkonnect)}</p>
+            </div>
+            <FaMoneyBill className="h-8 w-8 text-purple-200" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6 flex md:flex-row flex-col rounded-lg border border-gray-300 bg-gray-50 py-1 px-1 max-w-md">
         <button
-          className={`md:w-40 w-full py-1 px-1 font-medium transition-colors duration-300 ${
+          className={`md:w-40 w-full py-3 px-4 font-medium transition-all duration-300 rounded-lg ${
             activeTab === "Wallets"
-              ? "text-blue-500 bg-white rounded-lg w-40"
-              : "text-gray-500 hover:text-gray-800 w-40"
+              ? "bg-white text-blue-600 shadow-sm border border-blue-200"
+              : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
           }`}
           onClick={() => handleTabClick("Wallets")}
         >
+          <FaWallet className="inline mr-2 h-4 w-4" />
           Wallets
         </button>
         <button
-          className={`md:w-40 w-full py-1 px-1 font-medium transition-colors duration-300 ${
+          className={`md:w-40 w-full py-3 px-4 font-medium transition-all duration-300 rounded-lg ${
             activeTab === "Transactions"
-              ? "text-blue-500 bg-white rounded-lg w-40"
-              : "text-gray-500 hover:text-gray-800 w-40"
+              ? "bg-white text-blue-600 shadow-sm border border-blue-200"
+              : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
           }`}
           onClick={() => handleTabClick("Transactions")}
         >
+          <FaMoneyBill className="inline mr-2 h-4 w-4" />
           Transactions
         </button>
       </div>
 
-      <div className="w-full flex justify-end mb-4">
+      <div className="w-full flex justify-between items-center mb-6">
+        <div className="text-sm text-gray-600">
+          {activeTab === "Wallets" && `${wallets?.wallets?.length || 0} wallets found`}
+          {activeTab === "Transactions" && `${transactions?.transactions?.length || 0} transactions found`}
+        </div>
         <button
           onClick={openRate}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
         >
-          Set Rate
+          <FaPlus className="inline mr-2 h-4 w-4" />
+          Set Rates
         </button>
       </div>
 
@@ -267,26 +295,32 @@ const AdminWalletManagement = () => {
                 {
                   header: "Actions",
                   render: (row) => (
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-3">
                       <button
                         onClick={() =>
                           handleToggleWallet(row._id, row.isActive)
                         }
-                        className={`flex justify-center items-center rounded-full border border-solid w-6 h-6 ${
-                          row.isActive ? "border-green-500" : "border-red-500"
-                        } text-blue-500`}
+                        className={`flex justify-center items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                          row.isActive
+                            ? "bg-green-100 text-green-700 hover:bg-green-200 border border-green-300"
+                            : "bg-red-100 text-red-700 hover:bg-red-200 border border-red-300"
+                        }`}
+                        title={row.isActive ? "Disable Wallet" : "Enable Wallet"}
                       >
                         {row.isActive ? (
-                          <FaToggleOn className="text-green-500" size={15} />
+                          <FaToggleOn className="mr-1" size={14} />
                         ) : (
-                          <FaToggleOff className="text-red-500" size={15} />
+                          <FaToggleOff className="mr-1" size={14} />
                         )}
+                        {row.isActive ? "Active" : "Inactive"}
                       </button>
                       <button
                         onClick={() => openModal(row)}
-                        className="border border-solid border-green-500 flex justify-center items-center rounded-full w-6 h-6 text-green-500 hover:text-green-700"
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                        title="Add Funds"
                       >
-                        <FaWallet size={15} />
+                        <FaPlus className="mr-1" size={14} />
+                        Add Funds
                       </button>
                     </div>
                   ),
@@ -379,141 +413,330 @@ const AdminWalletManagement = () => {
         </div>
       )}
 
-      <Modal
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        title={
-          isCreatingWallet
-            ? `Create Wallet for ${selectedUser?.username}`
-            : `Add Funds to ${selectedUser?.username}`
-        }
-      >
-        <Formik
-          initialValues={{ amount: "" }}
-          validationSchema={Yup.object({
-            amount: Yup.number()
-              .required("Amount is required")
-              .positive("Amount must be positive")
-              .min(1, "Amount must be at least ₦1.00"),
-          })}
-          onSubmit={(values, { resetForm }) => {
-            if (isCreatingWallet) {
-              handleCreateWallet();
-            } else {
-              handleAddFunds(values.amount, resetForm);
-            }
-          }}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 md:p-6"
+          onClick={closeModal}
         >
-          {({ errors, touched, setFieldValue }) => (
-            <Form className="flex flex-col">
-              {!isCreatingWallet ? (
-                <>
-                  <label htmlFor="amount" className="mb-1">
-                    Enter Amount:
-                  </label>
-                  <Field
-                    name="amount"
-                    as={Textfield}
-                    placeholder="₦0.00"
-                    value={formattedAmount}
-                    onChange={(e) => handleAmountChange(e, setFieldValue)}
-                  />
-                  {errors.amount && touched.amount ? (
-                    <div className="text-red-600 text-sm">{errors.amount}</div>
-                  ) : null}
-                </>
-              ) : (
-                <p>
-                  Are you sure you want to create a wallet for{" "}
-                  {selectedUser?.username}?
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-700 dark:hover:scrollbar-thumb-gray-500 px-2 sm:px-0">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                  <FaWallet className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {isCreatingWallet ? "Create Wallet" : "Add Funds"}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {isCreatingWallet
+                    ? `Create a wallet for ${selectedUser?.username}`
+                    : `Add funds to ${selectedUser?.username}'s wallet`
+                  }
                 </p>
-              )}
-              <Button
-                type="submit"
-                className={`bg-blue-500 hover:bg-blue-600 text-white mt-3 ${
-                  loadingTransaction ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={loadingTransaction}
-              >
-                {isCreatingWallet ? "Create Wallet" : "Add Funds"}
-              </Button>
-            </Form>
-          )}
-        </Formik>
-      </Modal>
+              </div>
 
-      <Modal isOpen={isRateOpen} closeModal={closeRate} title={`Set Rates`}>
-        {loadingRates ? (
-          <p>Loading current rates...</p>
-        ) : ratesError ? (
-          <p>Error fetching rates: {ratesError.message}</p>
-        ) : (
-          <div className="mb-4">
-            <p>
-              Current Withdrawal Rate:{" "}
-              {formatNairaAmount(rates?.withdrawalRate)}
-            </p>
-            <p>Current Deposit Rate: {rates?.depositRate}%</p>
+              {/* User Details */}
+              <div className="mb-6 p-6 rounded-xl bg-gray-50">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="font-medium text-gray-600">Username</span>
+                    <span className="font-semibold text-lg text-gray-900">
+                      {selectedUser?.username}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="font-medium text-gray-600">User ID</span>
+                    <span className="font-semibold text-gray-900">
+                      {selectedUser?.userId}
+                    </span>
+                  </div>
+                  {!isCreatingWallet && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="font-medium text-gray-600">Current Balance</span>
+                      <span className="font-bold text-xl text-green-600">
+                        {formatNairaAmount(selectedUser?.balance)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Formik
+                initialValues={{ amount: "" }}
+                validationSchema={Yup.object({
+                  amount: Yup.number()
+                    .required("Amount is required")
+                    .positive("Amount must be positive")
+                    .min(1, "Amount must be at least ₦1.00"),
+                })}
+                onSubmit={(values, { resetForm }) => {
+                  if (isCreatingWallet) {
+                    handleCreateWallet();
+                  } else {
+                    handleAddFunds(values.amount, resetForm);
+                  }
+                }}
+              >
+                {({ errors, touched, setFieldValue }) => (
+                  <Form className="space-y-6 pb-8">
+                    {!isCreatingWallet && (
+                      <div>
+                        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+                          Enter Amount to Add:
+                        </label>
+                        <Field
+                          name="amount"
+                          as={Textfield}
+                          placeholder="₦0.00"
+                          value={formattedAmount}
+                          onChange={(e) => handleAmountChange(e, setFieldValue)}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        {errors.amount && touched.amount && (
+                          <div className="text-red-600 text-sm mt-1">{errors.amount}</div>
+                        )}
+                      </div>
+                    )}
+
+                    {isCreatingWallet && (
+                      <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                        <div className="flex items-start">
+                          <svg className="h-5 w-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                          <div>
+                            <p className="text-sm font-medium text-amber-800">
+                              Confirmation Required
+                            </p>
+                            <p className="text-sm mt-1 text-amber-700">
+                              This will create a new wallet for {selectedUser?.username}. This action cannot be undone.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Form>
+                )}
+              </Formik>
+            </div>
+
+            {/* Fixed Action Buttons at Bottom */}
+            <div className="flex-shrink-0 pt-4 border-t border-gray-200 mt-4">
+              <Formik
+                initialValues={{ amount: "" }}
+                validationSchema={Yup.object({
+                  amount: Yup.number()
+                    .required("Amount is required")
+                    .positive("Amount must be positive")
+                    .min(1, "Amount must be at least ₦1.00"),
+                })}
+                onSubmit={(values, { resetForm }) => {
+                  if (isCreatingWallet) {
+                    handleCreateWallet();
+                  } else {
+                    handleAddFunds(values.amount, resetForm);
+                  }
+                }}
+              >
+                {({ handleSubmit }) => (
+                  <form onSubmit={handleSubmit}>
+                    {/* Action Buttons */}
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={closeModal}
+                        disabled={loadingTransaction}
+                        className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loadingTransaction}
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
+                      >
+                        {loadingTransaction ? (
+                          <span className="flex items-center justify-center">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center">
+                            <FaPlus className="h-5 w-5 mr-2" />
+                            {isCreatingWallet ? "Create Wallet" : "Add Funds"}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </Formik>
+            </div>
           </div>
-        )}
-        <Formik
-          initialValues={{ withdrawalRate: "", depositRate: "" }}
-          validationSchema={Yup.object({
-            withdrawalRate: Yup.number()
-              .required("Withdrawal rate is required")
-              .positive("Rate must be positive"),
-            depositRate: Yup.number()
-              .required("Deposit rate is required")
-              .positive("Rate must be positive"),
-          })}
-          onSubmit={async (values) => {
-            try {
-              await setRates(values);
-              toast.success("Rates updated successfully!");
-              refetchRates();
-              closeRate();
-            } catch (error) {
-              toast.error("Error updating rates. Please try again.");
-            }
-          }}
+        </div>
+      )}
+
+      {isRateOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 md:p-6"
+          onClick={closeRate}
         >
-          {({ handleSubmit }) => (
-            <Form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block mb-1">Withdrawal Rate:</label>
-                <Field
-                  name="withdrawalRate"
-                  as={Textfield}
-                  placeholder="Enter withdrawal rate"
-                />
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-700 dark:hover:scrollbar-thumb-gray-500 px-2 sm:px-0">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full mb-4">
+                  <FaMoneyBill className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Set Transaction Rates
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Configure withdrawal and deposit rates for the system
+                </p>
               </div>
-              <div className="mb-4">
-                <label className="block mb-1">Deposit Rate:</label>
-                <Field
-                  name="depositRate"
-                  as={Textfield}
-                  placeholder="Enter deposit rate"
-                />
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={closeRate}
-                  className="mr-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Submit
-                </button>
-              </div>
-            </Form>
-          )}
-        </Formik>
-      </Modal>
+
+              {/* Current Rates */}
+              {loadingRates ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                  <p className="text-gray-600 mt-2">Loading current rates...</p>
+                </div>
+              ) : ratesError ? (
+                <div className="p-4 rounded-lg bg-red-50 border border-red-200 mb-6">
+                  <p className="text-red-800">Error fetching rates: {ratesError.message}</p>
+                </div>
+              ) : (
+                <div className="mb-6 p-6 rounded-xl bg-gray-50">
+                  <h4 className="font-semibold text-gray-900 mb-4">Current Rates</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                      <span className="font-medium text-gray-600">Withdrawal Rate</span>
+                      <span className="font-semibold text-lg text-gray-900">
+                        {formatNairaAmount(rates?.withdrawalRate)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="font-medium text-gray-600">Deposit Rate</span>
+                      <span className="font-semibold text-lg text-gray-900">
+                        {rates?.depositRate}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <Formik
+                initialValues={{ withdrawalRate: "", depositRate: "" }}
+                validationSchema={Yup.object({
+                  withdrawalRate: Yup.number()
+                    .required("Withdrawal rate is required")
+                    .positive("Rate must be positive"),
+                  depositRate: Yup.number()
+                    .required("Deposit rate is required")
+                    .positive("Rate must be positive"),
+                })}
+                onSubmit={async (values) => {
+                  try {
+                    await setRates(values);
+                    toast.success("Rates updated successfully!");
+                    refetchRates();
+                    closeRate();
+                  } catch (error) {
+                    toast.error("Error updating rates. Please try again.");
+                  }
+                }}
+              >
+                {({ handleSubmit }) => (
+                  <Form onSubmit={handleSubmit} className="space-y-6 pb-8">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        New Withdrawal Rate:
+                      </label>
+                      <Field
+                        name="withdrawalRate"
+                        as={Textfield}
+                        placeholder="Enter withdrawal rate"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        New Deposit Rate (%):
+                      </label>
+                      <Field
+                        name="depositRate"
+                        as={Textfield}
+                        placeholder="Enter deposit rate"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      />
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+
+            {/* Fixed Action Buttons at Bottom */}
+            <div className="flex-shrink-0 pt-4 border-t border-gray-200 mt-4">
+              <Formik
+                initialValues={{ withdrawalRate: "", depositRate: "" }}
+                validationSchema={Yup.object({
+                  withdrawalRate: Yup.number()
+                    .required("Withdrawal rate is required")
+                    .positive("Rate must be positive"),
+                  depositRate: Yup.number()
+                    .required("Deposit rate is required")
+                    .positive("Rate must be positive"),
+                })}
+                onSubmit={async (values) => {
+                  try {
+                    await setRates(values);
+                    toast.success("Rates updated successfully!");
+                    refetchRates();
+                    closeRate();
+                  } catch (error) {
+                    toast.error("Error updating rates. Please try again.");
+                  }
+                }}
+              >
+                {({ handleSubmit }) => (
+                  <form onSubmit={handleSubmit}>
+                    {/* Action Buttons */}
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={closeRate}
+                        className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-medium transition-all duration-200 hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-600 hover:from-purple-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
+                      >
+                        <FaPlus className="inline mr-2 h-4 w-4" />
+                        Update Rates
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </Formik>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

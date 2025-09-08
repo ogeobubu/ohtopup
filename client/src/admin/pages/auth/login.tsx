@@ -7,7 +7,7 @@ import * as Yup from "yup"; // For validation
 import Logo from "../../../components/ui/logo";
 import Textarea from "../../../components/ui/forms/input";
 import Button from "../../../components/ui/forms/button";
-import { loginAdmin } from "../../api";
+import { loginAdmin } from "../../../admin/api";
 
 const storeToken = (token) => {
   localStorage.setItem('ohtopup-admin-token', token);
@@ -18,10 +18,13 @@ const Login = ({ darkMode, toggleDarkMode }) => {
   const mutation = useMutation({
     mutationFn: loginAdmin,
     onSuccess: (data) => {
-      storeToken(data.token)
-      toast.success("Login successful!");
-      navigate("/admin/dashboard")
-      console.log("Login successful", data);
+      if (data.token) {
+        storeToken(data.token);
+        toast.success("Login successful!");
+        navigate("/admin/dashboard");
+      } else {
+        toast.error("Login failed: No token received");
+      }
     },
     onError: (error) => {
       toast.error("Login failed: " + error);

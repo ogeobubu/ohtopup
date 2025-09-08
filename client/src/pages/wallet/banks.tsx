@@ -3,11 +3,31 @@ import { FaBuilding } from "react-icons/fa";
 import Modal from "../../admin/components/modal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUser, deleteBank } from "../../api";
-import { toast } from "react-toastify"; // Import toast
+import { toast } from "react-toastify";
 
-const Banks = ({ user, handleShowBanks, openModal }) => {
+// TypeScript interfaces
+interface BankAccount {
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
+  bankCode: string;
+}
+
+interface User {
+  _id: string;
+  email: string;
+  bankAccounts?: BankAccount[];
+}
+
+interface BanksProps {
+  user: User;
+  handleShowBanks: () => void;
+  openModal: () => void;
+}
+
+const Banks: React.FC<BanksProps> = ({ user, handleShowBanks, openModal }) => {
   const queryClient = useQueryClient();
-  const [selectedBank, setSelectedBank] = useState(null);
+  const [selectedBank, setSelectedBank] = useState<BankAccount | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
 
@@ -26,7 +46,7 @@ const Banks = ({ user, handleShowBanks, openModal }) => {
       await deleteBank(accountNumber);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["user"]);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("Bank account deleted successfully!");
       closeDeleteModal();
     },

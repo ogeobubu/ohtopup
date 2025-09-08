@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Block access to admin areas
+Disallow: /admin/
+Disallow: /api/admin/
+
+# Block access to sensitive files
+Disallow: *.json
+Disallow: /api/
+
+# Allow access to CSS and JS files
+Allow: *.css
+Allow: *.js
+
+# Allow access to images
+Allow: *.png
+Allow: *.jpg
+Allow: *.jpeg
+Allow: *.svg
+Allow: *.webp
+
+# Crawl delay (optional)
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://ohtopup.onrender.com/sitemap.xml

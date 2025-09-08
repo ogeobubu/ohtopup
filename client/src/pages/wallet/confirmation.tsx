@@ -5,7 +5,17 @@ import { getUser, verifyMonnifyTransaction } from "../../api";
 import { toast } from "react-toastify";
 import { useParams, useNavigate } from "react-router-dom";
 
-const Confirmation = () => {
+interface User {
+  _id: string;
+  email: string;
+}
+
+interface VerificationResponse {
+  status: "paid" | "pending" | "failed";
+  message: string;
+}
+
+const Confirmation: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
@@ -16,13 +26,13 @@ const Confirmation = () => {
     queryFn: getUser,
   });
 
-  const { mutate, isLoading, isError, isSuccess } = useMutation({
-    mutationFn: () => verifyMonnifyTransaction(id, user?._id),
-    onSuccess: (response) => {
+  const { mutate, isPending, isError, isSuccess } = useMutation({
+    mutationFn: () => verifyMonnifyTransaction(id!, user?._id!),
+    onSuccess: (response: VerificationResponse) => {
         if(response.status === "paid") {
             setStatus("paid")
             toast.success(response.message);
-      queryClient.invalidateQueries(["wallet"]);
+      queryClient.invalidateQueries({ queryKey: ["wallet"] });
         } else if(response.status === "pending") {
             setStatus("pending")
             toast.warning(response.message);
@@ -30,9 +40,9 @@ const Confirmation = () => {
             setStatus("failed")
             toast.error(response.message);
         }
-      
+
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error("Error verifying transaction: " + error.message);
     },
   });
@@ -43,7 +53,7 @@ const Confirmation = () => {
     }
   }, [user, id, mutate]);
 
-  const verificationStatus = isLoading
+  const verificationStatus = isPending
     ? "loading"
     : isError
     ? "error"

@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUtilityTransactions, requeryTransaction } from "../../api";
-import Table from "../../components/table";
-import Chip from "../../../components/ui/chip";
-import Pagination from "../../components/pagination";
-import { formatNairaAmount } from "../../../utils";
-import { MdRefresh } from "react-icons/md";
+import TransactionTable from "../../../components/transactionTable";
+import ModernPagination from "../../../components/modernPagination";
 import { toast } from "react-toastify";
 
 const Transactions = () => {
@@ -23,7 +20,6 @@ const Transactions = () => {
     queryKey: ["transactions", currentPage, limit, activeTab, requestId],
     queryFn: () =>
       getAllUtilityTransactions(currentPage, limit, activeTab, requestId),
-    keepPreviousData: true,
   });
 
   const handleTabClick = (tab) => {
@@ -88,47 +84,11 @@ const Transactions = () => {
                 className="border border-gray-300 rounded-md p-2 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white mb-3"
               />
             </div>
-            <div className="overflow-x-auto">
-              <Table
-                columns={[
-                  {
-                    header: "Product Name",
-                    render: (row) => <p>{row.product_name}</p>,
-                  },
-                  {
-                    header: "Status",
-                    render: (row) => <Chip status={row.status} />,
-                  },
-                  {
-                    header: "Amount",
-                    render: (row) => <p>₦{row.amount.toFixed(2)}</p>,
-                  },
-                  {
-                    header: "Phone Number",
-                    render: (row) => <p>{row.phone}</p>,
-                  },
-                  {
-                    header: "Date",
-                    render: (row) => (
-                      <p>{new Date(row.createdAt).toLocaleString()}</p>
-                    ),
-                  },
-                  {
-                    header: "Action",
-                    render: (row) => row.status !== "delivered" && (
-                      <button
-                        onClick={() => handleRequery(row.requestId)}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        <MdRefresh />
-                      </button>
-                    ),
-                  },
-                ]}
-                data={data.transactions}
-              />
-            </div>
-            <Pagination
+            <TransactionTable
+              data={data.transactions}
+              onRequery={handleRequery}
+            />
+            <ModernPagination
               currentPage={currentPage}
               totalPages={data.totalPages}
               onPageChange={handlePageChange}

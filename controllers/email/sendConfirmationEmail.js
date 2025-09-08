@@ -7,6 +7,11 @@ const sendConfirmationEmail = async (email, username, confirmationCode) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    // Use TLS instead of SSL for better compatibility
+    secure: false,
+    tls: {
+      ciphers: 'SSLv3'
+    }
   });
 
   const mailOptions = {

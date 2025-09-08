@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FaUser, FaUserShield, FaUserTimes, FaEdit } from "react-icons/fa";
+import { FaUser, FaUserShield, FaUserTimes, FaEdit, FaUsers, FaChartLine, FaCalendarAlt, FaClock, FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaTrash, FaUserCheck } from "react-icons/fa";
 import Select from "react-select";
 import Table from "../../components/table";
 import Pagination from "../../components/pagination";
@@ -9,6 +9,8 @@ import { getAllUsers, updateUser, getUserAnalytics } from "../../api";
 import { setUsers, updateAdminRedux } from "../../../actions/adminActions";
 import Card from "./card";
 import Modal from "../../components/modal";
+import { formatNairaAmount } from "../../../utils";
+import { toast } from "react-toastify";
 
 const UserManagement = () => {
   const users = useSelector((state) => state.admin.users);
@@ -86,170 +88,314 @@ const UserManagement = () => {
 
   const columns = [
     {
-      header: "Name",
+      header: "User",
       render: (user) => (
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-300 mr-2 flex items-center justify-center">
-            <span className="text-gray-600 font-medium">
-              {user?.username?.charAt(0).toUpperCase()}
-            </span>
+        <div className="flex items-center space-x-3">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+            user?.role === 'admin' ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'
+          }`}>
+            {user?.username?.charAt(0).toUpperCase()}
           </div>
-          <span className="text-left">{user?.username}</span>
+          <div>
+            <div className="font-medium text-gray-900">{user?.username}</div>
+            <div className="text-sm text-gray-500">{user?.email}</div>
+          </div>
         </div>
       ),
     },
-    { header: "Email", render: (user) => user?.email },
-    { header: "Source", render: (user) => <span className="capitalize">{user?.source}</span> },
-    { header: "Role", render: (user) => <span className={`inline-flex items-center px-3 py-[0.5px] rounded-full text-white ${user?.role === 'admin' ? 'bg-green-500' : 'bg-blue-500'}`}>
-    {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
-  </span> },
+    {
+      header: "Role & Status",
+      render: (user) => (
+        <div className="space-y-1">
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+            user?.role === 'admin'
+              ? 'bg-orange-100 text-orange-800'
+              : 'bg-blue-100 text-blue-800'
+          }`}>
+            <FaUserShield className="mr-1 h-3 w-3" />
+            {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
+          </span>
+          <div className="flex items-center">
+            <div className={`w-2 h-2 rounded-full mr-2 ${
+              user?.isDeleted ? 'bg-red-500' : 'bg-green-500'
+            }`}></div>
+            <span className={`text-xs ${user?.isDeleted ? 'text-red-600' : 'text-green-600'}`}>
+              {user?.isDeleted ? 'Deleted' : 'Active'}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Source",
+      render: (user) => (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+          {user?.source || 'Direct'}
+        </span>
+      ),
+    },
+    {
+      header: "Registration Date",
+      render: (user) => (
+        <div className="text-sm text-gray-600">
+          {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+        </div>
+      ),
+    },
     {
       header: "Actions",
       render: (user) => (
         <div className="flex space-x-2">
           <button
             onClick={() => handleEditUser(user)}
-            className="border border-solid border-green-500 flex justify-center items-center rounded-full w-6 h-6 text-green-500 hover:text-green-700"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            title="Edit User"
           >
-            <FaEdit size={15} />
+            <FaEdit className="inline h-3 w-3" />
           </button>
           <button
-            onClick={() => console.log("Disable user with ID:", user._id)}
-            className="border border-solid border-red-500 flex justify-center items-center rounded-full w-6 h-6 text-red-500 hover:text-red-700"
+            onClick={() => handleToggleDelete(user)}
+            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+              user?.isDeleted
+                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                : 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'
+            }`}
+            title={user?.isDeleted ? 'Restore User' : 'Delete User'}
           >
-            <FaUserTimes size={15} />
+            {user?.isDeleted ? <FaUserCheck className="inline h-3 w-3" /> : <FaUserTimes className="inline h-3 w-3" />}
           </button>
         </div>
       ),
     },
   ];
 
+  // Calculate additional analytics
+  const activeUsers = analyticsData?.totalUsers - (analyticsData?.totalDeletedUsers || 0);
+  const adminUsers = analyticsData?.usersByRole.find((role) => role._id === "admin")?.count || 0;
+  const regularUsers = analyticsData?.totalUsers - adminUsers;
+  const deletedUsers = analyticsData?.totalDeletedUsers || 0;
+
   return (
     <div className="my-5 md:px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card
-          title="Registered Users"
-          count={analyticsData?.totalUsers || 0}
-          icon={FaUser}
-          bgColor="bg-blue-200"
-        />
-        <Card
-          title="Registered Admins"
-          count={
-            analyticsData?.usersByRole.find((role) => role._id === "admin")
-              ?.count || 0
-          }
-          icon={FaUserShield}
-          bgColor="bg-green-200"
-        />
-        <Card
-          title="Deleted Users"
-          count={analyticsData?.totalDeletedUsers || 0}
-          icon={FaUserTimes}
-          bgColor="bg-red-200"
-        />
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
+        <p className="text-gray-600">Manage and monitor all users in the system</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between my-4 gap-2">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className="border border-gray-300 rounded p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white flex-grow"
-        />
-        <div className="flex md:flex-row flex-col gap-2 items-center">
+      {/* Enhanced Analytics Cards */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Total Users</p>
+              <p className="text-2xl font-bold">{analyticsData?.totalUsers || 0}</p>
+            </div>
+            <FaUsers className="h-8 w-8 text-blue-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium">Active Users</p>
+              <p className="text-2xl font-bold">{activeUsers || 0}</p>
+            </div>
+            <FaUserCheck className="h-8 w-8 text-green-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium">Regular Users</p>
+              <p className="text-2xl font-bold">{regularUsers || 0}</p>
+            </div>
+            <FaUser className="h-8 w-8 text-purple-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-100 text-sm font-medium">Admins</p>
+              <p className="text-2xl font-bold">{adminUsers || 0}</p>
+            </div>
+            <FaUserShield className="h-8 w-8 text-orange-200" />
+          </div>
+        </div>
+      </div>
+
+      {/* Secondary Analytics Row */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-r from-red-500 to-red-600 p-4 rounded-lg shadow-md text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-100 text-sm font-medium">Deleted Users</p>
+              <p className="text-xl font-bold">{deletedUsers || 0}</p>
+            </div>
+            <FaUserTimes className="h-6 w-6 text-red-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-4 rounded-lg shadow-md text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-indigo-100 text-sm font-medium">Users This Month</p>
+              <p className="text-xl font-bold">{analyticsData?.usersThisMonth || 0}</p>
+            </div>
+            <FaCalendarAlt className="h-6 w-6 text-indigo-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 p-4 rounded-lg shadow-md text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-teal-100 text-sm font-medium">Active Rate</p>
+              <p className="text-xl font-bold">
+                {analyticsData?.totalUsers > 0
+                  ? Math.round(((activeUsers || 0) / analyticsData.totalUsers) * 100)
+                  : 0}%
+              </p>
+            </div>
+            <FaChartLine className="h-6 w-6 text-teal-200" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <div className="flex items-center space-x-4 flex-1">
+          <div className="text-sm text-gray-600">
+            {usersData?.users?.length || 0} users found
+          </div>
+          
+        </div>
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by name or email"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+            />
+            <FaUsers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          </div>
           <Select
             options={[
-              { value: "", label: "All" },
+              { value: "", label: "All Roles" },
               { value: "admin", label: "Admin" },
               { value: "user", label: "User" },
             ]}
             value={filter}
             onChange={handleFilterChange}
-            className="w-full sm:w-40"
-            placeholder="Filter by role"
+            className="w-32"
+            placeholder="Role"
             styles={{
               control: (base) => ({
                 ...base,
-                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
-                borderColor: isDarkMode ? "#4a5568" : "#d1d5db",
-                color: isDarkMode ? "#cbd5e0" : "#000000",
+                minHeight: '38px',
+                borderRadius: '8px',
+                borderColor: '#d1d5db',
+                '&:hover': { borderColor: '#9ca3af' },
+                boxShadow: 'none',
+                '&:focus-within': {
+                  borderColor: '#3b82f6',
+                  boxShadow: '0 0 0 1px #3b82f6'
+                }
               }),
               placeholder: (base) => ({
                 ...base,
-                color: isDarkMode ? "#a0aec0" : "#9ca3af",
+                color: '#9ca3af',
+                fontSize: '14px'
               }),
               singleValue: (base) => ({
                 ...base,
-                color: isDarkMode ? "#cbd5e0" : "#000000",
+                color: '#374151',
+                fontSize: '14px'
               }),
               menu: (base) => ({
                 ...base,
-                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
+                borderRadius: '8px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
               }),
-              option: (base, { isFocused }) => ({
+              option: (base, { isFocused, isSelected }) => ({
                 ...base,
-                backgroundColor: isFocused
-                  ? isDarkMode
-                    ? "#4a5568"
-                    : "#e5f3ff"
-                  : isDarkMode
-                  ? "#2d3748"
-                  : "#ffffff",
-                color: isDarkMode ? "#cbd5e0" : "#000000",
-              }),
+                backgroundColor: isSelected ? '#3b82f6' : isFocused ? '#eff6ff' : 'white',
+                color: isSelected ? 'white' : '#374151',
+                fontSize: '14px'
+              })
             }}
           />
           <Select
             options={[
-              { value: "all", label: "All" },
-              { value: "active", label: "Active User" },
-              { value: "deleted", label: "Deleted User" },
+              { value: "all", label: "All Status" },
+              { value: "active", label: "Active" },
+              { value: "deleted", label: "Deleted" },
             ]}
             onChange={handleStatusChange}
-            className="w-full sm:w-40"
-            placeholder="Filter by status"
+            className="w-32"
+            placeholder="Status"
             styles={{
               control: (base) => ({
                 ...base,
-                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
-                borderColor: isDarkMode ? "#4a5568" : "#d1d5db",
-                color: isDarkMode ? "#cbd5e0" : "#000000",
+                minHeight: '38px',
+                borderRadius: '8px',
+                borderColor: '#d1d5db',
+                '&:hover': { borderColor: '#9ca3af' },
+                boxShadow: 'none',
+                '&:focus-within': {
+                  borderColor: '#3b82f6',
+                  boxShadow: '0 0 0 1px #3b82f6'
+                }
               }),
               placeholder: (base) => ({
                 ...base,
-                color: isDarkMode ? "#a0aec0" : "#9ca3af",
+                color: '#9ca3af',
+                fontSize: '14px'
               }),
               singleValue: (base) => ({
                 ...base,
-                color: isDarkMode ? "#cbd5e0" : "#000000",
+                color: '#374151',
+                fontSize: '14px'
               }),
               menu: (base) => ({
                 ...base,
-                backgroundColor: isDarkMode ? "#2d3748" : "#ffffff",
+                borderRadius: '8px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
               }),
-              option: (base, { isFocused }) => ({
+              option: (base, { isFocused, isSelected }) => ({
                 ...base,
-                backgroundColor: isFocused
-                  ? isDarkMode
-                    ? "#4a5568"
-                    : "#e5f3ff"
-                  : isDarkMode
-                  ? "#2d3748"
-                  : "#ffffff",
-                color: isDarkMode ? "#cbd5e0" : "#000000",
-              }),
+                backgroundColor: isSelected ? '#3b82f6' : isFocused ? '#eff6ff' : 'white',
+                color: isSelected ? 'white' : '#374151',
+                fontSize: '14px'
+              })
             }}
           />
+          <button
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            onClick={() => toast.info("Export functionality coming soon!")}
+          >
+            <FaDownload className="inline mr-2 h-4 w-4" />
+            Export
+          </button>
         </div>
       </div>
 
       {isUsersLoading || isAnalyticsLoading ? (
-        <p>Loading...</p>
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="bg-white rounded-full p-6 shadow-lg mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Users</h3>
+          <p className="text-gray-600 text-center max-w-md">
+            Please wait while we fetch the user data and analytics...
+          </p>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <Table columns={columns} data={users} />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table columns={columns} data={users} />
+          </div>
         </div>
       )}
 
@@ -259,44 +405,146 @@ const UserManagement = () => {
         onPageChange={setCurrentPage}
       />
 
-      <Modal
-        isOpen={isOpen}
-        closeModal={toggleModal}
-        title="Update User"
-        isDarkMode={isDarkMode}
-      >
-        <div className="p-4 bg-blue-100 rounded-md">
-          <div className="flex justify-between items-center w-full">
-            <div className="flex flex-col gap-1">
-              <span className="dark:text-gray-600">Delete User</span>
-              <small className="text-sm text-gray-500">
-                You can delete/undelete this user.
-              </small>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 md:p-6"
+          onClick={toggleModal}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-700 dark:hover:scrollbar-thumb-gray-500 px-2 sm:px-0 pb-8">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full mb-4">
+                <FaUser className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {currentUser?.isDeleted ? 'Restore User' : 'Delete User'}
+              </h3>
+              <p className="text-sm text-gray-600">
+                Manage user account status for {currentUser?.username}
+              </p>
             </div>
-            <div>
-              <label className="flex items-center cursor-pointer">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    checked={currentUser?.isDeleted || false}
-                    onChange={handleToggleDelete}
-                    disabled={mutation.isLoading}
-                  />
-                  <div className="block bg-gray-300 w-14 h-8 rounded-full"></div>
-                  <div
-                    className={`absolute left-1 top-1 w-6 h-6 rounded-full transition-transform duration-200 ${
-                      currentUser?.isDeleted
-                        ? "transform translate-x-full bg-green-500"
-                        : "bg-white"
-                    }`}
-                  ></div>
+
+            {/* User Details */}
+            <div className="mb-6 p-6 rounded-xl bg-gray-50">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span className="font-medium text-gray-600">Username</span>
+                  <span className="font-semibold text-lg text-gray-900">
+                    {currentUser?.username}
+                  </span>
                 </div>
-              </label>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span className="font-medium text-gray-600">Email</span>
+                  <span className="font-semibold text-gray-900">
+                    {currentUser?.email}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span className="font-medium text-gray-600">Role</span>
+                  <span className={`font-semibold ${
+                    currentUser?.role === 'admin' ? 'text-orange-600' : 'text-blue-600'
+                  }`}>
+                    {currentUser?.role?.charAt(0).toUpperCase() + currentUser?.role?.slice(1)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="font-medium text-gray-600">Current Status</span>
+                  <span className={`font-semibold ${
+                    currentUser?.isDeleted ? 'text-red-600' : 'text-green-600'
+                  }`}>
+                    {currentUser?.isDeleted ? 'Deleted' : 'Active'}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
+
+            {/* Action Description */}
+            <div className={`mb-6 p-4 rounded-lg ${
+              currentUser?.isDeleted
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              <div className="flex items-start">
+                <div className={`h-5 w-5 rounded-full flex items-center justify-center mt-0.5 mr-3 ${
+                  currentUser?.isDeleted ? 'bg-green-500' : 'bg-red-500'
+                }`}>
+                  {currentUser?.isDeleted ? (
+                    <FaCheckCircle className="h-3 w-3 text-white" />
+                  ) : (
+                    <FaTimesCircle className="h-3 w-3 text-white" />
+                  )}
+                </div>
+                <div>
+                  <p className={`text-sm font-medium ${
+                    currentUser?.isDeleted ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    {currentUser?.isDeleted ? 'Restore User Account' : 'Delete User Account'}
+                  </p>
+                  <p className={`text-sm mt-1 ${
+                    currentUser?.isDeleted ? 'text-green-700' : 'text-red-700'
+                  }`}>
+                    {currentUser?.isDeleted
+                      ? 'This will restore the user account and allow them to access the system again.'
+                      : 'This will deactivate the user account. The user will not be able to log in until restored.'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={toggleModal}
+                disabled={mutation.isLoading}
+                className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleToggleDelete}
+                disabled={mutation.isLoading}
+                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative ${
+                  currentUser?.isDeleted
+                    ? 'bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white'
+                    : 'bg-gradient-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 text-white'
+                }`}
+              >
+                {mutation.isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    {currentUser?.isDeleted ? (
+                      <>
+                        <FaUserCheck className="h-5 w-5 mr-2" />
+                        Restore User
+                      </>
+                    ) : (
+                      <>
+                        <FaUserTimes className="h-5 w-5 mr-2" />
+                        Delete User
+                      </>
+                    )}
+                  </span>
+                )}
+              </button>
+            </div>
         </div>
-      </Modal>
+        </div>
+        </div>
+      )}
     </div>
   );
 };

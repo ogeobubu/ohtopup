@@ -24,3 +24,12 @@ dist-ssr
 *.sw?
 
 .env
+
+# Test files
+**/__tests__/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+
+sendgrid.env

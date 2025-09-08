@@ -1,17 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
-import { getDataVariationCodes } from '../../../../api';
+import { getDataVariations } from '../../../../api';
 
-const useDataVariations = (providerId) => {
+const useDataVariations = (serviceID) => {
   return useQuery({
-    queryKey: ['variations', providerId],
-    queryFn: () => providerId ? getDataVariationCodes(providerId) : Promise.resolve([]),
-    enabled: !!providerId,
+    queryKey: ['data-variations', serviceID],
+    queryFn: () => serviceID ? getDataVariations(serviceID) : Promise.resolve([]),
+    enabled: !!serviceID,
     select: (data) => {
-      return data?.data?.map((variation) => ({
+      if (!data?.variations) return [];
+
+      return data.variations.map((variation) => ({
         value: variation.variation_code,
         label: variation.name,
-        amount: Number(variation.variation_amount)
-      })) || [];
+        amount: Number(variation.variation_amount || variation.fixedPrice || 0),
+        dataAmount: variation.dataAmount,
+        validity: variation.validity,
+        type: variation.type,
+        network: variation.network,
+      }));
     }
   });
 };

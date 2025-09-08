@@ -3,6 +3,7 @@ const Wallet = require("../model/Wallet");
 const Transaction = require("../model/Transaction");
 const axios = require("axios");
 const { handleServiceError } = require("../middleware/errorHandler");
+const { createLog } = require("./systemLogController");
 
 const authService = require("../services/authService");
 const userService = require("../services/userService");
@@ -271,8 +272,25 @@ const addPoint = async (req, res, next) => {
   try {
     const updatedUser = await userService.addPointsToUser(userId, pointsToAdd);
 
+    // Log the points addition
+    await createLog(
+      'info',
+      `Points added to user: ${pointsToAdd} points added to ${updatedUser.username}`,
+      'system',
+      req.user?.id,
+      req.user?.email,
+      {
+        targetUserId: userId,
+        targetUsername: updatedUser.username,
+        pointsAdded: pointsToAdd,
+        newBalance: updatedUser.points,
+        timestamp: new Date()
+      },
+      req
+    );
+
     const user = await userService.findUserById(userId)
-    
+
     if (user) {
       const notificationTitle = "Points Added to Your Account";
       const notificationMessage = `${pointsToAdd} points have been added to your account. Your new balance is ${updatedUser.points} points.`;
@@ -303,6 +321,21 @@ const addPoint = async (req, res, next) => {
       },
     });
   } catch (error) {
+    // Log the error
+    await createLog(
+      'error',
+      `Failed to add points to user: ${error.message}`,
+      'system',
+      req.user?.id,
+      req.user?.email,
+      {
+        targetUserId: userId,
+        pointsToAdd: pointsToAdd,
+        error: error.message
+      },
+      req
+    );
+
     next(error);
   }
 };

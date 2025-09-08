@@ -28,7 +28,21 @@ const createWallet = async (req, res) => {
 const getWallet = async (req, res) => {
   try {
     const userId = req.user.id;
-    const wallet = await dbService.findWalletByUserId(userId);
+
+    // Try to find existing wallet
+    let wallet;
+    try {
+      wallet = await dbService.findWalletByUserId(userId);
+    } catch (walletError) {
+      // If wallet doesn't exist, create one
+      if (walletError.status === 404) {
+        console.log(`Creating wallet for user ${userId}`);
+        wallet = new Wallet({ userId });
+        await wallet.save();
+      } else {
+        throw walletError;
+      }
+    }
 
     try {
       walletService.checkWalletForDebit(wallet, 0);
@@ -1316,45 +1330,121 @@ const getTransactionsByUser = async (req, res) => {
   try {
     const wallet = await dbService.findWalletByUserId(userId);
 
-    const filters = {
+    // Get wallet transactions (deposits, withdrawals)
+    const walletFilters = {
       walletId: wallet._id,
     };
 
-    if (type) {
-      filters.type = type.toLowerCase();
+    if (reference) {
+      walletFilters.reference = { $regex: reference, $options: "i" };
+    }
+
+    // Get utility transactions (data, airtime, cable, electricity)
+    const utilityFilters = {
+      user: userId,
+    };
+
+    if (type && ['data', 'airtime', 'cable', 'electricity'].includes(type.toLowerCase())) {
+      utilityFilters.type = type.toLowerCase();
     }
 
     if (reference) {
-      filters.reference = { $regex: reference, $options: "i" };
+      utilityFilters.requestId = { $regex: reference, $options: "i" };
     }
 
-    const totalTransactions = await Transaction.countDocuments(filters);
-    const totalPages = Math.ceil(totalTransactions / parseInt(limit));
+    console.log('Wallet Controller - Utility query filters:', utilityFilters);
 
+    // Fetch both types of transactions
+    const [walletTransactions, utilityTransactions] = await Promise.all([
+      Transaction.find(walletFilters).sort({ createdAt: -1 }),
+      require("../model/Utility").find(utilityFilters).sort({ createdAt: -1 })
+    ]);
+
+    console.log('Wallet Controller - Raw query results:', {
+      walletTransactionsCount: walletTransactions.length,
+      utilityTransactionsCount: utilityTransactions.length,
+      utilityFilters,
+      userId,
+      sampleUtilityTransaction: utilityTransactions[0] ? {
+        id: utilityTransactions[0]._id,
+        requestId: utilityTransactions[0].requestId,
+        type: utilityTransactions[0].type,
+        product_name: utilityTransactions[0].product_name,
+        user: utilityTransactions[0].user
+      } : null
+    });
+
+    // Combine and sort all transactions by date
+    const allTransactions = [
+      ...walletTransactions.map(tx => ({
+        ...tx.toJSON(),
+        transactionType: 'wallet',
+        ...(tx.type === "withdrawal" && {
+          bankName: tx.bankName,
+          accountNumber: tx.accountNumber,
+          bankCode: tx.bankCode,
+        }),
+      })),
+      ...utilityTransactions.map(tx => ({
+        ...tx.toJSON(),
+        transactionType: 'utility',
+        // Map utility transaction fields to match wallet transaction format
+        type: tx.type,
+        amount: tx.amount,
+        status: tx.status,
+        createdAt: tx.createdAt,
+        reference: tx.requestId,
+        product_name: tx.product_name,
+        phone: tx.phone,
+        // Enhanced data purchase fields
+        ...(tx.provider && { provider: tx.provider }),
+        ...(tx.network && { network: tx.network }),
+        ...(tx.dataPlan && { dataPlan: tx.dataPlan }),
+        ...(tx.dataAmount && { dataAmount: tx.dataAmount }),
+        ...(tx.validity && { validity: tx.validity }),
+        ...(tx.transactionType && { transactionType: tx.transactionType }),
+        ...(tx.token && { token: tx.token }),
+        ...(tx.units && { units: tx.units }),
+        ...(tx.subscription_type && { subscription_type: tx.subscription_type }),
+      }))
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Apply type filter if specified (for wallet transactions only)
+    let filteredTransactions = allTransactions;
+    if (type && !['data', 'airtime', 'cable', 'electricity'].includes(type.toLowerCase())) {
+      filteredTransactions = allTransactions.filter(tx =>
+        tx.transactionType === 'wallet' && tx.type === type.toLowerCase()
+      );
+    }
+
+    // Apply pagination
+    const totalTransactions = filteredTransactions.length;
+    const totalPages = Math.ceil(totalTransactions / parseInt(limit));
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);
     const offset = (pageNumber - 1) * limitNumber;
 
-    const transactions = await Transaction.find(filters)
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limitNumber)
-      .exec();
+    const paginatedTransactions = filteredTransactions.slice(offset, offset + limitNumber);
 
-    const formattedTransactions = transactions.map((tx) => ({
-      ...tx.toJSON(),
-      ...(tx.type === "withdrawal" && {
-        bankName: tx.bankName,
-        accountNumber: tx.accountNumber,
-        bankCode: tx.bankCode,
-      }),
-    }));
+    console.log('Transaction History Debug:', {
+      totalWalletTransactions: walletTransactions.length,
+      totalUtilityTransactions: utilityTransactions.length,
+      totalCombined: allTransactions.length,
+      filteredCount: filteredTransactions.length,
+      paginatedCount: paginatedTransactions.length,
+      sampleTransaction: paginatedTransactions[0] ? {
+        type: paginatedTransactions[0].type,
+        transactionType: paginatedTransactions[0].transactionType,
+        product_name: paginatedTransactions[0].product_name,
+        status: paginatedTransactions[0].status
+      } : null
+    });
 
     res.json({
       totalTransactions,
       totalPages,
       currentPage: pageNumber,
-      transactions: formattedTransactions,
+      transactions: paginatedTransactions,
     });
   } catch (error) {
     console.error("Error fetching user transactions:", error);
@@ -1389,6 +1479,130 @@ const getBanks = async (req, res) => {
   }
 };
 
+// Get transaction details by request ID
+const getTransactionDetails = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    if (!requestId) {
+      return res.status(400).json({ message: "Request ID is required" });
+    }
+
+    let transaction = null;
+
+    // First, try to find in Utility transactions (data, airtime, cable, electricity)
+    const utilityTransaction = await require("../model/Utility").findOne({ requestId })
+      .populate('user', 'username email firstName lastName phoneNumber');
+
+    if (utilityTransaction) {
+      // Check permissions - users can only see their own transactions
+      if (userRole !== 'admin' && utilityTransaction.user._id.toString() !== userId) {
+        return res.status(403).json({ message: "Access denied. You can only view your own transactions." });
+      }
+
+      transaction = {
+        ...utilityTransaction.toJSON(),
+        transactionType: 'utility',
+        // Format for frontend consumption
+        id: utilityTransaction._id,
+        requestId: utilityTransaction.requestId,
+        serviceID: utilityTransaction.serviceID,
+        status: utilityTransaction.status,
+        type: utilityTransaction.type,
+        product_name: utilityTransaction.product_name,
+        amount: utilityTransaction.amount,
+        phone: utilityTransaction.phone,
+        revenue: utilityTransaction.revenue,
+        discount: utilityTransaction.discount,
+        commissionRate: utilityTransaction.commissionRate,
+        user: {
+          id: utilityTransaction.user._id,
+          username: utilityTransaction.user.username,
+          email: utilityTransaction.user.email,
+          firstName: utilityTransaction.user.firstName,
+          lastName: utilityTransaction.user.lastName,
+          phoneNumber: utilityTransaction.user.phoneNumber
+        },
+        transactionDate: utilityTransaction.createdAt,
+        // Enhanced fields for data purchases
+        provider: utilityTransaction.provider,
+        network: utilityTransaction.network,
+        dataPlan: utilityTransaction.dataPlan,
+        dataAmount: utilityTransaction.dataAmount,
+        validity: utilityTransaction.validity,
+        providerStatus: utilityTransaction.providerStatus,
+        token: utilityTransaction.token,
+        units: utilityTransaction.units,
+        subscription_type: utilityTransaction.subscription_type
+      };
+    } else {
+      // If not found in Utility, try wallet transactions
+      const walletTransaction = await Transaction.findOne({ reference: requestId })
+        .populate({
+          path: 'walletId',
+          populate: {
+            path: 'userId',
+            select: 'username email firstName lastName phoneNumber'
+          }
+        });
+
+      if (walletTransaction) {
+        // Check permissions - users can only see their own transactions
+        if (userRole !== 'admin' && walletTransaction.walletId.userId._id.toString() !== userId) {
+          return res.status(403).json({ message: "Access denied. You can only view your own transactions." });
+        }
+
+        transaction = {
+          ...walletTransaction.toJSON(),
+          transactionType: 'wallet',
+          // Format for frontend consumption
+          id: walletTransaction._id,
+          requestId: walletTransaction.reference,
+          serviceID: null, // Wallet transactions don't have serviceID
+          status: walletTransaction.status,
+          type: walletTransaction.type,
+          product_name: walletTransaction.type === 'deposit' ? 'Wallet Deposit' :
+                       walletTransaction.type === 'withdrawal' ? 'Wallet Withdrawal' : 'Wallet Transaction',
+          amount: walletTransaction.amount,
+          phone: null, // Wallet transactions don't have phone
+          revenue: walletTransaction.amount, // For wallet transactions, revenue = amount
+          discount: 0,
+          commissionRate: 0,
+          user: {
+            id: walletTransaction.walletId.userId._id,
+            username: walletTransaction.walletId.userId.username,
+            email: walletTransaction.walletId.userId.email,
+            firstName: walletTransaction.walletId.userId.firstName,
+            lastName: walletTransaction.walletId.lastName,
+            phoneNumber: walletTransaction.walletId.userId.phoneNumber
+          },
+          transactionDate: walletTransaction.createdAt,
+          // Wallet-specific fields
+          bankName: walletTransaction.bankName,
+          accountNumber: walletTransaction.accountNumber,
+          bankCode: walletTransaction.bankCode,
+          paymentMethod: walletTransaction.paymentMethod
+        };
+      }
+    }
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    res.status(200).json({
+      message: "Transaction details retrieved successfully",
+      transaction
+    });
+
+  } catch (error) {
+    console.error("Error fetching transaction details:", error);
+    res.status(500).json({ message: "Error fetching transaction details", error: error.message });
+  }
+};
+
 module.exports = {
   createWallet,
   getWallet,
@@ -1398,6 +1612,7 @@ module.exports = {
   toggleWalletStatus,
   getAllTransactions,
   getTransactionsByUser,
+  getTransactionDetails,
   getBanks,
   depositWalletWithPaystack,
   verifyPaystackTransaction,

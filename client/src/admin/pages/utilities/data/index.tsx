@@ -8,10 +8,13 @@ import {
   toggleData,
 } from "../../../api";
 import { Formik, Form, ErrorMessage } from "formik";
-import Button from "../../../../components/ui/forms/button";
 import { toast } from "react-toastify";
 import { AiOutlineExclamationCircle, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { FiCheck, FiX } from 'react-icons/fi';
+import mtn from '../../../../assets/mtn.svg';
+import glo from '../../../../assets/glo.svg';
+import airtel from '../../../../assets/airtel.svg';
+import nineMobile from '../../../../assets/9mobile.svg';
 
 const Data = () => {
   const queryClient = useQueryClient();
@@ -82,7 +85,8 @@ const Data = () => {
       await saveData(dataToSave);
       toast.success("Variations saved successfully!");
       setSelectedVariations([]);
-      queryClient.invalidateQueries(["getVariations", values.provider]);
+      queryClient.invalidateQueries({ queryKey: ["variations", values.provider] });
+      queryClient.invalidateQueries({ queryKey: ["getVariations", values.provider] });
     } catch (error) {
       toast.error(error.message || "Error saving variations. Please try again.");
     } finally {
@@ -100,8 +104,8 @@ const Data = () => {
     try {
       await toggleData(variation_code, serviceID);
       toast.success("Variation toggled successfully!");
-      queryClient.invalidateQueries(["variations", serviceID]);
-      queryClient.invalidateQueries(["getVariations", serviceID]);
+      queryClient.invalidateQueries({ queryKey: ["variations", serviceID] });
+      queryClient.invalidateQueries({ queryKey: ["getVariations", serviceID] });
     } catch (error) {
       toast.error(error.message || "Error toggling variation. Please try again.");
     } finally {
@@ -225,7 +229,7 @@ const Data = () => {
                             checked={
                               selectedVariations.some(
                                 (v) => v.variation_code === variation.variation_code
-                              ) || variation.isActive
+                              )
                             }
                             onChange={() => handleCheckboxChange(variation)}
                             className="form-checkbox h-5 w-5 text-green-500 focus:ring-green-400"
@@ -245,8 +249,8 @@ const Data = () => {
                   )}
                 </div>
 
-                <Button
-                  className="bg-green-600 hover:bg-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                <button
+                  className="bg-green-600 hover:bg-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed w-full py-3 px-4 rounded-md text-white font-semibold transition-colors duration-200 flex items-center justify-center"
                   type="submit"
                   disabled={isSubmitting || !formik.values.provider || selectedVariations.length === 0}
                 >
@@ -258,7 +262,7 @@ const Data = () => {
                   ) : (
                     "Save Variations"
                   )}
-                </Button>
+                </button>
               </Form>
             );
           }}

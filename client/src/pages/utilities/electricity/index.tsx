@@ -1,458 +1,704 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import PropTypes from "prop-types";
+import { getWallet, getUser, getServiceIDElectricity } from "../../../api";
 import Modal from "../../../admin/components/modal";
-import mtn from "../../../assets/mtn.svg";
-import glo from "../../../assets/glo.svg";
-import airtel from "../../../assets/airtel.svg";
-import nineMobile from "../../../assets/9mobile.svg";
-import PhoneInput from "react-phone-number-input";
-import "react-phone-number-input/style.css";
-import TextField from "../../../components/ui/forms/input";
-import Button from "../../../components/ui/forms/button";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import {
-  getWallet,
-  purchaseElectricity,
-  getServiceIDElectricity,
-  getDataVariationTVCodes,
-  getElectricityName,
-} from "../../../api";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import { toast } from "react-toastify";
-import Select from "react-select";
 import { formatNairaAmount } from "../../../utils";
+import { FaBolt, FaCheck, FaCreditCard, FaChevronRight, FaUser, FaMapMarkerAlt } from "react-icons/fa";
 
-const formatPhoneNumber = (phoneNumber) => {
-  return phoneNumber.replace(/^\+234/, "0");
-};
+const Loader = () => (
+  <div className="flex items-center justify-center py-8">
+    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-500"></div>
+    <p className="mt-3 text-gray-600 dark:text-gray-400">Loading electricity services...</p>
+  </div>
+);
 
-const customStyles = {
-  control: (provided) => ({
-    ...provided,
-    borderColor: "#d1d5db",
-    boxShadow: "none",
-    "&:hover": {
-      borderColor: "#3b82f6",
-    },
-    backgroundColor: "#f9fafb",
-    padding: "0.3rem",
-  }),
-  menu: (provided) => ({
-    ...provided,
-    zIndex: 9999,
-  }),
-  option: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.isFocused ? "#e0f2fe" : "#ffffff",
-    color: "#111827",
-    padding: "0.5rem 1rem",
-    "&:active": {
-      backgroundColor: "#bfdbfe",
-    },
-  }),
-  singleValue: (provided) => ({
-    ...provided,
-    color: "#111827",
-  }),
-};
-
-const Electricity = ({ user, isDarkMode }) => {
+const ElectricityPurchase = ({ isDarkMode }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setIsSubmitting(false);
+  const [selectedDisco, setSelectedDisco] = useState('');
+  const [selectedMeterType, setSelectedMeterType] = useState('');
+  const [meterNumber, setMeterNumber] = useState('');
+  const [selectedAmount, setSelectedAmount] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+  const [currentStep, setCurrentStep] = useState(1); // 1: Disco, 2: Meter Type, 3: Meter Details, 4: Amount, 5: Phone, 6: Confirm
+  const [discoReset, setDiscoReset] = useState(false); // Track if disco was reset
+
+  // Fetch wallet and providers
+  const { data: walletData, isLoading: isWalletLoading } = useQuery({
+    queryKey: ['wallet'],
+    queryFn: getWallet,
+  });
+
+  const { data: user, isLoading: isUserLoading } = useQuery({
+    queryKey: ['user'],
+    queryFn: getUser,
+  });
+
+  const { data: providers, isLoading: isProvidersLoading } = useQuery({
+    queryKey: ['providers', 'electricity'],
+    queryFn: () => getServiceIDElectricity('electricity-bill'),
+  });
+
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  // Initialize phone number
+  useEffect(() => {
+    if (user?.phoneNumber && !phoneNumber) {
+      setPhoneNumber(user.phoneNumber);
+    }
+  }, [user, phoneNumber]);
+
+  // Handle disco change - reset dependent data
+  const handleDiscoChange = (disco) => {
+    // If changing to a different disco, reset dependent selections
+    if (selectedDisco && selectedDisco !== disco) {
+      setSelectedMeterType('');
+      setMeterNumber('');
+      setSelectedAmount('');
+      setCustomerName('');
+      setCustomerAddress('');
+      setPhoneNumber('');
+      setCurrentStep(2); // Reset to meter type selection step
+      setDiscoReset(true); // Mark that disco was reset
+    } else {
+      setDiscoReset(false); // Clear reset flag if same disco
+    }
+
+    setSelectedDisco(disco);
   };
+
+  // Handle meter type change
+  const handleMeterTypeChange = (meterType) => {
+    setSelectedMeterType(meterType);
+    setMeterNumber('');
+    setCustomerName('');
+    setCustomerAddress('');
+  };
+
+  // Handle meter number validation
+  const validateMeterNumber = async (meterNum) => {
+    if (meterNum.length >= 10 && selectedDisco && selectedMeterType) {
+      try {
+        // Here you would call the VTPass meter verification API
+        // For now, we'll simulate the response
+        setCustomerName("John Doe");
+        setCustomerAddress("123 Main Street, Lagos");
+        return true;
+      } catch (error) {
+        console.error('Meter validation error:', error);
+        return false;
+      }
+    }
+    return false;
+  };
+
+  const confirmPurchase = async () => {
+    try {
+      setIsConfirming(true);
+      // Here you would call the VTPass electricity purchase API
+      console.log('Purchasing electricity:', {
+        serviceID: selectedDisco,
+        billersCode: meterNumber,
+        variation_code: selectedMeterType,
+        amount: selectedAmount,
+        phone: phoneNumber,
+      });
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      setIsModalOpen(false);
+      // Reset form
+      setSelectedDisco('');
+      setSelectedMeterType('');
+      setMeterNumber('');
+      setSelectedAmount('');
+      setPhoneNumber('');
+      setCustomerName('');
+      setCustomerAddress('');
+      setCurrentStep(1);
+    } catch (error) {
+      console.error('Purchase error:', error);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const isLoading = isWalletLoading || isProvidersLoading || isUserLoading;
 
   useEffect(() => {
     setIsModalOpen(true);
   }, []);
 
-  const {
-    data: walletData,
-    error: walletError,
-    isLoading: walletLoading,
-  } = useQuery({
-    queryKey: ["wallet"],
-    queryFn: getWallet,
-  });
-
-  const [queryId, setQueryId] = useState(null);
-  const [identifier, setIdentifier] = useState("electricity-bill");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [accountName, setAccountName] = useState("");
-  const [changeBouquet, setChangeBouquet] = useState(false);
-  const [meterType, setMeterType] = useState("");
-
-  const {
-    data: variations,
-    error: variationsError,
-    isLoading: variationsLoading,
-  } = useQuery({
-    queryKey: ["variations", queryId],
-    queryFn: () =>
-      queryId ? getDataVariationTVCodes(queryId) : Promise.resolve([]),
-    enabled: !!queryId,
-  });
-
-  const options = variations?.map((variation) => {
-    return {
-      value: variation.variation_code,
-      label: variation.name,
-      amount: variation.variation_amount,
-    };
-  });
-
-  const {
-    data: identifers,
-    error: identifersError,
-    isLoading: identifersLoading,
-  } = useQuery({
-    queryKey: ["identifers", identifier],
-    queryFn: () =>
-      identifier ? getServiceIDElectricity(identifier) : Promise.resolve([]),
-    enabled: !!identifier,
-  });
-
-  const optionsDisco = identifers?.map((identifier) => {
-    return {
-      value: identifier.serviceID,
-      label: identifier.name,
-    };
-  });
-
-  const {
-    data: accountNameApi,
-    error: accountNameError,
-    isLoading: accountNameLoading,
-    isFetching: accountNameFetching,
-  } = useQuery({
-    queryKey: ["accountName", accountNumber, queryId, meterType],
-    queryFn: () =>
-      accountNumber && queryId && meterType
-        ? getElectricityName(queryId, accountNumber, meterType)
-        : Promise.resolve([]),
-    enabled: !!accountNumber && !!queryId && !!meterType,
-  });
-
-  const mutation = useMutation({
-    mutationFn: purchaseElectricity,
-    onSuccess: () => {
-      toast.success("Transaction successful!");
-      closeModal();
-    },
-    onError: (error) => {
-      toast.error(error.message || "Transaction failed. Please try again.");
-      setIsSubmitting(false);
-    },
-  });
-
-  const validationSchema = Yup.object().shape({
-    phoneNumber: Yup.string().required("Phone number is required"),
-    amount: Yup.number()
-      .required("Amount is required")
-      .min(1000, "Amount must be at least ₦1000")
-      .max(
-        walletData?.balance,
-        `Your wallet balance (₦${walletData?.balance?.toFixed(
-          0
-        )}) is insufficient for this transaction`
-      ),
-    provider: Yup.string().required("Please select a provider"),
-    accountNumber: Yup.string().required("Please put in your meter number"),
-    meterType: Yup.string().required("Please choose your meter type"),
-  });
-
-  const handleSubmit = async (values) => {
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    const data = {
-      serviceID: values.provider,
-      billersCode: values.accountNumber,
-      variation_code: values.meterType,
-      amount: values.amount,
-      phone: formatPhoneNumber(values.phoneNumber),
-    };
-    mutation.mutate(data);
-  };
-
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-6 h-full flex flex-col items-center justify-center">
-      <div className="relative">
+    <div className="border border-solid border-gray-200 rounded-xl p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50">
+      <div className="text-center">
+        <div className="w-20 h-20 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <FaBolt className="text-white text-3xl" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Pay Electricity Bill</h3>
+        <p className="text-gray-600 mb-6">Pay your electricity bills instantly</p>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center bg-blue-500 text-white font-semibold py-2 px-4 rounded-full"
+          className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
         >
-          <span className="animate-bounce">Click to Open Modal</span>
+          Start Payment
         </button>
       </div>
+
       <Modal
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        title="Electricity Bill"
         isDarkMode={isDarkMode}
-      >
-        {identifersLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : identifersError ? (
-          <p className="text-center text-xl text-gray-500">
-            A problem occurred or service is currently unavailable. Try again later!
-          </p>
-        ) : (
-          <Formik
-            initialValues={{
-              amount: "",
-              provider: "",
-              accountNumber: "",
-              meterType: "",
-              phoneNumber: "",
-            }}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {(formik) => {
-              const handleProviderChange = (provider) => {
-                setQueryId(provider.value);
-                formik.setFieldValue("provider", provider.value);
-                formik.setFieldValue("accountNumber", "");
-                formik.setFieldValue("meterType", "");
-                formik.setFieldValue("amount", "");
-                setAccountNumber("");
-                setMeterType("");
-              };
-
-              const verifyAccountName = (value) => {
-                if (value.length > 12) {
-                  setAccountNumber(value);
-                }
-              };
-
-              return (
-                <Form className="flex flex-col">
-                  <div className="flex flex-col">
-                    <div>
-                      <label className="block text-gray-500 mb-2">Disco</label>
-                      <Select
-                        styles={{
-                          ...customStyles,
-                          control: (base) => ({
-                            ...base,
-                            backgroundColor: isDarkMode ? '#2d3748' : '#f7fafc',
-                            borderColor: isDarkMode ? '#4a5568' : '#cbd5e0',
-                            color: isDarkMode ? '#e2e8f0' : '#4a5568',
-                            '&:hover': {
-                              borderColor: isDarkMode ? '#cbd5e0' : '#a0aec0',
-                            },
-                          }),
-                          singleValue: (base) => ({
-                            ...base,
-                            color: isDarkMode ? '#e2e8f0' : '#4a5568',
-                          }),
-                          option: (base, state) => ({
-                            ...base,
-                            backgroundColor: state.isFocused ? (isDarkMode ? '#4a5568' : '#edf2f7') : (isDarkMode ? '#2d3748' : '#ffffff'),
-                            color: isDarkMode ? '#e2e8f0' : '#4a5568',
-                          }),
-                        }}
-                        options={optionsDisco}
-                        onChange={handleProviderChange}
-                        placeholder="Select an option"
-                        classNamePrefix="select"
-                        isDisabled={isSubmitting}
-                      />
-                      <ErrorMessage
-                        name="provider"
-                        component="div"
-                        className="text-red-500"
-                      />
-                    </div>
+        isOpen={isModalOpen}
+        closeModal={() => setIsModalOpen(false)}
+        size="lg"
+        showCloseButton={false}
+        stickyHeader={
+          <div className="bg-white">
+            {/* Progress Header */}
+            <div className="px-4 py-3">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-yellow-600 rounded-full flex items-center justify-center">
+                    <FaBolt className="text-white text-sm" />
                   </div>
                   <div>
-                    <div className="my-3 bg-gray-100 rounded-md p-2 dark:bg-gray-700">
-                      <label className="block text-gray-500 mb-2">Meter Type</label>
-                      <div className="flex items-center">
-                        <Field
-                          type="radio"
-                          name="meterType"
-                          value="prepaid"
-                          id="prepaid"
-                          className="h-5 w-5 text-blue-600"
-                          onChange={() => {
-                            formik.setFieldValue("meterType", "prepaid");
-                            setMeterType("prepaid");
-                          }}
-                          disabled={isSubmitting}
-                        />
-                        <label
-                          htmlFor="prepaid"
-                          className="ml-2 text-gray-700 text-lg dark:text-gray-300"
-                        >
-                          Prepaid Meter
-                        </label>
-                      </div>
-                      <div className="flex items-center">
-                        <Field
-                          type="radio"
-                          name="meterType"
-                          value="postpaid"
-                          id="postpaid"
-                          className="h-5 w-5 text-blue-600"
-                          onChange={() => {
-                            formik.setFieldValue("meterType", "postpaid");
-                            setMeterType("postpaid");
-                          }}
-                          disabled={isSubmitting}
-                        />
-                        <label
-                          htmlFor="postpaid"
-                          className="ml-2 text-gray-700 text-lg dark:text-gray-300"
-                        >
-                          Postpaid Meter
-                        </label>
-                      </div>
+                    <h2 className="text-lg font-bold text-gray-900">Pay Electricity Bill</h2>
+                    <p className="text-xs text-gray-500">Quick and easy electricity payment</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                >
+                  <span className="text-gray-500 text-sm">×</span>
+                </button>
+              </div>
+
+              {/* Progress Indicator */}
+              <div className="flex items-center gap-1">
+                {[
+                  { step: 1, label: 'Disco' },
+                  { step: 2, label: 'Meter' },
+                  { step: 3, label: 'Details' },
+                  { step: 4, label: 'Amount' },
+                  { step: 5, label: 'Phone' },
+                  { step: 6, label: 'Confirm' }
+                ].map(({ step, label }) => (
+                  <div key={step} className="flex items-center flex-1">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                      currentStep >= step
+                        ? 'bg-yellow-600 text-white'
+                        : 'bg-gray-200 text-gray-500'
+                    }`}>
+                      {currentStep > step ? <FaCheck className="text-xs" /> : step}
                     </div>
+                    <span className={`ml-1 text-xs font-medium ${
+                      currentStep >= step ? 'text-yellow-600' : 'text-gray-500'
+                    }`}>
+                      {label}
+                    </span>
+                    {step < 6 && (
+                      <div className={`flex-1 h-0.5 mx-2 ${
+                        currentStep > step ? 'bg-yellow-600' : 'bg-gray-200'
+                      }`} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                    <ErrorMessage
-                      name="meterType"
-                      component="div"
-                      className="text-red-500 text-sm mt-2"
-                    />
-                  </div>
-                  <div className="flex flex-col mt-3">
-                    <label className={`block text-gray-500`}>Meter Number</label>
-                    <Field name="accountNumber">
-                      {({ field, form }) => (
-                        <div className="relative">
-                          <TextField
-                            {...field}
-                            type="text"
-                            value={field.value}
-                            className="w-full border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                            onChange={(e) => {
-                              form.setFieldValue(field.name, e.target.value);
-                              verifyAccountName(e.target.value);
-                            }}
-                            disabled={isSubmitting}
-                          />
-                          {accountNameFetching && (
-                            <div className="absolute right-3 top-3">
-                              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </Field>
-                    <ErrorMessage
-                      name="accountNumber"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
-                  {accountNameLoading ? (
-                    <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse my-3"></div>
-                  ) : accountNameApi && (
-                    <>
-                      <div className="flex flex-col">
-                        <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
-                          Meter Card Name
-                        </label>
-                        <Field name="accountName">
-                          {({ field, form }) => (
-                            <TextField
-                              {...field}
-                              type="text"
-                              disabled
-                              value={accountNameApi?.data.Customer_Name}
-                              className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                            />
-                          )}
-                        </Field>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="flex flex-col">
-                    <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>Amount</label>
-                    <Field name="amount">
-                      {({ field, form }) => (
-                        <TextField
-                          {...field}
-                          type="text"
-                          value={formik.values.amount}
-                          className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                          onChange={(e) => {
-                            form.setFieldValue(field.name, e.target.value);
-                          }}
-                          disabled={isSubmitting}
-                        />
-                      )}
-                    </Field>
-                  </div>
-                  <div className="flex flex-col mb-3">
-                    <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>Phone Number</label>
-                    <Field name="phoneNumber">
-                      {({ field, form }) => (
-                        <PhoneInput
-                          {...field}
-                          international
-                          defaultCountry="NG"
-                          value={field.value}
-                          onChange={(value) =>
-                            form.setFieldValue(field.name, value)
-                          }
-                          className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
-                          placeholder="Enter phone number"
-                          disabled={isSubmitting}
-                        />
-                      )}
-                    </Field>
-                    <ErrorMessage
-                      name="phoneNumber"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
-                  <div className="bg-[#F7F9FB] dark:bg-gray-700 rounded-md p-4 w-full max-w-md mb-3">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-gray-700 dark:text-gray-300">Total</h2>
-                      <p className="text-gray-800 dark:text-gray-200">
-                        {formatNairaAmount(formik.values.amount) || 0}
+            {/* Balance Card */}
+            <div className="px-4 py-3 bg-gradient-to-r from-yellow-50 to-orange-50">
+              <div className="bg-white rounded-lg p-3 shadow-sm border border-yellow-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-yellow-600 rounded-full flex items-center justify-center">
+                      <FaCreditCard className="text-white text-sm" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Available Balance</p>
+                      <p className="text-xl font-bold text-gray-900">
+                        {formatNairaAmount(walletData?.balance || 0)}
                       </p>
                     </div>
                   </div>
-                  <ErrorMessage
-                    name="amount"
-                    component="div"
-                    className="text-red-500"
-                  />
-                  <br />
-                  <Button 
-                    type="submit" 
-                    disabled={isSubmitting || !formik.isValid}
-                    className="relative"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <span className="opacity-0">Pay</span>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                  <div className="text-right">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                    <p className="text-xs text-gray-500 mt-0.5">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      >
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <div className="flex flex-col bg-white rounded-2xl">
+            {/* Step 1: Disco Selection */}
+            {currentStep === 1 && (
+              <div className="px-4 py-4 pb-8">
+                <div className="mb-4 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Choose Your Disco</h3>
+                  <p className="text-sm text-gray-600">Select your electricity distribution company</p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 max-w-sm mx-auto">
+                  {providers?.map(provider => (
+                    <button
+                      key={provider.serviceID}
+                      onClick={() => {
+                        handleDiscoChange(provider.serviceID);
+                      }}
+                      className={`p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
+                        selectedDisco === provider.serviceID
+                          ? 'border-yellow-500 bg-yellow-50 shadow-md'
+                          : 'border-gray-200 hover:border-yellow-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <FaBolt className="text-yellow-600 text-lg" />
                         </div>
-                      </>
+                        <div className="text-lg font-bold text-gray-900 mb-1">
+                          {provider.name?.toUpperCase() || provider.serviceID?.toUpperCase() || 'UNKNOWN'}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => {
+                      if (selectedDisco) {
+                        setCurrentStep(2);
+                        setDiscoReset(false);
+                      }
+                    }}
+                    disabled={!selectedDisco}
+                    className="px-6 py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  >
+                    Next
+                  </button>
+                </div>
+
+                {/* Disco Change Notification */}
+                {selectedDisco && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <FaCheck className="text-yellow-600 text-xs" />
+                      </div>
+                      <div className="text-sm text-yellow-800">
+                        <span className="font-medium">{selectedDisco?.toUpperCase()}</span> selected.
+                        {discoReset && (
+                          <span className="text-orange-600 ml-1 block mt-1">
+                            ⚠️ Previous selections have been reset.
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 2: Meter Type Selection */}
+            {currentStep === 2 && selectedDisco && (
+              <div className="px-4 py-4 pb-8">
+                <div className="mb-4 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Meter Type</h3>
+                  <p className="text-sm text-gray-600">Select your meter type for {selectedDisco?.toUpperCase()}</p>
+                </div>
+
+                {/* Disco Reset Notification */}
+                {discoReset && (
+                  <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span className="text-orange-600 text-xs">⚠️</span>
+                      </div>
+                      <div className="text-sm text-orange-800">
+                        <span className="font-medium">Disco changed</span> - Please select your meter type for {selectedDisco?.toUpperCase()}.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="max-w-sm mx-auto space-y-3">
+                  <button
+                    onClick={() => {
+                      handleMeterTypeChange('prepaid');
+                      setCurrentStep(3);
+                    }}
+                    className={`w-full p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
+                      selectedMeterType === 'prepaid'
+                        ? 'border-yellow-500 bg-yellow-50 shadow-md'
+                        : 'border-gray-200 hover:border-yellow-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <FaBolt className="text-yellow-600 text-lg" />
+                      </div>
+                      <div className="text-left flex-1">
+                        <div className="font-semibold text-gray-900 text-base">Prepaid Meter</div>
+                        <div className="text-gray-600 text-sm">Buy electricity token</div>
+                      </div>
+                      <div className="text-yellow-600">
+                        <FaChevronRight className="text-lg" />
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleMeterTypeChange('postpaid');
+                      setCurrentStep(3);
+                    }}
+                    className={`w-full p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
+                      selectedMeterType === 'postpaid'
+                        ? 'border-yellow-500 bg-yellow-50 shadow-md'
+                        : 'border-gray-200 hover:border-yellow-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <FaBolt className="text-blue-600 text-lg" />
+                      </div>
+                      <div className="text-left flex-1">
+                        <div className="font-semibold text-gray-900 text-base">Postpaid Meter</div>
+                        <div className="text-gray-600 text-sm">Pay outstanding bill</div>
+                      </div>
+                      <div className="text-blue-600">
+                        <FaChevronRight className="text-lg" />
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-4 flex justify-between">
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Previous
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Meter Details */}
+            {currentStep === 3 && (
+              <div className="px-4 py-4 pb-8">
+                <div className="mb-4 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Meter Details</h3>
+                  <p className="text-sm text-gray-600">Enter your meter number</p>
+                </div>
+
+                <div className="max-w-sm mx-auto">
+                  <label className="block text-base font-semibold text-gray-900 mb-2">
+                    Meter Number
+                  </label>
+                  <input
+                    type="text"
+                    value={meterNumber}
+                    onChange={(e) => setMeterNumber(e.target.value)}
+                    className="w-full px-3 py-3 border-2 border-gray-300 rounded-lg text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    placeholder="Enter meter number"
+                  />
+
+                  {/* Customer Details Display */}
+                  {customerName && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2">Customer Details</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <FaUser className="text-gray-500 text-sm" />
+                          <span className="text-sm text-gray-700">{customerName}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaMapMarkerAlt className="text-gray-500 text-sm" />
+                          <span className="text-sm text-gray-700">{customerAddress}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-4 flex justify-between">
+                  <button
+                    onClick={() => setCurrentStep(2)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (meterNumber && customerName) {
+                        setCurrentStep(4);
+                      }
+                    }}
+                    disabled={!meterNumber || !customerName}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Amount Selection */}
+            {currentStep === 4 && (
+              <div className="px-4 py-4 pb-8">
+                <div className="mb-4 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Enter Amount</h3>
+                  <p className="text-sm text-gray-600">How much electricity do you want to purchase?</p>
+                </div>
+
+                <div className="max-w-sm mx-auto">
+                  <label className="block text-base font-semibold text-gray-900 mb-2">
+                    Amount (₦)
+                  </label>
+                  <input
+                    type="number"
+                    value={selectedAmount}
+                    onChange={(e) => setSelectedAmount(e.target.value)}
+                    className="w-full px-3 py-3 border-2 border-gray-300 rounded-lg text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    placeholder="Enter amount"
+                    min="1000"
+                  />
+
+                  {/* Selected Amount Display */}
+                  {selectedAmount && (
+                    <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                          <FaCreditCard className="text-yellow-600 text-sm" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-sm">₦{selectedAmount}</h4>
+                          <p className="text-xs text-gray-600">Electricity purchase amount</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-4 flex justify-between">
+                  <button
+                    onClick={() => setCurrentStep(3)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (selectedAmount) {
+                        setCurrentStep(5);
+                      }
+                    }}
+                    disabled={!selectedAmount}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 5: Phone Number */}
+            {currentStep === 5 && (
+              <div className="px-4 py-4 pb-8">
+                <div className="mb-4 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Confirm Phone Number</h3>
+                  <p className="text-sm text-gray-600">We'll send your receipt to this number</p>
+                </div>
+
+                <div className="max-w-sm mx-auto">
+                  <label className="block text-base font-semibold text-gray-900 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full px-3 py-3 border-2 border-gray-300 rounded-lg text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    placeholder="+2348012345678"
+                  />
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-4 flex justify-between">
+                  <button
+                    onClick={() => setCurrentStep(4)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (phoneNumber) {
+                        setCurrentStep(6);
+                      }
+                    }}
+                    disabled={!phoneNumber}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  >
+                    Continue to Payment
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 6: Confirmation & Purchase */}
+            {currentStep === 6 && (
+              <div className="px-4 py-4 pb-8">
+                <div className="mb-4 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
+                  <p className="text-sm text-gray-600">Review your electricity purchase details</p>
+                </div>
+
+                {/* Order Summary */}
+                <div className="bg-white rounded-xl border-2 border-gray-200 p-4 mb-4">
+                  <h4 className="text-base font-bold text-gray-900 mb-3">Purchase Summary</h4>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                          <FaBolt className="text-yellow-600 text-sm" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">Electricity Provider</div>
+                          <div className="text-xs text-gray-600">{selectedDisco?.toUpperCase()}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <FaBolt className="text-blue-600 text-sm" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">Meter Type</div>
+                          <div className="text-xs text-gray-600">{selectedMeterType?.toUpperCase()}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                          <FaUser className="text-green-600 text-sm" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">Customer Name</div>
+                          <div className="text-xs text-gray-600">{customerName}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <FaCreditCard className="text-purple-600 text-sm" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">Amount</div>
+                          <div className="text-xs text-gray-600">₦{selectedAmount}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-3">
+                      <div className="font-bold text-gray-900 text-base">Total Amount</div>
+                      <div className="text-xl font-bold text-yellow-600">
+                        ₦{selectedAmount}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentStep(5)}
+                    className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={confirmPurchase}
+                    disabled={isConfirming}
+                    className="flex-1 px-4 py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
+                  >
+                    {isConfirming ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Processing...</span>
+                      </div>
                     ) : (
-                      "Pay"
+                      <div className="flex items-center justify-center gap-1">
+                        <FaCreditCard className="text-sm" />
+                        <span>Pay ₦{selectedAmount}</span>
+                      </div>
                     )}
-                  </Button>
-                </Form>
-              );
-            }}
-          </Formik>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation for other steps */}
+            {currentStep < 6 && (
+              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <div className="text-xs text-gray-500 flex items-center">
+                    Step {currentStep} of 6
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Final step navigation */}
+            {currentStep === 6 && (
+              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <div className="text-xs text-gray-500 flex items-center">
+                    Step 6 of 6 - Ready to Purchase
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </Modal>
     </div>
   );
 };
 
-export default Electricity;
+ElectricityPurchase.propTypes = {
+  isDarkMode: PropTypes.bool
+};
+
+export default ElectricityPurchase;

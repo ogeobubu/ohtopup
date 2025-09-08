@@ -14,6 +14,8 @@ const {
   deleteBankAccount,
   verifyBankAccount,
   redeemPoints,
+  googleAuth,
+    googleAuthCallback
 } = require("../controllers/userController");
 
 const {
@@ -21,8 +23,39 @@ const {
 } = require("../controllers/adminController");
 
 const {
+  getAllRewards,
+  getRewardById,
+  createReward,
+  updateReward,
+  deleteReward,
+  assignRewardToUser,
+  getUserRewards,
+  redeemReward,
+  getRewardAnalytics,
+  getRewardSettings,
+  updateRewardSettings,
+  resetRewardSettings,
+  getRewardSystemStats,
+  bulkUpdateRewardStatus,
+} = require("../controllers/rewardController");
+
+const {
+  playDiceGame,
+  getUserGameHistory,
+  getUserGameStats,
+  getAllGames,
+  getGameStats,
+  getManagementWallet,
+  withdrawManagementFunds,
+  getDiceGameSettings,
+  updateDiceGameSettings,
+  resetDiceGameSettings,
+} = require("../controllers/diceGameController");
+
+const {
   getWallet,
   getTransactionsByUser,
+  getTransactionDetails,
   getBanks,
   withdrawWallet,
   withdrawMonnifyWalletOTP,
@@ -36,7 +69,7 @@ const {
 } = require("../controllers/walletController");
 
 const { buyAirtime } = require("../controllers/airtimeController")
-const { buyData } = require("../controllers/dataController")
+const { buyData, getDataVariations } = require("../controllers/dataController")
 const { purchaseElectricity } = require("../controllers/electricityController")
 const { purchaseCable } = require("../controllers/cableController")
 
@@ -49,6 +82,9 @@ const {
   getAllUtilityTransactions,
   usersRank,
   resetRankings,
+  manualResetRankings,
+  exportRankingsToCSV,
+  getUserAchievements
 } = require("../controllers/utilityController");
 
 const {
@@ -61,9 +97,19 @@ const {
   getSavedVariationsForPricing,
 } = require("../controllers/variationController");
 
+const {
+  getActiveAirtimeNetworkProviders,
+} = require("../controllers/providerController");
+
 const { createWaitlist } = require("../controllers/waitlistController");
 
 const { createTicket, replyTicket, getUserTickets } = require("../controllers/ticketController");
+
+const {
+  subscribeNewsletter,
+  unsubscribeNewsletter,
+  getNewsletterSubscribers,
+} = require("../controllers/newsletterController");
 
 const auth = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -80,8 +126,13 @@ router.get("/", auth, getUser);
 router.patch("/", auth, updateUser);
 router.delete("/", auth, softDeleteUser);
 
+// Google OAuth routes
+router.get("/auth/google", googleAuth);
+router.get("/auth/google/callback", googleAuthCallback);
+
 router.get("/wallet", auth, getWallet);
 router.get("/transactions", auth, getTransactionsByUser);
+router.get("/transactions/:requestId", auth, getTransactionDetails);
 router.get("/banks", auth, getBanks);
 router.post("/bank", auth, deleteBankAccount);
 router.post("/withdraw", auth, withdrawMonnifyWallet);
@@ -91,9 +142,11 @@ router.get("/verify-payment/:ref", auth, verifyPaystackTransaction);
 router.post("/verify-account", auth, verifyBankAccount);
 
 router.post("/airtime", auth, buyAirtime);
+router.get("/airtime-providers", auth, getActiveAirtimeNetworkProviders);
 // router.get("/data", auth, variationCodes);
 router.get("/data", auth, getVariations);
 router.post("/data", auth, buyData);
+router.get("/data-variations", auth, getDataVariations);
 router.get("/service-id", getServiceID);
 router.get("/cable", auth, variationTVCodes);
 router.post("/cable/verify", auth, verifySmartcard);
@@ -105,10 +158,17 @@ router.get("/pricing", getSavedVariationsForPricing);
 
 router.post("/redeem-points", auth, redeemPoints);
 
+// User reward routes
+router.get("/rewards", auth, getUserRewards);
+router.post("/rewards/:rewardId/redeem", auth, redeemReward);
+
 router.post("/waitlist", createWaitlist);
 
 router.post("/rankings", usersRank);
 router.post("/reset-rankings", resetRankings);
+router.post("/admin/manual-reset-rankings", auth, manualResetRankings);
+router.get("/admin/export-rankings-csv", auth, exportRankingsToCSV);
+router.get("/achievements", auth, getUserAchievements);
 
 router.get("/notifications", auth, getNotifications);
 router.patch("/notification/:id", auth, readNotification);
@@ -118,5 +178,56 @@ router.get("/tickets", auth, getUserTickets);
 router.post("/tickets/:id/reply", auth, replyTicket);
 
 router.get("/rates", auth, getRates);
+
+// Newsletter routes (public - no CSRF required for subscription)
+router.post("/newsletter/subscribe", subscribeNewsletter);
+router.post("/newsletter/unsubscribe", unsubscribeNewsletter);
+router.get("/newsletter/subscribers", auth, getNewsletterSubscribers);
+
+// Reward management routes (admin only)
+// Note: More specific routes must come before parameterized routes
+router.get("/admin/rewards", auth, getAllRewards);
+router.get("/admin/rewards/analytics", auth, getRewardAnalytics);
+
+// Reward settings routes (must come before parameterized routes)
+router.get("/admin/rewards/settings", auth, getRewardSettings);
+router.put("/admin/rewards/settings", auth, updateRewardSettings);
+router.post("/admin/rewards/settings/reset", auth, resetRewardSettings);
+router.get("/admin/rewards/stats", auth, getRewardSystemStats);
+router.post("/admin/rewards/bulk-update", auth, bulkUpdateRewardStatus);
+
+// Parameterized routes (must come after specific routes)
+router.get("/admin/rewards/user/:userId", auth, getUserRewards);
+router.get("/admin/rewards/:id", auth, getRewardById);
+router.post("/admin/rewards", auth, createReward);
+router.put("/admin/rewards/:id", auth, updateReward);
+router.delete("/admin/rewards/:id", auth, deleteReward);
+router.post("/admin/rewards/assign", auth, assignRewardToUser);
+router.post("/admin/rewards/:rewardId/redeem", auth, redeemReward);
+
+// Dice Game Routes
+router.post("/dice/play", auth, playDiceGame);
+router.get("/dice/history", auth, getUserGameHistory);
+router.get("/dice/stats", auth, getUserGameStats);
+
+// Admin dice game settings routes
+router.get("/admin/dice/settings", auth, getDiceGameSettings);
+router.put("/admin/dice/settings", auth, updateDiceGameSettings);
+router.post("/admin/dice/settings/reset", auth, resetDiceGameSettings);
+
+// Admin Dice Game Routes
+router.get("/admin/dice/games", auth, getAllGames);
+router.get("/admin/dice/stats", auth, getGameStats);
+router.get("/admin/dice/wallet", auth, getManagementWallet);
+router.post("/admin/dice/withdraw", auth, withdrawManagementFunds);
+router.post("/admin/verify-bank-account", auth, (req, res) => {
+  // Import wallet service for bank verification
+  const walletService = require("../services/walletService");
+  const { accountNumber, bankCode } = req.body;
+
+  walletService.verifyBankAccount(accountNumber, bankCode)
+    .then(data => res.json(data))
+    .catch(error => res.status(400).json({ message: error.message }));
+});
 
 module.exports = router;

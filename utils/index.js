@@ -19,7 +19,7 @@ function generateRequestId() {
   };
   const now = new Intl.DateTimeFormat("en-GB", options).format(new Date());
 
-  const [day, month, year, hour, minute] = now.replace(/\/|,/g, " ").split(" ");
+  const [day, month, year, hour, minute] = now.replace(/\/|,|:/g, " ").split(" ");
   const dateStr = `${year}${month}${day}${hour}${minute}`;
 
   const randomStr = Math.random().toString(36).substring(2, 10);

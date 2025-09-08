@@ -1,18 +1,21 @@
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { getAllUtilityTransactions } from "../../api";
-import Table from "../../components/ui/table";
+import DataTable from "../../components/dataTable";
+import ModernPagination from "../../components/modernPagination";
 import Chip from "../../components/ui/chip";
-import Pagination from "../../admin/components/pagination";
 import { useSelector } from "react-redux";
 import { formatNairaAmount } from "../../utils";
+import { FaEye } from "react-icons/fa";
 
 const Transactions = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [activeTab, setActiveTab] = useState("Data Services");
   const [requestId, setRequestId] = useState("");
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);
 
   const handleSearchChange = (e) => {
     setRequestId(e.target.value);
@@ -29,7 +32,6 @@ const Transactions = () => {
     queryKey: ["transactions", currentPage, limit, activeTab, requestId],
     queryFn: () =>
       getAllUtilityTransactions(currentPage, limit, activeTab, requestId),
-    keepPreviousData: true,
   });
 
   const totalPages = data ? data.totalPages : 0;
@@ -41,19 +43,6 @@ const Transactions = () => {
 
   const renderTableContent = () => {
     const commonColumns = [
-      {
-        header: "ID",
-        render: (row) => (
-          <p
-            title={row.requestId}
-            className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
-          >
-            {row.requestId.length > 10
-              ? `${row.requestId.slice(0, 15)}...`
-              : row.requestId}
-          </p>
-        ),
-      },
       {
         header: "Status",
         render: (row) => <Chip status={row.status} />,
@@ -126,7 +115,22 @@ const Transactions = () => {
         break;
     }
 
-    const columns = [...commonColumns, ...specificColumns];
+    const actionsColumn = [
+      {
+        header: "Actions",
+        render: (row) => (
+          <button
+            onClick={() => navigate(`/transactions/${row.requestId}`)}
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+            title="View Details"
+          >
+            <FaEye />
+          </button>
+        ),
+      },
+    ];
+
+    const columns = [...commonColumns, ...specificColumns, ...actionsColumn];
 
     return (
       <>
@@ -142,9 +146,9 @@ const Transactions = () => {
           />
         </div>
         <div className="overflow-x-auto">
-          <Table columns={columns} data={transactions} />
+          <DataTable columns={columns} data={transactions} />
         </div>
-        <Pagination
+        <ModernPagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}

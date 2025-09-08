@@ -1,21 +1,21 @@
 const validateAirtimePurchaseInput = (req) => {
-  const { serviceID, amount: amountStr, phone } = req.body;
+   const { serviceID, amount: amountStr, phone, provider } = req.body;
 
-  if (!serviceID || !amountStr || !phone) {
-    throw { status: 400, message: "Service ID, amount, and phone number are required." };
-  }
+   if (!serviceID || !amountStr || !phone) {
+     throw { status: 400, message: "Service ID, amount, and phone number are required." };
+   }
 
-  const amount = parseFloat(amountStr);
+   const amount = parseFloat(amountStr);
 
-  if (isNaN(amount) || amount <= 0) {
-    throw { status: 400, message: "Invalid amount specified." };
-  }
+   if (isNaN(amount) || amount <= 0) {
+     throw { status: 400, message: "Invalid amount specified." };
+   }
 
-  return { serviceID, amount, phone };
+   return { serviceID, amount, phone, provider };
 };
 
 const validateDataPurchaseInput = (req) => {
-    const { serviceID, billersCode, variation_code, amount: amountStr, phone } = req.body;
+    const { serviceID, billersCode, variation_code, amount: amountStr, phone, provider } = req.body;
 
     if (!serviceID || !billersCode || !variation_code || !amountStr) {
         throw { status: 400, message: "Service ID, billersCode, variation_code, and amount are required." };
@@ -27,40 +27,40 @@ const validateDataPurchaseInput = (req) => {
         throw { status: 400, message: "Invalid amount specified." };
     }
 
-    return { serviceID, billersCode, variation_code, amount, inputPhone: phone };
+    return { serviceID, billersCode, variation_code, amount, inputPhone: phone, provider };
 };
 
 const validateElectricityPurchaseInput = (req) => {
-    const { serviceID, billersCode, variation_code, amount: amountStr, phone } = req.body;
+     const { serviceID, billersCode, variation_code, amount: amountStr, phone, provider } = req.body;
 
-    if (!serviceID || !billersCode || !variation_code || !amountStr || !phone) {
-        throw { status: 400, message: "Service ID, billersCode, variation_code, amount, and phone are required." };
-    }
+     if (!serviceID || !billersCode || !variation_code || !amountStr || !phone) {
+         throw { status: 400, message: "Service ID, billersCode, variation_code, amount, and phone are required." };
+     }
 
-     const amount = parseFloat(amountStr);
+      const amount = parseFloat(amountStr);
 
-    if (isNaN(amount) || amount <= 0) {
-        throw { status: 400, message: "Invalid amount specified." };
-    }
+     if (isNaN(amount) || amount <= 0) {
+         throw { status: 400, message: "Invalid amount specified." };
+     }
 
-    return { serviceID, billersCode, variation_code, amount, phone };
+     return { serviceID, billersCode, variation_code, amount, phone, provider };
 };
 
 const validateCablePurchaseInput = (req) => {
-  const { serviceID, billersCode, variation_code, amount: amountStr, phone, subscription_type } = req.body;
+   const { serviceID, billersCode, variation_code, amount: amountStr, phone, subscription_type, provider } = req.body;
 
 
-   if (!serviceID || !billersCode || !variation_code || !amountStr || !phone || !subscription_type) {
-      throw { status: 400, message: "Service ID, billersCode, variation_code, amount, phone, and subscription_type are required." };
-  }
+    if (!serviceID || !billersCode || !variation_code || !amountStr || !phone || !subscription_type) {
+       throw { status: 400, message: "Service ID, billersCode, variation_code, amount, phone, and subscription_type are required." };
+   }
 
-   const amount = parseFloat(amountStr);
+    const amount = parseFloat(amountStr);
 
-  if (isNaN(amount) || amount <= 0) {
-      throw { status: 400, message: "Invalid amount specified." };
-  }
+   if (isNaN(amount) || amount <= 0) {
+       throw { status: 400, message: "Invalid amount specified." };
+   }
 
-  return { serviceID, billersCode, variation_code, amount, phone, subscription_type };
+   return { serviceID, billersCode, variation_code, amount, phone, subscription_type, provider };
 };
 
 

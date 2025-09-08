@@ -7,9 +7,10 @@ const AuthGuard = ({ children, tokenKey }) => {
 
     useEffect(() => {
         if (!isLoggedIn) {
-            navigate('/login', { replace: true });
+            const loginPath = tokenKey === 'ohtopup-admin-token' ? '/admin' : '/login';
+            navigate(loginPath, { replace: true });
         }
-    }, [isLoggedIn, navigate]);
+    }, [isLoggedIn, navigate, tokenKey]);
 
     return children;
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUserTimes, FaWallet } from "react-icons/fa";
+import { FaUserTimes, FaWallet, FaUsers, FaTrophy, FaCoins, FaChartLine, FaPlus, FaDownload } from "react-icons/fa";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ import Modal from "../../components/modal";
 import Textfield from "../../../components/ui/forms/input";
 import Button from "../../../components/ui/forms/button";
 import noData from "../../../assets/no-data.svg";
+import { formatNairaAmount } from "../../../utils";
 
 const Referral = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,22 +65,78 @@ const Referral = () => {
   };
 
   const columns = [
-    { header: "Username", render: (item) => item.username },
-    { header: "Referral Code", render: (item) => item.referralCode },
+    {
+      header: "Username",
+      render: (item) => (
+        <div className="font-medium text-gray-900">
+          {item.username}
+        </div>
+      )
+    },
+    {
+      header: "Referral Code",
+      render: (item) => (
+        <div className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+          {item.referralCode}
+        </div>
+      )
+    },
     {
       header: "Referred Users",
-      render: (item) => item?.referredUsers?.length || 0,
+      render: (item) => (
+        <div className="text-center">
+          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+            {item?.referredUsers?.length || 0}
+          </span>
+        </div>
+      ),
     },
-    { header: "Points", render: (item) => item?.points || 0 },
+    {
+      header: "Points",
+      render: (item) => (
+        <div className="text-center">
+          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
+            {item?.points || 0}
+          </span>
+        </div>
+      )
+    },
+    {
+      header: "Performance",
+      render: (item) => {
+        const referrals = item?.referredUsers?.length || 0;
+        const points = item?.points || 0;
+        let performance = "Low";
+        let colorClass = "bg-gray-100 text-gray-800";
+
+        if (referrals >= 10 && points >= 500) {
+          performance = "High";
+          colorClass = "bg-green-100 text-green-800";
+        } else if (referrals >= 5 && points >= 200) {
+          performance = "Medium";
+          colorClass = "bg-yellow-100 text-yellow-800";
+        }
+
+        return (
+          <div className="text-center">
+            <span className={`${colorClass} px-2 py-1 rounded-full text-xs font-medium`}>
+              {performance}
+            </span>
+          </div>
+        );
+      },
+    },
     {
       header: "Actions",
       render: (user) => (
         <div className="flex space-x-2">
           <button
             onClick={() => handleEditUser(user)}
-            className="border border-green-500 flex justify-center items-center rounded-full w-8 h-8 text-green-500 hover:bg-green-100 transition"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            title="Add Points"
           >
-            <FaWallet size={16} />
+            <FaPlus className="inline mr-1 h-3 w-3" />
+            Add Points
           </button>
         </div>
       ),
@@ -106,9 +163,62 @@ const Referral = () => {
     }
   };
 
+  // Calculate referral statistics
+  const totalReferrers = referrals?.users?.length || 0;
+  const totalReferredUsers = referrals?.users?.reduce((sum, user) => sum + (user?.referredUsers?.length || 0), 0) || 0;
+  const totalPoints = referrals?.users?.reduce((sum, user) => sum + (user?.points || 0), 0) || 0;
+  const avgReferralsPerUser = totalReferrers > 0 ? (totalReferredUsers / totalReferrers).toFixed(1) : 0;
+
   return (
     <>
-      <h2 className="text-2xl font-bold mb-5 dark:text-white text-gray-800">Referral Management</h2>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Referral Management</h1>
+        <p className="text-gray-600">Monitor and manage user referral activities and rewards</p>
+      </div>
+
+      {/* Analytics Cards */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium">Total Referrers</p>
+              <p className="text-2xl font-bold">{totalReferrers}</p>
+            </div>
+            <FaUsers className="h-8 w-8 text-blue-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium">Total Referred Users</p>
+              <p className="text-2xl font-bold">{totalReferredUsers}</p>
+            </div>
+            <FaChartLine className="h-8 w-8 text-green-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium">Total Points Awarded</p>
+              <p className="text-2xl font-bold">{totalPoints.toLocaleString()}</p>
+            </div>
+            <FaCoins className="h-8 w-8 text-purple-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-100 text-sm font-medium">Avg Referrals/User</p>
+              <p className="text-2xl font-bold">{avgReferralsPerUser}</p>
+            </div>
+            <FaTrophy className="h-8 w-8 text-orange-200" />
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col md:flex-row">
         <div className="flex-1 min-h-[250px] flex flex-col justify-between">
           {isLoading ? (
@@ -117,21 +227,38 @@ const Referral = () => {
             <p className="text-red-500">Error loading referrals: {error.message}</p>
           ) : referrals?.users.length > 0 ? (
             <div className="overflow-x-auto">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex-grow"></div>
-                <div className="flex items-center">
-                  <input
-                    type="search"
-                    placeholder="Search by username or email"
-                    className="border border-gray-300 rounded-md p-2 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center space-x-6">
+                  <div className="text-sm text-gray-600">
+                    {referrals?.users?.length || 0} users found
+                  </div>
+                 
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <input
+                      type="search"
+                      placeholder="Search by username or referral code"
+                      className="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <FaUsers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  </div>
+                  {searchTerm && (
+                    <button
+                      className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200"
+                      onClick={handleClearSearch}
+                    >
+                      Clear
+                    </button>
+                  )}
                   <button
-                    className="ml-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                    onClick={handleClearSearch}
+                    className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                    onClick={() => toast.info("Export functionality coming soon!")}
                   >
-                    Clear
+                    <FaDownload className="inline mr-2 h-4 w-4" />
+                    Export
                   </button>
                 </div>
               </div>
@@ -145,58 +272,146 @@ const Referral = () => {
               />
             </div>
           ) : (
-            <div className="border border-gray-300 rounded-md p-6 flex flex-col items-center justify-center h-full bg-gray-50">
-              <img
-                className="w-24 h-24 mb-4"
-                src={noData}
-                alt="No data"
-              />
-              <p className="mt-2 text-gray-500 text-center">
-                No referral history
+            <div className="border border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-50 to-gray-100">
+              <div className="bg-white rounded-full p-6 mb-6 shadow-lg">
+                <FaUsers className="w-12 h-12 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Referral Data</h3>
+              <p className="text-gray-500 text-center max-w-md">
+                There are no users with referral activity yet. Users will appear here once they start referring others and earning points.
               </p>
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-lg">
+                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <FaUsers className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">Users will register</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <FaChartLine className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">Users refer others</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                  <FaCoins className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">Points are earned</p>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      <Modal isOpen={isOpen} closeModal={toggleModal} title="Add Points">
-        <Formik
-          initialValues={{ amount: "" }}
-          validationSchema={Yup.object({
-            amount: Yup.number()
-              .required("Amount is required")
-              .positive("Amount must be positive")
-              .min(1, "Amount must be at least ₦1.00"),
-          })}
-          onSubmit={handleAddPoints}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 md:p-6"
+          onClick={toggleModal}
         >
-          {({ errors, touched }) => (
-            <Form className="flex flex-col">
-              <label htmlFor="amount" className="mb-1 text-gray-700">
-                Enter Amount:
-              </label>
-              <Field
-                name="amount"
-                as={Textfield}
-                placeholder="0"
-                min="0"
-                className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {errors.amount && touched.amount ? (
-                <div className="text-red-600 text-sm">{errors.amount}</div>
-              ) : null}
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-700 dark:hover:scrollbar-thumb-gray-500 px-2 sm:px-0 pb-8">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-100 to-green-200 rounded-full mb-4">
+                <FaCoins className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">
+                Add Referral Points
+              </h3>
+              <p className="text-sm text-gray-600">
+                Reward {currentUser?.username} for successful referrals
+              </p>
+            </div>
 
-              <Button
-                type="submit"
-                className={`mt-3 py-2 rounded transition ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"} text-white`}
-                disabled={loading}
-              >
-                {loading ? "Adding..." : "Add Points"}
-              </Button>
-            </Form>
-          )}
-        </Formik>
-      </Modal>
+            {/* User Details */}
+            <div className="mb-6 p-6 rounded-xl bg-gray-50">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span className="font-medium text-gray-600">Username</span>
+                  <span className="font-semibold text-lg text-gray-900">
+                    {currentUser?.username}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span className="font-medium text-gray-600">Current Points</span>
+                  <span className="font-semibold text-lg text-green-600">
+                    {currentUser?.points || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="font-medium text-gray-600">Referred Users</span>
+                  <span className="font-semibold text-lg text-blue-600">
+                    {currentUser?.referredUsers?.length || 0}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <Formik
+              initialValues={{ amount: "" }}
+              validationSchema={Yup.object({
+                amount: Yup.number()
+                  .required("Amount is required")
+                  .positive("Amount must be positive")
+                  .min(1, "Amount must be at least 1 point"),
+              })}
+              onSubmit={handleAddPoints}
+            >
+              {({ errors, touched, setFieldValue }) => (
+                <Form className="space-y-6">
+                  <div>
+                    <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+                      Points to Add:
+                    </label>
+                    <Field
+                      name="amount"
+                      as={Textfield}
+                      placeholder="Enter points amount"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                    {errors.amount && touched.amount && (
+                      <div className="text-red-600 text-sm mt-1">{errors.amount}</div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-4">
+                    <button
+                      type="button"
+                      onClick={toggleModal}
+                      disabled={loading}
+                      className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Adding Points...
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center">
+                          <FaPlus className="h-5 w-5 mr-2" />
+                          Add Points
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        </div>
+        </div>
+      )}
     </>
   );
 };

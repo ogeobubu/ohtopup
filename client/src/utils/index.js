@@ -15,7 +15,32 @@ export const formatNairaAmount = (amount) => {
 
 export const formatPhoneNumber = (phoneNumber) => {
   if (!phoneNumber) return '';
-  return phoneNumber.replace(/^\+234/, '0');
+
+  // Remove any non-digit characters except +
+  const cleanPhone = phoneNumber.replace(/[^\d+]/g, '');
+
+  // If already starts with +234, convert to 0 format for server
+  if (cleanPhone.startsWith('+234')) {
+    return '0' + cleanPhone.substring(4);
+  }
+
+  // If starts with 234, convert to 0 format
+  if (cleanPhone.startsWith('234')) {
+    return '0' + cleanPhone.substring(3);
+  }
+
+  // If already starts with 0, return as is
+  if (cleanPhone.startsWith('0')) {
+    return cleanPhone;
+  }
+
+  // If it's just the 10-digit number, add 0 prefix
+  if (cleanPhone.length === 10) {
+    return '0' + cleanPhone;
+  }
+
+  // Return as is if none of the above (shouldn't happen with valid Nigerian numbers)
+  return cleanPhone;
 };
 
 export const customStyles = {

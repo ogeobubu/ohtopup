@@ -1,8 +1,10 @@
 import { lazy } from "react";
+import { useSelector } from "react-redux";
 import AuthGuard from "../utils/guard";
 import MainLayout from "../layout/mainLayout";
 import Dashboard from "../pages/dashboard";
 import Transactions from "../pages/transactions";
+import TransactionDetail from "../pages/TransactionDetail";
 import Wallet from "../pages/wallet";
 import Settings from "../pages/settings";
 import Referral from "../pages/referral";
@@ -10,6 +12,12 @@ import Utilities from "../pages/utilities";
 import Confirmation from "../pages/wallet/confirmation";
 import Rank from "../pages/rank";
 import Support from "../pages/support";
+import DiceGame from "../pages/dice";
+
+const TransactionDetailWrapper = () => {
+  const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);
+  return <TransactionDetail isDarkMode={isDarkMode} />;
+};
 
 const MainRoutes = {
   path: "/",
@@ -26,6 +34,10 @@ const MainRoutes = {
     {
       path: "/transactions",
       element: <Transactions />,
+    },
+    {
+      path: "/transactions/:requestId",
+      element: <TransactionDetailWrapper />,
     },
     {
       path: "/wallet",
@@ -54,6 +66,10 @@ const MainRoutes = {
     {
       path: "/support",
       element: <Support />,
+    },
+    {
+      path: "/dice",
+      element: <DiceGame />,
     },
   ],
 };

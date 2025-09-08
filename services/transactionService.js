@@ -2,13 +2,13 @@ const Utility = require("../model/Utility");
 const Notification = require("../model/Notification");
 const User = require("../model/User");
 const walletService = require("./walletService");
+const { createLog } = require("../controllers/systemLogController");
 const {
-  sendTransactionEmailNotification,
-  sendTransactionEmailAdminNotification
+  sendTransactionEmailNotification
 } = require("../controllers/email/sendTransactionEmailNotification");
 
-const processPaymentApiResponse = (
-  vtpassResponseData,
+const processPaymentApiResponse = async (
+  apiResponseData,
   requestedAmount,
   userId,
   requestId,
@@ -16,27 +16,95 @@ const processPaymentApiResponse = (
   contactValue,
   optionalFields = {}
 ) => {
-  const transactionData = vtpassResponseData?.content?.transactions;
+  // Extract enhanced data purchase details from optionalFields
+  const {
+    provider,
+    network,
+    dataPlan,
+    dataAmount,
+    validity,
+    transactionType = 'data'
+  } = optionalFields;
+  let transactionData;
+
+  // Handle different response structures based on provider
+  if (apiResponseData?.content?.transactions) {
+    // VTPass response structure
+    transactionData = apiResponseData.content.transactions;
+  } else if (apiResponseData?.success !== undefined && apiResponseData?.status !== undefined) {
+    // Clubkonnect response structure - check for both success and status properties
+    const mappedStatus = mapClubkonnectStatus(apiResponseData.status) || 'pending';
+
+    transactionData = {
+      status: mappedStatus,
+      type: 'data',
+      product_name: `Data Plan (${contactValue})`,
+      total_amount: requestedAmount,
+      discount: 0,
+      commission: 0,
+      // Store original Clubkonnect status for better error handling
+      providerStatus: apiResponseData.status,
+      providerResponse: apiResponseData.rawResponse || apiResponseData,
+    };
+  } else {
+    // Fallback for other structures
+    transactionData = apiResponseData;
+  }
 
   if (!transactionData) {
-    console.error(
-      "Unexpected VTPASS API response structure:",
-      vtpassResponseData
+    await createLog(
+      'error',
+      'Payment gateway returned unexpected response structure',
+      'payment',
+      userId,
+      null,
+      {
+        requestId,
+        serviceId,
+        hasTransactionData: false,
+        responseKeys: Object.keys(apiResponseData || {}),
+        responseStructure: apiResponseData ? JSON.stringify(apiResponseData).substring(0, 500) : 'No response data'
+      }
     );
+
     throw {
       status: 502,
-      message: "Unexpected response structure from payment gateway.",
+      message: "Payment gateway communication error. Please try again or contact support.",
     };
   }
 
   const {
     status: transactionStatus,
-    type: transactionType,
+    type: transactionDataType,
     product_name: productName,
     total_amount: totalAmount,
     discount,
     commission: commissionRate,
   } = transactionData;
+
+  // Provide fallback values for required fields if missing from API response
+  const finalProductName = productName || `${transactionType === 'data' ? 'Data Plan' : 'Airtime'} Purchase`;
+  const finalTotalAmount = totalAmount || requestedAmount;
+  const finalCommissionRate = commissionRate || 0;
+  const finalDiscount = discount !== undefined ? discount : 0;
+
+  console.log('Transaction Data Extraction:', {
+    original: {
+      productName,
+      totalAmount,
+      commissionRate,
+      discount,
+      transactionStatus,
+      transactionDataType
+    },
+    fallback: {
+      finalProductName,
+      finalTotalAmount,
+      finalCommissionRate,
+      finalDiscount,
+      transactionType
+    }
+  });
 
   const token = optionalFields.token;
   const units = optionalFields.units;
@@ -48,20 +116,41 @@ const processPaymentApiResponse = (
     requestId: requestId,
     serviceID: serviceId,
     status: transactionStatus,
-    type: transactionType,
-    product_name: productName,
+    type: transactionDataType || transactionType || 'data', // Use transactionType from optionalFields if available
+    product_name: finalProductName,
     amount: requestedAmount,
     phone: contactValue,
-    revenue: totalAmount,
+    revenue: finalTotalAmount,
     user: userId,
     transactionDate: new Date(),
-    discount,
-    commissionRate,
+    discount: finalDiscount,
+    commissionRate: finalCommissionRate,
     paymentMethod,
+
+    // Enhanced data purchase fields
+    ...(provider && { provider }),
+    ...(network && { network }),
+    ...(dataPlan && { dataPlan }),
+    ...(dataAmount && { dataAmount }),
+    ...(validity && { validity }),
+    ...(apiResponseData?.status && { providerStatus: apiResponseData.status }),
+    ...(apiResponseData && { providerResponse: apiResponseData }),
+    transactionType,
 
     ...(token && { token }),
     ...(units && { units }),
     ...(subscription_type && { subscription_type }),
+  });
+
+  console.log('Transaction Service - Created transaction object:', {
+    id: newTransaction._id,
+    requestId: newTransaction.requestId,
+    type: newTransaction.type,
+    product_name: newTransaction.product_name,
+    status: newTransaction.status,
+    amount: newTransaction.amount,
+    user: newTransaction.user,
+    transactionType: newTransaction.transactionType
   });
 
   return newTransaction;
@@ -75,15 +164,57 @@ const handlePaymentOutcome = async (
   contactValue
 ) => {
   if (transaction.status === "failed") {
-    console.warn(
-      `VTPASS transaction ${transaction.requestId} failed. Status: ${transaction.status}. Product: ${transaction.product_name}`
+    // Generate user-friendly error message based on provider
+    const errorDetails = transaction.provider === 'vtpass'
+      ? getVTPassErrorDetails(transaction)
+      : getClubkonnectErrorDetails(transaction);
+
+    // Log failed transaction without revealing 3rd party API name
+    await createLog(
+      'warning',
+      `Payment transaction ${transaction.requestId} failed: ${errorDetails.providerStatus || 'Unknown error'}`,
+      'payment',
+      userId,
+      null,
+      {
+        requestId: transaction.requestId,
+        serviceID: transaction.serviceID,
+        amount: transaction.amount,
+        status: transaction.status,
+        productName: transaction.product_name,
+        contact: contactValue,
+        providerStatus: errorDetails.providerStatus,
+        errorType: errorDetails.errorType
+      }
     );
+
     await transaction.save();
+
+    // Log failed transaction with detailed error info
+    await createLog(
+      'error',
+      `Transaction failed: ${transaction.product_name} for ${contactValue} - ${errorDetails.message}`,
+      'transaction',
+      userId,
+      null,
+      {
+        requestId: transaction.requestId,
+        serviceID: transaction.serviceID,
+        amount: transaction.amount,
+        status: transaction.status,
+        contact: contactValue,
+        productName: transaction.product_name,
+        providerStatus: errorDetails.providerStatus,
+        errorType: errorDetails.errorType,
+        userMessage: errorDetails.userMessage,
+        canRetry: errorDetails.canRetry
+      }
+    );
 
     const notification = new Notification({
       userId: userId,
       title: `Transaction Failed: ${transaction.product_name}`,
-      message: `Your transaction for ${transaction.product_name} (${contactValue}) failed. Amount: ${transaction.amount}.`,
+      message: `${errorDetails.userMessage} Amount: ${transaction.amount}. ${errorDetails.canRetry ? 'Please try again.' : 'Contact support if this persists.'}`,
       createdAt: new Date(),
       link: "/transactions",
     });
@@ -98,12 +229,24 @@ const handlePaymentOutcome = async (
 
     return {
       status: 400,
-      message: "Transaction failed at payment gateway.",
+      message: errorDetails.userMessage,
+      errorDetails: {
+        type: errorDetails.errorType,
+        canRetry: errorDetails.canRetry,
+        providerStatus: errorDetails.providerStatus
+      },
       transactionDetails: {
         status: transaction.status,
         product_name: transaction.product_name,
         requestId: transaction.requestId,
         contact: contactValue,
+        // Enhanced data purchase fields
+        ...(transaction.provider && { provider: transaction.provider }),
+        ...(transaction.network && { network: transaction.network }),
+        ...(transaction.dataPlan && { dataPlan: transaction.dataPlan }),
+        ...(transaction.dataAmount && { dataAmount: transaction.dataAmount }),
+        ...(transaction.validity && { validity: transaction.validity }),
+        ...(transaction.transactionType && { transactionType: transaction.transactionType }),
         ...(transaction.token && { token: transaction.token }),
         ...(transaction.units && { units: transaction.units }),
         ...(transaction.subscription_type && {
@@ -116,7 +259,66 @@ const handlePaymentOutcome = async (
   try {
     await walletService.debitWallet(wallet, requestedAmount);
 
-    await transaction.save();
+    console.log('Transaction Service - About to save transaction:', {
+      id: transaction._id,
+      requestId: transaction.requestId,
+      type: transaction.type,
+      status: transaction.status,
+      product_name: transaction.product_name,
+      amount: transaction.amount,
+      revenue: transaction.revenue,
+      commissionRate: transaction.commissionRate,
+      user: transaction.user
+    });
+
+    try {
+      await transaction.save();
+      console.log('Transaction Service - Transaction saved successfully:', {
+        id: transaction._id,
+        requestId: transaction.requestId,
+        type: transaction.type,
+        status: transaction.status
+      });
+    } catch (saveError) {
+      console.error('Transaction Service - Failed to save transaction:', {
+        error: saveError.message,
+        validationErrors: saveError.errors,
+        transactionData: {
+          requestId: transaction.requestId,
+          type: transaction.type,
+          product_name: transaction.product_name,
+          amount: transaction.amount,
+          revenue: transaction.revenue,
+          commissionRate: transaction.commissionRate,
+          user: transaction.user
+        }
+      });
+      throw saveError; // Re-throw to be handled by error handler
+    }
+
+    // Log successful transaction
+    const logLevel = transaction.status === "delivered" ? 'info' : 'warning';
+    const logMessage = transaction.status === "delivered"
+      ? `Transaction completed: ${transaction.product_name} for ${contactValue}`
+      : `Transaction pending: ${transaction.product_name} for ${contactValue}`;
+
+    await createLog(
+      logLevel,
+      logMessage,
+      'transaction',
+      userId,
+      null,
+      {
+        requestId: transaction.requestId,
+        serviceID: transaction.serviceID,
+        amount: transaction.amount,
+        status: transaction.status,
+        contact: contactValue,
+        productName: transaction.product_name,
+        revenue: transaction.revenue,
+        discount: transaction.discount
+      }
+    );
 
     const notificationStatus =
       transaction.status === "delivered" ? "Successful" : "Pending";
@@ -130,11 +332,7 @@ const handlePaymentOutcome = async (
       });
     }
 
-    await sendTransactionEmailAdminNotification(process.env.EMAIL_USER, "Admin", {
-      product_name: transaction.product_name,
-      status: notificationStatus,
-      amount: transaction.amount,
-    });
+    // Admin notification email removed to prevent timeout delays
 
     const notification = new Notification({
       userId: userId,
@@ -168,6 +366,13 @@ const handlePaymentOutcome = async (
         amount: transaction.amount,
         contact: contactValue,
         transactionDate: transaction.transactionDate,
+        // Enhanced data purchase fields
+        ...(transaction.provider && { provider: transaction.provider }),
+        ...(transaction.network && { network: transaction.network }),
+        ...(transaction.dataPlan && { dataPlan: transaction.dataPlan }),
+        ...(transaction.dataAmount && { dataAmount: transaction.dataAmount }),
+        ...(transaction.validity && { validity: transaction.validity }),
+        ...(transaction.transactionType && { transactionType: transaction.transactionType }),
         ...(transaction.token && { token: transaction.token }),
         ...(transaction.units && { units: transaction.units }),
         ...(transaction.subscription_type && {
@@ -177,8 +382,42 @@ const handlePaymentOutcome = async (
       newBalance: wallet.balance,
     };
   } catch (dbError) {
-    console.error("Database error after successful VTPASS API call:", dbError);
-    console.error("Original DB Error details:", dbError);
+    // Log database error without revealing 3rd party API name
+    await createLog(
+      'error',
+      `Database error after successful payment processing: ${dbError.message}`,
+      'transaction',
+      userId,
+      null,
+      {
+        requestId: transaction.requestId,
+        serviceID: transaction.serviceID,
+        amount: transaction.amount,
+        contact: contactValue,
+        productName: transaction.product_name,
+        dbError: dbError.message,
+        needsReview: true
+      }
+    );
+
+    // Log database error for transaction that needs review
+    await createLog(
+      'error',
+      `Transaction database error: ${transaction.product_name} for ${contactValue}`,
+      'transaction',
+      userId,
+      null,
+      {
+        requestId: transaction.requestId,
+        serviceID: transaction.serviceID,
+        amount: transaction.amount,
+        status: transaction.status,
+        contact: contactValue,
+        productName: transaction.product_name,
+        error: dbError.message,
+        needsReview: true
+      }
+    );
 
     if (transaction && transaction._id) {
       transaction.localStatus = "review_needed";
@@ -198,7 +437,186 @@ const handlePaymentOutcome = async (
   }
 };
 
+// Helper function to map Clubkonnect status to valid enum values
+function mapClubkonnectStatus(clubkonnectStatus) {
+  if (!clubkonnectStatus) return 'pending';
+
+  const statusMap = {
+    'INVALID_MOBILENETWORK': 'failed',
+    'INVALID_DATAPLAN': 'failed',
+    'INSUFFICIENT_BALANCE': 'failed',
+    'ORDER_RECEIVED': 'pending',
+    'ORDER_COMPLETED': 'delivered',
+    'ORDER_FAILED': 'failed',
+    'ORDER_CANCELLED': 'failed',
+    'PENDING': 'pending',
+    'SUCCESS': 'delivered',
+    'FAILED': 'failed'
+  };
+
+  return statusMap[clubkonnectStatus] || 'pending';
+}
+
+// Helper function to get detailed error information for VTPass failures
+function getVTPassErrorDetails(transaction) {
+  const providerStatus = transaction.providerStatus || 'UNKNOWN_ERROR';
+  const providerResponse = transaction.providerResponse || {};
+
+  // Check VTPass response code first
+  const responseCode = providerResponse.code;
+  const responseDescription = providerResponse.response_description;
+  const transactionStatus = providerResponse.content?.transactions?.status;
+
+  console.log('VTPass Error Analysis:', {
+    responseCode,
+    responseDescription,
+    transactionStatus,
+    providerStatus
+  });
+
+  // Handle VTPass response codes
+  if (responseCode !== "000") {
+    // Non-success response codes
+    const errorMap = {
+      '001': {
+        message: 'Transaction pending',
+        userMessage: 'Your transaction is being processed. Please wait a few minutes.',
+        errorType: 'transaction_pending',
+        canRetry: false
+      },
+      '002': {
+        message: 'Invalid request parameters',
+        userMessage: 'Invalid request parameters. Please check your input and try again.',
+        errorType: 'invalid_request',
+        canRetry: true
+      },
+      '003': {
+        message: 'Service temporarily unavailable',
+        userMessage: 'The airtime service is temporarily unavailable. Please try again in a few minutes.',
+        errorType: 'service_unavailable',
+        canRetry: true
+      },
+      '004': {
+        message: 'Insufficient balance',
+        userMessage: 'Service temporarily unavailable due to provider balance. Please try again later.',
+        errorType: 'provider_balance',
+        canRetry: false
+      },
+      '005': {
+        message: 'Transaction failed',
+        userMessage: 'Your airtime purchase could not be completed. Please try again.',
+        errorType: 'transaction_failed',
+        canRetry: true
+      }
+    };
+
+    return errorMap[responseCode] || {
+      message: responseDescription || 'Transaction failed',
+      userMessage: responseDescription || 'Your airtime purchase failed. Please try again or contact support if the issue persists.',
+      errorType: 'transaction_failed',
+      canRetry: true,
+      providerStatus: responseCode
+    };
+  }
+
+  // Handle transaction status for successful response codes
+  if (transactionStatus !== "delivered") {
+    const statusMap = {
+      'failed': {
+        message: 'Transaction failed',
+        userMessage: 'Your airtime purchase failed. Please try again.',
+        errorType: 'transaction_failed',
+        canRetry: true
+      },
+      'pending': {
+        message: 'Transaction pending',
+        userMessage: 'Your transaction is being processed. Please wait a few minutes.',
+        errorType: 'transaction_pending',
+        canRetry: false
+      },
+      'processing': {
+        message: 'Transaction processing',
+        userMessage: 'Your transaction is being processed. Please wait.',
+        errorType: 'transaction_processing',
+        canRetry: false
+      }
+    };
+
+    return statusMap[transactionStatus] || {
+      message: `Transaction status: ${transactionStatus}`,
+      userMessage: 'Your transaction status is unclear. Please contact support if you have concerns.',
+      errorType: 'unknown_status',
+      canRetry: false,
+      providerStatus: transactionStatus
+    };
+  }
+
+  // Fallback for other error conditions
+  return {
+    message: 'Transaction failed',
+    userMessage: 'Your airtime purchase failed. Please try again or contact support if the issue persists.',
+    errorType: 'transaction_failed',
+    canRetry: true,
+    providerStatus
+  };
+}
+
+// Helper function to get detailed error information for Clubkonnect failures
+function getClubkonnectErrorDetails(transaction) {
+  const providerStatus = transaction.providerStatus || 'UNKNOWN_ERROR';
+
+  const errorMap = {
+    'INVALID_MOBILENETWORK': {
+      message: 'Invalid mobile network detected',
+      userMessage: 'The phone number provided is not valid for this network. Please check the number and try again.',
+      errorType: 'invalid_network',
+      canRetry: true
+    },
+    'INVALID_DATAPLAN': {
+      message: 'Invalid data plan selected',
+      userMessage: 'The selected data plan is not available. Please choose a different plan.',
+      errorType: 'invalid_plan',
+      canRetry: true
+    },
+    'INSUFFICIENT_BALANCE': {
+      message: 'Provider balance insufficient',
+      userMessage: 'Service temporarily unavailable due to provider balance. Please try again later.',
+      errorType: 'provider_balance',
+      canRetry: false
+    },
+    'ORDER_FAILED': {
+      message: 'Order processing failed',
+      userMessage: 'Your data purchase could not be completed. Please try again.',
+      errorType: 'order_failed',
+      canRetry: true
+    },
+    'ORDER_CANCELLED': {
+      message: 'Order was cancelled',
+      userMessage: 'Your data purchase was cancelled. Please try again.',
+      errorType: 'order_cancelled',
+      canRetry: true
+    },
+    'FAILED': {
+      message: 'Transaction failed',
+      userMessage: 'Your data purchase failed. Please try again.',
+      errorType: 'transaction_failed',
+      canRetry: true
+    }
+  };
+
+  return errorMap[providerStatus] || {
+    message: 'Unknown error occurred',
+    userMessage: 'An unexpected error occurred. Please try again or contact support.',
+    errorType: 'unknown_error',
+    canRetry: true,
+    providerStatus
+  };
+}
+
 module.exports = {
   processPaymentApiResponse,
   handlePaymentOutcome,
+  mapClubkonnectStatus,
+  getVTPassErrorDetails,
+  getClubkonnectErrorDetails,
 };

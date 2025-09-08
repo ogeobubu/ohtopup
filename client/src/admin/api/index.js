@@ -2,8 +2,42 @@ import axios from "axios";
 
 const API_URL = "/api/users/admin";
 
+// Add CSRF token fetching for admin routes
+let csrfToken = null;
+let isFetchingToken = false;
+
+const fetchCsrfToken = async () => {
+  if (isFetchingToken) {
+    // Wait for ongoing fetch to complete
+    while (isFetchingToken) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    return csrfToken;
+  }
+
+  if (csrfToken) {
+    console.log("Using cached CSRF token");
+    return csrfToken;
+  }
+
+  isFetchingToken = true;
+  try {
+    console.log("Fetching new CSRF token");
+    const response = await axios.get("/api/csrf-token", { withCredentials: true });
+    csrfToken = response.data.csrfToken;
+    console.log("CSRF token fetched successfully");
+    return csrfToken;
+  } catch (error) {
+    console.error("Failed to fetch CSRF token:", error);
+    return null;
+  } finally {
+    isFetchingToken = false;
+  }
+};
+
 const instance = axios.create({
   baseURL: API_URL,
+  withCredentials: true, // Ensure cookies are sent
 });
 
 const getToken = () => {
@@ -12,11 +46,33 @@ const getToken = () => {
 };
 
 instance.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Attach CSRF token for state-changing requests (except login)
+    if (["post", "put", "patch", "delete"].includes(config.method) && !config.url?.includes('/login')) {
+      console.log(`Making ${config.method.toUpperCase()} request to ${config.url}`);
+      if (!csrfToken) {
+        console.log("No CSRF token cached, fetching...");
+        try {
+          await fetchCsrfToken();
+        } catch (error) {
+          console.error("Failed to fetch CSRF token:", error);
+        }
+      }
+      if (csrfToken) {
+        config.headers["X-CSRF-Token"] = csrfToken;
+        console.log("CSRF token attached to request");
+      } else {
+        console.log("No CSRF token available");
+      }
+    } else if (config.url?.includes('/login')) {
+      console.log(`Making ${config.method.toUpperCase()} request to ${config.url} (CSRF skipped)`);
+    }
+
     return config;
   },
   (error) => {
@@ -29,7 +85,9 @@ instance.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
+    const config = error.config;
+
     if (error.response) {
       if (error.response.status === 401) {
         if (error.response.data.message === "Invalid token") {
@@ -37,7 +95,22 @@ instance.interceptors.response.use(
           window.location.href = "/admin";
         }
       } else if (error.response.status === 403) {
-        if (error.response.data.message === "Invalid token") {
+        if (error.response.data.message === "Invalid CSRF token") {
+          // Prevent infinite retry loop
+          if (config && !config._csrfRetry) {
+            config._csrfRetry = true;
+            csrfToken = null;
+            try {
+              await fetchCsrfToken();
+              if (csrfToken) {
+                config.headers["X-CSRF-Token"] = csrfToken;
+                return instance(config);
+              }
+            } catch (tokenError) {
+              console.error("Failed to refresh CSRF token:", tokenError);
+            }
+          }
+        } else if (error.response.data.message === "Invalid token") {
           localStorage.removeItem("ohtopup-admin-token");
           window.location.href = "/admin";
         }
@@ -56,7 +129,8 @@ export const loginAdmin = async (userData) => {
     const response = await instance.post(`/login`, userData);
     return response?.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error logging user");
+    console.error("Admin login error:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Error logging in");
   }
 };
 
@@ -210,7 +284,7 @@ export const createWallet = async (id) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user");
+    throw new Error(error.response.data.message || "Error creating wallet");
   }
 };
 
@@ -222,7 +296,7 @@ export const depositWallet = async (id, data) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user");
+    throw new Error(error.response.data.message || "Error depositing to wallet");
   }
 };
 
@@ -233,7 +307,7 @@ export const getWallets = async (page = 1, limit = 10) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user");
+    throw new Error(error.response.data.message || "Error fetching wallets");
   }
 };
 
@@ -242,7 +316,7 @@ export const toggleWallet = async (id) => {
     const response = await instance.patch(`/wallets/${id}/toggle`);
     return response.data.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user");
+    throw new Error(error.response.data.message || "Error toggling wallet");
   }
 };
 
@@ -275,7 +349,7 @@ export const getAllUtilityTransactions = async (
     if (type) {
       params.type = type;
     }
-    if (type) {
+    if (requestId) {
       params.requestId = requestId;
     }
 
@@ -357,8 +431,9 @@ export const getSavedVariations = async (id) => {
 
 export const toggleData = async (variation_code, serviceID) => {
   try {
-    const response = await instance.get(
-      `/data/toggle?variation_code=${variation_code}&serviceID=${serviceID}`
+    const response = await instance.patch(
+      `/data/toggle`,
+      { variation_code, serviceID }
     );
     return response.data;
   } catch (error) {
@@ -371,7 +446,7 @@ export const sendMessage = async (data) => {
     const response = await instance.post(`/chat/send-message`, data);
     return response?.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error sneding message");
+    throw new Error(error.response?.data?.message || "Error sending message");
   }
 };
 
@@ -524,5 +599,100 @@ export const requeryTransaction = async (data) => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error logging user");
+  }
+};
+
+export const getNewsletterStats = async () => {
+  try {
+    const response = await instance.get(`/newsletter/stats`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching newsletter stats");
+  }
+};
+
+export const getNewsletterActivity = async (limit = 5) => {
+  try {
+    const response = await instance.get(`/newsletter/activity`, {
+      params: { limit }
+    });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching newsletter activity");
+  }
+};
+
+export const getSystemLogs = async (params = {}) => {
+  try {
+    const response = await instance.get(`/logs`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching system logs");
+  }
+};
+
+export const getLogStats = async () => {
+  try {
+    const response = await instance.get(`/logs/stats`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching log stats");
+  }
+};
+
+export const cleanupLogs = async (days = 30) => {
+  try {
+    const response = await instance.delete(`/logs/cleanup`, {
+      data: { days }
+    });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error cleaning up logs");
+  }
+};
+
+// Reward Settings API functions
+export const getRewardSettings = async () => {
+  try {
+    const response = await instance.get(`/rewards/settings`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching reward settings");
+  }
+};
+
+export const updateRewardSettings = async (settings) => {
+  try {
+    const response = await instance.put(`/rewards/settings`, { settings });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating reward settings");
+  }
+};
+
+export const resetRewardSettings = async () => {
+  try {
+    const response = await instance.post(`/rewards/settings/reset`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error resetting reward settings");
+  }
+};
+
+export const getRewardSystemStats = async () => {
+  try {
+    const response = await instance.get(`/rewards/stats`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching reward system stats");
+  }
+};
+
+export const bulkUpdateRewardStatus = async (rewardIds, isActive) => {
+  try {
+    const response = await instance.post(`/rewards/bulk-update`, { rewardIds, isActive });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error bulk updating rewards");
   }
 };

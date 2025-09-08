@@ -31,23 +31,26 @@ const createUser = async (userData) => {
   const { username, email, phoneNumber, password, source, referrerCode } =
     userData;
 
-  const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+  // Convert username to lowercase and remove spaces
+  const processedUsername = username.toLowerCase().replace(/\s+/g, '');
+
+  const existingUser = await User.findOne({ $or: [{ username: processedUsername }, { email }] });
 
   if (existingUser) {
     throw {
       status: 400,
       message:
-        existingUser.username === username
+        existingUser.username === processedUsername
           ? "Username already exists"
           : "Email already exists",
     };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newReferralCode = await generateUniqueReferralCode(username);
+  const newReferralCode = await generateUniqueReferralCode(processedUsername);
 
   const newUser = new User({
-    username,
+    username: processedUsername,
     email,
     phoneNumber,
     referralCode: newReferralCode,

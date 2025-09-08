@@ -42,65 +42,56 @@ const Wallet = ({ data }) => {
     ? (data?.balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : "***";
 
+  // Handle loading state when wallet is being created
+  if (!data && !isDarkMode) {
+    return (
+      <div className="p-6 rounded-xl shadow-sm border border-gray-200 h-full flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-sm text-gray-600">Setting up your wallet...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className={`p-6 rounded-lg shadow-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-[#F7F9FB] text-gray-800'}`}>
-      <div className="flex flex-col md:flex-row items-start justify-between mb-4">
-        <h2 className="text-2xl font-bold flex items-center">
-          <span className="text-lg">₦</span>
-          <span className="text-2xl font-bold">{formattedBalance}</span>
-          <button
-            className="ml-4 focus:outline-none"
-            onClick={toggleBalanceVisibility}
-            aria-label={showBalance ? "Hide balance" : "Show balance"}
-          >
-            {showBalance ? <FaEyeSlash /> : <FaEye />}
-          </button>
-        </h2>
-        <div
-          className="relative inline-block text-left mt-4 md:mt-0"
-          ref={dropdownRef}
+    <div className={`p-6 rounded-xl shadow-sm border h-full flex flex-col ${isDarkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-200'}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+            <span className="text-blue-600 text-lg">💰</span>
+          </div>
+          <div>
+            <h3 className={`text-base font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Wallet Balance</h3>
+          </div>
+        </div>
+        <button
+          onClick={toggleBalanceVisibility}
+          className={`p-1.5 rounded-md transition-colors duration-200 ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          aria-label={showBalance ? "Hide balance" : "Show balance"}
         >
-          <button
-            type="button"
-            className={`inline-flex justify-center w-full px-4 py-2 text-sm font-medium ${isDarkMode ? 'text-white bg-gray-700' : 'text-[#0B2253] bg-white'} border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500`}
-            id="options-menu"
-            aria-expanded={isDropdownOpen}
-            aria-haspopup="true"
-            onClick={handleDropdownToggle}
-          >
-            {selectedCurrency}
-            <FaAngleDown className="w-5 h-5 ml-2" aria-hidden="true" />
-          </button>
-          {isDropdownOpen && (
-            <div className={`absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md ${isDarkMode ? 'bg-gray-700' : 'bg-white'} shadow-lg ring-1 ring-black ring-opacity-5`}>
-              <div
-                className="py-1"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="options-menu"
-              >
-                <a
-                  href="#"
-                  className={`block px-4 py-2 text-sm ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-[#0B2253] hover:bg-gray-100 hover:text-gray-900'}`}
-                  role="menuitem"
-                  onClick={() => handleCurrencyChange("NGN")}
-                >
-                  NGN
-                </a>
-              </div>
-            </div>
-          )}
+          {showBalance ? <FaEyeSlash className="text-gray-500 text-sm" /> : <FaEye className="text-gray-500 text-sm" />}
+        </button>
+      </div>
+
+      <div className="mb-4">
+        <div className="flex items-baseline space-x-1">
+          <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>₦</span>
+          <span className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{formattedBalance}</span>
         </div>
       </div>
-      <button
-        onClick={() => navigate("/wallet")}
-        className={`flex items-center font-bold py-2 px-4 rounded ${isDarkMode ? 'bg-gray-700 text-white hover:bg-blue-600' : 'bg-[#D9E4FB] text-blue-600 hover:bg-blue-300'}`}
-      >
-        <div className="w-4 h-4 rounded-full bg-blue-600 flex justify-center items-center mr-2">
-          <FaBuilding size={10} className="text-white" />
-        </div>
-        Withdraw
-      </button>
+
+      <div className="mt-auto">
+        <button
+          onClick={() => navigate("/wallet")}
+          className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            isDarkMode
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          } shadow-sm hover:shadow-md`}
+        >
+          <FaBuilding className="mr-2 text-sm" />
+          Manage
+        </button>
+      </div>
     </div>
   );
 };

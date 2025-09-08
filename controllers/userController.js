@@ -6,6 +6,7 @@ const { handleServiceError } = require('../middleware/errorHandler');
 const authService = require('../services/authService');
 const userService = require('../services/userService');
 const paymentGatewayService = require('../services/paymentGatewayService');
+const oauthService = require('../services/oauthService');
 
 
 const createUser = async (req, res, next) => {
@@ -172,6 +173,32 @@ const redeemPoints = async (req, res, next) => {
   }
 };
 
+const googleAuth = async (req, res) => {
+  try {
+    const authUrl = oauthService.getGoogleAuthURL();
+    res.redirect(authUrl);
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(500).json({ message: 'Failed to initiate Google authentication' });
+  }
+};
+
+const googleAuthCallback = async (req, res) => {
+  try {
+    const { code } = req.query;
+    const result = await oauthService.handleGoogleCallback(code);
+    console.log('OAuth result:', result);
+
+    // Redirect to frontend with token as query parameter
+    const redirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${result.token}`;
+    res.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Google auth callback error:', error);
+    const errorUrl = `${process.env.CLIENT_URL}/login?error=oauth_failed`;
+    res.redirect(errorUrl);
+  }
+};
+
 module.exports = {
   createUser,
   getReferrals,
@@ -187,4 +214,6 @@ module.exports = {
   deleteBankAccount,
   verifyBankAccount,
   redeemPoints,
+  googleAuth,
+  googleAuthCallback,
 };

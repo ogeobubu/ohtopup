@@ -54,11 +54,17 @@ const userSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
+      required: function() {
+        return !this.googleId; // Phone number required only if not using Google OAuth
+      },
       unique: true,
+      sparse: true,
       trim: true,
       validate: {
-        validator: (v) => /^\+\d{1,3}\d{9,15}$/.test(v),
+        validator: function(v) {
+          if (this.googleId) return true; // Skip validation for OAuth users
+          return /^\+\d{1,3}\d{9,15}$/.test(v);
+        },
         message: (props) => `${props.value} is not a valid phone number!`,
       },
     },
@@ -69,7 +75,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function() {
+        return !this.googleId; // Password required only if not using Google OAuth
+      },
       minlength: 6,
     },
     isVerified: {
@@ -138,15 +146,54 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    totalPoints: {
+      type: Number,
+      default: 0,
+    },
+    weeklyPoints: {
+      type: Number,
+      default: 0,
+    },
+    weeklyTransactions: {
+      type: Number,
+      default: 0,
+    },
     totalReferralPoints: {
       type: Number,
       default: 0,
     },
+    achievements: [{
+      type: {
+        type: String,
+        required: true,
+      },
+      points: {
+        type: Number,
+        required: true,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+      amount: {
+        type: Number,
+        default: 0,
+      },
+    }],
     referralDepositMap: {
       type: Map,
       of: Boolean,
     },
     bankAccounts: [bankAccountSchema],
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    profilePicture: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

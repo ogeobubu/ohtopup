@@ -7,7 +7,11 @@ const sendForgotPasswordEmail = async (email, user, fullName) => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    secure: true,
+    // Use TLS instead of SSL for better compatibility
+    secure: false,
+    tls: {
+      ciphers: 'SSLv3'
+    }
   });
 
   const mailOptions = {

@@ -1,6 +1,15 @@
+import React from "react";
 import { FaWallet } from "react-icons/fa";
 
-const Card = ({ title, balance, color, onClick, isActive }) => {
+interface CardProps {
+  title: string;
+  balance?: number;
+  color: string;
+  onClick: () => void;
+  isActive: boolean;
+}
+
+const Card: React.FC<CardProps> = ({ title, balance, color, onClick, isActive }) => {
   return (
     <button
       onClick={onClick}

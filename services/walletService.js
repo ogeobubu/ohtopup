@@ -4,6 +4,9 @@ const Wallet = require("../model/Wallet");
 const Transaction = require("../model/Transaction");
 const User = require("../model/User");
 const axios = require("axios");
+require("dotenv").config();
+
+console.log(process.env.PAYSTACK_SECRET_KEY)
 
 const checkWalletForDebit = (wallet, amount) => {
     if (!wallet) {
@@ -121,13 +124,13 @@ const handleReferralDepositReward = async (userId, amount) => {
            return;
       }
 
-      referrer.points = (referrer.points || 0) + 10;
+      referrer.points = (referrer.points || 0) + 500;
       referrer.referredUsersRewardedForDeposit = referrer.referredUsersRewardedForDeposit || [];
       referrer.referredUsersRewardedForDeposit.push(userId);
 
 
       await referrer.save();
-      console.log(`Rewarded referrer ${referrer._id} (code ${referrer.referralCode}) 10 points for referee ${userId}'s first qualifying deposit.`);
+      console.log(`Rewarded referrer ${referrer._id} (code ${referrer.referralCode}) 500 points for referee ${userId}'s first qualifying deposit.`);
 
     } else {
         console.log(`User ${userId} has referrerCode ${user.referrerCode} but referrer not found.`);
@@ -292,6 +295,26 @@ const initiatePaystackTransfer = async (transferData) => {
     }
 };
 
+const verifyBankAccount = async (accountNumber, bankCode) => {
+    try {
+        const response = await axios.get(
+          `https://api.paystack.co/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            },
+          }
+        );
+         if (!response.data || !response.data.status || !response.data.data) {
+             throw new Error("Paystack bank account verification failed: Invalid response");
+         }
+        return response.data.data;
+    } catch (error) {
+         console.error("Error verifying bank account:", error.response?.data || error.message);
+         throw new Error(`Paystack Bank Account Verification Error: ${error.response?.data?.message || error.message}`);
+    }
+};
+
 module.exports = {
   checkWalletForDebit,
   debitWallet,
@@ -310,4 +333,5 @@ module.exports = {
   fetchPaystackTransaction,
   createPaystackRecipient,
   initiatePaystackTransfer,
+  verifyBankAccount,
 };

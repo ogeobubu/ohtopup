@@ -3,6 +3,7 @@ const dbService = require("../services/dbService");
 const walletService = require("../services/walletService");
 const vtpassService = require("../services/vtpassService");
 const transactionService = require("../services/transactionService");
+const { Provider } = require("../model/Provider");
 const { generateRequestId } = require("../utils");
 
 const purchaseCable = async (req, res, next) => {
@@ -23,9 +24,18 @@ const purchaseCable = async (req, res, next) => {
 
     walletService.checkWalletForDebit(wallet, amount);
 
-    const VTPASS_URL = process.env.VTPASS_URL;
-    const VTPASS_API_KEY = process.env.VTPASS_API_KEY;
-    const VTPASS_SECRET_KEY = process.env.VTPASS_SECRET_KEY;
+    // Get active cable provider
+    const provider = await Provider.findOne({
+      isActive: true,
+      supportedServices: "cable"
+    });
+
+    if (!provider) {
+      return next({
+        status: 503,
+        message: "No active cable provider available. Please try again later.",
+      });
+    }
 
     const request_id = generateRequestId();
     if (!request_id) {
@@ -35,22 +45,31 @@ const purchaseCable = async (req, res, next) => {
       });
     }
 
-    const apiRequestData = {
-      request_id,
-      serviceID,
-      billersCode,
-      variation_code,
-      amount,
-      phone,
-      subscription_type,
-    };
+    let apiResponse;
 
-    const vtpassResponseData = await vtpassService.makePayment(
-      VTPASS_URL,
-      VTPASS_API_KEY,
-      VTPASS_SECRET_KEY,
-      apiRequestData
-    );
+    // Route to appropriate provider service
+    if (provider.name === 'vtpass') {
+      vtpassService.setProvider(provider);
+
+      const apiRequestData = {
+        request_id,
+        serviceID,
+        billersCode,
+        variation_code,
+        amount,
+        phone,
+        subscription_type,
+      };
+
+      apiResponse = await vtpassService.makePayment(apiRequestData);
+    } else {
+      return next({
+        status: 400,
+        message: `Unsupported provider: ${provider.name}`,
+      });
+    }
+
+    const vtpassResponseData = apiResponse;
 
     const newTransaction = transactionService.processPaymentApiResponse(
       vtpassResponseData,

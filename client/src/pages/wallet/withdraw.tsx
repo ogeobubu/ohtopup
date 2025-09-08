@@ -8,13 +8,46 @@ import { withdrawFunds, withdrawFundsAuthorization } from "../../api";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
+// TypeScript interfaces
+interface BankAccount {
+  accountNumber: string;
+  accountName: string;
+  bankName: string;
+  bankCode: string;
+}
+
+interface User {
+  _id: string;
+  email: string;
+  username?: string;
+  bankAccounts?: BankAccount[];
+}
+
+interface WalletData {
+  balance: number;
+}
+
+interface Rates {
+  withdrawalRate: number;
+}
+
+interface WithdrawProps {
+  handleShowBanks: () => void;
+  walletData: WalletData;
+  user: User;
+  closeModal: () => void;
+  isDarkMode: boolean;
+  rates: Rates;
+  formatNairaAmount: (amount: number) => string;
+}
+
 const Spinner = () => (
   <div className="flex items-center justify-center">
     <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 );
 
-const Withdraw = ({
+const Withdraw: React.FC<WithdrawProps> = ({
   handleShowBanks,
   walletData,
   user,
@@ -112,7 +145,7 @@ const Withdraw = ({
       });
 
       toast.success("Withdrawal successful!");
-      await queryClient.invalidateQueries(["wallet"]);
+      await queryClient.invalidateQueries({ queryKey: ["wallet"] });
       closeModal();
     } catch (error) {
       handleError(error);
