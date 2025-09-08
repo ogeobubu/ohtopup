@@ -30,8 +30,8 @@ app.use(
         scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https://www.googleapis.com"],
-        frameSrc: ["'none'"],
+        connectSrc: ["'self'", "https://www.googleapis.com", "https://api.paystack.co", "https://checkout.paystack.com"],
+        frameSrc: ["'self'", "https://checkout.paystack.com"],
         objectSrc: ["'none'"],
       },
     },
