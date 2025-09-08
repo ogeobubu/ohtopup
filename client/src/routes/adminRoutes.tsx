@@ -12,7 +12,6 @@ import Waitlist from "../admin/pages/waitlist";
 import Utilities from "../admin/pages/utilities";
 import Support from "../admin/pages/support";
 import Newsletter from "../admin/pages/newsletter";
-import SystemLogs from "../admin/pages/logs";
 import AdminRanking from "../admin/pages/ranking";
 import AdminDiceGame from "../admin/pages/dice";
 import ProviderManagement from "../admin/pages/providers";
@@ -73,10 +72,6 @@ const AdminRoutes = {
     {
       path: "newsletter",
       element: <Newsletter />,
-    },
-    {
-      path: "logs",
-      element: <SystemLogs />,
     },
     {
       path: "ranking",
