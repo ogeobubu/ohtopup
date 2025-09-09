@@ -158,6 +158,13 @@ const processPaymentApiResponse = async (
     ...(apiResponseData && { providerResponse: apiResponseData }),
     transactionType,
 
+    // Enhanced VTPass error details for admin debugging
+    ...(apiResponseData?.code && { vtpassResponseCode: apiResponseData.code }),
+    ...(apiResponseData?.response_description && { vtpassResponseDescription: apiResponseData.response_description }),
+    ...(apiResponseData?.content?.transactions?.transactionId && { vtpassTransactionId: apiResponseData.content.transactions.transactionId }),
+    ...(apiResponseData?.content?.transactions?.status && { vtpassTransactionStatus: apiResponseData.content.transactions.status }),
+    ...(apiResponseData?.requestId && { vtpassRequestId: apiResponseData.requestId }),
+
     // Commission fields for airtime
     ...(commissionAmount && { commissionAmount }),
     ...(adjustedAmount && { adjustedAmount }),
@@ -300,6 +307,13 @@ const handlePaymentOutcome = async (
         ...(transaction.subscription_type && {
           subscription_type: transaction.subscription_type,
         }),
+        // Include VTPass error details for admin debugging
+        ...(transaction.vtpassResponseCode && { vtpassResponseCode: transaction.vtpassResponseCode }),
+        ...(transaction.vtpassResponseDescription && { vtpassResponseDescription: transaction.vtpassResponseDescription }),
+        ...(transaction.vtpassTransactionId && { vtpassTransactionId: transaction.vtpassTransactionId }),
+        ...(transaction.vtpassTransactionStatus && { vtpassTransactionStatus: transaction.vtpassTransactionStatus }),
+        ...(transaction.vtpassRequestId && { vtpassRequestId: transaction.vtpassRequestId }),
+        ...(transaction.providerResponse && { providerResponse: transaction.providerResponse }),
       },
     };
   }
@@ -426,6 +440,13 @@ const handlePaymentOutcome = async (
         ...(transaction.subscription_type && {
           subscription_type: transaction.subscription_type,
         }),
+        // Include VTPass error details for admin debugging
+        ...(transaction.vtpassResponseCode && { vtpassResponseCode: transaction.vtpassResponseCode }),
+        ...(transaction.vtpassResponseDescription && { vtpassResponseDescription: transaction.vtpassResponseDescription }),
+        ...(transaction.vtpassTransactionId && { vtpassTransactionId: transaction.vtpassTransactionId }),
+        ...(transaction.vtpassTransactionStatus && { vtpassTransactionStatus: transaction.vtpassTransactionStatus }),
+        ...(transaction.vtpassRequestId && { vtpassRequestId: transaction.vtpassRequestId }),
+        ...(transaction.providerResponse && { providerResponse: transaction.providerResponse }),
       },
       newBalance: wallet.balance,
     };
@@ -554,6 +575,36 @@ function getVTPassErrorDetails(transaction) {
         message: 'Transaction failed',
         userMessage: 'Your airtime purchase could not be completed. Please try again.',
         errorType: 'transaction_failed',
+        canRetry: true
+      },
+      '016': {
+        message: 'Transaction failed',
+        userMessage: 'Your airtime purchase failed. This could be due to insufficient funds or network issues. Please try again.',
+        errorType: 'transaction_failed',
+        canRetry: true
+      },
+      '017': {
+        message: 'Transaction declined',
+        userMessage: 'Your airtime purchase was declined. Please check your account balance and try again.',
+        errorType: 'transaction_declined',
+        canRetry: true
+      },
+      '018': {
+        message: 'Transaction timeout',
+        userMessage: 'Your transaction timed out. Please try again.',
+        errorType: 'transaction_timeout',
+        canRetry: true
+      },
+      '019': {
+        message: 'Service unavailable',
+        userMessage: 'The airtime service is temporarily unavailable. Please try again in a few minutes.',
+        errorType: 'service_unavailable',
+        canRetry: true
+      },
+      '020': {
+        message: 'Invalid amount',
+        userMessage: 'The purchase amount is invalid. Please check the amount and try again.',
+        errorType: 'invalid_amount',
         canRetry: true
       }
     };

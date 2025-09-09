@@ -374,10 +374,49 @@ const AdminTransactionDetail = ({ isDarkMode }) => {
           </div>
         )}
 
+        {/* VTPass Error Details (Admin Only) */}
+        {(transaction.vtpassResponseCode || transaction.vtpassResponseDescription || transaction.vtpassTransactionId) && (
+          <div className={`rounded-xl shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className="text-lg font-bold mb-4 text-red-600 dark:text-red-400">VTPass Error Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {transaction.vtpassResponseCode && (
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Response Code</p>
+                  <p className="font-semibold text-red-600 dark:text-red-400">{transaction.vtpassResponseCode}</p>
+                </div>
+              )}
+              {transaction.vtpassResponseDescription && (
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Response Description</p>
+                  <p className="font-semibold text-red-600 dark:text-red-400">{transaction.vtpassResponseDescription}</p>
+                </div>
+              )}
+              {transaction.vtpassTransactionId && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">VTPass Transaction ID</p>
+                  <p className="font-semibold text-blue-600 dark:text-blue-400 font-mono">{transaction.vtpassTransactionId}</p>
+                </div>
+              )}
+              {transaction.vtpassTransactionStatus && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Transaction Status</p>
+                  <p className="font-semibold text-yellow-600 dark:text-yellow-400">{transaction.vtpassTransactionStatus}</p>
+                </div>
+              )}
+              {transaction.vtpassRequestId && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">VTPass Request ID</p>
+                  <p className="font-semibold text-purple-600 dark:text-purple-400 font-mono">{transaction.vtpassRequestId}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Provider Response (Admin Only) */}
         {transaction.providerResponse && (
           <div className={`rounded-xl shadow-lg p-6 mb-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className="text-lg font-bold mb-4">Provider Response</h3>
+            <h3 className="text-lg font-bold mb-4">Full Provider Response</h3>
             <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
               <pre className="text-sm overflow-x-auto">
                 {JSON.stringify(transaction.providerResponse, null, 2)}

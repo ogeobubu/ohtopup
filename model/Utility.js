@@ -120,6 +120,22 @@ const utilitySchema = new mongoose.Schema(
        type: String,
        enum: ['data', 'airtime', 'cable', 'electricity'],
        default: 'data'
+     },
+     // Enhanced VTPass error details for admin debugging
+     vtpassResponseCode: {
+       type: String, // VTPass response code (e.g., '016')
+     },
+     vtpassResponseDescription: {
+       type: String, // VTPass response description
+     },
+     vtpassTransactionId: {
+       type: String, // VTPass transaction ID
+     },
+     vtpassTransactionStatus: {
+       type: String, // VTPass transaction status
+     },
+     vtpassRequestId: {
+       type: String, // VTPass request ID
      }
   },
   { timestamps: true }

@@ -1,6 +1,8 @@
+require("dotenv").config()
 const { Provider, NetworkProvider } = require("../model/Provider");
 const vtpassService = require("../services/vtpassService");
 const clubkonnectService = require("../services/clubkonnectService");
+const { createLog } = require("./systemLogController");
 
 // Get all providers
 const getAllProviders = async (req, res) => {
@@ -759,6 +761,234 @@ const getAllDataPlans = async (req, res) => {
   }
 };
 
+// Get VTPass credentials for admin configuration
+const getVTPassCredentials = async (req, res) => {
+  try {
+    const provider = await Provider.findOne({ name: 'vtpass' });
+
+    if (!provider) {
+      return res.status(404).json({
+        message: "VTPass provider not found. Please create the VTPass provider first."
+      });
+    }
+
+    // Return credentials for admin configuration
+    res.status(200).json({
+      message: "VTPass credentials retrieved successfully",
+      credentials: {
+        apiKey: provider.credentials.apiKey,
+        publicKey: provider.credentials.publicKey,
+        secretKey: provider.credentials.secretKey,
+        baseUrl: provider.baseUrl
+      },
+      providerId: provider._id,
+      isActive: provider.isActive,
+      isDefault: provider.isDefault
+    });
+  } catch (error) {
+    console.error("Error fetching VTPass credentials:", error);
+    res.status(500).json({ message: "Error fetching VTPass credentials" });
+  }
+};
+
+// Update VTPass credentials
+const updateVTPassCredentials = async (req, res) => {
+  try {
+    const { apiKey, publicKey, secretKey, baseUrl } = req.body;
+
+    // Validate required fields
+    if (!apiKey || !publicKey || !secretKey || !baseUrl) {
+      return res.status(400).json({
+        message: "All VTPass credentials are required: apiKey, publicKey, secretKey, baseUrl"
+      });
+    }
+
+    // Find or create VTPass provider
+    let provider = await Provider.findOne({ name: 'vtpass' });
+
+    if (!provider) {
+      // Create new VTPass provider if it doesn't exist
+      provider = new Provider({
+        name: 'vtpass',
+        displayName: 'VTPass',
+        description: 'VTPass API Provider for utility services',
+        credentials: {
+          apiKey,
+          publicKey,
+          secretKey
+        },
+        baseUrl,
+        supportedServices: ['data', 'airtime', 'cable', 'electricity'],
+        endpoints: {
+          walletBalance: '/api/balance',
+          dataPurchase: '/api/pay',
+          airtimePurchase: '/api/pay',
+          cablePurchase: '/api/pay',
+          electricityPurchase: '/api/pay',
+          queryTransaction: '/api/requery',
+          dataPlans: '/api/service-variations',
+          serviceVariations: '/api/service-variations'
+        }
+      });
+    } else {
+      // Update existing provider credentials
+      provider.credentials.apiKey = apiKey;
+      provider.credentials.publicKey = publicKey;
+      provider.credentials.secretKey = secretKey;
+      provider.baseUrl = baseUrl;
+    }
+
+    await provider.save();
+
+    // Log the credential update
+    await createLog(
+      'info',
+      'VTPass credentials updated by admin',
+      'system',
+      req.user?.id,
+      req.user?.email,
+      {
+        providerId: provider._id,
+        providerName: provider.name,
+        updatedFields: ['apiKey', 'publicKey', 'secretKey', 'baseUrl']
+      },
+      req
+    );
+
+    res.status(200).json({
+      message: "VTPass credentials updated successfully",
+      providerId: provider._id
+    });
+  } catch (error) {
+    console.error("Error updating VTPass credentials:", error);
+
+    // Log the error
+    await createLog(
+      'error',
+      `Failed to update VTPass credentials: ${error.message}`,
+      'system',
+      req.user?.id,
+      req.user?.email,
+      { error: error.message },
+      req
+    );
+
+    res.status(500).json({ message: "Error updating VTPass credentials" });
+  }
+};
+
+// Get ClubKonnect credentials for admin configuration
+const getClubKonnectCredentials = async (req, res) => {
+  try {
+    const provider = await Provider.findOne({ name: 'clubkonnect' });
+
+    if (!provider) {
+      return res.status(404).json({
+        message: "ClubKonnect provider not found. Please create the ClubKonnect provider first."
+      });
+    }
+
+    // Return credentials for admin configuration
+    res.status(200).json({
+      message: "ClubKonnect credentials retrieved successfully",
+      credentials: {
+        userId: provider.credentials.userId,
+        apiKey: provider.credentials.apiKey,
+        baseUrl: provider.baseUrl
+      },
+      providerId: provider._id,
+      isActive: provider.isActive,
+      isDefault: provider.isDefault
+    });
+  } catch (error) {
+    console.error("Error fetching ClubKonnect credentials:", error);
+    res.status(500).json({ message: "Error fetching ClubKonnect credentials" });
+  }
+};
+
+// Update ClubKonnect credentials
+const updateClubKonnectCredentials = async (req, res) => {
+  try {
+    const { userId, apiKey, baseUrl } = req.body;
+
+    // Validate required fields
+    if (!userId || !apiKey || !baseUrl) {
+      return res.status(400).json({
+        message: "All ClubKonnect credentials are required: userId, apiKey, baseUrl"
+      });
+    }
+
+    // Find or create ClubKonnect provider
+    let provider = await Provider.findOne({ name: 'clubkonnect' });
+
+    if (!provider) {
+      // Create new ClubKonnect provider if it doesn't exist
+      provider = new Provider({
+        name: 'clubkonnect',
+        displayName: 'ClubKonnect',
+        description: 'ClubKonnect API Provider for utility services',
+        credentials: {
+          userId,
+          apiKey
+        },
+        baseUrl,
+        supportedServices: ['data', 'airtime', 'cable', 'electricity'],
+        endpoints: {
+          walletBalance: '/APIWalletBalanceV1.asp',
+          dataPurchase: '/APIDatabundleV1.asp',
+          airtimePurchase: '/APIAirtimeV1.asp',
+          cablePurchase: '/APICableV1.asp',
+          electricityPurchase: '/APIElectricityV1.asp',
+          queryTransaction: '/APIQueryV1.asp',
+          cancelTransaction: '/APICancelV1.asp'
+        }
+      });
+    } else {
+      // Update existing provider credentials
+      provider.credentials.userId = userId;
+      provider.credentials.apiKey = apiKey;
+      provider.baseUrl = baseUrl;
+    }
+
+    await provider.save();
+
+    // Log the credential update
+    await createLog(
+      'info',
+      'ClubKonnect credentials updated by admin',
+      'system',
+      req.user?.id,
+      req.user?.email,
+      {
+        providerId: provider._id,
+        providerName: provider.name,
+        updatedFields: ['userId', 'apiKey', 'baseUrl']
+      },
+      req
+    );
+
+    res.status(200).json({
+      message: "ClubKonnect credentials updated successfully",
+      providerId: provider._id
+    });
+  } catch (error) {
+    console.error("Error updating ClubKonnect credentials:", error);
+
+    // Log the error
+    await createLog(
+      'error',
+      `Failed to update ClubKonnect credentials: ${error.message}`,
+      'system',
+      req.user?.id,
+      req.user?.email,
+      { error: error.message },
+      req
+    );
+
+    res.status(500).json({ message: "Error updating ClubKonnect credentials" });
+  }
+};
+
 module.exports = {
   getAllProviders,
   getProviderById,
@@ -783,4 +1013,10 @@ module.exports = {
   getActiveNetworkProviders,
   setActiveProvider,
   getActiveProvider,
+  // VTPass specific functions
+  getVTPassCredentials,
+  updateVTPassCredentials,
+  // ClubKonnect specific functions
+  getClubKonnectCredentials,
+  updateClubKonnectCredentials,
 };

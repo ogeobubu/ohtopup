@@ -95,6 +95,12 @@ const {
   getActiveNetworkProviders,
   setActiveProvider,
   getActiveProvider,
+  // VTPass specific functions
+  getVTPassCredentials,
+  updateVTPassCredentials,
+  // ClubKonnect specific functions
+  getClubKonnectCredentials,
+  updateClubKonnectCredentials,
 } = require("../controllers/providerController");
 
 const {
@@ -201,6 +207,14 @@ router.patch("/providers/:id/default", authUser, authAdmin, setDefaultProvider);
 router.patch("/providers/:id/active", authUser, authAdmin, setActiveProvider);
 router.post("/providers/:id/test", authUser, authAdmin, testProviderConnection);
 router.post("/providers/bulk-update", authUser, authAdmin, bulkUpdateProviderStatus);
+
+// VTPass specific credential management routes
+router.get("/vtpass/credentials", authUser, authAdmin, getVTPassCredentials);
+router.put("/vtpass/credentials", authUser, authAdmin, updateVTPassCredentials);
+
+// ClubKonnect specific credential management routes
+router.get("/clubkonnect/credentials", authUser, authAdmin, getClubKonnectCredentials);
+router.put("/clubkonnect/credentials", authUser, authAdmin, updateClubKonnectCredentials);
 
 // Selected Data Plans routes
 router.get("/selected-data-plans", authUser, authAdmin, getAllSelectedPlans);

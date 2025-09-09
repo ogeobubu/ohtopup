@@ -162,6 +162,7 @@ const buyAirtime = async (req, res, next) => {
     // Route to appropriate provider service with timeout handling
     try {
       if (provider.name === 'vtpass') {
+        // Ensure VTPass service uses the latest provider credentials from database
         vtpassService.setProvider(provider);
 
         // VTPass airtime API request format - corrected for VTPass requirements
@@ -206,12 +207,19 @@ const buyAirtime = async (req, res, next) => {
             error: apiResponse.error,
             responseCode: apiResponse.data?.code,
             transactionStatus: apiResponse.data?.content?.transactions?.status,
-            responseDescription: apiResponse.data?.response_description
+            responseDescription: apiResponse.data?.response_description,
+            fullResponse: apiResponse.data,
+            requestData: {
+              request_id,
+              serviceID: actualServiceId,
+              amount: parseInt(amount),
+              phone: parseInt(billersCode.replace(/\D/g, ''))
+            }
           });
 
           await createLog(
             'error',
-            `VTPass airtime purchase failed: ${apiResponse.error}`,
+            `VTPass airtime purchase failed: ${apiResponse.error} (Code: ${apiResponse.data?.code})`,
             'transaction',
             req.user?.id,
             req.user?.email,
@@ -221,11 +229,33 @@ const buyAirtime = async (req, res, next) => {
               network: networkName,
               requestId: request_id,
               errorType: 'vtpass_transaction_failed',
-              responseCode: apiResponse.data?.code,
-              transactionStatus: apiResponse.data?.content?.transactions?.status,
-              responseDescription: apiResponse.data?.response_description,
-              vtpassResponse: apiResponse.data,
-              billersCode: billersCode.replace(/(\d{3})\d{6}(\d{3})/, '$1******$2')
+              // Enhanced VTPass error details for admin debugging
+              vtpassErrorDetails: {
+                responseCode: apiResponse.data?.code,
+                transactionStatus: apiResponse.data?.content?.transactions?.status,
+                responseDescription: apiResponse.data?.response_description,
+                transactionRef: apiResponse.data?.content?.transactions?.transactionId,
+                requestId: apiResponse.data?.requestId,
+                amount: apiResponse.data?.amount,
+                phone: apiResponse.data?.phone,
+                serviceID: apiResponse.data?.serviceID,
+                // Full response for complete debugging
+                fullVTPassResponse: apiResponse.data,
+                // Request details for correlation
+                requestPayload: {
+                  request_id,
+                  serviceID: actualServiceId,
+                  amount: parseInt(amount),
+                  phone: parseInt(billersCode.replace(/\D/g, ''))
+                }
+              },
+              billersCode: billersCode.replace(/(\d{3})\d{6}(\d{3})/, '$1******$2'),
+              // Additional context for admin troubleshooting
+              providerConfig: {
+                baseUrl: provider.baseUrl,
+                credentialsConfigured: !!provider.credentials,
+                apiKeyConfigured: !!provider.credentials?.apiKey
+              }
             },
             req
           );

@@ -1224,3 +1224,41 @@ export const getManagementWallet = async () => {
     throw new Error(error.response?.data?.message || "Error fetching management wallet");
   }
 };
+
+// VTPass Credential Management API functions
+export const getVTPassCredentials = async () => {
+  try {
+    const response = await instance.get(`/admin/vtpass/credentials`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching VTPass credentials");
+  }
+};
+
+export const updateVTPassCredentials = async (credentials) => {
+  try {
+    const response = await instance.put(`/admin/vtpass/credentials`, credentials);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating VTPass credentials");
+  }
+};
+
+// ClubKonnect Credential Management API functions
+export const getClubKonnectCredentials = async () => {
+  try {
+    const response = await instance.get(`/admin/clubkonnect/credentials`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching ClubKonnect credentials");
+  }
+};
+
+export const updateClubKonnectCredentials = async (credentials) => {
+  try {
+    const response = await instance.put(`/admin/clubkonnect/credentials`, credentials);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating ClubKonnect credentials");
+  }
+};

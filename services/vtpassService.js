@@ -14,13 +14,12 @@ class VTPassService {
   // Initialize with provider credentials
   setProvider(provider) {
     this.provider = provider;
-    this.baseUrl = provider.baseUrl;
-    this.apiKey = provider.credentials.apiKey;
-    this.secretKey = provider.credentials.secretKey;
+    // Use provider credentials if available, otherwise fall back to environment variables
+    this.baseUrl = provider?.baseUrl || process.env.VTPASS_URL || "https://sandbox.vtpass.com";
+    this.apiKey = provider?.credentials?.apiKey || process.env.VTPASS_API_KEY;
+    this.secretKey = provider?.credentials?.secretKey || process.env.VTPASS_SECRET_KEY;
     // Also store public key for GET requests
-    if (provider.credentials.publicKey) {
-      this.publicKey = provider.credentials.publicKey;
-    }
+    this.publicKey = provider?.credentials?.publicKey || process.env.VTPASS_PUBLIC_KEY;
   }
 
   // Check wallet balance

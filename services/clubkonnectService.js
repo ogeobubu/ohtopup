@@ -9,6 +9,8 @@ class ClubkonnectService {
   // Initialize with provider credentials
   setProvider(provider) {
     this.provider = provider;
+    // Use provider credentials if available, otherwise fall back to environment variables
+    this.baseUrl = provider?.baseUrl || "https://www.nellobytesystems.com";
   }
 
   // Check wallet balance
@@ -20,8 +22,8 @@ class ClubkonnectService {
         `${this.baseUrl}/APIWalletBalanceV1.asp`,
         {
           params: {
-            UserID: this.provider.credentials.userId,
-            APIKey: this.provider.credentials.apiKey,
+            UserID: this.provider?.credentials?.userId || process.env.CLUBKONNECT_USER_ID,
+            APIKey: this.provider?.credentials?.apiKey || process.env.CLUBKONNECT_API_KEY,
           },
           timeout: 30000, // 30 seconds timeout
         }
@@ -72,8 +74,8 @@ class ClubkonnectService {
       const startTime = Date.now();
 
       const params = {
-        UserID: this.provider.credentials.userId,
-        APIKey: this.provider.credentials.apiKey,
+        UserID: this.provider?.credentials?.userId || process.env.CLUBKONNECT_USER_ID,
+        APIKey: this.provider?.credentials?.apiKey || process.env.CLUBKONNECT_API_KEY,
         MobileNetwork: networkCode,
         DataPlan: dataPlan,
         MobileNumber: mobileNumber,
@@ -141,8 +143,8 @@ class ClubkonnectService {
       const startTime = Date.now();
 
       const params = {
-        UserID: this.provider.credentials.userId,
-        APIKey: this.provider.credentials.apiKey,
+        UserID: this.provider?.credentials?.userId || process.env.CLUBKONNECT_USER_ID,
+        APIKey: this.provider?.credentials?.apiKey || process.env.CLUBKONNECT_API_KEY,
         MobileNetwork: networkCode,
         Amount: amount,
         MobileNumber: mobileNumber,
@@ -211,8 +213,8 @@ class ClubkonnectService {
       const startTime = Date.now();
 
       const params = {
-        UserID: this.provider.credentials.userId,
-        APIKey: this.provider.credentials.apiKey,
+        UserID: this.provider?.credentials?.userId || process.env.CLUBKONNECT_USER_ID,
+        APIKey: this.provider?.credentials?.apiKey || process.env.CLUBKONNECT_API_KEY,
       };
 
       if (orderId) {
@@ -287,8 +289,8 @@ class ClubkonnectService {
         `${this.baseUrl}/APICancelV1.asp`,
         {
           params: {
-            UserID: this.provider.credentials.userId,
-            APIKey: this.provider.credentials.apiKey,
+            UserID: this.provider?.credentials?.userId || process.env.CLUBKONNECT_USER_ID,
+            APIKey: this.provider?.credentials?.apiKey || process.env.CLUBKONNECT_API_KEY,
             OrderID: orderId,
           },
           timeout: 30000,
@@ -343,8 +345,8 @@ class ClubkonnectService {
         `${this.baseUrl}/APIDatabundlePlansV2.asp`,
         {
           params: {
-            UserID: this.provider.credentials.userId,
-            APIKey: this.provider.credentials.apiKey,
+            UserID: this.provider?.credentials?.userId || process.env.CLUBKONNECT_USER_ID,
+            APIKey: this.provider?.credentials?.apiKey || process.env.CLUBKONNECT_API_KEY,
           },
           timeout: 30000,
         }

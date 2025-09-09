@@ -45,6 +45,10 @@ import {
   updateAirtimeLimits,
   getElectricitySettings,
   updateElectricitySettings,
+  getVTPassCredentials,
+  updateVTPassCredentials,
+  getClubKonnectCredentials,
+  updateClubKonnectCredentials,
 } from "../../../api";
 
 const ProviderManagement = () => {
@@ -260,6 +264,8 @@ const ProviderManagement = () => {
 
   const tabs = [
     { id: "providers", label: "3rd Party APIs", icon: FaServer },
+    { id: "vtpass", label: "VTPass Config", icon: FaBolt },
+    { id: "clubkonnect", label: "ClubKonnect Config", icon: FaServer },
     { id: "airtime", label: "Airtime Management", icon: FaNetworkWired },
     { id: "electricity", label: "Electricity Management", icon: FaBolt },
     { id: "data-plans", label: "Data Plans", icon: FaNetworkWired },
@@ -703,6 +709,16 @@ const ProviderManagement = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* VTPass Configuration Tab */}
+        {activeTab === "vtpass" && (
+          <VTPassCredentialsForm isDarkMode={isDarkMode} />
+        )}
+
+        {/* ClubKonnect Configuration Tab */}
+        {activeTab === "clubkonnect" && (
+          <ClubKonnectCredentialsForm isDarkMode={isDarkMode} />
         )}
 
         {/* Airtime Management Tab */}
@@ -2021,6 +2037,447 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
   );
 };
 
+// VTPass Credentials Form Component
+const VTPassCredentialsForm = ({ isDarkMode }) => {
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [credentials, setCredentials] = useState({
+    apiKey: '',
+    publicKey: '',
+    secretKey: '',
+    baseUrl: 'https://vtpass.com'
+  });
+
+  const queryClient = useQueryClient();
+
+  const { data: vtpassData, isLoading: vtpassLoading } = useQuery({
+    queryKey: ['vtpass-credentials'],
+    queryFn: getVTPassCredentials,
+    staleTime: 30000,
+  });
+
+  const updateCredentialsMutation = useMutation({
+    mutationFn: updateVTPassCredentials,
+    onSuccess: () => {
+      toast.success("VTPass credentials updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ['vtpass-credentials'] });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update VTPass credentials");
+    }
+  });
+
+  useEffect(() => {
+    if (vtpassData?.credentials) {
+      setCredentials(vtpassData.credentials);
+    }
+  }, [vtpassData]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!credentials.apiKey || !credentials.publicKey || !credentials.secretKey || !credentials.baseUrl) {
+      toast.error("All VTPass credentials are required");
+      return;
+    }
+
+    updateCredentialsMutation.mutate(credentials);
+  };
+
+  const handleChange = (field, value) => {
+    setCredentials(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">VTPass API Configuration</h2>
+        <button
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['vtpass-credentials'] })}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <FaHeartbeat className="text-sm" />
+          Refresh Data
+        </button>
+      </div>
+
+      {/* Status Card */}
+      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+            vtpassData?.isActive ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20'
+          }`}>
+            {vtpassData?.isActive ? (
+              <FaCheck className="text-green-600 text-xl" />
+            ) : (
+              <FaTimes className="text-red-600 text-xl" />
+            )}
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">VTPass Provider Status</h3>
+            <p className="text-sm opacity-75">
+              {vtpassData?.isActive ? 'Active and ready for transactions' : 'Inactive - check configuration'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Credentials Form */}
+      <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">API Credentials</h3>
+            <button
+              type="button"
+              onClick={() => setShowCredentials(!showCredentials)}
+              className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded"
+            >
+              {showCredentials ? <FaEyeSlash /> : <FaEye />}
+              {showCredentials ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          <p className="text-sm opacity-75 mt-1">
+            Configure your VTPass API credentials for secure transaction processing
+          </p>
+        </div>
+
+        {vtpassLoading ? (
+          <div className="p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading VTPass credentials...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  VTPass API Key *
+                </label>
+                <input
+                  type={showCredentials ? 'text' : 'password'}
+                  value={credentials.apiKey}
+                  onChange={(e) => handleChange('apiKey', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300'
+                  }`}
+                  placeholder="Enter VTPass API Key"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  VTPass Public Key *
+                </label>
+                <input
+                  type={showCredentials ? 'text' : 'password'}
+                  value={credentials.publicKey}
+                  onChange={(e) => handleChange('publicKey', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300'
+                  }`}
+                  placeholder="Enter VTPass Public Key"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  VTPass Secret Key *
+                </label>
+                <input
+                  type={showCredentials ? 'text' : 'password'}
+                  value={credentials.secretKey}
+                  onChange={(e) => handleChange('secretKey', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300'
+                  }`}
+                  placeholder="Enter VTPass Secret Key"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  VTPass Base URL *
+                </label>
+                <input
+                  type="url"
+                  value={credentials.baseUrl}
+                  onChange={(e) => handleChange('baseUrl', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300'
+                  }`}
+                  placeholder="https://vtpass.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <button
+                type="submit"
+                disabled={updateCredentialsMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              >
+                {updateCredentialsMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Updating...
+                  </div>
+                ) : (
+                  'Update Credentials'
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* Information Card */}
+      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <h3 className="text-lg font-semibold mb-4">Important Notes</h3>
+        <div className="space-y-3 text-sm opacity-75">
+          <p>
+            <strong>Security:</strong> These credentials are stored securely in the database and are only accessible to administrators.
+          </p>
+          <p>
+            <strong>Updates:</strong> Changes to credentials take effect immediately for new transactions.
+          </p>
+          <p>
+            <strong>Testing:</strong> Use the "Test Connection" feature in the Providers tab to verify your credentials are working.
+          </p>
+          <p>
+            <strong>Support:</strong> If you encounter issues, check the system logs for detailed error information.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ClubKonnect Credentials Form Component
+const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [credentials, setCredentials] = useState({
+    userId: '',
+    apiKey: '',
+    baseUrl: 'https://www.nellobytesystems.com'
+  });
+
+  const queryClient = useQueryClient();
+
+  const { data: clubkonnectData, isLoading: clubkonnectLoading } = useQuery({
+    queryKey: ['clubkonnect-credentials'],
+    queryFn: getClubKonnectCredentials,
+    staleTime: 30000,
+  });
+
+  const updateCredentialsMutation = useMutation({
+    mutationFn: updateClubKonnectCredentials,
+    onSuccess: () => {
+      toast.success("ClubKonnect credentials updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ['clubkonnect-credentials'] });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update ClubKonnect credentials");
+    }
+  });
+
+  useEffect(() => {
+    if (clubkonnectData?.credentials) {
+      setCredentials(clubkonnectData.credentials);
+    }
+  }, [clubkonnectData]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!credentials.userId || !credentials.apiKey || !credentials.baseUrl) {
+      toast.error("All ClubKonnect credentials are required");
+      return;
+    }
+
+    updateCredentialsMutation.mutate(credentials);
+  };
+
+  const handleChange = (field, value) => {
+    setCredentials(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">ClubKonnect API Configuration</h2>
+        <button
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['clubkonnect-credentials'] })}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <FaHeartbeat className="text-sm" />
+          Refresh Data
+        </button>
+      </div>
+
+      {/* Status Card */}
+      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+            clubkonnectData?.isActive ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20'
+          }`}>
+            {clubkonnectData?.isActive ? (
+              <FaCheck className="text-green-600 text-xl" />
+            ) : (
+              <FaTimes className="text-red-600 text-xl" />
+            )}
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">ClubKonnect Provider Status</h3>
+            <p className="text-sm opacity-75">
+              {clubkonnectData?.isActive ? 'Active and ready for transactions' : 'Inactive - check configuration'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Credentials Form */}
+      <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">API Credentials</h3>
+            <button
+              type="button"
+              onClick={() => setShowCredentials(!showCredentials)}
+              className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded"
+            >
+              {showCredentials ? <FaEyeSlash /> : <FaEye />}
+              {showCredentials ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          <p className="text-sm opacity-75 mt-1">
+            Configure your ClubKonnect API credentials for secure transaction processing
+          </p>
+        </div>
+
+        {clubkonnectLoading ? (
+          <div className="p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading ClubKonnect credentials...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  ClubKonnect User ID *
+                </label>
+                <input
+                  type={showCredentials ? 'text' : 'password'}
+                  value={credentials.userId}
+                  onChange={(e) => handleChange('userId', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300'
+                  }`}
+                  placeholder="Enter ClubKonnect User ID"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  ClubKonnect API Key *
+                </label>
+                <input
+                  type={showCredentials ? 'text' : 'password'}
+                  value={credentials.apiKey}
+                  onChange={(e) => handleChange('apiKey', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300'
+                  }`}
+                  placeholder="Enter ClubKonnect API Key"
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2">
+                  ClubKonnect Base URL *
+                </label>
+                <input
+                  type="url"
+                  value={credentials.baseUrl}
+                  onChange={(e) => handleChange('baseUrl', e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300'
+                  }`}
+                  placeholder="https://www.nellobytesystems.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <button
+                type="submit"
+                disabled={updateCredentialsMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              >
+                {updateCredentialsMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Updating...
+                  </div>
+                ) : (
+                  'Update Credentials'
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* Information Card */}
+      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+        <h3 className="text-lg font-semibold mb-4">Important Notes</h3>
+        <div className="space-y-3 text-sm opacity-75">
+          <p>
+            <strong>Security:</strong> These credentials are stored securely in the database and are only accessible to administrators.
+          </p>
+          <p>
+            <strong>Updates:</strong> Changes to credentials take effect immediately for new transactions.
+          </p>
+          <p>
+            <strong>Testing:</strong> Use the "Test Connection" feature in the Providers tab to verify your credentials are working.
+          </p>
+          <p>
+            <strong>Support:</strong> If you encounter issues, check the system logs for detailed error information.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Airtime Limits Form Component
 const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => {
   const [activeTab, setActiveTab] = useState('global');
@@ -2544,77 +3001,183 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  User ID *
-                </label>
-                <input
-                  type={showCredentials ? 'text' : 'password'}
-                  value={formData.credentials.userId}
-                  onChange={(e) => handleChange('credentials.userId', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
-                  }`}
-                  placeholder="API User ID"
-                  required
-                />
-              </div>
+            {/* VTPass Specific Credentials */}
+            {formData.name === 'vtpass' && (
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 className="text-md font-semibold text-blue-800 dark:text-blue-200 mb-3">
+                  VTPass API Configuration
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-blue-700 dark:text-blue-300">
+                      VTPass API Key *
+                    </label>
+                    <input
+                      type={showCredentials ? 'text' : 'password'}
+                      value={formData.credentials.apiKey}
+                      onChange={(e) => handleChange('credentials.apiKey', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-gray-700 border-gray-600 text-white'
+                          : 'bg-white border-gray-300'
+                      }`}
+                      placeholder="VTPass API Key"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  API Key *
-                </label>
-                <input
-                  type={showCredentials ? 'text' : 'password'}
-                  value={formData.credentials.apiKey}
-                  onChange={(e) => handleChange('credentials.apiKey', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
-                  }`}
-                  placeholder="API Key"
-                  required
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-blue-700 dark:text-blue-300">
+                      VTPass Public Key *
+                    </label>
+                    <input
+                      type={showCredentials ? 'text' : 'password'}
+                      value={formData.credentials.publicKey}
+                      onChange={(e) => handleChange('credentials.publicKey', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-gray-700 border-gray-600 text-white'
+                          : 'bg-white border-gray-300'
+                      }`}
+                      placeholder="VTPass Public Key"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Secret Key
-                </label>
-                <input
-                  type={showCredentials ? 'text' : 'password'}
-                  value={formData.credentials.secretKey}
-                  onChange={(e) => handleChange('credentials.secretKey', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
-                  }`}
-                  placeholder="Secret Key (if required)"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-blue-700 dark:text-blue-300">
+                      VTPass Secret Key *
+                    </label>
+                    <input
+                      type={showCredentials ? 'text' : 'password'}
+                      value={formData.credentials.secretKey}
+                      onChange={(e) => handleChange('credentials.secretKey', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-gray-700 border-gray-600 text-white'
+                          : 'bg-white border-gray-300'
+                      }`}
+                      placeholder="VTPass Secret Key"
+                      required
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Base URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.baseUrl}
-                  onChange={(e) => handleChange('baseUrl', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
-                  }`}
-                  placeholder="https://api.provider.com"
-                />
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-blue-700 dark:text-blue-300">
+                      VTPass Base URL *
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.baseUrl}
+                      onChange={(e) => handleChange('baseUrl', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-lg ${
+                        isDarkMode
+                          ? 'bg-gray-700 border-gray-600 text-white'
+                          : 'bg-white border-gray-300'
+                      }`}
+                      placeholder="https://vtpass.com"
+                      defaultValue="https://vtpass.com"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 text-sm text-blue-600 dark:text-blue-400">
+                  <strong>Note:</strong> These credentials will be stored securely in the database and used for all VTPass API calls.
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Generic Credentials (for other providers) */}
+            {formData.name !== 'vtpass' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    User ID *
+                  </label>
+                  <input
+                    type={showCredentials ? 'text' : 'password'}
+                    value={formData.credentials.userId}
+                    onChange={(e) => handleChange('credentials.userId', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300'
+                    }`}
+                    placeholder="API User ID"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    API Key *
+                  </label>
+                  <input
+                    type={showCredentials ? 'text' : 'password'}
+                    value={formData.credentials.apiKey}
+                    onChange={(e) => handleChange('credentials.apiKey', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300'
+                    }`}
+                    placeholder="API Key"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Secret Key
+                  </label>
+                  <input
+                    type={showCredentials ? 'text' : 'password'}
+                    value={formData.credentials.secretKey}
+                    onChange={(e) => handleChange('credentials.secretKey', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300'
+                    }`}
+                    placeholder="Secret Key (if required)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Public Key
+                  </label>
+                  <input
+                    type={showCredentials ? 'text' : 'password'}
+                    value={formData.credentials.publicKey}
+                    onChange={(e) => handleChange('credentials.publicKey', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300'
+                    }`}
+                    placeholder="Public Key (if required)"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">
+                    Base URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.baseUrl}
+                    onChange={(e) => handleChange('baseUrl', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300'
+                    }`}
+                    placeholder="https://api.provider.com"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Supported Services */}
