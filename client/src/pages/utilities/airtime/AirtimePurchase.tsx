@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
-import { getWallet, getUser, getAirtimeProviders } from "../../../api";
+import { getWallet, getUser, getAirtimeProviders, getAirtimeSettings } from "../../../api";
 import Modal from "../../../admin/components/modal";
 import useAirtimePurchase from "./hooks/useAirtimePurchase";
 import { formatPhoneNumber, formatNairaAmount } from "../../../utils";
@@ -38,6 +38,11 @@ const AirtimePurchase = ({ isDarkMode }) => {
   const { data: providers, isLoading: isProvidersLoading } = useQuery({
     queryKey: ['providers', 'airtime'],
     queryFn: () => getAirtimeProviders(),
+  });
+
+  const { data: airtimeSettings, isLoading: isSettingsLoading } = useQuery({
+    queryKey: ['airtime', 'settings'],
+    queryFn: () => getAirtimeSettings(),
   });
 
   const { mutateAsync } = useAirtimePurchase(() => {
@@ -146,7 +151,31 @@ const AirtimePurchase = ({ isDarkMode }) => {
     }
   };
 
-  const isLoading = isWalletLoading || isProvidersLoading || isUserLoading;
+  // Commission calculation
+  const calculateCommission = (amount, network) => {
+    if (!airtimeSettings?.settings || !amount) {
+      return { commissionAmount: 0, adjustedAmount: amount };
+    }
+
+    // Check for network-specific commission rate first, then fall back to global
+    const networkSettings = airtimeSettings.settings.networks?.[network];
+    const globalSettings = airtimeSettings.settings.global;
+
+    const commissionRate = networkSettings?.airtimeCommissionRate ||
+                          globalSettings?.airtimeCommissionRate || 0;
+
+    const commissionAmount = (amount * commissionRate) / 100;
+    const adjustedAmount = amount - commissionAmount;
+
+    return { commissionAmount, adjustedAmount, commissionRate };
+  };
+
+  const { commissionAmount, adjustedAmount, commissionRate } = calculateCommission(
+    parseFloat(selectedAmount) || 0,
+    selectedNetwork
+  );
+
+  const isLoading = isWalletLoading || isProvidersLoading || isUserLoading || isSettingsLoading;
 
   useEffect(() => {
     setIsModalOpen(true);
@@ -172,7 +201,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
         isDarkMode={isDarkMode}
         isOpen={isModalOpen}
         closeModal={() => setIsModalOpen(false)}
-        size="lg"
+        size="full"
         showCloseButton={false}
         stickyHeader={
           <div className="bg-white">
@@ -196,8 +225,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 </button>
               </div>
 
-              {/* Progress Indicator */}
-              <div className="flex items-center gap-1">
+              {/* Progress Indicator - Desktop */}
+              <div className="hidden md:flex items-center gap-1">
                 {[
                   { step: 1, label: 'Network' },
                   { step: 2, label: 'Amount' },
@@ -224,6 +253,56 @@ const AirtimePurchase = ({ isDarkMode }) => {
                     )}
                   </div>
                 ))}
+              </div>
+
+              {/* Progress Indicator - Mobile (Vertical) */}
+              <div className="md:hidden flex flex-col items-center gap-2">
+                <div className="flex items-center gap-3">
+                  {[
+                    { step: 1, label: 'Network' },
+                    { step: 2, label: 'Amount' },
+                    { step: 3, label: 'Phone' },
+                    { step: 4, label: 'Confirm' }
+                  ].map(({ step, label }) => (
+                    <div key={step} className="flex flex-col items-center gap-1">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${
+                        currentStep >= step
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : currentStep === step
+                          ? 'bg-blue-100 text-blue-600 border-2 border-blue-600'
+                          : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        {currentStep > step ? <FaCheck className="text-sm" /> : step}
+                      </div>
+                      <span className={`text-xs font-medium text-center leading-tight ${
+                        currentStep >= step ? 'text-blue-600' : 'text-gray-500'
+                      }`}>
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Progress Line */}
+                <div className="w-full max-w-xs h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 transition-all duration-300 ease-out rounded-full"
+                    style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+                  />
+                </div>
+
+                {/* Current Step Info */}
+                <div className="text-center mt-1">
+                  <p className="text-sm font-medium text-gray-700">
+                    Step {currentStep} of 4
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {currentStep === 1 && "Choose your network"}
+                    {currentStep === 2 && "Select airtime amount"}
+                    {currentStep === 3 && "Confirm phone number"}
+                    {currentStep === 4 && "Review and purchase"}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -255,10 +334,10 @@ const AirtimePurchase = ({ isDarkMode }) => {
         {isLoading ? (
           <Loader />
         ) : (
-          <div className="flex flex-col bg-white rounded-2xl">
+          <div className="flex flex-col bg-white rounded-2xl pb-8 md:pb-0">
             {/* Step 1: Network Selection */}
             {currentStep === 1 && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Your Network</h3>
                   <p className="text-sm text-gray-600">Select your mobile network provider</p>
@@ -327,7 +406,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Step 2: Amount Selection */}
             {currentStep === 2 && selectedNetwork && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Amount</h3>
                   <p className="text-sm text-gray-600">Select airtime amount for {selectedNetwork?.toUpperCase()}</p>
@@ -368,9 +447,21 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                           <FaCreditCard className="text-blue-600 text-sm" />
                         </div>
-                        <div>
-                          <h4 className="font-bold text-gray-900 text-sm">₦{selectedAmount}</h4>
-                          <p className="text-xs text-gray-600">Airtime amount</p>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <h4 className="font-bold text-gray-900 text-sm">₦{selectedAmount}</h4>
+                            <span className="text-xs text-gray-600">Airtime amount</span>
+                          </div>
+                          {commissionAmount > 0 && (
+                            <div className="text-xs text-green-600 font-medium">
+                              💰 Save ₦{commissionAmount.toFixed(2)} ({commissionRate}%)
+                            </div>
+                          )}
+                          {commissionAmount > 0 && (
+                            <div className="text-xs text-blue-600 font-medium mt-1">
+                              You pay: ₦{adjustedAmount.toFixed(2)}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -402,7 +493,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Step 3: Phone Number Selection */}
             {currentStep === 3 && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Phone Number</h3>
                   <p className="text-sm text-gray-600">Airtime will be sent to this number</p>
@@ -529,7 +620,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Step 4: Confirmation & Purchase */}
             {currentStep === 4 && selectedNetwork && selectedAmount && phoneNumber && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
                   <p className="text-sm text-gray-600">Review your selection and complete the purchase</p>
@@ -560,6 +651,11 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         <div>
                           <div className="font-medium text-gray-900 text-sm">Airtime Amount</div>
                           <div className="text-xs text-gray-600">₦{selectedAmount}</div>
+                          {commissionAmount > 0 && (
+                            <div className="text-xs text-green-600 font-medium">
+                              Commission: -₦{commissionAmount.toFixed(2)} ({commissionRate}%)
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -577,9 +673,11 @@ const AirtimePurchase = ({ isDarkMode }) => {
                     </div>
 
                     <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-3">
-                      <div className="font-bold text-gray-900 text-base">Total Amount</div>
+                      <div className="font-bold text-gray-900 text-base">
+                        {commissionAmount > 0 ? 'Amount to Pay' : 'Total Amount'}
+                      </div>
                       <div className="text-xl font-bold text-blue-600">
-                        ₦{selectedAmount}
+                        ₦{commissionAmount > 0 ? adjustedAmount.toFixed(2) : selectedAmount}
                       </div>
                     </div>
                   </div>
@@ -606,7 +704,14 @@ const AirtimePurchase = ({ isDarkMode }) => {
                     ) : (
                       <div className="flex items-center justify-center gap-1">
                         <FaCreditCard className="text-xs md:text-sm" />
-                        <span>Pay ₦{selectedAmount}</span>
+                        <span>
+                          Pay ₦{commissionAmount > 0 ? adjustedAmount.toFixed(2) : selectedAmount}
+                          {commissionAmount > 0 && (
+                            <span className="text-xs block text-green-600">
+                              (Save ₦{commissionAmount.toFixed(2)})
+                            </span>
+                          )}
+                        </span>
                       </div>
                     )}
                   </button>
@@ -616,7 +721,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Navigation Buttons for other steps */}
             {currentStep < 4 && (
-              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
+              <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-2 md:py-3 mt-3 md:mt-4 pb-12 md:pb-8">
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsModalOpen(false)}
@@ -633,7 +738,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
             {/* Final step navigation */}
             {currentStep === 4 && (
-              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
+              <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-2 md:py-3 mt-3 md:mt-4 pb-12 md:pb-8">
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsModalOpen(false)}

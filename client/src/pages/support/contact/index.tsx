@@ -6,9 +6,9 @@ const Contact = () => {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
   return (
-    <div className={`border border-solid rounded-md p-6 w-full ${isDarkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
-      <h2 className="text-2xl md:text-3xl font-bold mb-4">Contact Us</h2>
-      <p className="my-3 text-gray-500 text-lg md:text-xl">
+    <div className={`border border-solid rounded-md p-4 md:p-6 w-full ${isDarkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
+      <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4">Contact Us</h2>
+      <p className="my-2 md:my-3 text-gray-500 text-base md:text-lg lg:text-xl">
         You can reach us via the following channels:
       </p>
 
@@ -16,11 +16,11 @@ const Contact = () => {
         href="mailto:ohtopup@gmail.com"
         target="_blank"
         rel="noopener noreferrer"
-        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
       >
         <div className="flex items-center">
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 flex justify-center items-center mr-4">
-            <FaEnvelope size={16} md:size={20} className="text-blue-500" />
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
+            <FaEnvelope size={16} className="text-blue-500 md:w-5 md:h-5" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm md:text-base dark:text-white">Email Address</span>
@@ -32,62 +32,62 @@ const Contact = () => {
         </span>
       </a>
 
-      <a 
-        href="https://www.facebook.com" 
-        target="_blank" 
+      <a
+        href="https://www.facebook.com"
+        target="_blank"
         rel="noopener noreferrer"
-        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
       >
         <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-4">
-            <FaFacebook size={20} className="text-blue-600" />
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
+            <FaFacebook size={16} className="text-blue-600" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm md:text-base dark:text-white">Social Media</span>
             <span className="text-gray-600 text-xs md:text-sm dark:text-white">Facebook</span>
           </div>
         </div>
-        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2">
+        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
           ➔
         </span>
       </a>
 
-      <a 
-        href="https://www.x.com" 
-        target="_blank" 
+      <a
+        href="https://www.x.com"
+        target="_blank"
         rel="noopener noreferrer"
-        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
       >
         <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-4">
-            <FaTwitter size={20} className="text-blue-400" />
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
+            <FaTwitter size={16} className="text-blue-400" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm md:text-base dark:text-white">Social Media</span>
             <span className="text-gray-600 text-xs md:text-sm dark:text-white">X (formerly Twitter)</span>
           </div>
         </div>
-        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2">
+        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
           ➔
         </span>
       </a>
 
-      <a 
-        href="https://wa.me/+2348154212889" 
+      <a
+        href="https://wa.me/+2348154212889"
         target="_blank"
         rel="noopener noreferrer"
-        className={`mb-4 p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
       >
         <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-4">
-            <FaWhatsapp size={20} className="text-green-500" />
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
+            <FaWhatsapp size={16} className="text-green-500" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm md:text-base dark:text-white">Chat with Us</span>
             <span className="text-gray-600 text-xs md:text-sm dark:text-white">WhatsApp</span>
           </div>
         </div>
-        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2">
+        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
           ➔
         </span>
       </a>

@@ -5,6 +5,7 @@ const vtpassService = require("../services/vtpassService");
 const clubkonnectService = require("../services/clubkonnectService");
 const transactionService = require("../services/transactionService");
 const { Provider, NetworkProvider } = require("../model/Provider");
+const AirtimeSettings = require("../model/AirtimeSettings");
 const { generateRequestId } = require("../utils");
 const { createLog } = require("./systemLogController");
 const mongoose = require("mongoose");
@@ -13,7 +14,7 @@ const buyData = async (req, res, next) => {
   // Declare variables at function scope to make them available in catch block
   let serviceID, billersCode, variation_code, amount, inputPhone, requestedProvider;
   let user, wallet, provider, request_id, apiResponse, transactionContact;
-  let actualServiceId, networkName, selectedPlanForPurchase, dataPlanSize;
+  let actualServiceId, networkName, selectedPlanForPurchase, dataPlanSize, adjustedAmount, commissionAmount;
 
   try {
     ({ serviceID, billersCode, variation_code, amount, inputPhone, provider: requestedProvider } =
@@ -24,7 +25,8 @@ const buyData = async (req, res, next) => {
     user = await dbService.findUserById(req.user.id);
     wallet = await dbService.findWalletByUserId(req.user.id);
 
-    walletService.checkWalletForDebit(wallet, amount);
+    // Calculate commission and adjusted amount based on network (will be determined later)
+    // We'll calculate this after network determination
 
     // Select provider - use requested provider or default to active provider
     if (requestedProvider) {
@@ -135,6 +137,29 @@ const buyData = async (req, res, next) => {
 
     // Use the correct serviceId from NetworkProvider instead of provider name
     const actualServiceId = correctServiceId;
+
+    // Calculate commission and adjusted amount based on network
+    const airtimeSettings = await AirtimeSettings.find({ isActive: true });
+    const networkSettings = airtimeSettings.find(setting =>
+      setting.type === 'network' && setting.network === networkName
+    );
+    const globalSettings = airtimeSettings.find(setting => setting.type === 'global');
+
+    const commissionRate = networkSettings?.settings?.dataCommissionRate ||
+                          globalSettings?.settings?.dataCommissionRate || 0;
+    commissionAmount = (amount * commissionRate) / 100;
+    adjustedAmount = amount - commissionAmount;
+
+    console.log('Data Purchase Commission calculation:', {
+      originalAmount: amount,
+      network: networkName,
+      commissionRate: commissionRate,
+      commissionAmount: commissionAmount,
+      adjustedAmount: adjustedAmount
+    });
+
+    // Check wallet balance against adjusted amount
+    walletService.checkWalletForDebit(wallet, adjustedAmount);
 
     request_id = generateRequestId();
     if (!request_id) {
@@ -325,7 +350,7 @@ const buyData = async (req, res, next) => {
 
     const newTransaction = await transactionService.processPaymentApiResponse(
       apiResponseData,
-      amount,
+      amount, // Original data plan amount for API
       user._id,
       request_id,
       actualServiceId, // Use correct serviceId for transaction
@@ -336,7 +361,9 @@ const buyData = async (req, res, next) => {
         dataPlan: variation_code,
         dataAmount: selectedPlanForPurchase?.dataAmount || dataPlanSize,
         validity: selectedPlanForPurchase?.validity,
-        transactionType: 'data'
+        transactionType: 'data',
+        commissionAmount: commissionAmount,
+        adjustedAmount: adjustedAmount
       }
     );
 
@@ -346,16 +373,18 @@ const buyData = async (req, res, next) => {
       type: newTransaction.type,
       product_name: newTransaction.product_name,
       status: newTransaction.status,
-      amount: newTransaction.amount
+      amount: newTransaction.amount,
+      commissionAmount: commissionAmount,
+      adjustedAmount: adjustedAmount
     });
 
-    // Process transaction outcome
+    // Process transaction outcome with adjusted amount for wallet deduction
     let result;
     try {
       result = await transactionService.handlePaymentOutcome(
         newTransaction,
         wallet,
-        amount,
+        adjustedAmount, // Use adjusted amount for wallet deduction
         user._id,
         transactionContact
       );

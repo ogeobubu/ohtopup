@@ -23,22 +23,34 @@ const processPaymentApiResponse = async (
     dataPlan,
     dataAmount,
     validity,
-    transactionType = 'data'
+    transactionType = 'data',
+    commissionAmount,
+    adjustedAmount
   } = optionalFields;
   let transactionData;
 
   // Handle different response structures based on provider
   if (apiResponseData?.content?.transactions) {
-    // VTPass response structure
+    // VTPass response structure (data, airtime, cable)
     transactionData = apiResponseData.content.transactions;
+  } else if (apiResponseData?.code === "000" && apiResponseData?.content) {
+    // VTPass electricity response structure
+    transactionData = {
+      status: apiResponseData.content.transactions?.status || 'delivered',
+      type: transactionType,
+      product_name: apiResponseData.content.transactions?.product_name || 'Electricity Purchase',
+      total_amount: apiResponseData.amount || requestedAmount,
+      discount: 0,
+      commission: apiResponseData.content.transactions?.commission || 0,
+    };
   } else if (apiResponseData?.success !== undefined && apiResponseData?.status !== undefined) {
     // Clubkonnect response structure - check for both success and status properties
     const mappedStatus = mapClubkonnectStatus(apiResponseData.status) || 'pending';
 
     transactionData = {
       status: mappedStatus,
-      type: 'data',
-      product_name: `Data Plan (${contactValue})`,
+      type: transactionType || 'data',
+      product_name: `${transactionType === 'data' ? 'Data Plan' : transactionType === 'airtime' ? 'Airtime' : 'Service'} (${contactValue})`,
       total_amount: requestedAmount,
       discount: 0,
       commission: 0,
@@ -83,7 +95,16 @@ const processPaymentApiResponse = async (
   } = transactionData;
 
   // Provide fallback values for required fields if missing from API response
-  const finalProductName = productName || `${transactionType === 'data' ? 'Data Plan' : 'Airtime'} Purchase`;
+  const getProductNameFallback = (type) => {
+    switch (type) {
+      case 'data': return 'Data Plan Purchase';
+      case 'airtime': return 'Airtime Purchase';
+      case 'cable': return 'Cable TV Purchase';
+      case 'electricity': return 'Electricity Purchase';
+      default: return 'Service Purchase';
+    }
+  };
+  const finalProductName = productName || getProductNameFallback(transactionType);
   const finalTotalAmount = totalAmount || requestedAmount;
   const finalCommissionRate = commissionRate || 0;
   const finalDiscount = discount !== undefined ? discount : 0;
@@ -124,7 +145,7 @@ const processPaymentApiResponse = async (
     user: userId,
     transactionDate: new Date(),
     discount: finalDiscount,
-    commissionRate: finalCommissionRate,
+    commissionRate: commissionAmount ? (commissionAmount / requestedAmount) * 100 : finalCommissionRate, // Store as percentage
     paymentMethod,
 
     // Enhanced data purchase fields
@@ -136,6 +157,10 @@ const processPaymentApiResponse = async (
     ...(apiResponseData?.status && { providerStatus: apiResponseData.status }),
     ...(apiResponseData && { providerResponse: apiResponseData }),
     transactionType,
+
+    // Commission fields for airtime
+    ...(commissionAmount && { commissionAmount }),
+    ...(adjustedAmount && { adjustedAmount }),
 
     ...(token && { token }),
     ...(units && { units }),
@@ -153,6 +178,29 @@ const processPaymentApiResponse = async (
     transactionType: newTransaction.transactionType
   });
 
+  // Ensure the transaction is a proper Mongoose model instance
+  console.log('Transaction Service - Checking transaction object:', {
+    isMongooseModel: newTransaction instanceof Utility,
+    hasSaveMethod: typeof newTransaction.save === 'function',
+    constructorName: newTransaction.constructor.name,
+    prototype: Object.getPrototypeOf(newTransaction)
+  });
+
+  if (!(newTransaction instanceof Utility)) {
+    console.error('Transaction Service - Transaction is not a Mongoose model instance!');
+    console.error('Transaction object details:', newTransaction);
+    throw new Error('Failed to create valid transaction object');
+  }
+
+  // Verify save method exists
+  if (typeof newTransaction.save !== 'function') {
+    console.error('Transaction Service - Transaction object missing save method!');
+    console.error('Transaction object keys:', Object.keys(newTransaction));
+    console.error('Transaction object prototype:', Object.getPrototypeOf(newTransaction));
+    throw new Error('Transaction object is corrupted');
+  }
+
+  console.log('Transaction Service - Transaction validation passed');
   return newTransaction;
 };
 

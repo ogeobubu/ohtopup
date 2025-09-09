@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { getAllUtilityTransactions, requeryTransaction } from "../../api";
 import TransactionTable from "../../../components/transactionTable";
 import ModernPagination from "../../../components/modernPagination";
@@ -10,6 +11,17 @@ const Transactions = () => {
   const [limit] = useState(10);
   const [activeTab, setActiveTab] = useState("Data Services");
   const [requestId, setRequestId] = useState("");
+  const [userId, setUserId] = useState("");
+  const [searchParams] = useSearchParams();
+
+  // Get userId from URL parameters
+  useEffect(() => {
+    const userIdParam = searchParams.get('userId');
+    if (userIdParam) {
+      setUserId(userIdParam);
+      setActiveTab("Electricity Bill"); // Default to electricity when viewing user transactions
+    }
+  }, [searchParams]);
 
   const handleSearchChange = (e) => {
     setRequestId(e.target.value);
@@ -17,9 +29,9 @@ const Transactions = () => {
   };
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ["transactions", currentPage, limit, activeTab, requestId],
+    queryKey: ["transactions", currentPage, limit, activeTab, requestId, userId],
     queryFn: () =>
-      getAllUtilityTransactions(currentPage, limit, activeTab, requestId),
+      getAllUtilityTransactions(currentPage, limit, activeTab, requestId, userId),
   });
 
   const handleTabClick = (tab) => {
@@ -42,11 +54,11 @@ const Transactions = () => {
   };
 
   return (
-    <div className="">
-      <h1 className="text-2xl font-bold mb-5 text-gray-800 dark:text-gray-200">
+    <div className="p-2 md:p-4 space-y-3 md:space-y-4">
+      <h1 className="text-lg md:text-2xl font-bold mb-3 md:mb-5 text-gray-800 dark:text-gray-200">
         Transactions
       </h1>
-      <div className="mb-3 flex md:flex-row flex-col rounded-lg border border-solid max-w-sm border-gray-300 dark:border-gray-600 bg-[#F7F9FB] dark:bg-gray-700 py-1 px-1">
+      <div className="mb-3 flex flex-wrap rounded-lg border border-solid w-full max-w-sm md:max-w-none border-gray-300 dark:border-gray-600 bg-[#F7F9FB] dark:bg-gray-700 py-1 px-1">
         {[
           "Data Services",
           "Airtime Recharge",
@@ -55,10 +67,10 @@ const Transactions = () => {
         ].map((tab) => (
           <button
             key={tab}
-            className={`py-1 px-1 md:w-40 w-full font-medium transition-colors duration-300 ${
+            className={`py-2 px-2 flex-1 md:flex-none md:w-40 font-medium text-xs md:text-sm transition-colors duration-300 ${
               activeTab === tab
-                ? "text-green-500 bg-white rounded-lg w-40 dark:bg-gray-600 dark:text-white"
-                : "text-gray-500 hover:text-gray-800 w-40 dark:text-gray-400 hover:dark:text-gray-200"
+                ? "text-green-500 bg-white rounded-lg dark:bg-gray-600 dark:text-white"
+                : "text-gray-500 hover:text-gray-800 dark:text-gray-400 hover:dark:text-gray-200"
             }`}
             onClick={() => handleTabClick(tab)}
           >
@@ -75,13 +87,13 @@ const Transactions = () => {
         )}
         {data && data.transactions && (
           <>
-            <div className="flex justify-end">
+            <div className="flex justify-start md:justify-end mb-3">
               <input
                 type="text"
                 placeholder="Search by RequestID..."
                 value={requestId}
                 onChange={handleSearchChange}
-                className="border border-gray-300 rounded-md p-2 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white mb-3"
+                className="border border-gray-300 rounded-md px-3 py-2 w-full max-w-xs text-sm focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
               />
             </div>
             <TransactionTable

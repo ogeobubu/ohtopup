@@ -15,7 +15,7 @@ import Newsletter from "../admin/pages/newsletter";
 import AdminRanking from "../admin/pages/ranking";
 import AdminDiceGame from "../admin/pages/dice";
 import ProviderManagement from "../admin/pages/providers";
-import SystemLogs from "../admin/pages/logs";
+import SystemLogs from "../admin/pages/system-logs";
 
 const AdminTransactionDetailWrapper = () => {
   const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);

@@ -59,6 +59,17 @@ const AdminDiceGame = () => {
       maxLossPerHour: 50000,
       maxWinPerHour: 100000,
       autoShutdown: true
+    },
+    manipulation: {
+      enabled: false,
+      mode: 'fair',
+      bias: 0.5,
+      winProbability: 0.0278,
+      targetDice1: 6,
+      targetDice2: 6,
+      seed: '',
+      adminOnly: true,
+      logManipulations: true
     }
   });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -232,49 +243,50 @@ const AdminDiceGame = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 p-2 md:p-0">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <FaGamepad className="text-purple-500" />
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 md:gap-3">
+            <FaGamepad className="text-purple-500 text-lg md:text-xl" />
             Dice Game Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
             Monitor dice game activity, revenue, and player statistics
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => refetchGames()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs md:text-sm"
           >
-            <FaSync className="text-sm" />
-            Refresh
+            <FaSync className="text-xs md:text-sm" />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-            <FaDownload className="text-sm" />
-            Export Data
+          <button className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs md:text-sm">
+            <FaDownload className="text-xs md:text-sm" />
+            <span className="hidden sm:inline">Export Data</span>
           </button>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex space-x-8">
+      <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <nav className="flex space-x-4 md:space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-purple-500 text-purple-600 dark:text-purple-400"
                   : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
-              <tab.icon className="text-sm" />
-              {tab.label}
+              <tab.icon className="text-xs md:text-sm" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
             </button>
           ))}
         </nav>
@@ -283,53 +295,53 @@ const AdminDiceGame = () => {
       {/* Tab Content */}
       <div className="mt-6">
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {/* Stats Cards */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Games</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Games</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                     {statsLoading ? '...' : (diceStats?.stats?.totalGames || 0)}
                   </p>
                 </div>
-                <FaGamepad className="text-purple-500 text-2xl" />
+                <FaGamepad className="text-purple-500 text-lg md:text-2xl" />
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Wins</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Wins</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                     {statsLoading ? '...' : (diceStats?.stats?.totalWins || 0)}
                   </p>
                 </div>
-                <FaTrophy className="text-yellow-500 text-2xl" />
+                <FaTrophy className="text-yellow-500 text-lg md:text-2xl" />
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">House Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">House Revenue</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                     ₦{walletLoading ? '...' : (managementWallet?.balance || 0).toLocaleString()}
                   </p>
                 </div>
-                <FaWallet className="text-green-500 text-2xl" />
+                <FaWallet className="text-green-500 text-lg md:text-2xl" />
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Win Rate</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Win Rate</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                     {statsLoading ? '...' : `${diceStats?.stats?.winRate || 0}%`}
                   </p>
                 </div>
-                <FaChartLine className="text-blue-500 text-2xl" />
+                <FaChartLine className="text-blue-500 text-lg md:text-2xl" />
               </div>
             </div>
           </div>
@@ -337,30 +349,30 @@ const AdminDiceGame = () => {
 
         {activeTab === "games" && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Games</h3>
+            <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Recent Games</h3>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Dice Roll
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Result
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Winnings
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -368,25 +380,25 @@ const AdminDiceGame = () => {
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {gamesLoading ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                      <td colSpan={6} className="px-3 md:px-6 py-3 md:py-4 text-center text-gray-500 dark:text-gray-400">
                         Loading games...
                       </td>
                     </tr>
                   ) : diceGames?.games?.length > 0 ? (
                     diceGames.games.map((game) => (
                       <tr key={game._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate max-w-20 md:max-w-none">
                             {game.user?.username || 'Unknown'}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
                             {game.dice1} + {game.dice2}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-1 md:px-2 py-1 text-xs font-semibold rounded-full ${
                             game.gameResult === 'win'
                               ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                               : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
@@ -394,23 +406,26 @@ const AdminDiceGame = () => {
                             {game.gameResult.toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
                             {game.gameResult === 'win' ? `+₦${game.winnings}` : `-₦${game.entryFee}`}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">
-                            {new Date(game.playedAt).toLocaleString()}
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
+                            {window.innerWidth < 768
+                              ? new Date(game.playedAt).toLocaleDateString()
+                              : new Date(game.playedAt).toLocaleString()
+                            }
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex gap-2">
-                            <button className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors">
-                              <FaEye className="text-sm" />
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="flex gap-1 md:gap-2">
+                            <button className="p-1 md:p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors">
+                              <FaEye className="text-xs md:text-sm" />
                             </button>
-                            <button className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors">
-                              <FaTrash className="text-sm" />
+                            <button className="p-1 md:p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors">
+                              <FaTrash className="text-xs md:text-sm" />
                             </button>
                           </div>
                         </td>
@@ -418,7 +433,7 @@ const AdminDiceGame = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                      <td colSpan={6} className="px-3 md:px-6 py-3 md:py-4 text-center text-gray-500 dark:text-gray-400">
                         No games played yet
                       </td>
                     </tr>
@@ -771,7 +786,7 @@ const AdminDiceGame = () => {
                     className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                   />
                   <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    Alert on Large Wins (≥₦50,000)
+                    Alert on Dice Game Wins
                   </span>
                 </div>
 
@@ -837,6 +852,205 @@ const AdminDiceGame = () => {
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Game Outcome Manipulation */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-red-200 dark:border-red-700">
+              <div className="flex items-center gap-2 mb-6">
+                <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
+                  ⚠️ Game Outcome Manipulation
+                </h3>
+                <span className="text-xs bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 px-2 py-1 rounded">
+                  Admin Only - Use with Caution
+                </span>
+              </div>
+
+              <div className="space-y-6">
+                {/* Enable Manipulation */}
+                <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg border border-red-200 dark:border-red-700">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-red-800 dark:text-red-200">Enable Outcome Manipulation</h4>
+                      <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                        When enabled, game outcomes can be manipulated according to the settings below
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={settings.manipulation.enabled}
+                        onChange={(e) => handleSettingsChange('manipulation.enabled', e.target.checked)}
+                        className="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {settings.manipulation.enabled && (
+                  <>
+                    {/* Manipulation Mode */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Manipulation Mode
+                      </label>
+                      <select
+                        value={settings.manipulation.mode}
+                        onChange={(e) => handleSettingsChange('manipulation.mode', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      >
+                        <option value="fair">Fair Play (No Manipulation)</option>
+                        <option value="biased_win">Biased Towards Wins</option>
+                        <option value="biased_loss">Biased Towards Losses</option>
+                        <option value="fixed_win">Always Win</option>
+                        <option value="fixed_loss">Always Lose</option>
+                        <option value="custom_probability">Custom Win Probability</option>
+                        <option value="specific_dice">Force Specific Dice Values</option>
+                      </select>
+                    </div>
+
+                    {/* Mode-specific settings */}
+                    {(settings.manipulation.mode === 'biased_win' || settings.manipulation.mode === 'biased_loss') && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Bias Factor (0-1)
+                          <span className="text-xs text-gray-500 ml-2">
+                            Higher = stronger {settings.manipulation.mode === 'biased_win' ? 'win' : 'loss'} bias
+                          </span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="1"
+                          value={settings.manipulation.bias}
+                          onChange={(e) => handleSettingsChange('manipulation.bias', parseFloat(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                      </div>
+                    )}
+
+                    {settings.manipulation.mode === 'custom_probability' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Custom Win Probability (0-1)
+                          <span className="text-xs text-gray-500 ml-2">
+                            0.0278 = natural probability (1/36)
+                          </span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.001"
+                          min="0"
+                          max="1"
+                          value={settings.manipulation.winProbability}
+                          onChange={(e) => handleSettingsChange('manipulation.winProbability', parseFloat(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                      </div>
+                    )}
+
+                    {settings.manipulation.mode === 'specific_dice' && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Target Dice 1 (1-6)
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="6"
+                            value={settings.manipulation.targetDice1}
+                            onChange={(e) => handleSettingsChange('manipulation.targetDice1', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Target Dice 2 (1-6)
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="6"
+                            value={settings.manipulation.targetDice2}
+                            onChange={(e) => handleSettingsChange('manipulation.targetDice2', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Random Seed */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Random Seed (Optional)
+                        <span className="text-xs text-gray-500 ml-2">
+                          For reproducible results - leave empty for true randomness
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.manipulation.seed}
+                        onChange={(e) => handleSettingsChange('manipulation.seed', e.target.value)}
+                        placeholder="Enter seed string..."
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      />
+                    </div>
+
+                    {/* Security Options */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={settings.manipulation.adminOnly}
+                          onChange={(e) => handleSettingsChange('manipulation.adminOnly', e.target.checked)}
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                          Admin Only Access
+                        </span>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={settings.manipulation.logManipulations}
+                          onChange={(e) => handleSettingsChange('manipulation.logManipulations', e.target.checked)}
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                          Log All Manipulations
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Current Theoretical Probability */}
+                    <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                      <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Theoretical Win Probability</h4>
+                      <div className="text-sm text-blue-700 dark:text-blue-300">
+                        Current settings result in approximately{' '}
+                        <span className="font-bold">
+                          {(() => {
+                            const mode = settings.manipulation.mode;
+                            switch (mode) {
+                              case 'fair': return '2.78%';
+                              case 'biased_win': return `${(settings.manipulation.bias * 100).toFixed(1)}%`;
+                              case 'biased_loss': return `${((1 - settings.manipulation.bias) * 2.78).toFixed(2)}%`;
+                              case 'fixed_win': return '100%';
+                              case 'fixed_loss': return '0%';
+                              case 'custom_probability': return `${(settings.manipulation.winProbability * 100).toFixed(2)}%`;
+                              case 'specific_dice':
+                                return settings.manipulation.targetDice1 === 6 && settings.manipulation.targetDice2 === 6 ? '100%' : '0%';
+                              default: return '2.78%';
+                            }
+                          })()}
+                        </span>
+                        {' '}win rate
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

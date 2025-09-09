@@ -35,40 +35,40 @@ const Security = () => {
   };
 
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-6 w-full">
-      <h2 className="text-2xl font-bold mb-4">Security</h2>
-      <div className="max-w-sm w-auto bg-[#F7F9FB] dark:bg-gray-800 py-2 px-4 rounded-md">
-        <div className="space-y-8">
-          <div className="flex justify-between items-center">
+    <div className="border border-solid border-gray-200 rounded-md p-4 md:p-6 w-full">
+      <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Security</h2>
+      <div className="max-w-sm w-full bg-[#F7F9FB] dark:bg-gray-800 py-2 px-3 md:px-4 rounded-md">
+        <div className="space-y-6 md:space-y-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
             <div className="flex flex-col gap-1">
-              <span className="text-gray-500">Password</span>
-              <span className="text-blue-900">*******</span>
+              <span className="text-gray-500 text-sm md:text-base">Password</span>
+              <span className="text-blue-900 text-sm md:text-base">*******</span>
             </div>
             <button
               onClick={() => setChangePassword(true)}
-              className="text-blue-400 font-semibold hover:text-blue-600"
+              className="text-blue-400 font-semibold hover:text-blue-600 text-sm md:text-base self-start sm:self-auto"
               aria-label="Change Password"
             >
               Change Password
             </button>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
             <div className="flex flex-col gap-1">
-              <span className="text-gray-500">Transaction Pin</span>
-              <span className="text-blue-900">****</span>
+              <span className="text-gray-500 text-sm md:text-base">Transaction Pin</span>
+              <span className="text-blue-900 text-sm md:text-base">****</span>
             </div>
-            <span className="text-sm font-bold text-red-500">
+            <span className="text-xs md:text-sm font-bold text-red-500 self-start sm:self-auto">
               Not Available
             </span>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
             <div className="flex flex-col gap-1">
-              <span className="text-gray-500">2FA Settings</span>
-              <span className="text-blue-900">
+              <span className="text-gray-500 text-sm md:text-base">2FA Settings</span>
+              <span className="text-blue-900 text-sm md:text-base">
                 Add an extra layer of security
               </span>
             </div>
-            <span className="text-sm font-bold text-red-500">
+            <span className="text-xs md:text-sm font-bold text-red-500 self-start sm:self-auto">
               Not Available
             </span>
           </div>
@@ -76,16 +76,16 @@ const Security = () => {
       </div>
 
       {changePassword && (
-        <div className="fixed top-0 right-0 bottom-0 left-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="fixed top-0 right-0 bg-white shadow-md rounded-md p-6 w-full max-w-md h-screen w-80">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white shadow-md rounded-md p-4 md:p-6 w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
             <button
               onClick={closeModal}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
               aria-label="Close Modal"
             >
-              <FaTimes className="w-5 h-5" />
+              <FaTimes className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <h2 className="text-2xl font-bold mb-4">Update Password</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Update Password</h2>
             <Formik
               initialValues={{
                 oldPassword: '',

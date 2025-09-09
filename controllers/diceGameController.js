@@ -3,6 +3,8 @@ const User = require("../model/User");
 const Wallet = require("../model/Wallet");
 const { createLog } = require("./systemLogController");
 const { awardPoints } = require("./utilityController");
+const { diceManipulationEngine } = require("../utils/diceManipulation");
+const emailService = require("../services/emailService");
 
 // Play dice game
 const playDiceGame = async (req, res) => {
@@ -66,11 +68,31 @@ const playDiceGame = async (req, res) => {
       });
     }
 
-    // Generate dice rolls
-    const dice1 = Math.floor(Math.random() * 6) + 1;
-    const dice2 = Math.floor(Math.random() * 6) + 1;
-    // Check if user wins (double 6)
-    const isWin = dice1 === 6 && dice2 === 6;
+    // Generate dice rolls with manipulation if enabled
+    let diceResult;
+    if (settings.manipulation?.enabled) {
+      // Initialize generator with seed if provided
+      if (settings.manipulation.seed) {
+        diceManipulationEngine.initializeGenerator(settings.manipulation.seed);
+      }
+
+      // Apply manipulation
+      diceResult = await diceManipulationEngine.applyManipulation(
+        settings.manipulation,
+        userId,
+        req
+      );
+    } else {
+      // Fair play - no manipulation
+      diceManipulationEngine.initializeGenerator(); // Reset to fair random
+      diceResult = await diceManipulationEngine.applyManipulation(
+        { mode: 'fair' },
+        userId,
+        req
+      );
+    }
+
+    const { dice1, dice2, isWin, manipulationApplied, manipulationType, error: manipulationError } = diceResult;
 
     const winnings = isWin ? winAmount : 0;
     const gameResult = isWin ? "win" : "lose";
@@ -79,22 +101,7 @@ const playDiceGame = async (req, res) => {
     wallet.balance -= entryFee;
     await wallet.save();
 
-    // If user wins, award points only (no Naira added to wallet)
-    if (isWin) {
-      // Award 1000 points immediately for winning
-      const pointsAwarded = await awardPoints(userId, 'dice_game_win', winAmount);
-      console.log(`Awarded ${pointsAwarded} points to user ${user.username} for winning dice game`);
-
-      // Get updated user data with new points
-      const updatedUser = await User.findById(userId).select('points totalPoints weeklyPoints');
-      console.log(`User ${user.username} new points balance:`, {
-        points: updatedUser.points,
-        totalPoints: updatedUser.totalPoints,
-        weeklyPoints: updatedUser.weeklyPoints
-      });
-    }
-
-    // Create game record
+    // Create game record first
     const game = new DiceGame({
       user: userId,
       entryFee,
@@ -107,6 +114,76 @@ const playDiceGame = async (req, res) => {
 
     await game.save();
 
+    // If user wins, award points only (no Naira added to wallet)
+    if (isWin) {
+      // Award points immediately for winning
+      const pointsAwarded = await awardPoints(userId, 'dice_game_win', winAmount);
+      console.log(`Awarded ${pointsAwarded} points to user ${user.username} for winning dice game`);
+
+      // Get updated user data with new points
+      const updatedUser = await User.findById(userId).select('points totalPoints weeklyPoints');
+      console.log(`User ${user.username} new points balance:`, {
+        points: updatedUser.points,
+        totalPoints: updatedUser.totalPoints,
+        weeklyPoints: updatedUser.weeklyPoints
+      });
+
+      // Send admin notification only when user reaches 5 wins in a day
+      if (settings.notifications?.largeWinAlert) {
+        try {
+          // Count user's wins for today
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+
+          const todaysWins = await DiceGame.countDocuments({
+            user: userId,
+            gameResult: 'win',
+            playedAt: { $gte: today, $lt: tomorrow }
+          });
+
+          // Check if this is exactly the 5th win today
+          if (todaysWins === 5) {
+            // Check if we haven't already sent an email for this user today
+            const emailAlreadySent = await DiceGame.countDocuments({
+              user: userId,
+              gameResult: 'win',
+              playedAt: { $gte: today, $lt: tomorrow },
+              adminEmailSent: true
+            });
+
+            if (emailAlreadySent === 0) {
+              // Send the notification email
+              await emailService.sendDiceWinAdminNotification(process.env.EMAIL_USER, {
+                userName: user.username,
+                userEmail: user.email,
+                dice1,
+                dice2,
+                winAmount,
+                entryFee,
+                gameTime: game.playedAt,
+                manipulationApplied,
+                manipulationType,
+                manipulationMode: settings.manipulation?.mode,
+                seed: settings.manipulation?.seed,
+                dailyWins: todaysWins,
+                message: `User has reached 5 wins today!`
+              });
+
+              // Mark this game as having triggered the email
+              await DiceGame.findByIdAndUpdate(game._id, { adminEmailSent: true });
+
+              console.log(`Admin notification sent for ${user.username} reaching 5 wins today`);
+            }
+          }
+        } catch (emailError) {
+          console.error('Failed to send admin win notification:', emailError);
+          // Don't fail the game if email fails
+        }
+      }
+    }
+
     // Prepare log data
     const logData = {
       gameId: game._id,
@@ -116,13 +193,15 @@ const playDiceGame = async (req, res) => {
       winnings,
       entryFee,
       newBalance: wallet.balance,
+      manipulationApplied,
+      manipulationType,
       timestamp: new Date()
     };
 
     // If user won, include points information in log
     if (isWin) {
       const updatedUser = await User.findById(userId).select('points totalPoints weeklyPoints');
-      logData.pointsAwarded = 1000;
+      logData.pointsAwarded = winAmount;
       logData.newPointsBalance = {
         currentPoints: updatedUser.points,
         totalPoints: updatedUser.totalPoints,
@@ -130,11 +209,16 @@ const playDiceGame = async (req, res) => {
       };
     }
 
-    // Log the game transaction
+    // Log the game transaction with manipulation info
+    const logLevel = manipulationApplied ? 'warning' : (isWin ? 'info' : 'warning');
+    const logMessage = manipulationApplied
+      ? `Dice game ${gameResult} [MANIPULATED:${manipulationType}]: User ${user.username} rolled ${dice1},${dice2} - ${isWin ? `Won ${winAmount} points` : `Lost ₦${entryFee}`}`
+      : `Dice game ${gameResult}: User ${user.username} rolled ${dice1},${dice2} - ${isWin ? `Won ${winAmount} points` : `Lost ₦${entryFee}`}`;
+
     await createLog(
-      isWin ? 'info' : 'warning',
-      `Dice game ${gameResult}: User ${user.username} rolled ${dice1},${dice2} - ${isWin ? `Won 1000 points` : `Lost ₦${entryFee}`}`,
-      'transaction',
+      logLevel,
+      logMessage,
+      manipulationApplied ? 'game_manipulation' : 'transaction',
       userId,
       user.email,
       logData,
@@ -143,13 +227,13 @@ const playDiceGame = async (req, res) => {
 
     // Prepare response data
     const responseData = {
-      message: isWin ? "Congratulations! You won 1000 points!" : "Better luck next time!",
+      message: isWin ? `Congratulations! You won ${winAmount} points!` : "Better luck next time!",
       game: {
         id: game._id,
         dice1,
         dice2,
         isWin,
-        winnings: isWin ? 1000 : 0, // Points won
+        winnings: isWin ? winAmount : 0, // Points won
         entryFee,
         gameResult,
         playedAt: game.playedAt,
@@ -160,13 +244,22 @@ const playDiceGame = async (req, res) => {
     // If user won, include points information
     if (isWin) {
       const updatedUser = await User.findById(userId).select('points totalPoints weeklyPoints');
-      responseData.pointsAwarded = 1000;
+      responseData.pointsAwarded = winAmount;
       responseData.newPointsBalance = {
         currentPoints: updatedUser.points,
         totalPoints: updatedUser.totalPoints,
         weeklyPoints: updatedUser.weeklyPoints
       };
       responseData.transferStatus = "Points transferred immediately to your account";
+    }
+
+    // Include manipulation info only for admins (security)
+    if (req.user?.role === 'admin' && manipulationApplied) {
+      responseData.manipulationInfo = {
+        applied: manipulationApplied,
+        type: manipulationType,
+        mode: settings.manipulation?.mode
+      };
     }
 
     res.status(200).json(responseData);
@@ -718,6 +811,17 @@ const resetDiceGameSettings = async (req, res) => {
         maxLossPerHour: 50000,
         maxWinPerHour: 100000,
         autoShutdown: true
+      },
+      manipulation: {
+        enabled: false,
+        mode: 'fair',
+        bias: 0.5,
+        winProbability: 0.0278,
+        targetDice1: 6,
+        targetDice2: 6,
+        seed: null,
+        adminOnly: true,
+        logManipulations: true
       }
     };
 

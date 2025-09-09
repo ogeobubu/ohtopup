@@ -306,21 +306,83 @@ const verifyElecticity = async (req, res) => {
     type,
   };
 
-  const response = await axios.post(`${VTPASS_URL}/api/merchant-verify`, data, {
-    headers: {
-      "api-key": `${VTPASS_API_KEY}`,
-      "secret-key": `${VTPASS_SECRET_KEY}`,
-    },
-  });
+  try {
+    const response = await axios.post(`${VTPASS_URL}/api/merchant-verify`, data, {
+      headers: {
+        "api-key": `${VTPASS_API_KEY}`,
+        "secret-key": `${VTPASS_SECRET_KEY}`,
+      },
+      timeout: 30000, // 30 second timeout
+    });
 
-  const newData = {
-    Customer_Name: response.data.content.Customer_Name,
-    Address: response.data.content.Address,
-  };
+    const newData = {
+      Customer_Name: response.data.content.Customer_Name,
+      Address: response.data.content.Address,
+    };
 
-  res.status(200).json({
-    data: newData,
-  });
+    res.status(200).json({
+      data: newData,
+    });
+  } catch (error) {
+    console.error("VTPass meter verification error:", error.message);
+
+    // For testing purposes, provide mock data when VTPass is unavailable
+    if (process.env.NODE_ENV === 'development' && (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED')) {
+      console.log("VTPass unavailable, using mock data for testing");
+
+      // Mock response for testing
+      const mockData = {
+        Customer_Name: billersCode === '1111111111111' ? 'TESTMETER1' : 'JOHN DOE',
+        Address: billersCode === '1111111111111' ? 'ABULE EGBA BU ABULE' : '123 MAIN STREET, LAGOS',
+      };
+
+      return res.status(200).json({
+        data: mockData,
+        mock: true, // Indicate this is mock data
+        message: "Using test data - VTPass service unavailable"
+      });
+    }
+    console.error("VTPass meter verification error:", error.message);
+
+    // Handle different types of errors
+    if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      return res.status(503).json({
+        message: "Electricity service is temporarily unavailable. Please try again in a few minutes.",
+        error: "SERVICE_UNAVAILABLE"
+      });
+    }
+
+    if (error.response) {
+      // VTPass returned an error response
+      const statusCode = error.response.status;
+      const errorData = error.response.data;
+
+      if (statusCode === 400) {
+        return res.status(400).json({
+          message: "Invalid meter number or service type. Please check your input.",
+          error: "INVALID_REQUEST"
+        });
+      }
+
+      if (statusCode === 401) {
+        return res.status(503).json({
+          message: "Service authentication failed. Please try again later.",
+          error: "AUTHENTICATION_ERROR"
+        });
+      }
+
+      return res.status(statusCode).json({
+        message: errorData?.response_description || "Meter verification failed",
+        error: "VTPASS_ERROR"
+      });
+    }
+
+    // Network or other errors
+    return res.status(500).json({
+      message: "Unable to verify meter at this time. Please try again.",
+      error: "NETWORK_ERROR"
+    });
+  }
 };
 
 const getAllUtilityTransactions = async (req, res) => {
@@ -337,7 +399,7 @@ const getAllUtilityTransactions = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const { type, requestId } = req.query;
+    const { type, requestId, userId } = req.query;
 
     let query = {};
 
@@ -356,6 +418,10 @@ const getAllUtilityTransactions = async (req, res) => {
 
     if (requestId) {
       query.requestId = { $regex: requestId, $options: "i" };
+    }
+
+    if (userId) {
+      query.user = userId;
     }
 
     let transactions;
@@ -811,7 +877,7 @@ const awardPoints = async (userId, activity, amount = 0) => {
         pointsToAdd = 200; // 100 transactions milestone
         break;
       case 'dice_game_win':
-        pointsToAdd = 1000; // 1000 points for winning dice game
+        pointsToAdd = amount || 1000; // Use the winAmount from admin settings, fallback to 1000
         break;
       default:
         pointsToAdd = 1;

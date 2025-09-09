@@ -323,6 +323,20 @@ const AdminTransactionDetail = ({ isDarkMode }) => {
                   <span className="font-medium">{transaction.providerStatus}</span>
                 </div>
               )}
+              {transaction.token && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Electricity Token:</span>
+                  <span className="font-medium font-mono bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1 rounded text-sm break-all max-w-xs">
+                    {transaction.token}
+                  </span>
+                </div>
+              )}
+              {transaction.units && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Electricity Units:</span>
+                  <span className="font-medium text-blue-600">{transaction.units}</span>
+                </div>
+              )}
             </div>
           </div>
         )}

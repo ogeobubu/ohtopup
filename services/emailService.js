@@ -203,6 +203,80 @@ class EmailService {
         </div>
       `
     });
+
+    this.templates.set('dice-win-admin', {
+      subject: '🎲 Dice Game Win Alert - {{userName}} Won {{winAmount}} Points',
+      html: `
+        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
+          <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">🎲 Dice Game Win Alert</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">A user has won the dice game!</p>
+          </div>
+          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
+              <h3 style="margin-top: 0; color: #28a745;">🎉 Win Details</h3>
+              <div style="display: table; width: 100%; margin-top: 15px;">
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Player:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{userName}} ({{userEmail}})</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Dice Roll:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{dice1}} + {{dice2}} = {{total}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Win Amount:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #28a745; font-weight: bold;">{{winAmount}} Points</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Entry Fee:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #dc3545;">₦{{entryFee}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Game Time:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{gameTime}}</div>
+                </div>
+                {{#manipulationApplied}}
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Manipulation:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #856404; font-weight: bold;">{{manipulationType}} ({{manipulationMode}})</div>
+                </div>
+                {{/manipulationApplied}}
+              </div>
+            </div>
+
+            <div style="background-color: #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h4 style="margin-top: 0; color: #495057;">💰 Revenue Impact</h4>
+              <p style="margin: 10px 0; color: #6c757d;">
+                <strong>House Loss:</strong> ₦{{entryFee}} (entry fee paid but points awarded)<br>
+                <strong>Points Awarded:</strong> {{winAmount}} points to user account
+              </p>
+            </div>
+
+            {{#manipulationApplied}}
+            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              <p style="margin: 0; font-size: 14px; color: #856404;">
+                <strong>⚠️ Manipulation Alert:</strong> This win was generated using {{manipulationType}} mode ({{manipulationMode}}).
+                {{#seed}}Seed: {{seed}}{{/seed}}
+              </p>
+            </div>
+            {{/manipulationApplied}}
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="{{adminDashboardUrl}}" style="background-color: #007bff; color: #fff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">View Admin Dashboard</a>
+            </div>
+
+            <p style="font-size: 12px; color: #888; text-align: center; margin-top: 20px;">
+              This is an automated notification for dice game wins. No action is required unless suspicious activity is detected.
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
+            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
+            <p>OhTopUp Admin System | Lagos, Nigeria</p>
+          </div>
+        </div>
+      `
+    });
   }
 
   // Render template with data
@@ -378,6 +452,25 @@ class EmailService {
     return this.sendTemplate('email-verification', email, {
       userName,
       verificationUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`
+    });
+  }
+
+  // Send dice game win notification to admin
+  async sendDiceWinAdminNotification(adminEmail, winDetails) {
+    return this.sendTemplate('dice-win-admin', adminEmail, {
+      userName: winDetails.userName,
+      userEmail: winDetails.userEmail,
+      dice1: winDetails.dice1,
+      dice2: winDetails.dice2,
+      total: winDetails.dice1 + winDetails.dice2,
+      winAmount: winDetails.winAmount,
+      entryFee: winDetails.entryFee,
+      gameTime: new Date(winDetails.gameTime).toLocaleString(),
+      manipulationApplied: winDetails.manipulationApplied,
+      manipulationType: winDetails.manipulationType,
+      manipulationMode: winDetails.manipulationMode,
+      seed: winDetails.seed,
+      adminDashboardUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/dice`
     });
   }
 

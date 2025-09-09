@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Logo from "../../components/ui/logo";
-import Textarea from "../../components/ui/forms/input";
+import FormInput from "../../components/ui/forms/input";
 import Button from "../../components/ui/forms/button";
 import { forgotUser } from "../../api";
 
@@ -42,6 +42,9 @@ const Forgot = ({ darkMode }) => {
               initialValues={{ email: "" }}
               validationSchema={validationSchema}
               onSubmit={(values, { resetForm }) => {
+                // Store the email for the reset page
+                localStorage.setItem("ohtopup-forgot", JSON.stringify({ email: values.email }));
+
                 mutation.mutate(values, {
                   onSettled: () => {
                     resetForm();
@@ -54,7 +57,7 @@ const Forgot = ({ darkMode }) => {
                   <Field
                     type="email"
                     name="email"
-                    as={Textarea}
+                    as={FormInput}
                     label="Email Address"
                   />
                   <ErrorMessage

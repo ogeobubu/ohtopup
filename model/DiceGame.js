@@ -46,6 +46,10 @@ const diceGameSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    adminEmailSent: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
@@ -124,6 +128,53 @@ const diceGameSettingsSchema = new mongoose.Schema(
         max: 1000000,
       },
       autoShutdown: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    manipulation: {
+      enabled: {
+        type: Boolean,
+        default: false,
+      },
+      mode: {
+        type: String,
+        enum: ['fair', 'biased_win', 'biased_loss', 'fixed_win', 'fixed_loss', 'custom_probability', 'specific_dice'],
+        default: 'fair',
+      },
+      bias: {
+        type: Number,
+        default: 0.5,
+        min: 0,
+        max: 1,
+      },
+      winProbability: {
+        type: Number,
+        default: 0.0278, // 1/36 natural probability
+        min: 0,
+        max: 1,
+      },
+      targetDice1: {
+        type: Number,
+        default: 6,
+        min: 1,
+        max: 6,
+      },
+      targetDice2: {
+        type: Number,
+        default: 6,
+        min: 1,
+        max: 6,
+      },
+      seed: {
+        type: String,
+        default: null,
+      },
+      adminOnly: {
+        type: Boolean,
+        default: true,
+      },
+      logManipulations: {
         type: Boolean,
         default: true,
       },

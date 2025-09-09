@@ -171,50 +171,50 @@ const Referral = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Referral Management</h1>
-        <p className="text-gray-600">Monitor and manage user referral activities and rewards</p>
+      <div className="mb-4 md:mb-6 p-2 md:p-0">
+        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2">Referral Management</h1>
+        <p className="text-gray-600 text-sm md:text-base">Monitor and manage user referral activities and rewards</p>
       </div>
 
       {/* Analytics Cards */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+      <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 px-2 md:px-0">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">Total Referrers</p>
-              <p className="text-2xl font-bold">{totalReferrers}</p>
+              <p className="text-blue-100 text-xs md:text-sm font-medium">Total Referrers</p>
+              <p className="text-lg md:text-2xl font-bold">{totalReferrers}</p>
             </div>
-            <FaUsers className="h-8 w-8 text-blue-200" />
+            <FaUsers className="h-6 w-6 md:h-8 md:w-8 text-blue-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium">Total Referred Users</p>
-              <p className="text-2xl font-bold">{totalReferredUsers}</p>
+              <p className="text-green-100 text-xs md:text-sm font-medium">Total Referred Users</p>
+              <p className="text-lg md:text-2xl font-bold">{totalReferredUsers}</p>
             </div>
-            <FaChartLine className="h-8 w-8 text-green-200" />
+            <FaChartLine className="h-6 w-6 md:h-8 md:w-8 text-green-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm font-medium">Total Points Awarded</p>
-              <p className="text-2xl font-bold">{totalPoints.toLocaleString()}</p>
+              <p className="text-purple-100 text-xs md:text-sm font-medium">Total Points Awarded</p>
+              <p className="text-lg md:text-2xl font-bold">{totalPoints.toLocaleString()}</p>
             </div>
-            <FaCoins className="h-8 w-8 text-purple-200" />
+            <FaCoins className="h-6 w-6 md:h-8 md:w-8 text-purple-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm font-medium">Avg Referrals/User</p>
-              <p className="text-2xl font-bold">{avgReferralsPerUser}</p>
+              <p className="text-orange-100 text-xs md:text-sm font-medium">Avg Referrals/User</p>
+              <p className="text-lg md:text-2xl font-bold">{avgReferralsPerUser}</p>
             </div>
-            <FaTrophy className="h-8 w-8 text-orange-200" />
+            <FaTrophy className="h-6 w-6 md:h-8 md:w-8 text-orange-200" />
           </div>
         </div>
       </div>
@@ -227,44 +227,41 @@ const Referral = () => {
             <p className="text-red-500">Error loading referrals: {error.message}</p>
           ) : referrals?.users.length > 0 ? (
             <div className="overflow-x-auto">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-6">
-                  <div className="text-sm text-gray-600">
-                    {referrals?.users?.length || 0} users found
-                  </div>
-                 
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 px-2 md:px-0">
+                <div className="text-xs md:text-sm text-gray-600">
+                  {referrals?.users?.length || 0} users found
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-none">
                     <input
                       type="search"
                       placeholder="Search by username or referral code"
-                      className="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                      className="border border-gray-300 rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <FaUsers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <FaUsers className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
                   </div>
                   {searchTerm && (
                     <button
-                      className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200"
+                      className="bg-gray-500 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200 text-xs md:text-sm"
                       onClick={handleClearSearch}
                     >
                       Clear
                     </button>
                   )}
                   <button
-                    className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                    className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 md:px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-xs md:text-sm"
                     onClick={() => toast.info("Export functionality coming soon!")}
                   >
-                    <FaDownload className="inline mr-2 h-4 w-4" />
+                    <FaDownload className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
                     Export
                   </button>
                 </div>
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto px-2 md:px-0">
               <Table columns={columns} data={referrals.users} />
-</div>
+              </div>
               <Pagination
                 currentPage={currentPage}
                 totalPages={referrals.totalPages}
@@ -272,26 +269,26 @@ const Referral = () => {
               />
             </div>
           ) : (
-            <div className="border border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-50 to-gray-100">
-              <div className="bg-white rounded-full p-6 mb-6 shadow-lg">
-                <FaUsers className="w-12 h-12 text-gray-400" />
+            <div className="border border-gray-200 rounded-xl p-4 md:p-8 flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-50 to-gray-100 mx-2 md:mx-0">
+              <div className="bg-white rounded-full p-4 md:p-6 mb-4 md:mb-6 shadow-lg">
+                <FaUsers className="w-8 h-8 md:w-12 md:h-12 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Referral Data</h3>
-              <p className="text-gray-500 text-center max-w-md">
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">No Referral Data</h3>
+              <p className="text-gray-500 text-center text-sm md:text-base max-w-md px-2">
                 There are no users with referral activity yet. Users will appear here once they start referring others and earning points.
               </p>
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-lg">
-                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-                  <FaUsers className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Users will register</p>
+              <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 w-full max-w-lg">
+                <div className="bg-white rounded-lg p-3 md:p-4 text-center shadow-sm">
+                  <FaUsers className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mx-auto mb-2" />
+                  <p className="text-xs md:text-sm text-gray-600">Users will register</p>
                 </div>
-                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-                  <FaChartLine className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Users refer others</p>
+                <div className="bg-white rounded-lg p-3 md:p-4 text-center shadow-sm">
+                  <FaChartLine className="w-5 h-5 md:w-6 md:h-6 text-green-500 mx-auto mb-2" />
+                  <p className="text-xs md:text-sm text-gray-600">Users refer others</p>
                 </div>
-                <div className="bg-white rounded-lg p-4 text-center shadow-sm">
-                  <FaCoins className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Points are earned</p>
+                <div className="bg-white rounded-lg p-3 md:p-4 text-center shadow-sm">
+                  <FaCoins className="w-5 h-5 md:w-6 md:h-6 text-purple-500 mx-auto mb-2" />
+                  <p className="text-xs md:text-sm text-gray-600">Points are earned</p>
                 </div>
               </div>
             </div>

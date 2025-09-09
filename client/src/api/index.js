@@ -1,4 +1,5 @@
 import axios from "axios";
+import { store } from "../store";
 
 const API_URL = "/api/users";
 
@@ -41,15 +42,26 @@ const instance = axios.create({
 });
 
 const getToken = () => {
-  // Check current path to determine which token to use
-  const currentPath = window.location.pathname;
+  try {
+    // Check if user is authenticated in Redux state
+    const state = store.getState();
+    const isUserAuthenticated = state.user?.user !== null;
+    const isAdminAuthenticated = state.admin?.user !== null;
 
-  if (currentPath.startsWith('/admin')) {
-    // On admin routes, use admin token
-    return localStorage.getItem("ohtopup-admin-token");
-  } else {
-    // On user routes, use user token
-    return localStorage.getItem("ohtopup-token");
+    // Check current path to determine which token to use
+    const currentPath = window.location.pathname;
+
+    if (currentPath.startsWith('/admin')) {
+      // On admin routes, use admin token only if admin is authenticated
+      return isAdminAuthenticated ? localStorage.getItem("ohtopup-admin-token") : null;
+    } else {
+      // On user routes, use user token only if user is authenticated
+      return isUserAuthenticated ? localStorage.getItem("ohtopup-token") : null;
+    }
+  } catch (error) {
+    // If store is not available or there's an error, don't attach token
+    console.warn("Unable to check authentication state:", error);
+    return null;
   }
 };
 
@@ -370,6 +382,38 @@ export const purchaseAirtime = async (data) => {
   }
 };
 
+export const getAirtimeLimits = async () => {
+  try {
+    const response = await instance.get("/airtime/limits");
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching airtime limits");
+  }
+};
+
+export const getAirtimeSettings = async () => {
+  try {
+    const response = await instance.get("/airtime/settings");
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response.data.message || "Error fetching airtime settings");
+  }
+};
+
+export const updateAirtimeLimits = async (data) => {
+  try {
+    console.log('API call - updateAirtimeLimits - sending data:', data);
+    console.log('API call - updateAirtimeLimits - JSON stringified:', JSON.stringify(data, null, 2));
+    const response = await instance.put("/airtime/limits", data);
+    console.log('API call - updateAirtimeLimits - response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('API call - updateAirtimeLimits - error:', error);
+    console.error('API call - updateAirtimeLimits - error response:', error.response?.data);
+    throw new Error(error.response?.data?.message || "Error updating airtime limits");
+  }
+};
+
 export const getDataVariationCodes = async (id) => {
   try {
     const response = await instance.get(`/data?serviceID=${id}`);
@@ -483,6 +527,66 @@ export const purchaseElectricity = async (data) => {
         error.response.data.error ||
         "Error purchasing electricity"
     );
+  }
+};
+
+export const getAvailableDiscos = async () => {
+  try {
+    const response = await instance.get("/electricity/discos");
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error fetching available discos"
+    );
+  }
+};
+
+export const requeryElectricityTransaction = async (requestId) => {
+  try {
+    const response = await instance.post("/electricity/requery", { request_id: requestId });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Error requerying transaction"
+    );
+  }
+};
+
+export const getElectricitySettings = async () => {
+  try {
+    const response = await instance.get("/electricity/settings");
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching electricity settings");
+  }
+};
+
+export const updateElectricitySettings = async (data) => {
+  try {
+    const response = await instance.put("/electricity/settings", data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating electricity settings");
+  }
+};
+
+export const getElectricityCommissionRate = async (disco) => {
+  try {
+    const response = await instance.get(`/electricity/commission/${disco || ''}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching commission rate");
+  }
+};
+
+export const getElectricityLimits = async (disco) => {
+  try {
+    const response = await instance.get(`/electricity/limits/${disco || ''}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching electricity limits");
   }
 };
 

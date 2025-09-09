@@ -668,51 +668,51 @@ const AdminRanking = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 p-2 md:p-0">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <FaTrophy className="text-yellow-500" />
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 md:gap-3">
+            <FaTrophy className="text-yellow-500 text-lg md:text-xl" />
             Ranking Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
             Manage user rankings, rewards, and competition settings
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => refetch()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs md:text-sm"
           >
-            <FaSync className="text-sm" />
-            Refresh
+            <FaSync className="text-xs md:text-sm" />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
           <button
             onClick={handleExportRankings}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs md:text-sm"
           >
-            <FaDownload className="text-sm" />
-            Export CSV
+            <FaDownload className="text-xs md:text-sm" />
+            <span className="hidden sm:inline">Export CSV</span>
           </button>
           <button
             onClick={() => setShowAddPoints(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs md:text-sm"
           >
-            <FaPlus className="text-sm" />
-            Add Points
+            <FaPlus className="text-xs md:text-sm" />
+            <span className="hidden sm:inline">Add Points</span>
           </button>
         </div>
       </div>
 
       {/* Period Selector */}
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-2 md:gap-4">
         {["weekly", "monthly", "all-time"].map((period) => (
           <button
             key={period}
             onClick={() => setSelectedPeriod(period)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors text-xs md:text-sm ${
               selectedPeriod === period
                 ? "bg-blue-600 text-white"
                 : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -724,20 +724,21 @@ const AdminRanking = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex space-x-8">
+      <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <nav className="flex space-x-4 md:space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-600 dark:text-blue-400"
                   : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
-              <tab.icon className="text-sm" />
-              {tab.label}
+              <tab.icon className="text-xs md:text-sm" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
             </button>
           ))}
         </nav>
@@ -746,53 +747,53 @@ const AdminRanking = () => {
       {/* Tab Content */}
       <div className="mt-6">
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {/* Stats Cards */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Participants</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Participants</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                     {rankingData?.rankings?.length || 0}
                   </p>
                 </div>
-                <FaUsers className="text-blue-500 text-2xl" />
+                <FaUsers className="text-blue-500 text-lg md:text-2xl" />
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Top Performer</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Top Performer</p>
+                  <p className="text-sm md:text-lg font-bold text-gray-900 dark:text-white truncate">
                     {rankingData?.rankings?.[0]?.username || "N/A"}
                   </p>
                 </div>
-                <FaCrown className="text-yellow-500 text-2xl" />
+                <FaCrown className="text-yellow-500 text-lg md:text-2xl" />
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Transactions</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Transactions</p>
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                     {rankingData?.rankings?.reduce((sum, user) => sum + user.transactionCount, 0) || 0}
                   </p>
                 </div>
-                <FaChartLine className="text-green-500 text-2xl" />
+                <FaChartLine className="text-green-500 text-lg md:text-2xl" />
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Next Reset</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Next Reset</p>
+                  <p className="text-lg md:text-lg font-bold text-gray-900 dark:text-white">
                     {rankingData?.countdown ? Math.floor(rankingData.countdown / 86400) + "d" : "N/A"}
                   </p>
                 </div>
-                <FaCalendarAlt className="text-purple-500 text-2xl" />
+                <FaCalendarAlt className="text-purple-500 text-lg md:text-2xl" />
               </div>
             </div>
           </div>
@@ -800,27 +801,27 @@ const AdminRanking = () => {
 
         {activeTab === "leaderboard" && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Current Leaderboard</h3>
+            <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Current Leaderboard</h3>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Rank
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Transactions
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Reward Tier
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Bonus
                     </th>
                   </tr>
@@ -831,31 +832,31 @@ const AdminRanking = () => {
                     const reward = getRewardTier(rank);
                     return (
                       <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             {getRankIcon(rank)}
-                            <span className="ml-2 text-sm font-medium text-gray-900 dark:text-white">
+                            <span className="ml-1 md:ml-2 text-xs md:text-sm font-medium text-gray-900 dark:text-white">
                               #{rank}
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate max-w-20 md:max-w-none">
                             {user.username}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
                             {user.transactionCount}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${reward.color} text-white`}>
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-1 md:px-2 py-1 text-xs font-semibold rounded-full ${reward.color} text-white`}>
                             {reward.tier}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">
+                        <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
+                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
                             {reward.bonus > 0 ? `₦${reward.bonus}` : "N/A"}
                           </div>
                         </td>

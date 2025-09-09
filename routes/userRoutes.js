@@ -70,7 +70,13 @@ const {
 
 const { buyAirtime } = require("../controllers/airtimeController")
 const { buyData, getDataVariations } = require("../controllers/dataController")
-const { purchaseElectricity } = require("../controllers/electricityController")
+const {
+  purchaseElectricity,
+  getElectricitySettings,
+  updateElectricitySettings,
+  getCommissionRate,
+  getAvailableDiscos
+} = require("../controllers/electricityController")
 const { purchaseCable } = require("../controllers/cableController")
 
 const {
@@ -96,6 +102,10 @@ const {
   getVariations,
   getSavedVariationsForPricing,
 } = require("../controllers/variationController");
+
+const {
+  requeryTransactionHandler,
+} = require("../controllers/utilityController");
 
 const {
   getActiveAirtimeNetworkProviders,
@@ -153,6 +163,35 @@ router.post("/cable/verify", auth, verifySmartcard);
 router.post("/cable", auth, purchaseCable);
 router.post("/electricity/verify", auth, verifyElecticity);
 router.post("/electricity", auth, purchaseElectricity);
+router.post("/electricity/requery", auth, requeryTransactionHandler);
+router.get("/electricity/settings", auth, getElectricitySettings);
+router.put("/electricity/settings", auth, updateElectricitySettings);
+router.get("/electricity/commission/:disco?", auth, getCommissionRate);
+router.get("/electricity/discos", auth, getAvailableDiscos);
+router.get("/electricity/limits/:disco?", auth, (req, res) => {
+  // Import electricity settings service
+  const electricitySettingsService = require("../services/electricitySettingsService");
+  const disco = req.params.disco;
+
+  electricitySettingsService.getAmountLimits(disco)
+    .then(result => {
+      if (result.success) {
+        res.status(200).json({
+          message: "Electricity limits retrieved successfully",
+          minAmount: result.minAmount,
+          maxAmount: result.maxAmount
+        });
+      } else {
+        res.status(500).json({
+          message: result.error || "Failed to retrieve electricity limits"
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Error getting electricity limits:", error);
+      res.status(500).json({ message: "Error retrieving electricity limits" });
+    });
+});
 router.get("/utility-transactions", auth, getAllUtilityTransactions);
 router.get("/pricing", getSavedVariationsForPricing);
 

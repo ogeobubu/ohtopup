@@ -62,6 +62,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       indigo: isActive
         ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg"
         : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700",
+      red: isActive
+        ? "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg"
+        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700",
     };
 
     return colorMap[tabs.find(tab => tab.name === tabName)?.color] || colorMap.blue;
@@ -91,7 +94,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
       {/* Desktop: Full width horizontal tabs */}
       <div className="hidden md:block">
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
           {tabs.map((tab, index) => (
             <button
               key={index}

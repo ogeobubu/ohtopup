@@ -5,16 +5,18 @@ const vtpassService = require("../services/vtpassService");
 const clubkonnectService = require("../services/clubkonnectService");
 const transactionService = require("../services/transactionService");
 const { Provider, NetworkProvider } = require("../model/Provider");
+const AirtimeSettings = require("../model/AirtimeSettings");
 const { generateRequestId } = require("../utils");
 const { createLog } = require("./systemLogController");
 
-// Purchase limits configuration
-const PURCHASE_LIMITS = {
+// Default purchase limits (fallback)
+const DEFAULT_PURCHASE_LIMITS = {
   global: {
     minAmount: 50,
     maxAmount: 50000,
     dailyLimit: 100000,
-    monthlyLimit: 500000
+    monthlyLimit: 500000,
+    commissionRate: 0
   },
   networks: {
     mtn: { minAmount: 50, maxAmount: 50000 },
@@ -24,10 +26,15 @@ const PURCHASE_LIMITS = {
   }
 };
 
+// Cache for settings to avoid frequent DB queries
+let settingsCache = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 const buyAirtime = async (req, res, next) => {
   let serviceID, billersCode, amount, inputPhone, requestedProvider;
   let user, wallet, provider, request_id, apiResponse, transactionContact;
-  let actualServiceId, networkName;
+  let actualServiceId, networkName, adjustedAmount, commissionAmount;
 
   try {
     ({ serviceID, amount, phone, provider: requestedProvider } =
@@ -42,7 +49,22 @@ const buyAirtime = async (req, res, next) => {
     // Validate purchase limits
     await validatePurchaseLimits(amount, billersCode, user._id);
 
-    walletService.checkWalletForDebit(wallet, amount);
+    // Calculate commission and adjusted amount based on network
+    const airtimeSettings = await loadAirtimeSettings();
+    const networkSettings = airtimeSettings.networks?.[networkName];
+    const commissionRate = networkSettings?.airtimeCommissionRate || airtimeSettings.global?.airtimeCommissionRate || 0;
+    commissionAmount = (amount * commissionRate) / 100;
+    adjustedAmount = amount - commissionAmount;
+
+    console.log('Commission calculation:', {
+      originalAmount: amount,
+      commissionRate: commissionRate,
+      commissionAmount: commissionAmount,
+      adjustedAmount: adjustedAmount
+    });
+
+    // Check wallet balance against adjusted amount
+    walletService.checkWalletForDebit(wallet, adjustedAmount);
 
     // Select provider - use requested provider or default to active provider
     if (requestedProvider) {
@@ -293,7 +315,7 @@ const buyAirtime = async (req, res, next) => {
     const apiResponseData = apiResponse.success ? apiResponse.data : apiResponse;
     const newTransaction = await transactionService.processPaymentApiResponse(
       apiResponseData,
-      amount,
+      amount, // Original airtime amount for API
       user._id,
       request_id,
       actualServiceId,
@@ -301,15 +323,17 @@ const buyAirtime = async (req, res, next) => {
       {
         provider: provider.name,
         network: networkName,
-        transactionType: 'airtime' // Explicitly set transaction type to airtime
+        transactionType: 'airtime', // Explicitly set transaction type to airtime
+        commissionAmount: commissionAmount,
+        adjustedAmount: adjustedAmount
       }
     );
 
-    // Process transaction outcome
+    // Process transaction outcome with adjusted amount for wallet deduction
     const result = await transactionService.handlePaymentOutcome(
       newTransaction,
       wallet,
-      amount,
+      adjustedAmount, // Use adjusted amount for wallet deduction
       user._id,
       transactionContact
     );
@@ -349,8 +373,46 @@ const buyAirtime = async (req, res, next) => {
   }
 };
 
+// Load airtime settings from database with caching
+const loadAirtimeSettings = async () => {
+  // Check cache first
+  if (settingsCache && cacheTimestamp && (Date.now() - cacheTimestamp) < CACHE_DURATION) {
+    return settingsCache;
+  }
+
+  try {
+    const settings = await AirtimeSettings.find({ isActive: true });
+
+    const limits = {
+      global: { ...DEFAULT_PURCHASE_LIMITS.global },
+      networks: { ...DEFAULT_PURCHASE_LIMITS.networks }
+    };
+
+    // Apply database settings
+    settings.forEach(setting => {
+      if (setting.type === 'global') {
+        limits.global = { ...limits.global, ...setting.settings };
+      } else if (setting.type === 'network' && setting.network) {
+        limits.networks[setting.network] = { ...limits.networks[setting.network], ...setting.settings };
+      }
+    });
+
+    // Update cache
+    settingsCache = limits;
+    cacheTimestamp = Date.now();
+
+    return limits;
+  } catch (error) {
+    console.error('Error loading airtime settings:', error);
+    // Return defaults if database error
+    return DEFAULT_PURCHASE_LIMITS;
+  }
+};
+
 // Validate purchase limits
 const validatePurchaseLimits = async (amount, phoneNumber, userId) => {
+  const PURCHASE_LIMITS = await loadAirtimeSettings();
+
   // Check global limits
   if (amount < PURCHASE_LIMITS.global.minAmount) {
     throw {
@@ -469,9 +531,10 @@ const mapNetworkToClubkonnect = (network) => {
 // Get purchase limits configuration
 const getPurchaseLimits = async (req, res, next) => {
   try {
+    const limits = await loadAirtimeSettings();
     res.status(200).json({
       message: "Purchase limits retrieved successfully",
-      limits: PURCHASE_LIMITS
+      limits
     });
   } catch (error) {
     next({
@@ -484,27 +547,65 @@ const getPurchaseLimits = async (req, res, next) => {
 // Update purchase limits configuration
 const updatePurchaseLimits = async (req, res, next) => {
   try {
+    console.log('Update purchase limits request:', {
+      user: req.user?.id,
+      userRole: req.user?.role,
+      body: req.body,
+      bodyKeys: Object.keys(req.body || {}),
+      hasGlobal: !!req.body?.global,
+      hasNetworks: !!req.body?.networks,
+      globalKeys: req.body?.global ? Object.keys(req.body.global) : [],
+      networksKeys: req.body?.networks ? Object.keys(req.body.networks) : []
+    });
+
     const { global, networks } = req.body;
 
+    // Update global settings
     if (global) {
-      if (global.minAmount !== undefined) PURCHASE_LIMITS.global.minAmount = global.minAmount;
-      if (global.maxAmount !== undefined) PURCHASE_LIMITS.global.maxAmount = global.maxAmount;
-      if (global.dailyLimit !== undefined) PURCHASE_LIMITS.global.dailyLimit = global.dailyLimit;
-      if (global.monthlyLimit !== undefined) PURCHASE_LIMITS.global.monthlyLimit = global.monthlyLimit;
+      await AirtimeSettings.findOneAndUpdate(
+        { type: 'global' },
+        {
+          settings: {
+            minAmount: global.minAmount || DEFAULT_PURCHASE_LIMITS.global.minAmount,
+            maxAmount: global.maxAmount || DEFAULT_PURCHASE_LIMITS.global.maxAmount,
+            dailyLimit: global.dailyLimit || DEFAULT_PURCHASE_LIMITS.global.dailyLimit,
+            monthlyLimit: global.monthlyLimit || DEFAULT_PURCHASE_LIMITS.global.monthlyLimit,
+            airtimeCommissionRate: global.airtimeCommissionRate !== undefined ? global.airtimeCommissionRate : 0,
+            dataCommissionRate: global.dataCommissionRate !== undefined ? global.dataCommissionRate : 0
+          }
+        },
+        { upsert: true, new: true }
+      );
     }
 
+    // Update network-specific settings
     if (networks) {
-      Object.keys(networks).forEach(network => {
-        if (PURCHASE_LIMITS.networks[network]) {
-          if (networks[network].minAmount !== undefined) {
-            PURCHASE_LIMITS.networks[network].minAmount = networks[network].minAmount;
-          }
-          if (networks[network].maxAmount !== undefined) {
-            PURCHASE_LIMITS.networks[network].maxAmount = networks[network].maxAmount;
-          }
+      for (const [network, settings] of Object.entries(networks)) {
+        if (DEFAULT_PURCHASE_LIMITS.networks[network]) {
+          await AirtimeSettings.findOneAndUpdate(
+            { type: 'network', network },
+            {
+              settings: {
+                minAmount: settings.minAmount || DEFAULT_PURCHASE_LIMITS.networks[network].minAmount,
+                maxAmount: settings.maxAmount || DEFAULT_PURCHASE_LIMITS.networks[network].maxAmount,
+                dailyLimit: settings.dailyLimit || DEFAULT_PURCHASE_LIMITS.networks[network].dailyLimit || DEFAULT_PURCHASE_LIMITS.global.dailyLimit,
+                monthlyLimit: settings.monthlyLimit || DEFAULT_PURCHASE_LIMITS.networks[network].monthlyLimit || DEFAULT_PURCHASE_LIMITS.global.monthlyLimit,
+                airtimeCommissionRate: settings.airtimeCommissionRate !== undefined ? settings.airtimeCommissionRate : 0,
+                dataCommissionRate: settings.dataCommissionRate !== undefined ? settings.dataCommissionRate : 0
+              }
+            },
+            { upsert: true, new: true }
+          );
         }
-      });
+      }
     }
+
+    // Clear cache to force reload
+    settingsCache = null;
+    cacheTimestamp = null;
+
+    // Get updated limits
+    const updatedLimits = await loadAirtimeSettings();
 
     // Log the configuration change
     await createLog(
@@ -514,7 +615,7 @@ const updatePurchaseLimits = async (req, res, next) => {
       req.user?.id,
       req.user?.email,
       {
-        newLimits: PURCHASE_LIMITS,
+        newLimits: updatedLimits,
         updatedBy: req.user?.id
       },
       req
@@ -522,9 +623,16 @@ const updatePurchaseLimits = async (req, res, next) => {
 
     res.status(200).json({
       message: "Purchase limits updated successfully",
-      limits: PURCHASE_LIMITS
+      limits: updatedLimits
     });
   } catch (error) {
+    console.error('Error in updatePurchaseLimits:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    });
     next({
       status: 500,
       message: "Unable to update purchase limits"
@@ -809,6 +917,22 @@ const getSystemHealth = async (req, res, next) => {
   }
 };
 
+// Get airtime settings including commission rate
+const getAirtimeSettings = async (req, res, next) => {
+  try {
+    const settings = await loadAirtimeSettings();
+    res.status(200).json({
+      message: "Airtime settings retrieved successfully",
+      settings
+    });
+  } catch (error) {
+    next({
+      status: 500,
+      message: "Unable to retrieve airtime settings"
+    });
+  }
+};
+
 module.exports = {
   buyAirtime,
   getPurchaseLimits,
@@ -820,5 +944,6 @@ module.exports = {
   retryFailedTransaction,
   getProviderPerformance,
   bulkUpdateTransactionStatus,
-  getSystemHealth
+  getSystemHealth,
+  getAirtimeSettings
 };

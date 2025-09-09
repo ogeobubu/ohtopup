@@ -288,6 +288,18 @@ const TransactionDetail = ({ isDarkMode }) => {
                     <span className="font-medium text-xs md:text-sm ml-2">{transaction.validity}</span>
                   </div>
                 )}
+                {transaction.token && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Electricity Token:</span>
+                    <span className="font-medium text-xs md:text-sm font-mono bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded ml-2 break-all">{transaction.token}</span>
+                  </div>
+                )}
+                {transaction.units && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Electricity Units:</span>
+                    <span className="font-medium text-xs md:text-sm text-blue-600 ml-2">{transaction.units}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

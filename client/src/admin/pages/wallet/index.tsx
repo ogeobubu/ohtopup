@@ -206,85 +206,85 @@ const AdminWalletManagement = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Wallet Management</h1>
-        <p className="text-gray-600">Manage user wallets, view transactions, and set rates</p>
+      <div className="mb-4 md:mb-6 p-2 md:p-0">
+        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2">Wallet Management</h1>
+        <p className="text-gray-600 text-sm md:text-base">Manage user wallets, view transactions, and set rates</p>
       </div>
 
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+      <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 px-2 md:px-0">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">Total Wallet Balance</p>
-              <p className="text-2xl font-bold">{formatNairaAmount(wallets?.totalWalletAmount)}</p>
+              <p className="text-blue-100 text-xs md:text-sm font-medium">Total Wallet Balance</p>
+              <p className="text-lg md:text-2xl font-bold">{formatNairaAmount(wallets?.totalWalletAmount)}</p>
             </div>
-            <FaMoneyBill className="h-8 w-8 text-blue-200" />
+            <FaMoneyBill className="h-6 w-6 md:h-8 md:w-8 text-blue-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium">VTPass Balance</p>
-              <p className="text-2xl font-bold">{formatNairaAmount(balance?.balance)}</p>
+              <p className="text-green-100 text-xs md:text-sm font-medium">VTPass Balance</p>
+              <p className="text-lg md:text-2xl font-bold">{formatNairaAmount(balance?.balance)}</p>
             </div>
-            <FaMoneyBill className="h-8 w-8 text-green-200" />
+            <FaMoneyBill className="h-6 w-6 md:h-8 md:w-8 text-green-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm font-medium">ClubKonnect Balance</p>
-              <p className="text-2xl font-bold">{formatNairaAmount(balance?.clubkonnect)}</p>
+              <p className="text-purple-100 text-xs md:text-sm font-medium">ClubKonnect Balance</p>
+              <p className="text-lg md:text-2xl font-bold">{formatNairaAmount(balance?.clubkonnect)}</p>
             </div>
-            <FaMoneyBill className="h-8 w-8 text-purple-200" />
+            <FaMoneyBill className="h-6 w-6 md:h-8 md:w-8 text-purple-200" />
           </div>
         </div>
       </div>
 
-      <div className="mb-6 flex md:flex-row flex-col rounded-lg border border-gray-300 bg-gray-50 py-1 px-1 max-w-md">
+      <div className="mb-4 md:mb-6 flex flex-wrap rounded-lg border border-gray-300 bg-gray-50 py-1 px-1 w-full max-w-md md:max-w-none">
         <button
-          className={`md:w-40 w-full py-3 px-4 font-medium transition-all duration-300 rounded-lg ${
+          className={`flex-1 md:flex-none md:w-40 py-2 md:py-3 px-3 md:px-4 font-medium text-xs md:text-sm transition-all duration-300 rounded-lg ${
             activeTab === "Wallets"
               ? "bg-white text-blue-600 shadow-sm border border-blue-200"
               : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
           }`}
           onClick={() => handleTabClick("Wallets")}
         >
-          <FaWallet className="inline mr-2 h-4 w-4" />
+          <FaWallet className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
           Wallets
         </button>
         <button
-          className={`md:w-40 w-full py-3 px-4 font-medium transition-all duration-300 rounded-lg ${
+          className={`flex-1 md:flex-none md:w-40 py-2 md:py-3 px-3 md:px-4 font-medium text-xs md:text-sm transition-all duration-300 rounded-lg ${
             activeTab === "Transactions"
               ? "bg-white text-blue-600 shadow-sm border border-blue-200"
               : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
           }`}
           onClick={() => handleTabClick("Transactions")}
         >
-          <FaMoneyBill className="inline mr-2 h-4 w-4" />
+          <FaMoneyBill className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
           Transactions
         </button>
       </div>
 
-      <div className="w-full flex justify-between items-center mb-6">
-        <div className="text-sm text-gray-600">
+      <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-2 px-2 md:px-0">
+        <div className="text-xs md:text-sm text-gray-600">
           {activeTab === "Wallets" && `${wallets?.wallets?.length || 0} wallets found`}
           {activeTab === "Transactions" && `${transactions?.transactions?.length || 0} transactions found`}
         </div>
         <button
           onClick={openRate}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+          className="px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-xs md:text-sm"
         >
-          <FaPlus className="inline mr-2 h-4 w-4" />
+          <FaPlus className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
           Set Rates
         </button>
       </div>
 
       {activeTab === "Wallets" && (
         <>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto px-2 md:px-0">
             <Table
               columns={[
                 { header: "User", render: (row) => <p>{row.username}</p> },
@@ -338,8 +338,8 @@ const AdminWalletManagement = () => {
       )}
 
       {activeTab === "Transactions" && (
-        <div className="overflow-x-auto">
-          <div className="flex justify-between items-center mb-4">
+        <div className="overflow-x-auto px-2 md:px-0">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-3 md:mb-4 gap-2">
             <Select
               options={transactionTypeOptions}
               onChange={(selectedOption) => {
@@ -347,7 +347,7 @@ const AdminWalletManagement = () => {
                 setCurrentPage(1);
               }}
               placeholder="Select Type"
-              className="w-48 mr-4"
+              className="w-full sm:w-48 text-sm"
             />
             <Textfield
               placeholder="Search..."
@@ -356,7 +356,7 @@ const AdminWalletManagement = () => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="flex-1"
+              className="flex-1 text-sm"
             />
           </div>
 

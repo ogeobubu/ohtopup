@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
-import { getWallet, getUser, getServiceIDElectricity } from "../../../api";
+import { getWallet, getUser, getServiceIDElectricity, getElectricityName, purchaseElectricity, getElectricityCommissionRate, getElectricityLimits, requeryElectricityTransaction, getAvailableDiscos } from "../../../api";
 import Modal from "../../../admin/components/modal";
 import { formatNairaAmount } from "../../../utils";
 import { FaBolt, FaCheck, FaCreditCard, FaChevronRight, FaUser, FaMapMarkerAlt } from "react-icons/fa";
@@ -38,10 +38,17 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
   const { data: providers, isLoading: isProvidersLoading } = useQuery({
     queryKey: ['providers', 'electricity'],
-    queryFn: () => getServiceIDElectricity('electricity-bill'),
+    queryFn: getAvailableDiscos,
   });
 
   const [isConfirming, setIsConfirming] = useState(false);
+  const [purchaseResult, setPurchaseResult] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [commissionRate, setCommissionRate] = useState(0);
+  const [savings, setSavings] = useState(0);
+  const [minAmount, setMinAmount] = useState(1000);
+  const [maxAmount, setMaxAmount] = useState(50000);
+  const [isRequerying, setIsRequerying] = useState(false);
 
   // Initialize phone number
   useEffect(() => {
@@ -50,8 +57,34 @@ const ElectricityPurchase = ({ isDarkMode }) => {
     }
   }, [user, phoneNumber]);
 
+  // Load commission rate and limits for selected disco
+  const loadDiscoSettings = async (disco) => {
+    try {
+      const [commissionResult, limitsResult] = await Promise.all([
+        getElectricityCommissionRate(disco),
+        getElectricityLimits(disco)
+      ]);
+
+      setCommissionRate(commissionResult.commissionRate || 0);
+      setMinAmount(limitsResult.minAmount || 1000);
+      setMaxAmount(limitsResult.maxAmount || 50000);
+    } catch (error) {
+      console.error('Error loading disco settings:', error);
+      // Use defaults if API fails
+      setCommissionRate(0);
+      setMinAmount(1000);
+      setMaxAmount(50000);
+    }
+  };
+
+  // Calculate savings based on amount and commission rate
+  const calculateSavings = (amount, rate) => {
+    if (!amount || !rate) return 0;
+    return (parseFloat(amount) * rate) / 100;
+  };
+
   // Handle disco change - reset dependent data
-  const handleDiscoChange = (disco) => {
+  const handleDiscoChange = async (disco) => {
     // If changing to a different disco, reset dependent selections
     if (selectedDisco && selectedDisco !== disco) {
       setSelectedMeterType('');
@@ -67,6 +100,9 @@ const ElectricityPurchase = ({ isDarkMode }) => {
     }
 
     setSelectedDisco(disco);
+
+    // Load settings for the selected disco
+    await loadDiscoSettings(disco);
   };
 
   // Handle meter type change
@@ -81,13 +117,28 @@ const ElectricityPurchase = ({ isDarkMode }) => {
   const validateMeterNumber = async (meterNum) => {
     if (meterNum.length >= 10 && selectedDisco && selectedMeterType) {
       try {
-        // Here you would call the VTPass meter verification API
-        // For now, we'll simulate the response
-        setCustomerName("John Doe");
-        setCustomerAddress("123 Main Street, Lagos");
+        const response = await getElectricityName(selectedDisco, meterNum, selectedMeterType);
+        setCustomerName(response.data.Customer_Name);
+        setCustomerAddress(response.data.Address);
+
+        // Show notification if using mock data
+        if (response.mock) {
+          console.log('ℹ️ Using test data - VTPass service unavailable');
+        }
+
         return true;
       } catch (error) {
         console.error('Meter validation error:', error);
+        setCustomerName('');
+        setCustomerAddress('');
+
+        // Handle specific error types
+        if (error.response?.data?.error === 'SERVICE_UNAVAILABLE') {
+          console.warn('Electricity service temporarily unavailable');
+        } else if (error.response?.data?.error === 'INVALID_REQUEST') {
+          console.warn('Invalid meter number format');
+        }
+
         return false;
       }
     }
@@ -97,32 +148,66 @@ const ElectricityPurchase = ({ isDarkMode }) => {
   const confirmPurchase = async () => {
     try {
       setIsConfirming(true);
-      // Here you would call the VTPass electricity purchase API
-      console.log('Purchasing electricity:', {
+
+      const purchaseData = {
         serviceID: selectedDisco,
         billersCode: meterNumber,
         variation_code: selectedMeterType,
-        amount: selectedAmount,
+        amount: parseInt(selectedAmount),
         phone: phoneNumber,
-      });
+      };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await purchaseElectricity(purchaseData);
+      setPurchaseResult(response);
 
-      setIsModalOpen(false);
-      // Reset form
-      setSelectedDisco('');
-      setSelectedMeterType('');
-      setMeterNumber('');
-      setSelectedAmount('');
-      setPhoneNumber('');
-      setCustomerName('');
-      setCustomerAddress('');
-      setCurrentStep(1);
+      // Show success modal
+      setShowSuccessModal(true);
+
+      // Reset form after a delay
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setShowSuccessModal(false);
+        setPurchaseResult(null);
+        // Reset form
+        setSelectedDisco('');
+        setSelectedMeterType('');
+        setMeterNumber('');
+        setSelectedAmount('');
+        setPhoneNumber('');
+        setCustomerName('');
+        setCustomerAddress('');
+        setCurrentStep(1);
+      }, 5000);
+
     } catch (error) {
       console.error('Purchase error:', error);
+      // Handle error - you might want to show an error message
     } finally {
       setIsConfirming(false);
+    }
+  };
+
+  const handleRequeryTransaction = async () => {
+    if (!purchaseResult?.transaction?.requestId) return;
+
+    try {
+      setIsRequerying(true);
+      const response = await requeryElectricityTransaction(purchaseResult.transaction.requestId);
+
+      // Update the purchase result with the new status
+      setPurchaseResult(prev => ({
+        ...prev,
+        transaction: {
+          ...prev.transaction,
+          status: response.transaction.status
+        }
+      }));
+
+      console.log('Transaction status updated:', response.transaction.status);
+    } catch (error) {
+      console.error('Requery error:', error);
+    } finally {
+      setIsRequerying(false);
     }
   };
 
@@ -246,14 +331,14 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                   <p className="text-sm text-gray-600">Select your electricity distribution company</p>
                 </div>
                 <div className="grid grid-cols-1 gap-2 md:gap-3 max-w-sm mx-auto">
-                  {providers?.map(provider => (
+                  {providers?.discos?.map(disco => (
                     <button
-                      key={provider.serviceID}
+                      key={disco.serviceID}
                       onClick={() => {
-                        handleDiscoChange(provider.serviceID);
+                        handleDiscoChange(disco.serviceID);
                       }}
                       className={`p-3 md:p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
-                        selectedDisco === provider.serviceID
+                        selectedDisco === disco.serviceID
                           ? 'border-yellow-500 bg-yellow-50 shadow-md'
                           : 'border-gray-200 hover:border-yellow-300'
                       }`}
@@ -263,7 +348,10 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           <FaBolt className="text-yellow-600 text-base md:text-lg" />
                         </div>
                         <div className="text-base md:text-lg font-bold text-gray-900 mb-1">
-                          {provider.name?.toUpperCase() || provider.serviceID?.toUpperCase() || 'UNKNOWN'}
+                          {disco.displayName}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          Commission: {disco.commissionRate}%
                         </div>
                       </div>
                     </button>
@@ -288,19 +376,42 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
                 {/* Disco Change Notification */}
                 {selectedDisco && (
-                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <FaCheck className="text-yellow-600 text-xs" />
+                  <div className="mt-3 space-y-3">
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center">
+                          <FaCheck className="text-yellow-600 text-xs" />
+                        </div>
+                        <div className="text-sm text-yellow-800">
+                          <span className="font-medium">{providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}</span> selected.
+                          {discoReset && (
+                            <span className="text-orange-600 ml-1 block mt-1">
+                              ⚠️ Previous selections have been reset.
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-sm text-yellow-800">
-                        <span className="font-medium">{selectedDisco?.toUpperCase()}</span> selected.
-                        {discoReset && (
-                          <span className="text-orange-600 ml-1 block mt-1">
-                            ⚠️ Previous selections have been reset.
-                          </span>
-                        )}
+                    </div>
+
+                    {/* Amount Limits for Selected Disco */}
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FaBolt className="text-blue-600 text-sm" />
+                        <span className="text-sm font-medium text-blue-800">Transaction Limits</span>
                       </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="bg-white p-2 rounded border">
+                          <span className="text-blue-700 font-medium block">Minimum</span>
+                          <span className="text-blue-900 font-bold text-lg">₦{minAmount.toLocaleString()}</span>
+                        </div>
+                        <div className="bg-white p-2 rounded border">
+                          <span className="text-blue-700 font-medium block">Maximum</span>
+                          <span className="text-blue-900 font-bold text-lg">₦{maxAmount.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-600 mt-2">
+                        These limits are configured by your electricity provider for secure transactions.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -312,7 +423,9 @@ const ElectricityPurchase = ({ isDarkMode }) => {
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Meter Type</h3>
-                  <p className="text-sm text-gray-600">Select your meter type for {selectedDisco?.toUpperCase()}</p>
+                  <p className="text-sm text-gray-600">
+                    Select your meter type for {providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}
+                  </p>
                 </div>
 
                 {/* Disco Reset Notification */}
@@ -323,7 +436,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                         <span className="text-orange-600 text-xs">⚠️</span>
                       </div>
                       <div className="text-sm text-orange-800">
-                        <span className="font-medium">Disco changed</span> - Please select your meter type for {selectedDisco?.toUpperCase()}.
+                        <span className="font-medium">Disco changed</span> - Please select your meter type for {providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}.
                       </div>
                     </div>
                   </div>
@@ -408,10 +521,37 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                   <input
                     type="text"
                     value={meterNumber}
-                    onChange={(e) => setMeterNumber(e.target.value)}
+                    onChange={async (e) => {
+                      const value = e.target.value;
+                      setMeterNumber(value);
+                      await validateMeterNumber(value);
+                    }}
                     className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder="Enter meter number"
                   />
+
+                  {/* Amount Limits Info - Early visibility */}
+                  {selectedDisco && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FaBolt className="text-blue-600 text-sm" />
+                        <span className="text-sm font-medium text-blue-800">Purchase Limits</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-blue-700 font-medium">Min Amount:</span>
+                          <p className="text-blue-800 font-semibold">₦{minAmount.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <span className="text-blue-700 font-medium">Max Amount:</span>
+                          <p className="text-blue-800 font-semibold">₦{maxAmount.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-600 mt-2">
+                        These limits ensure secure and compliant transactions.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Customer Details Display */}
                   {customerName && (
@@ -469,23 +609,69 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                   <input
                     type="number"
                     value={selectedAmount}
-                    onChange={(e) => setSelectedAmount(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedAmount(value);
+                      // Calculate savings when amount changes
+                      const calculatedSavings = calculateSavings(value, commissionRate);
+                      setSavings(calculatedSavings);
+                    }}
                     className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
-                    placeholder="Enter amount"
-                    min="1000"
+                    placeholder={`Min: ₦${minAmount.toLocaleString()} - Max: ₦${maxAmount.toLocaleString()}`}
+                    min={minAmount}
+                    max={maxAmount}
                   />
 
                   {/* Selected Amount Display */}
                   {selectedAmount && (
-                    <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                          <FaCreditCard className="text-yellow-600 text-sm" />
+                    <div className="mt-3 space-y-3">
+                      <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <FaCreditCard className="text-yellow-600 text-sm" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-900 text-sm">₦{parseFloat(selectedAmount).toLocaleString()}</h4>
+                            <p className="text-xs text-gray-600">Electricity purchase amount</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold text-gray-900 text-sm">₦{selectedAmount}</h4>
-                          <p className="text-xs text-gray-600">Electricity purchase amount</p>
+                      </div>
+
+                      {/* Commission Savings Display */}
+                      {commissionRate > 0 && savings > 0 && (
+                        <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                              <FaBolt className="text-green-600 text-sm" />
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-green-900 text-sm">You Save: ₦{savings.toLocaleString()}</h4>
+                              <p className="text-xs text-green-700">
+                                {commissionRate}% commission discount applied
+                              </p>
+                              <p className="text-xs text-green-600 mt-1">
+                                You pay: ₦{(parseFloat(selectedAmount) - savings).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
                         </div>
+                      )}
+
+                      {/* Amount Limits Info */}
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <FaBolt className="text-blue-600 text-sm" />
+                          <span className="text-sm font-medium text-blue-800">Amount Limits</span>
+                        </div>
+                        <p className="text-sm text-blue-700">
+                          Minimum: ₦{minAmount.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-blue-700">
+                          Maximum: ₦{maxAmount.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-blue-600 mt-1">
+                          These limits are set by your service provider for security and compliance.
+                        </p>
                       </div>
                     </div>
                   )}
@@ -578,7 +764,9 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                         </div>
                         <div>
                           <div className="font-medium text-gray-900 text-sm">Electricity Provider</div>
-                          <div className="text-xs text-gray-600">{selectedDisco?.toUpperCase()}</div>
+                          <div className="text-xs text-gray-600">
+                            {providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -619,11 +807,35 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-3">
-                      <div className="font-bold text-gray-900 text-base">Total Amount</div>
-                      <div className="text-xl font-bold text-yellow-600">
-                        ₦{selectedAmount}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <div className="font-medium text-gray-900 text-sm">Purchase Amount</div>
+                        <div className="text-sm text-gray-900">
+                          ₦{parseFloat(selectedAmount).toLocaleString()}
+                        </div>
                       </div>
+
+                      {commissionRate > 0 && savings > 0 && (
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <div className="font-medium text-green-700 text-sm">Commission Discount ({commissionRate}%)</div>
+                          <div className="text-sm text-green-700">
+                            -₦{savings.toLocaleString()}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-3">
+                        <div className="font-bold text-gray-900 text-base">You Pay</div>
+                        <div className="text-xl font-bold text-yellow-600">
+                          ₦{(parseFloat(selectedAmount) - savings).toLocaleString()}
+                        </div>
+                      </div>
+
+                      {commissionRate > 0 && savings > 0 && (
+                        <div className="text-xs text-green-600 text-center mt-2">
+                          🎉 You save ₦{savings.toLocaleString()} with our commission discount!
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -693,6 +905,75 @@ const ElectricityPurchase = ({ isDarkMode }) => {
           </div>
         )}
       </Modal>
+
+      {/* Success Modal */}
+      {showSuccessModal && purchaseResult && (
+        <Modal
+          isDarkMode={isDarkMode}
+          isOpen={showSuccessModal}
+          closeModal={() => setShowSuccessModal(false)}
+          size="md"
+        >
+          <div className="p-6 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaCheck className="text-green-600 text-2xl" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Purchase Successful!</h3>
+            <p className="text-gray-600 mb-4">Your electricity purchase has been completed successfully.</p>
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <div className="space-y-2 text-left">
+                <div className="flex justify-between">
+                  <span className="font-medium">Transaction ID:</span>
+                  <span className="text-sm">{purchaseResult.transaction?.requestId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Amount:</span>
+                  <span>₦{purchaseResult.transaction?.amount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Status:</span>
+                  <span className="text-green-600 font-medium">{purchaseResult.transaction?.status}</span>
+                </div>
+                {purchaseResult.transaction?.token && (
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                    <div className="font-medium text-yellow-800 mb-1">Electricity Token:</div>
+                    <div className="text-lg font-mono text-yellow-900 break-all">
+                      {purchaseResult.transaction.token}
+                    </div>
+                    <div className="text-xs text-yellow-700 mt-1">
+                      Please save this token. It will also be sent to your email and phone.
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleRequeryTransaction}
+                disabled={isRequerying}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+              >
+                {isRequerying ? (
+                  <div className="flex items-center justify-center gap-1">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                    Checking...
+                  </div>
+                ) : (
+                  'Check Status'
+                )}
+              </button>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

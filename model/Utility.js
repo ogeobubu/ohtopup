@@ -68,6 +68,14 @@ const utilitySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    commissionAmount: {
+      type: Number,
+      default: 0,
+    },
+    adjustedAmount: {
+      type: Number,
+      default: 0,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

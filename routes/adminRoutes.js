@@ -107,6 +107,13 @@ const {
   getSelectedPlansStats,
 } = require("../controllers/selectedDataPlanController");
 
+const {
+  getElectricitySettings,
+  updateElectricitySettings,
+  resetElectricitySettings,
+  getAvailableDiscos,
+} = require("../controllers/electricityController");
+
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
 
@@ -220,5 +227,11 @@ router.get("/active-provider", authUser, authAdmin, getActiveProvider);
 
 // Public route for getting data providers (for user selection)
 router.get("/data-providers", getActiveNetworkProviders);
+
+// Electricity Settings routes
+router.get("/electricity/settings", authUser, authAdmin, getElectricitySettings);
+router.put("/electricity/settings", authUser, authAdmin, updateElectricitySettings);
+router.post("/electricity/settings/reset", authUser, authAdmin, resetElectricitySettings);
+router.get("/electricity/discos", authUser, authAdmin, getAvailableDiscos);
 
 module.exports = router;

@@ -22,59 +22,59 @@ const Settings = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white py-12 px-6">
+      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white py-8 md:py-12 px-4 md:px-6">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6 backdrop-blur-sm">
-            <FaCog className="text-3xl text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-full mb-4 md:mb-6 backdrop-blur-sm">
+            <FaCog className="text-2xl md:text-3xl text-white" />
           </div>
-          <h1 className="text-4xl font-bold mb-2">Account Settings</h1>
-          <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">Account Settings</h1>
+          <p className="text-blue-100 text-sm md:text-lg max-w-2xl mx-auto px-2">
             Customize your account preferences, security settings, and personalize your experience
           </p>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="max-w-7xl mx-auto px-6 -mt-8 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className={`rounded-xl shadow-lg p-6 border hover:shadow-xl transition-all duration-300 ${
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-8 mb-6 md:mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className={`rounded-xl shadow-lg p-4 md:p-6 border hover:shadow-xl transition-all duration-300 ${
             isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
           }`}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <FaUser className={`text-xl ${isDarkMode ? 'text-white' : 'text-white'}`} />
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <FaUser className={`text-lg md:text-xl ${isDarkMode ? 'text-white' : 'text-white'}`} />
               </div>
               <div>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Profile Status</p>
-                <p className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Complete</p>
+                <p className={`text-xs md:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Profile Status</p>
+                <p className={`text-base md:text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Complete</p>
               </div>
             </div>
           </div>
 
-          <div className={`rounded-xl shadow-lg p-6 border hover:shadow-xl transition-all duration-300 ${
+          <div className={`rounded-xl shadow-lg p-4 md:p-6 border hover:shadow-xl transition-all duration-300 ${
             isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
           }`}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                <FaShieldAlt className={`text-xl ${isDarkMode ? 'text-white' : 'text-white'}`} />
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                <FaShieldAlt className={`text-lg md:text-xl ${isDarkMode ? 'text-white' : 'text-white'}`} />
               </div>
               <div>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Security Level</p>
-                <p className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>High</p>
+                <p className={`text-xs md:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Security Level</p>
+                <p className={`text-base md:text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>High</p>
               </div>
             </div>
           </div>
 
-          <div className={`rounded-xl shadow-lg p-6 border hover:shadow-xl transition-all duration-300 ${
+          <div className={`rounded-xl shadow-lg p-4 md:p-6 border hover:shadow-xl transition-all duration-300 ${
             isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
           }`}>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <FaBell className={`text-xl ${isDarkMode ? 'text-white' : 'text-white'}`} />
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <FaBell className={`text-lg md:text-xl ${isDarkMode ? 'text-white' : 'text-white'}`} />
               </div>
               <div>
-                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Notifications</p>
-                <p className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Active</p>
+                <p className={`text-xs md:text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Notifications</p>
+                <p className={`text-base md:text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Active</p>
               </div>
             </div>
           </div>
@@ -82,31 +82,31 @@ const Settings = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="max-w-7xl mx-auto px-6 mb-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 mb-6 md:mb-8">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 pb-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-8 md:pb-12">
         <div className={`rounded-2xl shadow-xl border overflow-hidden ${
           isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
         }`}>
           {/* Tab Header */}
-          <div className={`px-8 py-6 border-b ${
+          <div className={`px-4 md:px-8 py-4 md:py-6 border-b ${
             isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200'
           }`}>
-            <div className="flex items-center gap-3">
-              {activeTab === "Profile" && <FaUser className="text-blue-600 text-xl" />}
-              {activeTab === "General" && <FaPalette className="text-purple-600 text-xl" />}
-              {activeTab === "Security" && <FaShieldAlt className="text-green-600 text-xl" />}
-              {activeTab === "Notification" && <FaBell className="text-orange-600 text-xl" />}
-              {activeTab === "Services" && <FaWrench className="text-indigo-600 text-xl" />}
-              <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{activeTab}</h2>
+            <div className="flex items-center gap-2 md:gap-3">
+              {activeTab === "Profile" && <FaUser className="text-blue-600 text-lg md:text-xl" />}
+              {activeTab === "General" && <FaPalette className="text-purple-600 text-lg md:text-xl" />}
+              {activeTab === "Security" && <FaShieldAlt className="text-green-600 text-lg md:text-xl" />}
+              {activeTab === "Notification" && <FaBell className="text-orange-600 text-lg md:text-xl" />}
+              {activeTab === "Services" && <FaWrench className="text-indigo-600 text-lg md:text-xl" />}
+              <h2 className={`text-xl md:text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{activeTab}</h2>
             </div>
           </div>
 
           {/* Tab Content */}
-          <div className="p-8">
+          <div className="p-4 md:p-8">
             {activeTab === "Profile" && <Profile />}
             {activeTab === "General" && <General />}
             {activeTab === "Security" && <Security />}

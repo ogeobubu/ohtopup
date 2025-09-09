@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "../navbar";
 import Hero from "../hero";
@@ -14,10 +14,15 @@ import defaultNetworkImage from "../../../assets/default-network.png";
 
 const imageMap = {
   mtn: mtn,
-  dstv: dstv,
+  MTN: mtn,
   glo: glo,
-  airt: airtel,
-  eti: nineMobile,
+  Glo: glo,
+  airtel: airtel,
+  Airtel: airtel,
+  '9mobile': nineMobile,
+  '9MOBILE': nineMobile,
+  dstv: dstv,
+  DSTV: dstv,
 };
 
 const formatPrice = (amount) => {
@@ -40,14 +45,14 @@ const DataPricing = () => {
 
   const plans = pricingPlans?.data ?? [];
   const filtered = useMemo(() => {
-    const byNetwork = network === "all" ? plans : plans.filter((p) => p.variationCode.startsWith(network));
+    const byNetwork = network === "all" ? plans : plans.filter((p) => p.network.toLowerCase().startsWith(network.toLowerCase()));
     const bySearch = search
       ? byNetwork.filter((p) =>
-          [p.name, p.variationCode].some((t) => String(t).toLowerCase().includes(search.toLowerCase()))
+          [p.name, p.planId, p.network, p.planType].some((t) => String(t || '').toLowerCase().includes(search.toLowerCase()))
         )
       : byNetwork;
     const sorted = [...bySearch].sort((a, b) => {
-      if (sort === "price") return Number(a.dataLimit) - Number(b.dataLimit);
+      if (sort === "price") return Number(a.finalPrice || a.price) - Number(b.finalPrice || b.price);
       return String(a.name).localeCompare(String(b.name));
     });
     return sorted;
@@ -60,6 +65,7 @@ const DataPricing = () => {
         heading="Choose Your Perfect Plan"
         subheading="Find affordable data plans across all major networks."
         buttonText="Create Free Account"
+        secondButtonText="View All Plans"
         href="/create"
       />
       <div className="container mx-auto py-20 px-4">
@@ -94,8 +100,7 @@ const DataPricing = () => {
                 <option value="mtn">MTN</option>
                 <option value="glo">Glo</option>
                 <option value="airtel">Airtel</option>
-                <option value="eti">9mobile</option>
-                <option value="dstv">DSTV</option>
+                <option value="9mobile">9mobile</option>
               </select>
               <select
                 value={sort}
@@ -113,15 +118,8 @@ const DataPricing = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {filtered.map((plan) => {
-                const serviceName = plan.variationCode.split("-")[0];
-                let imageSrc;
-                if (serviceName === "glo" || plan.variationCode.startsWith("glo")) {
-                  imageSrc = imageMap.glo;
-                } else if (!isNaN(serviceName)) {
-                  imageSrc = defaultNetworkImage;
-                } else {
-                  imageSrc = imageMap[serviceName];
-                }
+                const networkName = plan.network;
+                let imageSrc = imageMap[networkName] || defaultNetworkImage;
 
                 return (
                   <div
@@ -131,16 +129,23 @@ const DataPricing = () => {
                     <div className="rounded-full border border-solid border-gray-500 w-12 h-12 flex justify-center items-center mb-4 p-1 mx-auto">
                       <img
                         src={imageSrc}
-                        alt={serviceName}
+                        alt={networkName}
                         className="object-cover mx-auto"
                       />
                     </div>
                     <h2 className="text-sm md:text-base font-semibold mb-2 text-gray-900 dark:text-white">
                       {plan.name}
                     </h2>
-                    <p className="text-lg md:text-xl font-bold mb-4 text-gray-700 dark:text-gray-300">
-                      {formatPrice(plan.dataLimit)}
-                    </p>
+                    <div className="mb-4">
+                      <p className="text-lg md:text-xl font-bold text-gray-700 dark:text-gray-300">
+                        {formatPrice(Math.round(plan.finalPrice) || Math.round(plan.price))}
+                      </p>
+                      {plan.commissionRate > 0 && (
+                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                          {plan.commissionRate}% commission
+                        </p>
+                      )}
+                    </div>
                     <div className="flex justify-center gap-2">
                       <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition text-sm">
                         Select Plan

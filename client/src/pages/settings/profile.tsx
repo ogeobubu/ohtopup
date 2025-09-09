@@ -71,60 +71,60 @@ const Profile = () => {
   };
 
   return (
-    <div className={`border rounded-md p-6 w-full ${isDarkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
-      <h2 className="text-2xl font-bold mb-4">Profile</h2>
+    <div className={`border rounded-md p-4 md:p-6 w-full ${isDarkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
+      <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Profile</h2>
       <div className="max-w-sm w-full mx-auto">
-        <div className="flex flex-col items-center space-y-4 mb-6">
-          <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl font-bold">
+        <div className="flex flex-col items-center space-y-3 md:space-y-4 mb-4 md:mb-6">
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl md:text-2xl font-bold">
             {user?.username?.charAt(0).toUpperCase()}
           </div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold">{user?.username}</h2>
-            <p className="text-gray-500">{user?.email}</p>
+            <h2 className="text-xl md:text-2xl font-bold">{user?.username}</h2>
+            <p className="text-gray-500 text-sm md:text-base">{user?.email}</p>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500">Unique ID:</span>
-            <span>{user?._id}</span>
+        <div className="space-y-3 md:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+            <span className="text-gray-500 text-sm md:text-base">Unique ID:</span>
+            <span className="text-xs md:text-sm font-mono break-all">{user?._id}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500">Phone Number:</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+            <span className="text-gray-500 text-sm md:text-base">Phone Number:</span>
             <div className="flex gap-2 items-center">
-              <span>{user?.phoneNumber}</span>
+              <span className="text-sm md:text-base">{user?.phoneNumber}</span>
               <button
                 onClick={() => setIsPhoneNumberEditMode(true)}
-                className="text-blue-500 hover:text-blue-600"
+                className="text-blue-500 hover:text-blue-600 p-1"
                 aria-label="Edit Phone Number"
               >
-                <FaEdit className="w-4 h-4" />
+                <FaEdit className="w-3 h-3 md:w-4 md:h-4" />
               </button>
             </div>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500">Country:</span>
-            <span>Nigeria</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+            <span className="text-gray-500 text-sm md:text-base">Country:</span>
+            <span className="text-sm md:text-base">Nigeria</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500">KYC Status:</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+            <span className="text-gray-500 text-sm md:text-base">KYC Status:</span>
             <div className="flex gap-2 items-center">
-              <span className="text-red-500 font-medium">Not Set</span>
+              <span className="text-red-500 font-medium text-sm md:text-base">Not Set</span>
               <button
                 onClick={() => setIsKYCEditMode(true)}
-                className="text-blue-500 hover:text-blue-600"
+                className="text-blue-500 hover:text-blue-600 p-1"
                 aria-label="Update KYC"
               >
-                <FaEdit className="w-4 h-4" />
+                <FaEdit className="w-3 h-3 md:w-4 md:h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 text-left">
+        <div className="mt-4 md:mt-6 text-left">
           <button
             onClick={() => setIsDelete(true)}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md w-full"
+            className="bg-red-500 hover:bg-red-600 text-white px-3 md:px-4 py-2 md:py-3 rounded-md w-full text-sm md:text-base font-medium"
           >
             Delete User Account
           </button>
@@ -133,16 +133,16 @@ const Profile = () => {
 
       {/* Phone Number Edit Modal */}
       {isPhoneNumberEditMode && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white shadow-md rounded-md p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white shadow-md rounded-md p-4 md:p-6 w-full max-w-md mx-auto">
             <button
               onClick={closeModal}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
               aria-label="Close Modal"
             >
-              <FaTimes className="w-5 h-5" />
+              <FaTimes className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <h2 className="text-2xl font-bold mb-4">Update Phone Number</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Update Phone Number</h2>
             <div className="flex flex-col w-full my-5">
               <label htmlFor="phoneNumber" className="mb-1 block text-gray-500">
                 Phone Number
@@ -210,16 +210,16 @@ const Profile = () => {
 
       {/* KYC Update Modal */}
       {isKYCEditMode && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white shadow-md rounded-md p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white shadow-md rounded-md p-4 md:p-6 w-full max-w-md mx-auto">
             <button
               onClick={closeKYCModal}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
               aria-label="Close Modal"
             >
-              <FaTimes className="w-5 h-5" />
+              <FaTimes className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <h2 className="text-2xl font-bold mb-4">Update KYC</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Update KYC</h2>
             <div className="flex flex-col justify-center items-center gap-3">
               <img
                 className="w-32 h-32 object-cover"
@@ -236,30 +236,30 @@ const Profile = () => {
 
       {/* Delete Confirmation Modal */}
       {isDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white shadow-md rounded-md p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white shadow-md rounded-md p-4 md:p-6 w-full max-w-md mx-auto">
             <button
               onClick={closeDeleteModal}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
               aria-label="Close Modal"
             >
-              <FaTimes className="w-5 h-5" />
+              <FaTimes className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <FaExclamationTriangle className="text-red-500 mb-4 text-2xl" />
-            <h2 className="text-2xl font-bold mb-4">
+            <FaExclamationTriangle className="text-red-500 mb-3 md:mb-4 text-xl md:text-2xl" />
+            <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
               Are you sure you want to delete your account?
             </h2>
-            <p className="text-gray-700 mb-4">This action is irreversible.</p>
-            <div className="flex justify-end">
+            <p className="text-gray-700 mb-3 md:mb-4 text-sm md:text-base">This action is irreversible.</p>
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-0">
               <button
                 onClick={closeDeleteModal}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded mr-4"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded order-2 sm:order-1 sm:mr-4 w-full sm:w-auto"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded order-1 sm:order-2 w-full sm:w-auto"
               >
                 Delete Account
               </button>

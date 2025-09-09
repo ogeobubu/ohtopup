@@ -63,23 +63,28 @@ const Ticket = ({ isDarkMode }) => {
   const columns = [
     {
       header: "ID",
-      render: (ticket) => <span className="text-sm">{ticket.ticketId}</span>,
+      render: (ticket) => <span className="text-xs md:text-sm font-mono">{ticket.ticketId}</span>,
     },
     {
       header: "Title",
-      render: (ticket) => <span className="text-sm">{ticket.title}</span>,
+      render: (ticket) => <span className="text-xs md:text-sm truncate max-w-24 md:max-w-none" title={ticket.title}>{ticket.title}</span>,
     },
     {
       header: "Date",
       render: (ticket) => (
-        <small>{new Date(ticket.createdAt).toLocaleString()}</small>
+        <small className="text-xs md:text-sm">
+          {window.innerWidth < 768
+            ? new Date(ticket.createdAt).toLocaleDateString()
+            : new Date(ticket.createdAt).toLocaleString()
+          }
+        </small>
       ),
     },
     {
       header: "Status",
       render: (ticket) => (
         <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+          className={`inline-flex items-center px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold ${
             ticket.status === "open"
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
@@ -93,14 +98,14 @@ const Ticket = ({ isDarkMode }) => {
       header: "Actions",
       render: (ticket) => (
         <div
-          className="cursor-pointer text-blue-500 hover:text-blue-700"
+          className="cursor-pointer text-blue-500 hover:text-blue-700 p-1"
           onClick={() => {
             setSelectedTicket(ticket);
             toggleReplyModal();
           }}
           aria-label={`View replies for ${ticket.title}`}
         >
-          <FaEye size={20} />
+          <FaEye size={16} className="md:w-5 md:h-5" />
         </div>
       ),
     },
@@ -116,15 +121,15 @@ const Ticket = ({ isDarkMode }) => {
   };
 
   return (
-    <div className="p-4 border border-solid rounded-md border-gray-200 w-full">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6">
-        <h2 className="text-xl md:text-2xl font-bold">Tickets</h2>
-        <Button onClick={toggleCreateModal} size="sm">
+    <div className="p-3 md:p-4 border border-solid rounded-md border-gray-200 w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 md:mb-6 gap-2 sm:gap-0">
+        <h2 className="text-lg md:text-xl lg:text-2xl font-bold">Tickets</h2>
+        <Button onClick={toggleCreateModal} size="sm" className="w-full sm:w-auto">
           Create
         </Button>
       </div>
 
-      <div className="my-4">
+      <div className="my-3 md:my-4">
         <Textfield
           placeholder="Search by Ticket ID"
           value={searchQuery}
@@ -133,19 +138,23 @@ const Ticket = ({ isDarkMode }) => {
         />
       </div>
 
-      <div className="my-5">
+      <div className="my-4 md:my-5">
         {isLoading ? (
-          <p>Loading tickets...</p>
+          <p className="text-sm md:text-base">Loading tickets...</p>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <Table columns={columns} data={ticketsData.tickets || []} />
+            <div className="overflow-x-auto -mx-3 md:mx-0">
+              <div className="px-3 md:px-0">
+                <Table columns={columns} data={ticketsData.tickets || []} />
+              </div>
             </div>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={Math.ceil(ticketsData.totalCount / ticketsPerPage)}
-              onPageChange={handlePageChange}
-            />
+            <div className="mt-4 md:mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(ticketsData.totalCount / ticketsPerPage)}
+                onPageChange={handlePageChange}
+              />
+            </div>
           </>
         )}
       </div>
@@ -169,8 +178,8 @@ const Ticket = ({ isDarkMode }) => {
         >
           {({ isSubmitting }) => (
             <Form>
-              <div className="mb-4">
-                <label htmlFor="title" className="block text-gray-700">
+              <div className="mb-3 md:mb-4">
+                <label htmlFor="title" className="block text-gray-700 text-sm md:text-base mb-1">
                   Title
                 </label>
                 <Field
@@ -182,11 +191,11 @@ const Ticket = ({ isDarkMode }) => {
                 <ErrorMessage
                   name="title"
                   component="div"
-                  className="text-red-600"
+                  className="text-red-600 text-xs md:text-sm mt-1"
                 />
               </div>
-              <div className="mb-4">
-                <label htmlFor="description" className="block text-gray-700">
+              <div className="mb-3 md:mb-4">
+                <label htmlFor="description" className="block text-gray-700 text-sm md:text-base mb-1">
                   Description
                 </label>
                 <Field
@@ -198,18 +207,22 @@ const Ticket = ({ isDarkMode }) => {
                 <ErrorMessage
                   name="description"
                   component="div"
-                  className="text-red-600"
+                  className="text-red-600 text-xs md:text-sm mt-1"
                 />
               </div>
-              <div className="flex justify-end">
+              <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-0">
                 <Button
                   type="button"
                   onClick={toggleCreateModal}
-                  className="mr-2"
+                  className="order-2 sm:order-1 sm:mr-2 w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="order-1 sm:order-2 w-full sm:w-auto"
+                >
                   {isSubmitting ? "Creating..." : "Create Ticket"}
                 </Button>
               </div>
@@ -226,16 +239,16 @@ const Ticket = ({ isDarkMode }) => {
       >
         {selectedTicket && (
           <div>
-            <h3 className="text-xl font-bold mb-2">{selectedTicket.title}</h3>
-            <p className="text-gray-700 mb-4">{selectedTicket.description}</p>
-            <div className="border-t border-gray-300 pt-4">
-              <h4 className="text-lg font-semibold mb-2">Replies</h4>
-              <div className="flex flex-col">
+            <h3 className="text-lg md:text-xl font-bold mb-2">{selectedTicket.title}</h3>
+            <p className="text-gray-700 mb-3 md:mb-4 text-sm md:text-base">{selectedTicket.description}</p>
+            <div className="border-t border-gray-300 pt-3 md:pt-4">
+              <h4 className="text-base md:text-lg font-semibold mb-2">Replies</h4>
+              <div className="flex flex-col space-y-3 md:space-y-4">
                 {selectedTicket.replies.length ? (
                   selectedTicket.replies.map((reply) => (
                     <div
                       key={reply._id}
-                      className={`reply mb-3 flex ${
+                      className={`reply flex ${
                         reply.role === "admin" ? "justify-start" : "justify-end"
                       }`}
                     >
@@ -244,24 +257,27 @@ const Ticket = ({ isDarkMode }) => {
                           reply.role === "admin"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-green-100 text-green-800"
-                        } p-4 rounded-lg max-w-xs shadow-md`}
+                        } p-3 md:p-4 rounded-lg max-w-xs md:max-w-sm shadow-md`}
                         style={{
                           overflowWrap: "break-word",
                           wordBreak: "break-word",
                         }}
                       >
-                        <strong className="font-semibold">
+                        <strong className="font-semibold text-sm md:text-base">
                           {reply.role === "admin" ? "Admin:" : ""}
                         </strong>
-                        <p className="text-gray-800 mt-1">{reply.content}</p>
-                        <small className="text-gray-500 block mt-2">
-                          {new Date(reply.createdAt).toLocaleString()}
+                        <p className="text-gray-800 mt-1 text-sm md:text-base">{reply.content}</p>
+                        <small className="text-gray-500 block mt-2 text-xs md:text-sm">
+                          {window.innerWidth < 768
+                            ? new Date(reply.createdAt).toLocaleDateString()
+                            : new Date(reply.createdAt).toLocaleString()
+                          }
                         </small>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">No replies yet.</p>
+                  <p className="text-gray-500 text-sm md:text-base">No replies yet.</p>
                 )}
               </div>
             </div>
@@ -280,18 +296,18 @@ const Ticket = ({ isDarkMode }) => {
                 }}
               >
                 {({ isSubmitting }) => (
-                  <Form className="mt-4">
+                  <Form className="mt-3 md:mt-4">
                     <Field
                       name="replyContent"
                       as={Textarea}
                       placeholder="Type your reply..."
-                      className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      className="w-full border rounded-lg p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm md:text-base"
                     />
-                    <div className="flex justify-end mt-2">
+                    <div className="flex justify-end mt-2 md:mt-3">
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2"
+                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-3 md:px-4 py-2 md:py-3 text-sm md:text-base"
                       >
                         {isSubmitting ? "Replying..." : "Reply"}
                       </Button>

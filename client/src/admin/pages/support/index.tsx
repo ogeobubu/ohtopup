@@ -19,30 +19,28 @@ const Settings = () => {
 
   return (
     <div
-      className={`min-h-screen ${
+      className={`min-h-screen p-2 md:p-6 ${
         isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-800"
       }`}
     >
-      {" "}
-      {/* Added responsive padding */}
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center md:text-left">
-        Help & Support
-      </h1>{" "}
-      {/* Responsive text size and alignment */}
+      {/* Header */}
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-center md:text-left">
+          Help & Support
+        </h1>
+        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 text-center md:text-left mt-2">
+          Get help and support for your admin needs
+        </p>
+      </div>
+
       {/* Main layout container: stacks on small screens, side-by-side on medium screens and up */}
-      <div className="flex flex-col md:flex-row ">
-        {" "}
-        {/* Added responsive flex direction and gap */}
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         {/* Sidebar container */}
-        <div className="w-full md:w-64">
-          {" "}
-          {/* Full width on small, fixed width on medium+ */}
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="w-full md:w-64 flex-shrink-0">
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} className="" />
         </div>
         {/* Content area */}
-        <div className="w-full px-4">
-          {" "}
-          {/* Adjusted padding */}
+        <div className="w-full min-w-0">
           {activeTab === "Ticket" && <Ticket isDarkMode={isDarkMode} />}
           {activeTab === "Contact" && <Contact />}
           {activeTab === "Chat" && <Chat />}

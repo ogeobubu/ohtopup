@@ -152,14 +152,14 @@ const Rank = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8 px-4">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-6 md:py-8 px-3 md:px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
-            <FaTrophy className="text-yellow-300" />
-            Utility Champions League
-            <FaTrophy className="text-yellow-300" />
+          <h1 className="text-2xl md:text-4xl font-bold mb-2 flex items-center justify-center gap-2 md:gap-3">
+            <FaTrophy className="text-yellow-300 text-lg md:text-xl" />
+            <span className="leading-tight">Utility Champions League</span>
+            <FaTrophy className="text-yellow-300 text-lg md:text-xl" />
           </h1>
-          <p className="text-blue-100 text-lg">
+          <p className="text-blue-100 text-sm md:text-lg px-2">
             Compete, earn rewards, and climb the leaderboard!
           </p>
         </div>
@@ -168,50 +168,50 @@ const Rank = () => {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* User Stats Card */}
         {userStats && (
-          <div className={`mb-8 p-6 rounded-xl shadow-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <FaUser className="text-blue-500" />
+          <div className={`mb-6 md:mb-8 p-4 md:p-6 rounded-xl shadow-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+              <h2 className="text-lg md:text-2xl font-bold flex items-center gap-2">
+                <FaUser className="text-blue-500 text-base md:text-lg" />
                 Your Performance
               </h2>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {getAchievementBadges(userPosition, userStats.transactionCount)}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              <div className={`p-3 md:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
                 <div className="flex items-center gap-2 mb-2">
                   {getRankIcon(userPosition)}
-                  <span className="font-semibold">Your Rank</span>
+                  <span className="font-semibold text-sm md:text-base">Your Rank</span>
                 </div>
-                <div className="text-2xl font-bold text-blue-600">#{userPosition}</div>
+                <div className="text-xl md:text-2xl font-bold text-blue-600">#{userPosition}</div>
               </div>
 
-              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-green-50'}`}>
+              <div className={`p-3 md:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-green-50'}`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <FaChartLine className="text-green-500" />
-                  <span className="font-semibold">Transactions</span>
+                  <FaChartLine className="text-green-500 text-sm md:text-base" />
+                  <span className="font-semibold text-sm md:text-base">Transactions</span>
                 </div>
-                <div className="text-2xl font-bold text-green-600">{userStats.transactionCount}</div>
+                <div className="text-xl md:text-2xl font-bold text-green-600">{userStats.transactionCount}</div>
               </div>
 
-              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-yellow-50'}`}>
+              <div className={`p-3 md:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-yellow-50'}`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <FaCoins className="text-yellow-500" />
-                  <span className="font-semibold">Points</span>
+                  <FaCoins className="text-yellow-500 text-sm md:text-base" />
+                  <span className="font-semibold text-sm md:text-base">Points</span>
                 </div>
-                <div className="text-2xl font-bold text-yellow-600">
+                <div className="text-xl md:text-2xl font-bold text-yellow-600">
                   {userStats.points || 0}
                 </div>
               </div>
 
-              <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-purple-50'}`}>
+              <div className={`p-3 md:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-purple-50'}`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <FaGift className="text-purple-500" />
-                  <span className="font-semibold">Rewards</span>
+                  <FaGift className="text-purple-500 text-sm md:text-base" />
+                  <span className="font-semibold text-sm md:text-base">Rewards</span>
                 </div>
-                <div className="text-lg font-bold text-purple-600">
+                <div className="text-lg md:text-xl font-bold text-purple-600">
                   {getBusinessIncentives(userPosition).discount}% OFF
                 </div>
               </div>
@@ -247,19 +247,19 @@ const Rank = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="mb-6 flex justify-center">
-          <div className={`flex rounded-lg border ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} p-1`}>
+        <div className="mb-4 md:mb-6 flex justify-center px-2">
+          <div className={`flex w-full max-w-md md:max-w-none rounded-lg border ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} p-1 overflow-hidden`}>
             {["Leaderboard", "Rewards", "Achievements"].map((tab) => (
               <button
                 key={tab}
-                className={`px-6 py-2 rounded-md font-medium transition-all duration-300 ${
+                className={`flex-1 px-3 md:px-6 py-2 md:py-3 rounded-md font-medium transition-all duration-300 text-xs md:text-sm ${
                   activeTab === tab
                     ? "bg-blue-600 text-white shadow-md"
                     : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} hover:bg-gray-100`
                 }`}
                 onClick={() => setActiveTab(tab)}
               >
-                {tab}
+                {tab === "Leaderboard" ? "Rankings" : tab}
               </button>
             ))}
           </div>
@@ -270,43 +270,43 @@ const Rank = () => {
           <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
             {/* Top 3 Podium */}
             {rankingData?.rankings && rankingData.rankings.length >= 3 && (
-              <div className="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 p-6">
-                <div className="flex justify-center items-end gap-4 mb-4">
+              <div className="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 p-4 md:p-6">
+                <div className="flex justify-center items-end gap-2 md:gap-4 mb-3 md:mb-4">
                   {/* 2nd Place */}
                   <div className="text-center">
-                    <div className={`w-16 h-16 mx-auto mb-2 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
-                      <FaMedal className="text-gray-400 text-xl" />
+                    <div className={`w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                      <FaMedal className="text-gray-400 text-lg md:text-xl" />
                     </div>
-                    <div className={`w-20 h-16 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} rounded-t-lg flex items-end justify-center pb-2`}>
+                    <div className={`w-16 h-12 md:w-20 md:h-16 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} rounded-t-lg flex items-end justify-center pb-2`}>
                       <span className="text-xs font-bold text-gray-700">2</span>
                     </div>
-                    <p className="text-xs mt-1 font-semibold text-white">
+                    <p className="text-xs mt-1 font-semibold text-white truncate max-w-16 md:max-w-20">
                       {rankingData.rankings[1]?.username || '---'}
                     </p>
                   </div>
 
                   {/* 1st Place */}
                   <div className="text-center">
-                    <div className={`w-20 h-20 mx-auto mb-2 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-yellow-600' : 'bg-yellow-500'}`}>
-                      <FaCrown className="text-white text-2xl" />
+                    <div className={`w-16 h-16 md:w-20 md:h-20 mx-auto mb-2 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-yellow-600' : 'bg-yellow-500'}`}>
+                      <FaCrown className="text-white text-xl md:text-2xl" />
                     </div>
-                    <div className={`w-24 h-20 ${isDarkMode ? 'bg-yellow-600' : 'bg-yellow-500'} rounded-t-lg flex items-end justify-center pb-2`}>
+                    <div className={`w-20 h-16 md:w-24 md:h-20 ${isDarkMode ? 'bg-yellow-600' : 'bg-yellow-500'} rounded-t-lg flex items-end justify-center pb-2`}>
                       <span className="text-sm font-bold text-white">1</span>
                     </div>
-                    <p className="text-sm mt-1 font-bold text-white">
+                    <p className="text-sm mt-1 font-bold text-white truncate max-w-20 md:max-w-24">
                       {rankingData.rankings[0]?.username || '---'}
                     </p>
                   </div>
 
                   {/* 3rd Place */}
                   <div className="text-center">
-                    <div className={`w-16 h-16 mx-auto mb-2 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
-                      <FaMedal className="text-amber-600 text-xl" />
+                    <div className={`w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                      <FaMedal className="text-amber-600 text-lg md:text-xl" />
                     </div>
-                    <div className={`w-20 h-12 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} rounded-t-lg flex items-end justify-center pb-2`}>
+                    <div className={`w-16 h-10 md:w-20 md:h-12 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} rounded-t-lg flex items-end justify-center pb-2`}>
                       <span className="text-xs font-bold text-gray-700">3</span>
                     </div>
-                    <p className="text-xs mt-1 font-semibold text-white">
+                    <p className="text-xs mt-1 font-semibold text-white truncate max-w-16 md:max-w-20">
                       {rankingData.rankings[2]?.username || '---'}
                     </p>
                   </div>
@@ -315,9 +315,9 @@ const Rank = () => {
             )}
 
             {/* Rankings List */}
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <FaChartLine className="text-blue-500" />
+            <div className="p-4 md:p-6">
+              <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 flex items-center gap-2">
+                <FaChartLine className="text-blue-500 text-base md:text-lg" />
                 Full Rankings
               </h3>
 
@@ -340,29 +340,30 @@ const Rank = () => {
                     return (
                       <div
                         key={index}
-                        className={`flex items-center justify-between p-4 rounded-lg transition-all duration-300 ${
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 md:p-4 rounded-lg transition-all duration-300 gap-2 sm:gap-0 ${
                           isCurrentUser
                             ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500'
                             : `${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`
                         }`}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center justify-center w-10 h-10">
+                        <div className="flex items-center gap-3 md:gap-4">
+                          <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10">
                             {getRankIcon(rank)}
                           </div>
 
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className={`font-semibold ${isCurrentUser ? 'text-blue-600' : ''}`}>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`font-semibold text-sm md:text-base truncate ${isCurrentUser ? 'text-blue-600' : ''}`}>
                                 {user.username}
                                 {isCurrentUser && <span className="text-xs text-blue-600 ml-1">(You)</span>}
                               </span>
                               {getRankBadge(rank)}
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">
                               <span className="flex items-center gap-1">
-                                <FaCoins className="text-yellow-500" />
-                                {user.transactionCount} transactions
+                                <FaCoins className="text-yellow-500 text-xs" />
+                                <span className="hidden sm:inline">{user.transactionCount} transactions</span>
+                                <span className="sm:hidden">{user.transactionCount}</span>
                               </span>
                             </div>
                           </div>
@@ -392,9 +393,9 @@ const Rank = () => {
         )}
 
         {activeTab === "Rewards" && (
-          <div className={`rounded-xl shadow-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <FaGift className="text-purple-500" />
+          <div className={`rounded-xl shadow-lg p-4 md:p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className="text-lg md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2">
+              <FaGift className="text-purple-500 text-base md:text-lg" />
               My Rewards
             </h3>
 
@@ -404,7 +405,7 @@ const Rank = () => {
               {userRewardsData?.userRewards?.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {userRewardsData.userRewards.map((userReward) => (
-                    <div key={userReward._id} className={`p-4 rounded-lg border-2 ${
+                    <div key={userReward._id} className={`p-3 md:p-4 rounded-lg border-2 ${
                       userReward.status === 'assigned'
                         ? 'border-green-400 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900'
                         : userReward.status === 'redeemed'
@@ -551,35 +552,35 @@ const Rank = () => {
         )}
 
         {activeTab === "Achievements" && (
-          <div className={`rounded-xl shadow-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <FaTrophy className="text-orange-500" />
+          <div className={`rounded-xl shadow-lg p-4 md:p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <h3 className="text-lg md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-2">
+              <FaTrophy className="text-orange-500 text-base md:text-lg" />
               Achievement Badges
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="p-4 border rounded-lg text-center">
-                <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center">
-                  <FaFire className="text-white text-2xl" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              <div className="p-3 md:p-4 border rounded-lg text-center">
+                <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center">
+                  <FaFire className="text-white text-lg md:text-2xl" />
                 </div>
-                <h4 className="font-bold mb-1">Power User</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Complete 50+ transactions</p>
+                <h4 className="font-bold mb-1 text-sm md:text-base">Power User</h4>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Complete 50+ transactions</p>
               </div>
 
-              <div className="p-4 border rounded-lg text-center">
-                <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                  <FaStar className="text-white text-2xl" />
+              <div className="p-3 md:p-4 border rounded-lg text-center">
+                <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <FaStar className="text-white text-lg md:text-2xl" />
                 </div>
-                <h4 className="font-bold mb-1">Active Member</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Complete 25+ transactions</p>
+                <h4 className="font-bold mb-1 text-sm md:text-base">Active Member</h4>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Complete 25+ transactions</p>
               </div>
 
-              <div className="p-4 border rounded-lg text-center">
-                <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <FaTrophy className="text-white text-2xl" />
+              <div className="p-3 md:p-4 border rounded-lg text-center">
+                <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <FaTrophy className="text-white text-lg md:text-2xl" />
                 </div>
-                <h4 className="font-bold mb-1">Elite Member</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Top 3 on leaderboard</p>
+                <h4 className="font-bold mb-1 text-sm md:text-base">Elite Member</h4>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Top 3 on leaderboard</p>
               </div>
             </div>
           </div>
@@ -587,15 +588,15 @@ const Rank = () => {
 
         {/* Countdown Timer */}
         {rankingData?.countdown && (
-          <div className={`mt-8 p-4 rounded-lg text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
+          <div className={`mt-6 md:mt-8 p-3 md:p-4 rounded-lg text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <FaCalendarAlt className="text-blue-500" />
-              <span className="font-semibold">Next Reset In:</span>
+              <FaCalendarAlt className="text-blue-500 text-sm md:text-base" />
+              <span className="font-semibold text-sm md:text-base">Next Reset In:</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-lg md:text-2xl font-bold text-blue-600">
               {formatCountdown(rankingData.countdown)}
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">
               Rankings reset every Sunday at midnight
             </p>
           </div>

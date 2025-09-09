@@ -19,8 +19,10 @@ const App = () => {
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["user"],
     queryFn: getUser,
-    retry: 5,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
   });
 
   useEffect(() => {
@@ -47,6 +49,24 @@ const App = () => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
 
+  // Keep server alive with periodic health checks
+  useEffect(() => {
+    const keepAlive = () => {
+      fetch('/api/health', { method: 'GET' })
+        .catch(() => {
+          // Silently handle errors to avoid console spam
+        });
+    };
+
+    // Check every 5 minutes to keep server warm
+    const interval = setInterval(keepAlive, 5 * 60 * 1000);
+
+    // Initial check
+    keepAlive();
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleToggleDarkMode = () => {
     dispatch(toggleDarkMode());
   };
@@ -56,7 +76,8 @@ const App = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Waking up the server... Please wait.</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading your account...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">This may take a moment on first load</p>
         </div>
       </div>
     );

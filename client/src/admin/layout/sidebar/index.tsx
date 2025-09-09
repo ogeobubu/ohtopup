@@ -35,7 +35,6 @@ const Sidebar = () => {
     { label: "Dice Game", icon: FaGamepad, to: "/admin/dice" },
     { label: "Providers", icon: FaNetworkWired, to: "/admin/providers" },
     { label: "Newsletter", icon: FaEnvelope, to: "/admin/newsletter" },
-    { label: "Email", icon: FaEnvelope, to: "/admin/email" },
     { label: "System Logs", icon: FaFileAlt, to: "/admin/logs" },
     { label: "Settings", icon: FaCog, to: "/admin/settings" },
     { label: "Help & Support", icon: FaQuestionCircle, to: "/admin/support" },

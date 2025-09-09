@@ -342,7 +342,8 @@ export const getAllUtilityTransactions = async (
   page = 1,
   limit = 10,
   type,
-  requestId
+  requestId,
+  userId
 ) => {
   try {
     const params = { page, limit };
@@ -351,6 +352,9 @@ export const getAllUtilityTransactions = async (
     }
     if (requestId) {
       params.requestId = requestId;
+    }
+    if (userId) {
+      params.userId = userId;
     }
 
     const response = await instance.get(`/utility-transactions`, {
@@ -625,7 +629,15 @@ export const getNewsletterActivity = async (limit = 5) => {
 export const getSystemLogs = async (params = {}) => {
   try {
     const response = await instance.get(`/logs`, { params });
-    return response?.data;
+    const data = response?.data;
+
+    // Transform the response to match frontend expectations
+    return {
+      logs: data.logs || [],
+      total: data.pagination?.total || 0,
+      currentPage: data.pagination?.page || 1,
+      totalPages: data.pagination?.pages || 1
+    };
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching system logs");
   }
@@ -634,7 +646,24 @@ export const getSystemLogs = async (params = {}) => {
 export const getLogStats = async () => {
   try {
     const response = await instance.get(`/logs/stats`);
-    return response?.data;
+    const data = response?.data;
+
+    // Transform stats to match frontend expectations
+    const stats = data.stats || [];
+    const errorCount = stats.find(s => s._id === 'error')?.total || 0;
+    const warningCount = stats.find(s => s._id === 'warning')?.total || 0;
+    const infoCount = stats.find(s => s._id === 'info')?.total || 0;
+    const debugCount = stats.find(s => s._id === 'debug')?.total || 0;
+
+    return {
+      errorCount,
+      warningCount,
+      infoCount,
+      debugCount,
+      totalLogs: errorCount + warningCount + infoCount + debugCount,
+      recentLogs: data.recentLogs || 0,
+      recentErrors: data.recentErrors || 0
+    };
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching log stats");
   }
@@ -694,5 +723,42 @@ export const bulkUpdateRewardStatus = async (rewardIds, isActive) => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error bulk updating rewards");
+  }
+};
+
+// Electricity Settings API functions
+export const getElectricitySettings = async () => {
+  try {
+    const response = await instance.get(`/electricity/settings`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching electricity settings");
+  }
+};
+
+export const updateElectricitySettings = async (settings) => {
+  try {
+    const response = await instance.put(`/electricity/settings`, { settings });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating electricity settings");
+  }
+};
+
+export const resetElectricitySettings = async () => {
+  try {
+    const response = await instance.post(`/electricity/settings/reset`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error resetting electricity settings");
+  }
+};
+
+export const getAvailableDiscos = async () => {
+  try {
+    const response = await instance.get(`/electricity/discos`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching available discos");
   }
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getWallet, getSelectedPlansForUsers, getUser } from '../../../api';
+import { getWallet, getSelectedPlansForUsers, getUser, getAirtimeSettings } from '../../../api';
 import Modal from '../../../admin/components/modal';
 import useDataPurchase from './hooks/useDataPurchase';
 import { formatNairaAmount, formatPhoneNumber } from '../../../utils';
@@ -37,6 +37,11 @@ const DataPurchase = ({ isDarkMode }) => {
   const { data: user, isLoading: isUserLoading } = useQuery({
     queryKey: ['user'],
     queryFn: getUser,
+  });
+
+  const { data: airtimeSettings, isLoading: isSettingsLoading } = useQuery({
+    queryKey: ['airtime', 'settings'],
+    queryFn: () => getAirtimeSettings(),
   });
 
   // Get available networks from selected plans
@@ -163,7 +168,30 @@ const DataPurchase = ({ isDarkMode }) => {
     }
   };
 
-  const isLoading = isSelectedPlansLoading || isWalletLoading || isUserLoading;
+  // Commission calculation
+  const calculateCommission = (amount, network) => {
+    if (!airtimeSettings?.settings || !amount) {
+      return { commissionAmount: 0, adjustedAmount: amount };
+    }
+
+    // Check for network-specific commission rate first, then fall back to global
+    const networkSettings = airtimeSettings.settings.networks?.[network];
+    const globalSettings = airtimeSettings.settings.global;
+
+    const commissionRate = networkSettings?.dataCommissionRate ||
+                          globalSettings?.dataCommissionRate || 0;
+
+    const commissionAmount = (amount * commissionRate) / 100;
+    const adjustedAmount = amount - commissionAmount;
+
+    return { commissionAmount, adjustedAmount, commissionRate };
+  };
+
+  const { commissionAmount, adjustedAmount, commissionRate } = selectedPlan && selectedNetwork ?
+    calculateCommission(selectedPlan.finalPrice || selectedPlan.amount, selectedNetwork) :
+    { commissionAmount: 0, adjustedAmount: 0, commissionRate: 0 };
+
+  const isLoading = isSelectedPlansLoading || isWalletLoading || isUserLoading || isSettingsLoading;
 
   return (
     <div className="border border-solid border-gray-200 rounded-xl p-4 md:p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -185,7 +213,7 @@ const DataPurchase = ({ isDarkMode }) => {
         isDarkMode={isDarkMode}
         isOpen={isModalOpen}
         closeModal={() => setIsModalOpen(false)}
-        size="lg"
+        size="full"
         showCloseButton={false}
         stickyHeader={
           <div className="bg-white">
@@ -209,14 +237,14 @@ const DataPurchase = ({ isDarkMode }) => {
                 </button>
               </div>
 
-              {/* Progress Indicator */}
-              <div className="flex items-center gap-1">
+              {/* Progress Indicator - Desktop */}
+              <div className="hidden md:flex items-center gap-1">
                 {[
-                  { step: 1, label: 'Network', icon: FaSignal },
-                  { step: 2, label: 'Plan', icon: FaWifi },
-                  { step: 3, label: 'Phone', icon: FaUser },
-                  { step: 4, label: 'Confirm', icon: FaCheck }
-                ].map(({ step, label, icon: Icon }) => (
+                  { step: 1, label: 'Network' },
+                  { step: 2, label: 'Plan' },
+                  { step: 3, label: 'Phone' },
+                  { step: 4, label: 'Confirm' }
+                ].map(({ step, label }) => (
                   <div key={step} className="flex items-center flex-1">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
                       currentStep >= step
@@ -237,6 +265,56 @@ const DataPurchase = ({ isDarkMode }) => {
                     )}
                   </div>
                 ))}
+              </div>
+
+              {/* Progress Indicator - Mobile (Vertical) */}
+              <div className="md:hidden flex flex-col items-center gap-2">
+                <div className="flex items-center gap-3">
+                  {[
+                    { step: 1, label: 'Network' },
+                    { step: 2, label: 'Plan' },
+                    { step: 3, label: 'Phone' },
+                    { step: 4, label: 'Confirm' }
+                  ].map(({ step, label }) => (
+                    <div key={step} className="flex flex-col items-center gap-1">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${
+                        currentStep >= step
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : currentStep === step
+                          ? 'bg-blue-100 text-blue-600 border-2 border-blue-600'
+                          : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        {currentStep > step ? <FaCheck className="text-sm" /> : step}
+                      </div>
+                      <span className={`text-xs font-medium text-center leading-tight ${
+                        currentStep >= step ? 'text-blue-600' : 'text-gray-500'
+                      }`}>
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Progress Line */}
+                <div className="w-full max-w-xs h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 transition-all duration-300 ease-out rounded-full"
+                    style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+                  />
+                </div>
+
+                {/* Current Step Info */}
+                <div className="text-center mt-1">
+                  <p className="text-sm font-medium text-gray-700">
+                    Step {currentStep} of 4
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {currentStep === 1 && "Choose your network"}
+                    {currentStep === 2 && "Select data plan"}
+                    {currentStep === 3 && "Confirm phone number"}
+                    {currentStep === 4 && "Review and purchase"}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -268,11 +346,11 @@ const DataPurchase = ({ isDarkMode }) => {
         {isLoading ? (
           <Loader />
         ) : (
-          <div className="flex flex-col bg-white rounded-2xl">
+          <div className="flex flex-col bg-white rounded-2xl pb-8 md:pb-0">
 
             {/* Step 1: Network Selection */}
             {currentStep === 1 && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Your Network</h3>
                   <p className="text-sm text-gray-600">Select your mobile network provider</p>
@@ -344,9 +422,9 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 2: Data Plan Selection */}
             {currentStep === 2 && selectedNetwork && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Choose Your Data Plan</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Your Data Plan</h3>
                   <p className="text-sm text-gray-600">Select a plan for {selectedNetwork.toUpperCase()}</p>
                 </div>
 
@@ -463,9 +541,9 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 3: Phone Number Selection */}
             {currentStep === 3 && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Confirm Phone Number</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Phone Number</h3>
                   <p className="text-sm text-gray-600">Data will be sent to this number</p>
                 </div>
 
@@ -590,15 +668,15 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 4: Confirmation & Purchase */}
             {currentStep === 4 && selectedPlan && selectedNetwork && phoneNumber && (
-              <div className="px-4 py-4 pb-8">
-                <div className="mb-4 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-12 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
                   <p className="text-sm text-gray-600">Review your selection and complete the purchase</p>
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-white rounded-xl border-2 border-gray-200 p-4 mb-4">
-                  <h4 className="text-base font-bold text-gray-900 mb-3">Order Summary</h4>
+                <div className="bg-white rounded-xl border-2 border-gray-200 p-3 md:p-4 mb-3 md:mb-4">
+                  <h4 className="text-sm md:text-base font-bold text-gray-900 mb-2 md:mb-3">Order Summary</h4>
 
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -638,10 +716,24 @@ const DataPurchase = ({ isDarkMode }) => {
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-3">
-                      <div className="font-bold text-gray-900 text-base">Total Amount</div>
-                      <div className="text-xl font-bold text-blue-600">
-                        {formatNairaAmount(selectedPlan.finalPrice || selectedPlan.amount)}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <div className="font-medium text-gray-900 text-sm">Plan Amount</div>
+                        <div className="text-sm text-gray-600">{formatNairaAmount(selectedPlan.finalPrice || selectedPlan.amount)}</div>
+                      </div>
+                      {commissionAmount > 0 && (
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <div className="font-medium text-green-600 text-sm">Commission Savings ({commissionRate}%)</div>
+                          <div className="text-sm text-green-600">-{formatNairaAmount(commissionAmount)}</div>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-3">
+                        <div className="font-bold text-gray-900 text-base">
+                          {commissionAmount > 0 ? 'Amount to Pay' : 'Total Amount'}
+                        </div>
+                        <div className="text-xl font-bold text-blue-600">
+                          {formatNairaAmount(commissionAmount > 0 ? adjustedAmount : (selectedPlan.finalPrice || selectedPlan.amount))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -668,7 +760,14 @@ const DataPurchase = ({ isDarkMode }) => {
                     ) : (
                       <div className="flex items-center justify-center gap-1">
                         <FaCreditCard className="text-sm" />
-                        <span>Pay {formatNairaAmount(selectedPlan.finalPrice || selectedPlan.amount)}</span>
+                        <span>
+                          Pay {formatNairaAmount(commissionAmount > 0 ? adjustedAmount : (selectedPlan.finalPrice || selectedPlan.amount))}
+                          {commissionAmount > 0 && (
+                            <span className="text-xs block text-green-600">
+                              (Save {formatNairaAmount(commissionAmount)})
+                            </span>
+                          )}
+                        </span>
                       </div>
                     )}
                   </button>
@@ -678,16 +777,17 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Navigation Buttons for other steps */}
             {currentStep < 4 && (
-              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
+              <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-2 md:py-3 mt-3 md:mt-4 pb-12 md:pb-8">
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
                   >
                     Cancel
                   </button>
                   <div className="text-xs text-gray-500 flex items-center">
-                    Step {currentStep} of 4
+                    <span className="hidden sm:inline">Step {currentStep} of 4</span>
+                    <span className="sm:hidden">{currentStep}/4</span>
                   </div>
                 </div>
               </div>
@@ -695,16 +795,17 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Final step navigation - only show if no other navigation exists */}
             {currentStep === 4 && (
-              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
+              <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-2 md:py-3 mt-3 md:mt-4 pb-12 md:pb-8">
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
                   >
                     Cancel
                   </button>
                   <div className="text-xs text-gray-500 flex items-center">
-                    Step 4 of 4 - Ready to Purchase
+                    <span className="hidden sm:inline">Step 4 of 4 - Ready to Purchase</span>
+                    <span className="sm:hidden">4/4 - Ready</span>
                   </div>
                 </div>
               </div>

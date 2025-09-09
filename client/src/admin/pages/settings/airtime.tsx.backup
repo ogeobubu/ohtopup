@@ -1,0 +1,269 @@
+import { useState, useEffect } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import Textfield from "../../../components/ui/forms/input";
+import Button from "../../../components/ui/forms/button";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+
+import { getAirtimeLimits as getLimitsApi } from '../../../api';
+
+// API functions for airtime settings
+const updateAirtimeLimits = async (data) => {
+  const response = await fetch('/api/users/airtime/limits', {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('ohtopup-admin-token')}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update airtime limits');
+  }
+
+  return response.json();
+};
+
+const AirtimeSettings = () => {
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState('global');
+
+  const { data: limitsData, isLoading, error } = useQuery({
+    queryKey: ['airtimeLimits'],
+    queryFn: getLimitsApi,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateAirtimeLimits,
+    onSuccess: () => {
+      toast.success("Airtime limits updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ['airtimeLimits'] });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update airtime limits");
+    }
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      global: {
+        minAmount: 50,
+        maxAmount: 50000,
+        dailyLimit: 100000,
+        monthlyLimit: 500000
+      },
+      networks: {
+        mtn: { minAmount: 50, maxAmount: 50000 },
+        glo: { minAmount: 50, maxAmount: 50000 },
+        airtel: { minAmount: 50, maxAmount: 50000 },
+        '9mobile': { minAmount: 50, maxAmount: 50000 }
+      }
+    },
+    validationSchema: Yup.object({
+      global: Yup.object({
+        minAmount: Yup.number().min(1, "Minimum amount must be at least 1").required("Required"),
+        maxAmount: Yup.number().min(Yup.ref('minAmount'), "Max amount must be greater than min amount").required("Required"),
+        dailyLimit: Yup.number().min(1, "Daily limit must be at least 1").required("Required"),
+        monthlyLimit: Yup.number().min(Yup.ref('dailyLimit'), "Monthly limit must be greater than daily limit").required("Required")
+      }),
+      networks: Yup.object({
+        mtn: Yup.object({
+          minAmount: Yup.number().min(1, "Minimum amount must be at least 1").required("Required"),
+          maxAmount: Yup.number().min(Yup.ref('minAmount'), "Max amount must be greater than min amount").required("Required")
+        }),
+        glo: Yup.object({
+          minAmount: Yup.number().min(1, "Minimum amount must be at least 1").required("Required"),
+          maxAmount: Yup.number().min(Yup.ref('minAmount'), "Max amount must be greater than min amount").required("Required")
+        }),
+        airtel: Yup.object({
+          minAmount: Yup.number().min(1, "Minimum amount must be at least 1").required("Required"),
+          maxAmount: Yup.number().min(Yup.ref('minAmount'), "Max amount must be greater than min amount").required("Required")
+        }),
+        '9mobile': Yup.object({
+          minAmount: Yup.number().min(1, "Minimum amount must be at least 1").required("Required"),
+          maxAmount: Yup.number().min(Yup.ref('minAmount'), "Max amount must be greater than min amount").required("Required")
+        })
+      })
+    }),
+    onSubmit: (values) => {
+      updateMutation.mutate(values);
+    }
+  });
+
+  useEffect(() => {
+    if (limitsData?.limits) {
+      formik.setValues(limitsData.limits);
+    }
+  }, [limitsData]);
+
+  const networkNames = {
+    mtn: 'MTN',
+    glo: 'Glo',
+    airtel: 'Airtel',
+    '9mobile': '9Mobile'
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
+        <div className="text-center text-red-600">
+          Error loading airtime settings: {error.message}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="md:p-6 p-2 border border-solid rounded-md border-gray-200 w-full">
+      <h2 className="text-2xl font-bold mb-6">Airtime Purchase Settings</h2>
+
+      <div className="mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('global')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'global'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Global Limits
+            </button>
+            <button
+              onClick={() => setActiveTab('networks')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'networks'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Network-Specific Limits
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <form onSubmit={formik.handleSubmit} className="space-y-6">
+        {activeTab === 'global' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Global Purchase Limits</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Textfield
+                label="Minimum Amount (₦)"
+                name="global.minAmount"
+                type="number"
+                placeholder="Enter minimum amount"
+                value={formik.values.global.minAmount}
+                onChange={formik.handleChange}
+                min="1"
+                isDarkMode={false}
+                error={formik.touched.global?.minAmount && Boolean(formik.errors.global?.minAmount)}
+                helperText={formik.touched.global?.minAmount && formik.errors.global?.minAmount}
+              />
+              <Textfield
+                label="Maximum Amount (₦)"
+                name="global.maxAmount"
+                type="number"
+                placeholder="Enter maximum amount"
+                value={formik.values.global.maxAmount}
+                onChange={formik.handleChange}
+                min="1"
+                isDarkMode={false}
+                error={formik.touched.global?.maxAmount && Boolean(formik.errors.global?.maxAmount)}
+                helperText={formik.touched.global?.maxAmount && formik.errors.global?.maxAmount}
+              />
+              <Textfield
+                label="Daily Limit (₦)"
+                name="global.dailyLimit"
+                type="number"
+                placeholder="Enter daily limit"
+                value={formik.values.global.dailyLimit}
+                onChange={formik.handleChange}
+                min="1"
+                isDarkMode={false}
+                error={formik.touched.global?.dailyLimit && Boolean(formik.errors.global?.dailyLimit)}
+                helperText={formik.touched.global?.dailyLimit && formik.errors.global?.dailyLimit}
+              />
+              <Textfield
+                label="Monthly Limit (₦)"
+                name="global.monthlyLimit"
+                type="number"
+                placeholder="Enter monthly limit"
+                value={formik.values.global.monthlyLimit}
+                onChange={formik.handleChange}
+                min="1"
+                isDarkMode={false}
+                error={formik.touched.global?.monthlyLimit && Boolean(formik.errors.global?.monthlyLimit)}
+                helperText={formik.touched.global?.monthlyLimit && formik.errors.global?.monthlyLimit}
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'networks' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900">Network-Specific Limits</h3>
+            {Object.entries(formik.values.networks).map(([network, settings]) => (
+              <div key={network} className="border border-gray-200 rounded-lg p-4">
+                <h4 className="text-md font-medium text-gray-800 mb-3">{networkNames[network]}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Textfield
+                    label="Minimum Amount (₦)"
+                    name={`networks.${network}.minAmount`}
+                    type="number"
+                    placeholder="Enter minimum amount"
+                    value={settings.minAmount}
+                    onChange={formik.handleChange}
+                    min="1"
+                    isDarkMode={false}
+                    error={formik.touched.networks?.[network]?.minAmount && Boolean(formik.errors.networks?.[network]?.minAmount)}
+                    helperText={formik.touched.networks?.[network]?.minAmount && formik.errors.networks?.[network]?.minAmount}
+                  />
+                  <Textfield
+                    label="Maximum Amount (₦)"
+                    name={`networks.${network}.maxAmount`}
+                    type="number"
+                    placeholder="Enter maximum amount"
+                    value={settings.maxAmount}
+                    onChange={formik.handleChange}
+                    min="1"
+                    isDarkMode={false}
+                    error={formik.touched.networks?.[network]?.maxAmount && Boolean(formik.errors.networks?.[network]?.maxAmount)}
+                    helperText={formik.touched.networks?.[network]?.maxAmount && formik.errors.networks?.[network]?.maxAmount}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+          <Button
+            onClick={formik.handleSubmit}
+            onSuccess={() => {}}
+            disabled={updateMutation.isPending}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+            loading={updateMutation.isPending}
+          >
+            {updateMutation.isPending ? 'Updating...' : 'Update Settings'}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default AirtimeSettings;

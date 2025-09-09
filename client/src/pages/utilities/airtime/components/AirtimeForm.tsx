@@ -1,13 +1,72 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import PropTypes from "prop-types";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { formatNairaAmount } from "../../../../utils";
+import { getAirtimeLimits } from "../../../../api";
 import NetworkProviderSelector from "./NetworkProviderSelector";
 import PhoneNumberInput from "./PhoneNumberInput";
 import QuickAmounts from "./QuickAmounts";
 import TransactionSummary from "../../data/components/TransactionSummary";
 
 const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
+  const [detectedNetwork, setDetectedNetwork] = useState(null);
+
+  // Fetch airtime limits from API
+  const { data: limitsData, isLoading: limitsLoading } = useQuery({
+    queryKey: ['airtimeLimits'],
+    queryFn: getAirtimeLimits,
+  });
+
+  // Get current limits based on detected network
+  const getCurrentLimits = () => {
+    if (!limitsData?.limits) {
+      return { minAmount: 50, maxAmount: 50000 }; // Default fallback
+    }
+
+    const globalLimits = limitsData.limits.global;
+    const networkLimits = detectedNetwork && limitsData.limits.networks[detectedNetwork];
+
+    return {
+      minAmount: networkLimits?.minAmount || globalLimits.minAmount,
+      maxAmount: Math.min(
+        networkLimits?.maxAmount || globalLimits.maxAmount,
+        walletBalance
+      )
+    };
+  };
+
+  const currentLimits = getCurrentLimits();
+
+  // Generate quick amount options based on current limits
+  const generateQuickAmounts = (limits) => {
+    const { minAmount, maxAmount } = limits;
+    const amounts = [];
+
+    // Generate 4 quick amounts within the limits
+    const range = maxAmount - minAmount;
+    const step = Math.max(100, Math.floor(range / 4));
+
+    for (let i = 1; i <= 4; i++) {
+      const amount = Math.min(minAmount + (step * i), maxAmount);
+      if (amount >= minAmount && amount <= maxAmount && !amounts.includes(amount)) {
+        amounts.push(amount);
+      }
+    }
+
+    // If we don't have enough amounts, add some defaults
+    if (amounts.length < 4) {
+      const defaults = [100, 200, 500, 1000];
+      defaults.forEach(amount => {
+        if (amount >= minAmount && amount <= maxAmount && !amounts.includes(amount)) {
+          amounts.push(amount);
+        }
+      });
+    }
+
+    return amounts.slice(0, 4);
+  };
 
   const validationSchema = Yup.object().shape({
     phoneNumber: Yup.string()
@@ -21,20 +80,19 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
       ),
     amount: Yup.number()
       .required("Amount is required")
-      .min(50, "Minimum purchase amount is ₦50")
+      .min(currentLimits.minAmount, `Minimum purchase amount is ₦${currentLimits.minAmount}`)
       .max(
-        walletBalance,
-        `Your wallet balance (${formatNairaAmount(
-          walletBalance
-        )}) is insufficient`
+        currentLimits.maxAmount,
+        currentLimits.maxAmount >= walletBalance
+          ? `Your wallet balance (${formatNairaAmount(walletBalance)}) is insufficient`
+          : `Maximum purchase amount is ₦${currentLimits.maxAmount}`
       ),
     provider: Yup.string().required("Please select a provider"),
   });
 
   // Handle network detection from phone number
   const handleNetworkDetected = (network) => {
-    // Network detection is handled in the PhoneNumberInput component
-    // This callback can be used for future enhancements like auto-selecting providers
+    setDetectedNetwork(network);
     if (network) {
       console.log(`Detected ${network.toUpperCase()} network`);
     }
@@ -120,13 +178,14 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
                 className="text-red-600 dark:text-red-400 text-sm mt-1 flex items-center"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Minimum amount: ₦50
+                Minimum amount: ₦{currentLimits.minAmount}
               </p>
             </div>
 
             <QuickAmounts
-              selectedAmount={values.amount}
-              onChange={(amount) => setFieldValue("amount", amount)}
+              amounts={generateQuickAmounts(currentLimits)}
+              selectedAmount={values.amount ? parseFloat(values.amount) : 0}
+              onChange={(amount) => setFieldValue("amount", amount.toString())}
               isSubmitting={isSubmitting}
             />
           </div>
@@ -134,7 +193,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
           {/* Transaction Summary */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4">
             <TransactionSummary
-              amount={values.amount}
+              amount={values.amount ? parseFloat(values.amount) : 0}
               walletBalance={walletBalance}
               isDarkMode={isDarkMode}
             />

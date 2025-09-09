@@ -216,26 +216,83 @@ const toggleVariation = async (req, res) => {
 
 const getSavedVariationsForPricing = async (req, res) => {
   try {
-    const savedVariations = await Variation.find({ isActive: true });
+    // Import required models
+    const SelectedDataPlan = require("../model/SelectedDataPlan");
+    const AirtimeSettings = require("../model/AirtimeSettings");
 
-    const pricingData = savedVariations.map(variation => ({
-      id: variation._id,
-      name: variation.name,
-      price: variation.fixedPrice,
-      dataLimit: variation.variation_amount,
-      variationCode: variation.variation_code,
-    }));
+    // Fetch selected data plans that are active and visible
+    const selectedPlans = await SelectedDataPlan.find({
+      isActive: true,
+      isVisible: true
+    })
+    .populate('provider', 'name displayName isActive')
+    .sort({ priority: -1, network: 1, amount: 1 })
+    .lean();
+
+    // Load commission settings
+    const airtimeSettings = await AirtimeSettings.find({ isActive: true });
+
+    const pricingData = selectedPlans.map(plan => {
+      // Normalize network name for commission lookup
+      const network = plan.network.toLowerCase();
+
+      // Handle special network mappings
+      const networkMap = {
+        '9mobile': '9mobile',
+        'airtel': 'airtel',
+        'glo': 'glo',
+        'mtn': 'mtn'
+      };
+      const normalizedNetwork = networkMap[network] || network;
+
+      // Get commission rates for data plans
+      const networkSettings = airtimeSettings.find(setting =>
+        setting.type === 'network' && setting.network === normalizedNetwork
+      );
+      const globalSettings = airtimeSettings.find(setting => setting.type === 'global');
+
+      const commissionRate = Math.floor(networkSettings?.settings?.dataCommissionRate ||
+                           globalSettings?.settings?.dataCommissionRate || 0);
+
+      // Use admin price if set, otherwise use provider amount
+      const basePrice = plan.adminPrice || plan.amount;
+      const discountAmount = plan.discount > 0 ? (basePrice * plan.discount / 100) : 0;
+      const priceAfterDiscount = basePrice - discountAmount;
+
+      // Apply commission
+      const commissionAmount = (priceAfterDiscount * commissionRate) / 100;
+      const finalPrice = priceAfterDiscount - commissionAmount;
+
+      return {
+        id: plan._id,
+        name: plan.displayName || plan.name,
+        price: basePrice,
+        finalPrice: finalPrice,
+        commissionRate: commissionRate,
+        commissionAmount: commissionAmount,
+        discount: plan.discount || 0,
+        discountAmount: discountAmount,
+        dataLimit: plan.dataAmount,
+        validity: plan.validity,
+        planId: plan.planId,
+        serviceID: plan.serviceId,
+        network: plan.network,
+        planType: plan.planType,
+        provider: plan.providerName,
+        type: 'data'
+      };
+    });
 
     res.status(200).json({
       success: true,
       data: pricingData
     });
   } catch (error) {
-    console.error("Error retrieving saved variations:", error);
-    res.status(500).json({ 
+    console.error("Error retrieving selected data plans for pricing:", error);
+    res.status(500).json({
       success: false,
-      message: "Error retrieving saved variations",
-      error: error.message 
+      message: "Error retrieving pricing data",
+      error: error.message
     });
   }
 };

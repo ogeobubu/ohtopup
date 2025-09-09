@@ -6,12 +6,19 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Logo from "../../components/ui/logo";
 import Button from "../../components/ui/forms/button";
-import Textarea from "../../components/ui/forms/input";
+import FormInput from "../../components/ui/forms/input";
 import { resetUser, resendResetCodeUser } from "../../api";
 
 const Reset = ({ darkMode }) => {
-  const emailStorage = JSON.parse(localStorage.getItem("ohtopup-create")) || null;
+  const emailStorage = JSON.parse(localStorage.getItem("ohtopup-forgot")) || null;
   const inputRefs = useRef([]);
+
+  // Redirect to forgot password if no email is stored
+  React.useEffect(() => {
+    if (!emailStorage?.email) {
+      window.location.href = "/forgot";
+    }
+  }, [emailStorage]);
 
   useEffect(() => {
     const inputFields = inputRefs.current;
@@ -66,6 +73,11 @@ const Reset = ({ darkMode }) => {
     },
   });
 
+  // Don't render if no email is stored
+  if (!emailStorage?.email) {
+    return null;
+  }
+
   return (
     <div className={`flex md:flex-row justify-between ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="w-full py-0 md:py-4">
@@ -89,7 +101,7 @@ const Reset = ({ darkMode }) => {
                 const code = inputRefs.current.map((input) => input.value).join("");
                 mutation.mutate(
                   {
-                    email: emailStorage?.email || "ohtopup@gmail.com",
+                    email: emailStorage?.email,
                     otp: code,
                     newPassword: values.newPassword,
                   },
@@ -140,7 +152,7 @@ const Reset = ({ darkMode }) => {
                   <ErrorMessage name="otp" component="div" className="text-red-500 mb-3" />
                   <Field name="newPassword">
                     {({ field, meta }) => (
-                      <Textarea
+                      <FormInput
                         type="password"
                         label="New Password"
                         {...field}
@@ -154,7 +166,7 @@ const Reset = ({ darkMode }) => {
                     onClick={async () => {
                       try {
                         const response = await resendResetCodeUser({
-                          email: emailStorage?.email || "ohtopup@gmail.com",
+                          email: emailStorage?.email,
                         });
                         toast.success(response.message);
                       } catch (error) {

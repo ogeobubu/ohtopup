@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FaUser, FaUserShield, FaUserTimes, FaEdit, FaUsers, FaChartLine, FaCalendarAlt, FaClock, FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaTrash, FaUserCheck } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaUser, FaUserShield, FaUserTimes, FaEdit, FaUsers, FaChartLine, FaCalendarAlt, FaClock, FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaTrash, FaUserCheck, FaCreditCard } from "react-icons/fa";
 import Select from "react-select";
 import Table from "../../components/table";
 import Pagination from "../../components/pagination";
@@ -17,6 +18,7 @@ const UserManagement = () => {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState(null);
@@ -147,6 +149,13 @@ const UserManagement = () => {
       render: (user) => (
         <div className="flex space-x-2">
           <button
+            onClick={() => navigate(`/admin/transactions?userId=${user._id}`)}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            title="View User Transactions"
+          >
+            <FaCreditCard className="inline h-3 w-3" />
+          </button>
+          <button
             onClick={() => handleEditUser(user)}
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
             title="Edit User"
@@ -176,109 +185,106 @@ const UserManagement = () => {
   const deletedUsers = analyticsData?.totalDeletedUsers || 0;
 
   return (
-    <div className="my-5 md:px-4 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
-        <p className="text-gray-600">Manage and monitor all users in the system</p>
+    <div className="my-3 md:my-5 p-2 md:px-4 sm:px-6 lg:px-8">
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2">User Management</h1>
+        <p className="text-gray-600 text-sm md:text-base">Manage and monitor all users in the system</p>
       </div>
 
       {/* Enhanced Analytics Cards */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+      <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">Total Users</p>
-              <p className="text-2xl font-bold">{analyticsData?.totalUsers || 0}</p>
+              <p className="text-blue-100 text-xs md:text-sm font-medium">Total Users</p>
+              <p className="text-lg md:text-2xl font-bold">{analyticsData?.totalUsers || 0}</p>
             </div>
-            <FaUsers className="h-8 w-8 text-blue-200" />
+            <FaUsers className="h-6 w-6 md:h-8 md:w-8 text-blue-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium">Active Users</p>
-              <p className="text-2xl font-bold">{activeUsers || 0}</p>
+              <p className="text-green-100 text-xs md:text-sm font-medium">Active Users</p>
+              <p className="text-lg md:text-2xl font-bold">{activeUsers || 0}</p>
             </div>
-            <FaUserCheck className="h-8 w-8 text-green-200" />
+            <FaUserCheck className="h-6 w-6 md:h-8 md:w-8 text-green-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm font-medium">Regular Users</p>
-              <p className="text-2xl font-bold">{regularUsers || 0}</p>
+              <p className="text-purple-100 text-xs md:text-sm font-medium">Regular Users</p>
+              <p className="text-lg md:text-2xl font-bold">{regularUsers || 0}</p>
             </div>
-            <FaUser className="h-8 w-8 text-purple-200" />
+            <FaUser className="h-6 w-6 md:h-8 md:w-8 text-purple-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm font-medium">Admins</p>
-              <p className="text-2xl font-bold">{adminUsers || 0}</p>
+              <p className="text-orange-100 text-xs md:text-sm font-medium">Admins</p>
+              <p className="text-lg md:text-2xl font-bold">{adminUsers || 0}</p>
             </div>
-            <FaUserShield className="h-8 w-8 text-orange-200" />
+            <FaUserShield className="h-6 w-6 md:h-8 md:w-8 text-orange-200" />
           </div>
         </div>
       </div>
 
       {/* Secondary Analytics Row */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-r from-red-500 to-red-600 p-4 rounded-lg shadow-md text-white">
+      <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-gradient-to-r from-red-500 to-red-600 p-3 md:p-4 rounded-lg shadow-md text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-red-100 text-sm font-medium">Deleted Users</p>
-              <p className="text-xl font-bold">{deletedUsers || 0}</p>
+              <p className="text-red-100 text-xs md:text-sm font-medium">Deleted Users</p>
+              <p className="text-lg md:text-xl font-bold">{deletedUsers || 0}</p>
             </div>
-            <FaUserTimes className="h-6 w-6 text-red-200" />
+            <FaUserTimes className="h-5 w-5 md:h-6 md:w-6 text-red-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-4 rounded-lg shadow-md text-white">
+        <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-3 md:p-4 rounded-lg shadow-md text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-indigo-100 text-sm font-medium">Users This Month</p>
-              <p className="text-xl font-bold">{analyticsData?.usersThisMonth || 0}</p>
+              <p className="text-indigo-100 text-xs md:text-sm font-medium">Users This Month</p>
+              <p className="text-lg md:text-xl font-bold">{analyticsData?.usersThisMonth || 0}</p>
             </div>
-            <FaCalendarAlt className="h-6 w-6 text-indigo-200" />
+            <FaCalendarAlt className="h-5 w-5 md:h-6 md:w-6 text-indigo-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-teal-500 to-teal-600 p-4 rounded-lg shadow-md text-white">
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 p-3 md:p-4 rounded-lg shadow-md text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-teal-100 text-sm font-medium">Active Rate</p>
-              <p className="text-xl font-bold">
+              <p className="text-teal-100 text-xs md:text-sm font-medium">Active Rate</p>
+              <p className="text-lg md:text-xl font-bold">
                 {analyticsData?.totalUsers > 0
                   ? Math.round(((activeUsers || 0) / analyticsData.totalUsers) * 100)
                   : 0}%
               </p>
             </div>
-            <FaChartLine className="h-6 w-6 text-teal-200" />
+            <FaChartLine className="h-5 w-5 md:h-6 md:w-6 text-teal-200" />
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <div className="flex items-center space-x-4 flex-1">
-          <div className="text-sm text-gray-600">
-            {usersData?.users?.length || 0} users found
-          </div>
-          
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 px-2 md:px-0">
+        <div className="text-xs md:text-sm text-gray-600">
+          {usersData?.users?.length || 0} users found
         </div>
-        <div className="flex items-center space-x-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
             <input
               type="text"
               placeholder="Search by name or email"
               value={searchTerm}
               onChange={handleSearchChange}
-              className="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+              className="border border-gray-300 rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
             />
-            <FaUsers className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <FaUsers className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
           </div>
           <Select
             options={[
@@ -288,13 +294,13 @@ const UserManagement = () => {
             ]}
             value={filter}
             onChange={handleFilterChange}
-            className="w-32"
+            className="w-full sm:w-32 text-sm"
             placeholder="Role"
             styles={{
               control: (base) => ({
                 ...base,
-                minHeight: '38px',
-                borderRadius: '8px',
+                minHeight: '36px',
+                borderRadius: '6px',
                 borderColor: '#d1d5db',
                 '&:hover': { borderColor: '#9ca3af' },
                 boxShadow: 'none',
@@ -306,23 +312,23 @@ const UserManagement = () => {
               placeholder: (base) => ({
                 ...base,
                 color: '#9ca3af',
-                fontSize: '14px'
+                fontSize: '12px'
               }),
               singleValue: (base) => ({
                 ...base,
                 color: '#374151',
-                fontSize: '14px'
+                fontSize: '12px'
               }),
               menu: (base) => ({
                 ...base,
-                borderRadius: '8px',
+                borderRadius: '6px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
               }),
               option: (base, { isFocused, isSelected }) => ({
                 ...base,
                 backgroundColor: isSelected ? '#3b82f6' : isFocused ? '#eff6ff' : 'white',
                 color: isSelected ? 'white' : '#374151',
-                fontSize: '14px'
+                fontSize: '12px'
               })
             }}
           />
@@ -333,13 +339,13 @@ const UserManagement = () => {
               { value: "deleted", label: "Deleted" },
             ]}
             onChange={handleStatusChange}
-            className="w-32"
+            className="w-full sm:w-32 text-sm"
             placeholder="Status"
             styles={{
               control: (base) => ({
                 ...base,
-                minHeight: '38px',
-                borderRadius: '8px',
+                minHeight: '36px',
+                borderRadius: '6px',
                 borderColor: '#d1d5db',
                 '&:hover': { borderColor: '#9ca3af' },
                 boxShadow: 'none',
@@ -351,32 +357,32 @@ const UserManagement = () => {
               placeholder: (base) => ({
                 ...base,
                 color: '#9ca3af',
-                fontSize: '14px'
+                fontSize: '12px'
               }),
               singleValue: (base) => ({
                 ...base,
                 color: '#374151',
-                fontSize: '14px'
+                fontSize: '12px'
               }),
               menu: (base) => ({
                 ...base,
-                borderRadius: '8px',
+                borderRadius: '6px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
               }),
               option: (base, { isFocused, isSelected }) => ({
                 ...base,
                 backgroundColor: isSelected ? '#3b82f6' : isFocused ? '#eff6ff' : 'white',
                 color: isSelected ? 'white' : '#374151',
-                fontSize: '14px'
+                fontSize: '12px'
               })
             }}
           />
           <button
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 md:px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-xs md:text-sm"
             onClick={() => toast.info("Export functionality coming soon!")}
           >
-            <FaDownload className="inline mr-2 h-4 w-4" />
-            Export
+            <FaDownload className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Export</span>
           </button>
         </div>
       </div>
@@ -392,7 +398,7 @@ const UserManagement = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mx-2 md:mx-0">
           <div className="overflow-x-auto">
             <Table columns={columns} data={users} />
           </div>
