@@ -387,10 +387,14 @@ const handlePaymentOutcome = async (
 
     const user = await User.findById(userId);
     if (user && user.emailNotificationsEnabled) {
-      await sendTransactionEmailNotification(user.email, user.username, {
+      // Send email asynchronously to prevent transaction delays
+      sendTransactionEmailNotification(user.email, user.username, {
         product_name: transaction.product_name,
         status: notificationStatus,
         amount: transaction.amount,
+      }).catch(error => {
+        console.error('Async email notification failed:', error.message);
+        // Don't throw - email failure shouldn't affect transaction success
       });
     }
 

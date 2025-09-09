@@ -213,6 +213,9 @@ class DiceManipulationEngine {
    * @returns {Object} Biased dice results
    */
   generateBiasedWinRoll(bias = 0.8) {
+    if (!this.generator) {
+      this.initializeGenerator();
+    }
     const random = this.generator();
 
     if (random < bias) {
@@ -236,6 +239,9 @@ class DiceManipulationEngine {
    * @returns {Object} Biased dice results
    */
   generateBiasedLossRoll(bias = 0.8) {
+    if (!this.generator) {
+      this.initializeGenerator();
+    }
     const random = this.generator();
 
     if (random < bias) {
@@ -286,6 +292,9 @@ class DiceManipulationEngine {
    * @returns {Object} Custom probability results
    */
   generateCustomProbabilityRoll(winProbability = 0.0278) {
+    if (!this.generator) {
+      this.initializeGenerator();
+    }
     const random = this.generator();
 
     if (random < winProbability) {

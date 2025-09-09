@@ -74,6 +74,7 @@ const Navbar = () => {
             <Link to="/" className="hover:underline">Home</Link>
             <Link to="/about" className="hover:underline">About Us</Link>
             <Link to="/pricing" className="hover:underline">Data Pricing</Link>
+            <Link to="/tutorials" className="hover:underline">Tutorials</Link>
             <button
               onClick={() => dispatch(toggleDarkMode())}
               aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
@@ -132,6 +133,9 @@ const Navbar = () => {
           </Link>
           <Link to="/pricing" className="py-2 hover:underline" onClick={toggleMenu}>
             Data Pricing
+          </Link>
+          <Link to="/tutorials" className="py-2 hover:underline" onClick={toggleMenu}>
+            Tutorials
           </Link>
           <Link to="/login" className="mt-2 px-4 py-2 rounded-lg border border-current" onClick={toggleMenu}>
             Login

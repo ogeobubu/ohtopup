@@ -152,6 +152,9 @@ const Cable = ({ user, isDarkMode }) => {
       ),
     provider: Yup.string().required("Please select a provider"),
     source: Yup.string().required("Please select a data plan"),
+    transactionPin: Yup.string()
+      .required("Transaction PIN is required")
+      .matches(/^\d{4,6}$/, "Transaction PIN must be 4-6 digits"),
   });
 
   const handleSubmit = async (values) => {
@@ -209,11 +212,12 @@ const Cable = ({ user, isDarkMode }) => {
         ) : (
           <Formik
             initialValues={{
-              phoneNumber: "", 
-              amount: "", 
+              phoneNumber: "",
+              amount: "",
               provider: "",
               source: "",
               accountNumber: "",
+              transactionPin: "",
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
@@ -453,6 +457,33 @@ const Cable = ({ user, isDarkMode }) => {
                         />
                       </div>
 
+                      {/* Transaction PIN Section */}
+                      <div className="flex flex-col my-3">
+                        <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
+                          Transaction PIN
+                        </label>
+                        <Field name="transactionPin">
+                          {({ field, form }) => (
+                            <input
+                              {...field}
+                              type="password"
+                              placeholder="Enter your 4-6 digit PIN"
+                              className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
+                              disabled={isSubmitting}
+                              maxLength={6}
+                            />
+                          )}
+                        </Field>
+                        <ErrorMessage
+                          name="transactionPin"
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Enter your 4-6 digit transaction PIN to proceed
+                        </p>
+                      </div>
+
                       <div className="bg-[#F7F9FB] dark:bg-gray-700 rounded-md p-4 w-full max-w-md mb-3">
                         <div className="flex justify-between items-center">
                           <h2 className="text-gray-700 dark:text-white">Total</h2>
@@ -473,9 +504,9 @@ const Cable = ({ user, isDarkMode }) => {
                   {formik.values.provider && (
                     <div className="mt-3">
                       {changeBouquet ? (
-                        <Button 
-                          type="submit" 
-                          disabled={isSubmitting || !formik.isValid}
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting || !formik.isValid || !formik.values.transactionPin}
                           className="relative"
                         >
                           {isSubmitting ? (
@@ -489,9 +520,9 @@ const Cable = ({ user, isDarkMode }) => {
                         </Button>
                       ) : (
                         accountNameApi && (
-                          <Button 
-                            type="submit" 
-                            disabled={isSubmitting}
+                          <Button
+                            type="submit"
+                            disabled={isSubmitting || !formik.values.transactionPin}
                             className="relative"
                           >
                             {isSubmitting ? (

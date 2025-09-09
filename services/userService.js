@@ -234,6 +234,28 @@ const updateUserProfile = async (userId, updateData) => {
     updates.emailNotificationsEnabled = updateData.emailNotificationsEnabled;
   }
 
+  if (updateData.transactionPin !== undefined) {
+    // Validate transaction PIN format
+    if (updateData.transactionPin && !/^\d{4,6}$/.test(updateData.transactionPin)) {
+      throw {
+        status: 400,
+        message: "Transaction PIN must be 4-6 digits",
+      };
+    }
+
+    // If user already has a PIN and is changing it, verify current PIN
+    if (user.transactionPin && updateData.currentTransactionPin) {
+      if (user.transactionPin !== updateData.currentTransactionPin) {
+        throw {
+          status: 400,
+          message: "Current transaction PIN is incorrect",
+        };
+      }
+    }
+
+    updates.transactionPin = updateData.transactionPin;
+  }
+
   if (updateData.bankAccount) {
     const { bankName, accountNumber, bankCode, accountName } =
       updateData.bankAccount;

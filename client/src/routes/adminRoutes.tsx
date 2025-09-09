@@ -14,8 +14,10 @@ import Support from "../admin/pages/support";
 import Newsletter from "../admin/pages/newsletter";
 import AdminRanking from "../admin/pages/ranking";
 import AdminDiceGame from "../admin/pages/dice";
+import AdminBetDiceGame from "../admin/pages/betDice";
 import ProviderManagement from "../admin/pages/providers";
 import SystemLogs from "../admin/pages/system-logs";
+import TutorialManagement from "../admin/pages/tutorials";
 
 const AdminTransactionDetailWrapper = () => {
   const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);
@@ -83,12 +85,20 @@ const AdminRoutes = {
       element: <AdminDiceGame />,
     },
     {
+      path: "bet-dice",
+      element: <AdminBetDiceGame />,
+    },
+    {
       path: "providers",
       element: <ProviderManagement />,
     },
     {
       path: "logs",
       element: <SystemLogs />,
+    },
+    {
+      path: "tutorials",
+      element: <TutorialManagement />,
     },
   ],
 };

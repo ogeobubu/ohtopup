@@ -12,8 +12,9 @@ import {
   FaEnvelope,
   FaFileAlt,
   FaTrophy,
-  FaGamepad,
   FaNetworkWired,
+  FaBook,
+  FaBullseye,
 } from "react-icons/fa";
 import logo from "../../../assets/logo/ohtopup-high-resolution-logo-transparent.png";
 import logoWhite from "../../../assets/logo/logo-color.svg";
@@ -32,8 +33,9 @@ const Sidebar = () => {
     { label: "Referral", icon: FaUserFriends, to: "/admin/referral" },
     { label: "Users", icon: FaUserFriends, to: "/admin/users" },
     { label: "Ranking", icon: FaTrophy, to: "/admin/ranking" },
-    { label: "Dice Game", icon: FaGamepad, to: "/admin/dice" },
+    { label: "Bet Dice Game", icon: FaBullseye, to: "/admin/bet-dice" },
     { label: "Providers", icon: FaNetworkWired, to: "/admin/providers" },
+    { label: "Tutorials", icon: FaBook, to: "/admin/tutorials" },
     { label: "Newsletter", icon: FaEnvelope, to: "/admin/newsletter" },
     { label: "System Logs", icon: FaFileAlt, to: "/admin/logs" },
     { label: "Settings", icon: FaCog, to: "/admin/settings" },

@@ -194,13 +194,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    transactionPin: {
+      type: String,
+      default: null,
+      validate: {
+        validator: function(v) {
+          if (!v) return true; // Allow null/empty
+          return /^\d{4,6}$/.test(v); // 4-6 digit PIN
+        },
+        message: 'Transaction PIN must be 4-6 digits'
+      }
+    },
   },
   { timestamps: true }
 );
 
-userSchema.index({ email: 1 });
-userSchema.index({ phoneNumber: 1 });
-userSchema.index({ username: 1 });
+// Indexes are automatically created for unique fields
 
 const User = mongoose.model("User", userSchema);
 

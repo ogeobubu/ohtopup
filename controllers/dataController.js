@@ -17,13 +17,28 @@ const buyData = async (req, res, next) => {
   let actualServiceId, networkName, selectedPlanForPurchase, dataPlanSize, adjustedAmount, commissionAmount;
 
   try {
-    ({ serviceID, billersCode, variation_code, amount, inputPhone, provider: requestedProvider } =
+    ({ serviceID, billersCode, variation_code, amount, inputPhone, provider: requestedProvider, transactionPin } =
       validationService.validateDataPurchaseInput(req));
 
     transactionContact = billersCode;
 
     user = await dbService.findUserById(req.user.id);
     wallet = await dbService.findWalletByUserId(req.user.id);
+
+    // Verify transaction PIN
+    if (!user.transactionPin) {
+      return next({
+        status: 400,
+        message: "Transaction PIN not set. Please set your transaction PIN in settings.",
+      });
+    }
+
+    if (user.transactionPin !== transactionPin) {
+      return next({
+        status: 400,
+        message: "Invalid transaction PIN.",
+      });
+    }
 
     // Calculate commission and adjusted amount based on network (will be determined later)
     // We'll calculate this after network determination

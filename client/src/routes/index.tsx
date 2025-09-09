@@ -3,6 +3,8 @@ import Landing from "../pages/landing/home";
 import About from "../pages/landing/about";
 import Pricing from "../pages/landing/pricing";
 import Terms from "../pages/landing/terms";
+import Tutorial from "../pages/landing/tutorial";
+import TutorialDetail from "../pages/TutorialDetail";
 import Unsubscribe from "../pages/unsubscribe";
 import Create from "../pages/auth/create";
 import Verify from "../pages/auth/verify";
@@ -34,6 +36,14 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
     {
       path: "/terms",
       element: isLogin ? <Navigate to="/dashboard" /> : <Terms darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/tutorials",
+      element: <Tutorial darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
+    {
+      path: "/tutorial/:id",
+      element: <TutorialDetail darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
     },
     {
       path: "/create",

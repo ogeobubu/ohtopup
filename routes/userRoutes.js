@@ -53,6 +53,17 @@ const {
 } = require("../controllers/diceGameController");
 
 const {
+  playBetDiceGame,
+  getBetDiceHistory,
+  getBetDiceStats,
+  getAllBetDiceGames,
+  getAdminBetDiceStats,
+  getBetDiceSettings,
+  updateBetDiceSettings,
+  resetBetDiceSettings,
+} = require("../controllers/betDiceGameController");
+
+const {
   getWallet,
   getTransactionsByUser,
   getTransactionDetails,
@@ -105,6 +116,7 @@ const {
 
 const {
   requeryTransactionHandler,
+  getStoredEmails
 } = require("../controllers/utilityController");
 
 const {
@@ -114,6 +126,12 @@ const {
 const { createWaitlist } = require("../controllers/waitlistController");
 
 const { createTicket, replyTicket, getUserTickets } = require("../controllers/ticketController");
+
+const {
+  getAllTutorials,
+  getTutorialById,
+  getTutorialCategories,
+} = require("../controllers/tutorialController");
 
 const {
   subscribeNewsletter,
@@ -249,16 +267,33 @@ router.post("/dice/play", auth, playDiceGame);
 router.get("/dice/history", auth, getUserGameHistory);
 router.get("/dice/stats", auth, getUserGameStats);
 
+// Bet Dice Game Routes
+router.post("/bet-dice/play", auth, playBetDiceGame);
+router.get("/bet-dice/history", auth, getBetDiceHistory);
+router.get("/bet-dice/stats", auth, getBetDiceStats);
+
 // Admin dice game settings routes
 router.get("/admin/dice/settings", auth, getDiceGameSettings);
 router.put("/admin/dice/settings", auth, updateDiceGameSettings);
 router.post("/admin/dice/settings/reset", auth, resetDiceGameSettings);
+
+// Admin Bet Dice Game Settings Routes
+router.get("/admin/bet-dice/settings", auth, getBetDiceSettings);
+router.put("/admin/bet-dice/settings", auth, updateBetDiceSettings);
+router.post("/admin/bet-dice/settings/reset", auth, resetBetDiceSettings);
 
 // Admin Dice Game Routes
 router.get("/admin/dice/games", auth, getAllGames);
 router.get("/admin/dice/stats", auth, getGameStats);
 router.get("/admin/dice/wallet", auth, getManagementWallet);
 router.post("/admin/dice/withdraw", auth, withdrawManagementFunds);
+
+// Admin Bet Dice Game Routes
+router.get("/admin/bet-dice/games", auth, getAllBetDiceGames);
+router.get("/admin/bet-dice/stats", auth, getAdminBetDiceStats);
+
+// Admin Email Management Routes
+router.get("/admin/stored-emails", auth, getStoredEmails);
 router.post("/admin/verify-bank-account", auth, (req, res) => {
   // Import wallet service for bank verification
   const walletService = require("../services/walletService");
@@ -268,5 +303,10 @@ router.post("/admin/verify-bank-account", auth, (req, res) => {
     .then(data => res.json(data))
     .catch(error => res.status(400).json({ message: error.message }));
 });
+
+// Tutorial routes (public - no auth required for viewing)
+router.get("/tutorials", getAllTutorials);
+router.get("/tutorials/:id", getTutorialById);
+router.get("/tutorials/categories/list", getTutorialCategories);
 
 module.exports = router;

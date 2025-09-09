@@ -22,7 +22,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
-  const [currentStep, setCurrentStep] = useState(1); // 1: Disco, 2: Meter Type, 3: Meter Details, 4: Amount, 5: Phone, 6: Confirm
+  const [transactionPin, setTransactionPin] = useState('');
+  const [currentStep, setCurrentStep] = useState(1); // 1: Disco, 2: Meter Type, 3: Meter Details, 4: Amount, 5: Phone, 6: PIN, 7: Confirm
   const [discoReset, setDiscoReset] = useState(false); // Track if disco was reset
 
   // Fetch wallet and providers
@@ -155,6 +156,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
         variation_code: selectedMeterType,
         amount: parseInt(selectedAmount),
         phone: phoneNumber,
+        transactionPin: transactionPin,
       };
 
       const response = await purchaseElectricity(purchaseData);
@@ -174,6 +176,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
         setMeterNumber('');
         setSelectedAmount('');
         setPhoneNumber('');
+        setTransactionPin('');
         setCustomerName('');
         setCustomerAddress('');
         setCurrentStep(1);
@@ -269,7 +272,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                   { step: 3, label: 'Details' },
                   { step: 4, label: 'Amount' },
                   { step: 5, label: 'Phone' },
-                  { step: 6, label: 'Confirm' }
+                  { step: 6, label: 'PIN' },
+                  { step: 7, label: 'Confirm' }
                 ].map(({ step, label }) => (
                   <div key={step} className="flex items-center flex-1">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
@@ -284,7 +288,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                     }`}>
                       {label}
                     </span>
-                    {step < 6 && (
+                    {step < 7 && (
                       <div className={`flex-1 h-0.5 mx-2 ${
                         currentStep > step ? 'bg-yellow-600' : 'bg-gray-200'
                       }`} />
@@ -738,14 +742,62 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                     disabled={!phoneNumber}
                     className="px-3 md:px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
+                    Continue to PIN
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 6: Transaction PIN */}
+            {currentStep === 6 && (
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Enter Transaction PIN</h3>
+                  <p className="text-sm text-gray-600">Enter your 4-6 digit transaction PIN to proceed</p>
+                </div>
+
+                <div className="max-w-sm mx-auto">
+                  <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
+                    Transaction PIN
+                  </label>
+                  <input
+                    type="password"
+                    value={transactionPin}
+                    onChange={(e) => setTransactionPin(e.target.value)}
+                    className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    placeholder="Enter your PIN"
+                    maxLength={6}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Enter your 4-6 digit transaction PIN to proceed with the payment
+                  </p>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-3 md:mt-4 flex justify-between">
+                  <button
+                    onClick={() => setCurrentStep(5)}
+                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (transactionPin && transactionPin.length >= 4 && transactionPin.length <= 6) {
+                        setCurrentStep(7);
+                      }
+                    }}
+                    disabled={!transactionPin || transactionPin.length < 4 || transactionPin.length > 6}
+                    className="px-3 md:px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  >
                     Continue to Payment
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Step 6: Confirmation & Purchase */}
-            {currentStep === 6 && (
+            {/* Step 7: Confirmation & Purchase */}
+            {currentStep === 7 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
@@ -843,7 +895,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 {/* Navigation Buttons */}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setCurrentStep(5)}
+                    onClick={() => setCurrentStep(6)}
                     className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
                   >
                     Previous
@@ -880,7 +932,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                     Cancel
                   </button>
                   <div className="text-xs text-gray-500 flex items-center">
-                    Step {currentStep} of 6
+                    Step {currentStep} of 7
                   </div>
                 </div>
               </div>
@@ -897,7 +949,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                     Cancel
                   </button>
                   <div className="text-xs text-gray-500 flex items-center">
-                    Step 6 of 6 - Ready to Purchase
+                    Step 7 of 7 - Ready to Purchase
                   </div>
                 </div>
               </div>

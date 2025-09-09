@@ -1,8 +1,12 @@
 const validateAirtimePurchaseInput = (req) => {
-   const { serviceID, amount: amountStr, phone, provider } = req.body;
+   const { serviceID, amount: amountStr, phone, provider, transactionPin } = req.body;
 
    if (!serviceID || !amountStr || !phone) {
      throw { status: 400, message: "Service ID, amount, and phone number are required." };
+   }
+
+   if (!transactionPin) {
+     throw { status: 400, message: "Transaction PIN is required." };
    }
 
    const amount = parseFloat(amountStr);
@@ -11,14 +15,18 @@ const validateAirtimePurchaseInput = (req) => {
      throw { status: 400, message: "Invalid amount specified." };
    }
 
-   return { serviceID, amount, phone, provider };
+   return { serviceID, amount, phone, provider, transactionPin };
 };
 
 const validateDataPurchaseInput = (req) => {
-    const { serviceID, billersCode, variation_code, amount: amountStr, phone, provider } = req.body;
+    const { serviceID, billersCode, variation_code, amount: amountStr, phone, provider, transactionPin } = req.body;
 
     if (!serviceID || !billersCode || !variation_code || !amountStr) {
         throw { status: 400, message: "Service ID, billersCode, variation_code, and amount are required." };
+    }
+
+    if (!transactionPin) {
+        throw { status: 400, message: "Transaction PIN is required." };
     }
 
     const amount = parseFloat(amountStr);
@@ -27,14 +35,18 @@ const validateDataPurchaseInput = (req) => {
         throw { status: 400, message: "Invalid amount specified." };
     }
 
-    return { serviceID, billersCode, variation_code, amount, inputPhone: phone, provider };
+    return { serviceID, billersCode, variation_code, amount, inputPhone: phone, provider, transactionPin };
 };
 
 const validateElectricityPurchaseInput = (req) => {
-     const { serviceID, billersCode, variation_code, amount: amountStr, phone, provider } = req.body;
+     const { serviceID, billersCode, variation_code, amount: amountStr, phone, provider, transactionPin } = req.body;
 
      if (!serviceID || !billersCode || !variation_code || !amountStr || !phone) {
          throw { status: 400, message: "Service ID, billersCode, variation_code, amount, and phone are required." };
+     }
+
+     if (!transactionPin) {
+         throw { status: 400, message: "Transaction PIN is required." };
      }
 
       const amount = parseFloat(amountStr);
@@ -43,15 +55,19 @@ const validateElectricityPurchaseInput = (req) => {
          throw { status: 400, message: "Invalid amount specified." };
      }
 
-     return { serviceID, billersCode, variation_code, amount, phone, provider };
+     return { serviceID, billersCode, variation_code, amount, phone, provider, transactionPin };
 };
 
 const validateCablePurchaseInput = (req) => {
-   const { serviceID, billersCode, variation_code, amount: amountStr, phone, subscription_type, provider } = req.body;
+   const { serviceID, billersCode, variation_code, amount: amountStr, phone, subscription_type, provider, transactionPin } = req.body;
 
 
     if (!serviceID || !billersCode || !variation_code || !amountStr || !phone || !subscription_type) {
        throw { status: 400, message: "Service ID, billersCode, variation_code, amount, phone, and subscription_type are required." };
+   }
+
+   if (!transactionPin) {
+       throw { status: 400, message: "Transaction PIN is required." };
    }
 
     const amount = parseFloat(amountStr);
@@ -60,7 +76,7 @@ const validateCablePurchaseInput = (req) => {
        throw { status: 400, message: "Invalid amount specified." };
    }
 
-   return { serviceID, billersCode, variation_code, amount, phone, subscription_type, provider };
+   return { serviceID, billersCode, variation_code, amount, phone, subscription_type, provider, transactionPin };
 };
 
 

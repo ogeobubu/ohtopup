@@ -13,6 +13,7 @@ import Confirmation from "../pages/wallet/confirmation";
 import Rank from "../pages/rank";
 import Support from "../pages/support";
 import DiceGame from "../pages/dice";
+import BetDiceGame from "../pages/betDice";
 
 const TransactionDetailWrapper = () => {
   const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);
@@ -70,6 +71,10 @@ const MainRoutes = {
     {
       path: "/dice",
       element: <DiceGame />,
+    },
+    {
+      path: "/bet-dice",
+      element: <BetDiceGame />,
     },
   ],
 };

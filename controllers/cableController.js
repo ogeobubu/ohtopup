@@ -15,12 +15,28 @@ const purchaseCable = async (req, res, next) => {
       amount,
       phone,
       subscription_type,
+      transactionPin,
     } = validationService.validateCablePurchaseInput(req);
 
     const transactionContact = billersCode;
 
     const user = await dbService.findUserById(req.user.id);
     const wallet = await dbService.findWalletByUserId(req.user.id);
+
+    // Verify transaction PIN
+    if (!user.transactionPin) {
+      return next({
+        status: 400,
+        message: "Transaction PIN not set. Please set your transaction PIN in settings.",
+      });
+    }
+
+    if (user.transactionPin !== transactionPin) {
+      return next({
+        status: 400,
+        message: "Invalid transaction PIN.",
+      });
+    }
 
     walletService.checkWalletForDebit(wallet, amount);
 

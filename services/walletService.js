@@ -6,8 +6,6 @@ const User = require("../model/User");
 const axios = require("axios");
 require("dotenv").config();
 
-console.log(process.env.PAYSTACK_SECRET_KEY)
-
 const checkWalletForDebit = (wallet, amount) => {
     if (!wallet) {
          throw { status: 404, message: "Wallet not found." };

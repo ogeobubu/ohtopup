@@ -12,7 +12,7 @@ const systemLogSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['auth', 'transaction', 'user', 'system', 'newsletter', 'api', 'admin', 'payment', 'game', 'game_manipulation'],
+    enum: ['auth', 'transaction', 'user', 'system', 'newsletter', 'api', 'admin', 'payment', 'game', 'game_manipulation', 'tutorial', 'bet_dice_manipulation'],
     required: true,
   },
   userId: {

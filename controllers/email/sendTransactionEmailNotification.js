@@ -2,11 +2,6 @@ const nodemailer = require("nodemailer");
 
 require("dotenv").config();
 
-console.log({
-  EMAIL_USER: process.env.EMAIL_USER,
-  EMAIL_PASS: process.env.EMAIL_PASS,
-})
-
 const createTransporter = () => {
   return nodemailer.createTransport({
     service: "gmail",
@@ -143,62 +138,50 @@ const sendTransactionEmailAdminNotification = async (
   const transactionAmount = transactionDetails.amount || "N/A";
   const transactionType = transactionDetails.type || "Transaction";
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail", // Using Gmail service
-    auth: {
-      user: process.env.EMAIL_USER, // Your Gmail address
-      pass: process.env.EMAIL_PASS,
-    },
-    
-  });
-
-  const mailOptions = {
-    to: email,
-    from: process.env.EMAIL_USER, // Sender address
-    // Subject can be dynamic based on type or status
-    subject: `${transactionType} ${transactionStatus}: ${subjectProductName}`,
-    html: `
-      <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <div style="text-align: center; padding-bottom: 20px;">
-           <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
-           <h1 style="color: #333; font-size: 24px; font-weight: bold;">Transaction Update</h1>
-        </div>
-        <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
-          <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello ${username},</p>
-          <p style="font-size: 16px; line-height: 1.5; color: #555;">The recent transaction is <strong>${transactionStatus}</strong>.</p>
-
-          <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #007bff; border-radius: 4px;">
-              <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Type:</strong> ${transactionType}</p>
-              <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Description:</strong> ${subjectProductName}</p>
-              <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Amount:</strong> ${transactionAmount}</p>
-              ${
-                transactionDetails.balance
-                  ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>New Balance:</strong> ${transactionDetails.balance}</p>`
-                  : ""
-              }
-              ${
-                transactionDetails.reference
-                  ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Reference:</strong> ${transactionDetails.reference}</p>`
-                  : ""
-              }
-          </div>
-
-
-          <p style="font-size: 14px; color: #888; margin-top: 20px;">If you have any questions, please contact our support team.</p>
-          <p style="font-size: 14px; color: #888; margin-top: 5px;">Thank you for using our service.</p>
-        </div>
-         <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; ${new Date().getFullYear()} OhTopUp Inc. All rights reserved.</p>
-         </div>
-      </div>
-    `,
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
-    console.log("Transaction notification email sent successfully!");
+    const result = await emailService.sendEmail({
+      to: email,
+      subject: `${transactionType} ${transactionStatus}: ${subjectProductName}`,
+      html: `
+        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <div style="text-align: center; padding-bottom: 20px;">
+             <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
+             <h1 style="color: #333; font-size: 24px; font-weight: bold;">Transaction Update</h1>
+          </div>
+          <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
+            <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello ${username},</p>
+            <p style="font-size: 16px; line-height: 1.5; color: #555;">The recent transaction is <strong>${transactionStatus}</strong>.</p>
+
+            <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #007bff; border-radius: 4px;">
+                <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Type:</strong> ${transactionType}</p>
+                <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Description:</strong> ${subjectProductName}</p>
+                <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Amount:</strong> ${transactionAmount}</p>
+                ${
+                  transactionDetails.balance
+                    ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>New Balance:</strong> ${transactionDetails.balance}</p>`
+                    : ""
+                }
+                ${
+                  transactionDetails.reference
+                    ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Reference:</strong> ${transactionDetails.reference}</p>`
+                    : ""
+                }
+            </div>
+
+
+            <p style="font-size: 14px; color: #888; margin-top: 20px;">If you have any questions, please contact our support team.</p>
+            <p style="font-size: 14px; color: #888; margin-top: 5px;">Thank you for using our service.</p>
+          </div>
+           <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
+              <p>&copy; ${new Date().getFullYear()} OhTopUp Inc. All rights reserved.</p>
+           </div>
+        </div>
+      `,
+      emailType: 'admin_transaction_notification'
+    });
+    console.log("Admin transaction notification email sent successfully!", result.messageId);
   } catch (error) {
-    console.error("Error sending transaction email:", error);
+    console.error("Error sending admin transaction email:", error);
     // Log specific Nodemailer errors if possible
     if (error.response) {
       console.error("Nodemailer SMTP response:", error.response);
@@ -208,9 +191,7 @@ const sendTransactionEmailAdminNotification = async (
 
 const sendLoginNotificationEmail = async (userEmail) => {
   try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
+    const result = await emailService.sendEmail({
       to: process.env.EMAIL_USER,
       from: userEmail,
       subject: "User Login Notification",
@@ -223,10 +204,9 @@ const sendLoginNotificationEmail = async (userEmail) => {
           <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This is an automated message. Please do not reply.</p>
         </div>
       `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log("Login notification email sent successfully!");
+      emailType: 'login_notification'
+    });
+    console.log("Login notification email sent successfully!", result.messageId);
   } catch (error) {
     console.error("Error sending login notification email:", error);
     // Don't throw the error - we don't want login to fail because of email issues
@@ -234,15 +214,12 @@ const sendLoginNotificationEmail = async (userEmail) => {
 };
 
 const sendNotificationEmail = async (email, username, title, message, link) => {
-  const transporter = createTransporter();
-
-  const mailOptions = {
+  const result = await emailService.sendEmail({
     to: email,
-    from: process.env.EMAIL_USER,
     subject: `Notification: ${title}`,
     html: `
       <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-      
+
         <div style="text-align: center; padding-bottom: 20px;">
            <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
            <h1 style="color: #333; font-size: 24px; font-weight: bold;">New Notification</h1>
@@ -265,9 +242,9 @@ const sendNotificationEmail = async (email, username, title, message, link) => {
          </div>
       </div>
     `,
-  };
-
-  await transporter.sendMail(mailOptions);
+    emailType: 'notification'
+  });
+  console.log("Notification email sent successfully!", result.messageId);
 };
 
 const sendWaitlistEmail = async (
@@ -275,11 +252,8 @@ const sendWaitlistEmail = async (
   subject = "Welcome to the Waitlist!",
   message = "Thank you for joining our waitlist!"
 ) => {
-  const transporter = createTransporter();
-
-  const mailOptions = {
+  const result = await emailService.sendEmail({
     to: email,
-    from: process.env.EMAIL_USER,
     subject,
     html: `
         <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
@@ -290,9 +264,9 @@ const sendWaitlistEmail = async (
           <p style="font-size: 14px; color: #888; margin-bottom: 20px;">If you have any questions, feel free to reach out to us.</p>
         </div>
       `,
-  };
-
-  await transporter.sendMail(mailOptions);
+    emailType: 'waitlist'
+  });
+  console.log("Waitlist email sent successfully!", result.messageId);
 };
 
 module.exports = {

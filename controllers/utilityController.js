@@ -5,6 +5,7 @@ const Notification = require("../model/Notification");
 const Service = require("../model/Service");
 const Wallet = require("../model/Wallet");
 const { Provider } = require("../model/Provider");
+const { BetDiceGame } = require("../model/BetDiceGame");
 const axios = require("axios");
 const { generateRequestId } = require("../utils");
 const cron = require("node-cron");
@@ -12,6 +13,59 @@ const moment = require("moment");
 const vtpassService = require("../services/vtpassService");
 const clubkonnectService = require("../services/clubkonnectService");
 const { createLog } = require("./systemLogController");
+
+const fs = require('fs').promises;
+const path = require('path');
+
+// Get stored emails for admin review
+const getStoredEmails = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user || user.role !== "admin") {
+      return res.status(403).json({
+        message: "Access denied. Admin only.",
+      });
+    }
+
+    const emailDir = path.join(__dirname, '../email-queue');
+
+    try {
+      const files = await fs.readdir(emailDir);
+      const emails = [];
+
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          const filePath = path.join(emailDir, file);
+          const content = await fs.readFile(filePath, 'utf8');
+          const emailData = JSON.parse(content);
+          emails.push({
+            filename: file,
+            subject: emailData.subject,
+            to: emailData.to,
+            storedAt: emailData.storedAt,
+            emailType: emailData.emailType,
+            status: emailData.status
+          });
+        }
+      }
+
+      res.status(200).json({
+        message: "Stored emails retrieved successfully",
+        emails: emails.sort((a, b) => new Date(b.storedAt) - new Date(a.storedAt))
+      });
+    } catch (error) {
+      // Directory doesn't exist yet
+      res.status(200).json({
+        message: "No stored emails found",
+        emails: []
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching stored emails:", error);
+    res.status(500).json({ message: "Error fetching stored emails." });
+  }
+};
 
 const vtpassWalletBalance = async (req, res) => {
   const VTPASS_URL = process.env.VTPASS_URL;
@@ -588,77 +642,148 @@ const usersRank = async (req, res) => {
       matchStage = { createdAt: dateFilter };
     }
 
-    const rankings = await Utility.aggregate([
+    // Get utility transactions rankings
+    const utilityRankings = await Utility.aggregate([
       ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
       {
         $group: {
           _id: "$user",
-          transactionCount: { $sum: 1 },
-          totalAmount: { $sum: "$amount" },
-          totalRevenue: { $sum: "$revenue" },
-          successfulTransactions: {
+          utilityTransactionCount: { $sum: 1 },
+          utilityTotalAmount: { $sum: "$amount" },
+          utilityTotalRevenue: { $sum: "$revenue" },
+          utilitySuccessfulTransactions: {
             $sum: { $cond: [{ $eq: ["$status", "delivered"] }, 1, 0] }
           },
-          failedTransactions: {
+          utilityFailedTransactions: {
             $sum: { $cond: [{ $eq: ["$status", "failed"] }, 1, 0] }
           },
-          avgTransactionAmount: { $avg: "$amount" },
-          lastTransactionDate: { $max: "$createdAt" },
-          firstTransactionDate: { $min: "$createdAt" },
+          utilityAvgTransactionAmount: { $avg: "$amount" },
+          utilityLastTransactionDate: { $max: "$createdAt" },
+          utilityFirstTransactionDate: { $min: "$createdAt" },
         },
       },
+    ]);
+
+    // Get bet dice game rankings
+    const betGameRankings = await BetDiceGame.aggregate([
+      ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
       {
-        $lookup: {
-          from: "users",
-          localField: "_id",
-          foreignField: "_id",
-          as: "userInfo",
+        $group: {
+          _id: "$user",
+          betGameCount: { $sum: 1 },
+          betGameTotalAmount: { $sum: "$betAmount" },
+          betGameWins: {
+            $sum: { $cond: [{ $eq: ["$gameResult", "win"] }, 1, 0] }
+          },
+          betGameLosses: {
+            $sum: { $cond: [{ $eq: ["$gameResult", "lose"] }, 1, 0] }
+          },
+          betGameTotalWinnings: { $sum: "$winnings" },
+          betGameAvgBetAmount: { $avg: "$betAmount" },
+          betGameLastPlayedDate: { $max: "$playedAt" },
+          betGameFirstPlayedDate: { $min: "$playedAt" },
         },
       },
+    ]);
+
+    // Combine utility and bet game rankings
+    const combinedRankings = {};
+
+    // Add utility rankings
+    utilityRankings.forEach(ranking => {
+      combinedRankings[ranking._id] = {
+        ...ranking,
+        betGameCount: 0,
+        betGameTotalAmount: 0,
+        betGameWins: 0,
+        betGameLosses: 0,
+        betGameTotalWinnings: 0,
+        betGameAvgBetAmount: 0,
+        betGameLastPlayedDate: null,
+        betGameFirstPlayedDate: null,
+      };
+    });
+
+    // Add bet game rankings
+    betGameRankings.forEach(ranking => {
+      if (combinedRankings[ranking._id]) {
+        combinedRankings[ranking._id] = {
+          ...combinedRankings[ranking._id],
+          ...ranking,
+        };
+      } else {
+        combinedRankings[ranking._id] = {
+          ...ranking,
+          utilityTransactionCount: 0,
+          utilityTotalAmount: 0,
+          utilityTotalRevenue: 0,
+          utilitySuccessfulTransactions: 0,
+          utilityFailedTransactions: 0,
+          utilityAvgTransactionAmount: 0,
+          utilityLastTransactionDate: null,
+          utilityFirstTransactionDate: null,
+        };
+      }
+    });
+
+    // Convert back to array and calculate combined metrics
+    const rankings = Object.values(combinedRankings).map(ranking => ({
+      ...ranking,
+      transactionCount: ranking.utilityTransactionCount + ranking.betGameCount,
+      totalAmount: ranking.utilityTotalAmount + ranking.betGameTotalAmount,
+      successfulTransactions: ranking.utilitySuccessfulTransactions + ranking.betGameWins,
+      failedTransactions: ranking.utilityFailedTransactions + ranking.betGameLosses,
+      avgTransactionAmount: (ranking.utilityTransactionCount * (ranking.utilityAvgTransactionAmount || 0) +
+                           ranking.betGameCount * (ranking.betGameAvgBetAmount || 0)) /
+                          (ranking.utilityTransactionCount + ranking.betGameCount || 1),
+      lastTransactionDate: ranking.utilityLastTransactionDate > ranking.betGameLastPlayedDate
+                          ? ranking.utilityLastTransactionDate
+                          : ranking.betGameLastPlayedDate,
+      firstTransactionDate: ranking.utilityFirstTransactionDate < ranking.betGameFirstPlayedDate
+                           ? ranking.utilityFirstTransactionDate
+                           : ranking.betGameFirstPlayedDate,
+    }));
+
+    // Now perform the aggregation with lookup and projection
+    const finalRankings = await User.aggregate([
       {
-        $unwind: "$userInfo",
+        $match: {
+          _id: { $in: rankings.map(r => r._id) }
+        }
       },
       {
         $project: {
-          _id: "$userInfo._id",
-          username: "$userInfo.username",
-          email: "$userInfo.email",
-          transactionCount: 1,
-          totalAmount: 1,
-          totalRevenue: 1,
-          successfulTransactions: 1,
-          failedTransactions: 1,
-          avgTransactionAmount: 1,
-          lastTransactionDate: 1,
-          firstTransactionDate: 1,
-          // Calculate points based on multiple factors
-          points: {
-            $add: [
-              { $multiply: ["$transactionCount", 10] }, // 10 points per transaction
-              { $multiply: ["$successfulTransactions", 5] }, // 5 bonus points for successful
-              { $divide: ["$totalAmount", 100] }, // 1 point per ₦100 spent
-              { $multiply: [
-                { $divide: [
-                  { $subtract: [new Date(), "$firstTransactionDate"] },
-                  1000 * 60 * 60 * 24 * 30 // days since first transaction
-                ]},
-                2 // 2 points per month of activity
-              ]}
-            ]
-          },
-          // Calculate success rate
-          successRate: {
-            $multiply: [
-              { $divide: ["$successfulTransactions", "$transactionCount"] },
-              100
-            ]
-          }
+          _id: 1,
+          username: 1,
+          email: 1,
         },
       },
-      {
-        $sort: { points: -1, transactionCount: -1, totalAmount: -1 },
-      },
-    ]).limit(10);
+    ]);
+
+    // Merge the aggregated data with user info
+    const rankingsWithUserInfo = rankings.map(ranking => {
+      const userInfo = finalRankings.find(u => u._id.toString() === ranking._id.toString());
+      return {
+        ...ranking,
+        username: userInfo?.username || 'Unknown',
+        email: userInfo?.email || 'Unknown',
+        // Calculate points based on multiple factors
+        points: (ranking.transactionCount * 10) + // 10 points per transaction
+                (ranking.successfulTransactions * 5) + // 5 bonus points for successful
+                (ranking.totalAmount / 100) + // 1 point per ₦100 spent
+                ((ranking.firstTransactionDate ?
+                  (new Date() - new Date(ranking.firstTransactionDate)) / (1000 * 60 * 60 * 24 * 30) : 0) * 2), // 2 points per month of activity
+        // Calculate success rate
+        successRate: ranking.transactionCount > 0 ?
+                    (ranking.successfulTransactions / ranking.transactionCount) * 100 : 0
+      };
+    });
+
+    // Sort by points
+    rankingsWithUserInfo.sort((a, b) => b.points - a.points || b.transactionCount - a.transactionCount || b.totalAmount - a.totalAmount);
+
+    // Limit to top 10
+    const topRankings = rankingsWithUserInfo.slice(0, 10);
 
     const rankingsWithPositions = rankings.map((winner, index) => {
       const rank = index + 1;
@@ -1182,5 +1307,6 @@ module.exports = {
   awardPoints,
   getUserAchievements,
   vtpassWalletBalance,
-  requeryTransactionHandler
+  requeryTransactionHandler,
+  getStoredEmails
 };

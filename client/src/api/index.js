@@ -1225,6 +1225,80 @@ export const getManagementWallet = async () => {
   }
 };
 
+// Bet Dice Game APIs
+export const playBetDiceGame = async (gameData) => {
+  try {
+    const response = await instance.post(`/bet-dice/play`, gameData);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error playing bet dice game");
+  }
+};
+
+export const getBetDiceHistory = async (params = {}) => {
+  try {
+    const response = await instance.get(`/bet-dice/history`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching bet dice game history");
+  }
+};
+
+export const getBetDiceStats = async () => {
+  try {
+    const response = await instance.get(`/bet-dice/stats`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching bet dice game stats");
+  }
+};
+
+export const getBetDiceSettings = async () => {
+  try {
+    const response = await instance.get(`/admin/bet-dice/settings`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching bet dice game settings");
+  }
+};
+
+export const updateBetDiceSettings = async (settingsData) => {
+  try {
+    const response = await instance.put(`/admin/bet-dice/settings`, { settings: settingsData });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating bet dice game settings");
+  }
+};
+
+export const resetBetDiceSettings = async () => {
+  try {
+    const response = await instance.post(`/admin/bet-dice/settings/reset`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error resetting bet dice game settings");
+  }
+};
+
+export const getAllBetDiceGames = async (params = {}) => {
+  try {
+    const response = await instance.get(`/admin/bet-dice/games`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching all bet dice games");
+  }
+};
+
+export const getBetDiceGameStats = async () => {
+  try {
+    const response = await instance.get(`/admin/bet-dice/stats`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching bet dice game stats");
+  }
+};
+
+
 // VTPass Credential Management API functions
 export const getVTPassCredentials = async () => {
   try {
@@ -1260,5 +1334,79 @@ export const updateClubKonnectCredentials = async (credentials) => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error updating ClubKonnect credentials");
+  }
+};
+
+// Tutorial Management APIs
+export const getAllTutorials = async (params = {}) => {
+  try {
+    const response = await instance.get(`/tutorials`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching tutorials");
+  }
+};
+
+export const getTutorialById = async (id) => {
+  try {
+    const response = await instance.get(`/tutorials/${id}`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching tutorial");
+  }
+};
+
+export const getTutorialCategories = async () => {
+  try {
+    const response = await instance.get(`/tutorials/categories/list`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching tutorial categories");
+  }
+};
+
+// Admin Tutorial APIs
+export const getAllTutorialsAdmin = async (params = {}) => {
+  try {
+    const response = await instance.get(`/admin/tutorials`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching tutorials");
+  }
+};
+
+export const createTutorial = async (tutorialData) => {
+  try {
+    const response = await instance.post(`/admin/tutorials`, tutorialData);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error creating tutorial");
+  }
+};
+
+export const updateTutorial = async (id, tutorialData) => {
+  try {
+    const response = await instance.put(`/admin/tutorials/${id}`, tutorialData);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating tutorial");
+  }
+};
+
+export const deleteTutorial = async (id) => {
+  try {
+    const response = await instance.delete(`/admin/tutorials/${id}`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error deleting tutorial");
+  }
+};
+
+export const toggleTutorialStatus = async (id) => {
+  try {
+    const response = await instance.patch(`/admin/tutorials/${id}/toggle`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error toggling tutorial status");
   }
 };

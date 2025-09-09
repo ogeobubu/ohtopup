@@ -37,7 +37,7 @@ const buyAirtime = async (req, res, next) => {
   let actualServiceId, networkName, adjustedAmount, commissionAmount;
 
   try {
-    ({ serviceID, amount, phone, provider: requestedProvider } =
+    ({ serviceID, amount, phone, provider: requestedProvider, transactionPin } =
       validationService.validateAirtimePurchaseInput(req));
 
     const billersCode = phone;
@@ -45,6 +45,21 @@ const buyAirtime = async (req, res, next) => {
 
     user = await dbService.findUserById(req.user.id);
     wallet = await dbService.findWalletByUserId(req.user.id);
+
+    // Verify transaction PIN
+    if (!user.transactionPin) {
+      return next({
+        status: 400,
+        message: "Transaction PIN not set. Please set your transaction PIN in settings.",
+      });
+    }
+
+    if (user.transactionPin !== transactionPin) {
+      return next({
+        status: 400,
+        message: "Invalid transaction PIN.",
+      });
+    }
 
     // Validate purchase limits
     await validatePurchaseLimits(amount, billersCode, user._id);

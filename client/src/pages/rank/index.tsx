@@ -156,11 +156,11 @@ const Rank = () => {
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-2xl md:text-4xl font-bold mb-2 flex items-center justify-center gap-2 md:gap-3">
             <FaTrophy className="text-yellow-300 text-lg md:text-xl" />
-            <span className="leading-tight">Utility Champions League</span>
+            <span className="leading-tight">Champions League</span>
             <FaTrophy className="text-yellow-300 text-lg md:text-xl" />
           </h1>
           <p className="text-blue-100 text-sm md:text-lg px-2">
-            Compete, earn rewards, and climb the leaderboard!
+            Compete with utility purchases and bet games, earn rewards, and climb the leaderboard!
           </p>
         </div>
       </div>

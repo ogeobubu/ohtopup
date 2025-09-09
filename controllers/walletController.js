@@ -154,13 +154,16 @@ const depositWallet = async (req, res) => {
 
     const user = await dbService.findUserById(userId);
 
-    await sendTransactionEmailNotification(user.email, user.username, {
+    // Send email asynchronously to prevent transaction delays
+    sendTransactionEmailNotification(user.email, user.username, {
       type: completedTransaction.type,
       product_name: "Wallet Deposit",
       status: completedTransaction.status,
       amount: completedTransaction.amount,
       balance: wallet.balance,
       reference: completedTransaction.reference,
+    }).catch(error => {
+      console.error('Async wallet deposit email failed:', error.message);
     });
 
     res.json(wallet);
@@ -232,13 +235,16 @@ const depositPaystackWallet = async (req, res) => {
 
     const user = await dbService.findUserById(userId);
 
-    await sendTransactionEmailNotification(user.email, user.username, {
+    // Send email asynchronously to prevent transaction delays
+    sendTransactionEmailNotification(user.email, user.username, {
       type: transaction.type,
       product_name: "Paystack Deposit",
       status: transaction.status,
       amount: transaction.amount,
       balance: wallet.balance,
       reference: transaction.reference,
+    }).catch(error => {
+      console.error('Async Paystack deposit email failed:', error.message);
     });
 
     res.json(wallet);
@@ -541,13 +547,16 @@ const verifyMonnifyTransaction = async (req, res) => {
 
       const user = await dbService.findUserById(wallet.userId);
 
-      await sendTransactionEmailNotification(user.email, user.username, {
+      // Send email asynchronously to prevent transaction delays
+      sendTransactionEmailNotification(user.email, user.username, {
         type: completedTransaction.type,
         product_name: "Monnify Deposit",
         status: completedTransaction.status,
         amount: completedTransaction.amount,
         balance: wallet.balance,
         reference: completedTransaction.reference,
+      }).catch(error => {
+        console.error('Async Monnify deposit email failed:', error.message);
       });
 
       return res.status(200).json({
@@ -733,13 +742,16 @@ const verifyPaystackTransaction = async (req, res) => {
 
         const user = await dbService.findUserById(userIdToCredit);
 
-        await sendTransactionEmailNotification(user.email, user.username, {
+        // Send email asynchronously to prevent transaction delays
+        sendTransactionEmailNotification(user.email, user.username, {
           type: completedTransaction.type,
           product_name: "Paystack Deposit",
           status: completedTransaction.status,
           amount: completedTransaction.amount,
           balance: wallet.balance,
           reference: completedTransaction.reference,
+        }).catch(error => {
+          console.error('Async Paystack verification email failed:', error.message);
         });
 
         return res.status(200).json({
@@ -880,7 +892,8 @@ const withdrawWallet = async (req, res) => {
 
     const user = await dbService.findUserById(userId);
 
-    await sendTransactionEmailNotification(user.email, user.username, {
+    // Send email asynchronously to prevent transaction delays
+    sendTransactionEmailNotification(user.email, user.username, {
       type: transaction.type,
       product_name: "Wallet Withdrawal",
       status: transaction.status,
@@ -889,6 +902,8 @@ const withdrawWallet = async (req, res) => {
       reference: transaction.reference,
       bankName: transaction.bankName,
       accountNumber: transaction.accountNumber,
+    }).catch(error => {
+      console.error('Async wallet withdrawal email failed:', error.message);
     });
 
     return res.status(200).json({
@@ -1046,7 +1061,8 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
 
       const user = await dbService.findUserById(userId);
 
-      await sendTransactionEmailNotification(user.email, user.username, {
+      // Send email asynchronously to prevent transaction delays
+      sendTransactionEmailNotification(user.email, user.username, {
         type: completedTransaction.type,
         product_name: "Monnify Withdrawal",
         status: completedTransaction.status,
@@ -1055,6 +1071,8 @@ const withdrawFromWallet = async (req, res, isOTP = false) => {
         reference: completedTransaction.reference,
         bankName: completedTransaction.bankName,
         accountNumber: completedTransaction.accountNumber,
+      }).catch(error => {
+        console.error('Async Monnify withdrawal email failed:', error.message);
       });
 
       return res.status(200).json({
@@ -1172,7 +1190,8 @@ const withdrawWalletPaystack = async (req, res) => {
     await wallet.save();
 
     const user = await dbService.findUserById(userId);
-    await sendTransactionEmailNotification(user.email, user.username, {
+    // Send email asynchronously to prevent transaction delays
+    sendTransactionEmailNotification(user.email, user.username, {
       type: transaction.type,
       product_name: "Paystack Withdrawal Initiation",
       status: transaction.status,
@@ -1181,6 +1200,8 @@ const withdrawWalletPaystack = async (req, res) => {
       reference: transaction.reference,
       bankName: transaction.bankName,
       accountNumber: transaction.accountNumber,
+    }).catch(error => {
+      console.error('Async Paystack withdrawal initiation email failed:', error.message);
     });
 
     return res.status(200).json({

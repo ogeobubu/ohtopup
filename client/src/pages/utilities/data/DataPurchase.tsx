@@ -20,7 +20,9 @@ const DataPurchase = ({ isDarkMode }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [useCustomPhone, setUseCustomPhone] = useState(false);
   const [phoneError, setPhoneError] = useState('');
-  const [currentStep, setCurrentStep] = useState(1); // 1: Network, 2: Plan, 3: Phone, 4: Confirm
+  const [transactionPin, setTransactionPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [currentStep, setCurrentStep] = useState(1); // 1: Network, 2: Plan, 3: Phone, 4: PIN, 5: Confirm
   const [dataReset, setDataReset] = useState(false); // Track if data was reset due to network change
 
   // Fetch selected data plans from admin
@@ -160,6 +162,7 @@ const DataPurchase = ({ isDarkMode }) => {
         amount: selectedPlan.finalPrice || selectedPlan.amount,
         phone: formatPhoneNumber(phoneNumber),
         provider: selectedPlan.providerName,
+        transactionPin: transactionPin,
       });
     } catch (error) {
       console.error('Purchase error:', error);
@@ -243,7 +246,8 @@ const DataPurchase = ({ isDarkMode }) => {
                   { step: 1, label: 'Network' },
                   { step: 2, label: 'Plan' },
                   { step: 3, label: 'Phone' },
-                  { step: 4, label: 'Confirm' }
+                  { step: 4, label: 'PIN' },
+                  { step: 5, label: 'Confirm' }
                 ].map(({ step, label }) => (
                   <div key={step} className="flex items-center flex-1">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
@@ -258,7 +262,7 @@ const DataPurchase = ({ isDarkMode }) => {
                     }`}>
                       {label}
                     </span>
-                    {step < 4 && (
+                    {step < 5 && (
                       <div className={`flex-1 h-0.5 mx-2 ${
                         currentStep > step ? 'bg-blue-600' : 'bg-gray-200'
                       }`} />
@@ -274,7 +278,8 @@ const DataPurchase = ({ isDarkMode }) => {
                     { step: 1, label: 'Network' },
                     { step: 2, label: 'Plan' },
                     { step: 3, label: 'Phone' },
-                    { step: 4, label: 'Confirm' }
+                    { step: 4, label: 'PIN' },
+                    { step: 5, label: 'Confirm' }
                   ].map(({ step, label }) => (
                     <div key={step} className="flex flex-col items-center gap-1">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 ${
@@ -299,20 +304,21 @@ const DataPurchase = ({ isDarkMode }) => {
                 <div className="w-full max-w-xs h-1 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-600 transition-all duration-300 ease-out rounded-full"
-                    style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
+                    style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
                   />
                 </div>
 
                 {/* Current Step Info */}
                 <div className="text-center mt-1">
                   <p className="text-sm font-medium text-gray-700">
-                    Step {currentStep} of 4
+                    Step {currentStep} of 5
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {currentStep === 1 && "Choose your network"}
                     {currentStep === 2 && "Select data plan"}
                     {currentStep === 3 && "Confirm phone number"}
-                    {currentStep === 4 && "Review and purchase"}
+                    {currentStep === 4 && "Enter transaction PIN"}
+                    {currentStep === 5 && "Review and purchase"}
                   </p>
                 </div>
               </div>
@@ -636,7 +642,7 @@ const DataPurchase = ({ isDarkMode }) => {
                           disabled={!!phoneError || !phoneNumber}
                           className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                         >
-                          Continue
+                          Continue to PIN
                         </button>
                       </div>
                     </div>
@@ -660,14 +666,76 @@ const DataPurchase = ({ isDarkMode }) => {
                     disabled={!phoneNumber || !!phoneError}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
-                    Continue to Payment
+                    Continue to PIN
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Step 4: Confirmation & Purchase */}
-            {currentStep === 4 && selectedPlan && selectedNetwork && phoneNumber && (
+            {/* Step 4: Transaction PIN */}
+            {currentStep === 4 && selectedNetwork && selectedPlan && phoneNumber && (
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
+                <div className="mb-3 md:mb-4 text-center">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Enter Transaction PIN</h3>
+                  <p className="text-sm text-gray-600">Enter your 4-6 digit transaction PIN to proceed</p>
+                </div>
+
+                <div className="max-w-sm mx-auto space-y-3">
+                  <div className="bg-white p-4 rounded-xl border-2 border-gray-200">
+                    <label className="block text-base font-semibold text-gray-900 mb-2">
+                      Transaction PIN
+                    </label>
+                    <input
+                      type="password"
+                      value={transactionPin}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+                        setTransactionPin(value);
+                        setPinError(value.length < 4 || value.length > 6 ? 'PIN must be 4-6 digits' : '');
+                      }}
+                      className={`w-full px-3 py-3 border-2 rounded-lg text-base font-medium ${
+                        pinError
+                          ? 'border-red-500 focus:border-red-500'
+                          : 'border-gray-300 focus:border-blue-500'
+                      }`}
+                      placeholder="Enter your PIN"
+                      maxLength={6}
+                      autoFocus
+                    />
+                    {pinError && (
+                      <p className="text-xs text-red-600 mt-2 font-medium">{pinError}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">
+                      Enter your 4-6 digit transaction PIN to secure this transaction
+                    </p>
+                  </div>
+
+                  {/* Navigation Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCurrentStep(4)}
+                      className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (transactionPin && !pinError) {
+                          setCurrentStep(5);
+                        }
+                      }}
+                      disabled={!transactionPin || !!pinError}
+                      className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    >
+                      Continue to Payment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 5: Confirmation & Purchase */}
+            {currentStep === 5 && selectedPlan && selectedNetwork && phoneNumber && transactionPin && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-12 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
@@ -776,7 +844,7 @@ const DataPurchase = ({ isDarkMode }) => {
             )}
 
             {/* Navigation Buttons for other steps */}
-            {currentStep < 4 && (
+            {currentStep < 5 && (
               <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-2 md:py-3 mt-3 md:mt-4 pb-12 md:pb-8">
                 <div className="flex gap-2">
                   <button
@@ -786,15 +854,15 @@ const DataPurchase = ({ isDarkMode }) => {
                     Cancel
                   </button>
                   <div className="text-xs text-gray-500 flex items-center">
-                    <span className="hidden sm:inline">Step {currentStep} of 4</span>
-                    <span className="sm:hidden">{currentStep}/4</span>
+                    <span className="hidden sm:inline">Step {currentStep} of 5</span>
+                    <span className="sm:hidden">{currentStep}/5</span>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Final step navigation - only show if no other navigation exists */}
-            {currentStep === 4 && (
+            {currentStep === 5 && (
               <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-2 md:py-3 mt-3 md:mt-4 pb-12 md:pb-8">
                 <div className="flex gap-2">
                   <button
@@ -804,8 +872,8 @@ const DataPurchase = ({ isDarkMode }) => {
                     Cancel
                   </button>
                   <div className="text-xs text-gray-500 flex items-center">
-                    <span className="hidden sm:inline">Step 4 of 4 - Ready to Purchase</span>
-                    <span className="sm:hidden">4/4 - Ready</span>
+                    <span className="hidden sm:inline">Step 5 of 5 - Ready to Purchase</span>
+                    <span className="sm:hidden">5/5 - Ready</span>
                   </div>
                 </div>
               </div>

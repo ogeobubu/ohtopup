@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
 const sgMail = require('@sendgrid/mail');
 const { createLog } = require('../controllers/systemLogController');
+const fs = require('fs').promises;
+const path = require('path');
 require("dotenv").config();
 
 class EmailService {
@@ -9,9 +11,15 @@ class EmailService {
     this.templates = new Map();
     this.queue = [];
     this.isProcessing = false;
+    this.retryQueue = []; // Queue for failed emails
+    this.maxRetries = 5;
+    this.retryDelay = 60000; // 1 minute
+    this.fallbackMode = false; // Flag for fallback mode
 
     this.initializeProvider();
     this.loadTemplates();
+    this.startQueueProcessor();
+    this.startRetryProcessor();
   }
 
   initializeProvider() {
@@ -24,26 +32,12 @@ class EmailService {
       case 'gmail':
       default:
         this.transporter = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
-          port: 587, // Use TLS port instead of SSL
-          secure: false, // Use TLS
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-          tls: {
-            ciphers: 'SSLv3',
-            rejectUnauthorized: false // For development/testing
-          },
-          // Connection pool for better performance
-          pool: true,
-          maxConnections: 5,
-          maxMessages: 100,
-          // Connection timeout
-          connectionTimeout: 60000,
-          greetingTimeout: 30000,
-          socketTimeout: 60000
-        });
+           service: 'gmail',
+           auth: {
+             user: process.env.EMAIL_USER,
+             pass: process.env.EMAIL_PASS,
+           },
+         });
         break;
     }
   }
@@ -277,6 +271,78 @@ class EmailService {
         </div>
       `
     });
+
+    this.templates.set('bet-dice-win-admin', {
+      subject: '🎯 Bet Dice Game Win Alert - {{userName}} Won ₦{{winnings}}',
+      html: `
+        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">🎯 Bet Dice Game Win Alert</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">A user has won the bet dice game!</p>
+          </div>
+          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+              <h3 style="margin-top: 0; color: #667eea;">🎉 Win Details</h3>
+              <div style="display: table; width: 100%; margin-top: 15px;">
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Player:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{userName}} ({{userEmail}})</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Bet Amount:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">₦{{betAmount}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Odds:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{odds}}x</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Difficulty:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{difficulty}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Dice Count:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{diceCount}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Dice Roll:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{dice}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Win Amount:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #28a745; font-weight: bold;">₦{{winnings}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Game Time:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{gameTime}}</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background-color: #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h4 style="margin-top: 0; color: #495057;">💰 Revenue Impact</h4>
+              <p style="margin: 10px 0; color: #6c757d;">
+                <strong>House Loss:</strong> ₦{{betAmount}} (bet amount paid but winnings awarded)<br>
+                <strong>Net Loss:</strong> ₦{{netLoss}} to house<br>
+                <strong>Expected Value:</strong> ₦{{expectedValue}} ({{houseEdge}}% house edge)
+              </p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="{{adminDashboardUrl}}" style="background-color: #667eea; color: #fff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">View Admin Dashboard</a>
+            </div>
+
+            <p style="font-size: 12px; color: #888; text-align: center; margin-top: 20px;">
+              This is an automated notification for bet dice game wins. Large wins are monitored for responsible gaming.
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
+            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
+            <p>OhTopUp Admin System | Lagos, Nigeria</p>
+          </div>
+        </div>
+      `
+    });
   }
 
   // Render template with data
@@ -304,7 +370,34 @@ class EmailService {
     return { subject, html };
   }
 
-  // Send email with retry logic
+  // Store email to file when service is completely down
+  async storeEmailToFile(emailData) {
+    try {
+      const emailDir = path.join(__dirname, '../email-queue');
+      await fs.mkdir(emailDir, { recursive: true });
+
+      const filename = `email-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.json`;
+      const filepath = path.join(emailDir, filename);
+
+      const emailRecord = {
+        ...emailData,
+        storedAt: new Date().toISOString(),
+        status: 'stored',
+        filename
+      };
+
+      await fs.writeFile(filepath, JSON.stringify(emailRecord, null, 2));
+
+      console.log(`💾 Email stored to file: ${filename} (${emailData.subject})`);
+      console.log(`📂 Email storage location: ${emailDir}/${filename}`);
+      return { success: true, stored: true, filename };
+    } catch (error) {
+      console.error('Failed to store email to file:', error);
+      throw error;
+    }
+  }
+
+  // Send email with retry logic and fallback storage
   async sendEmail(options, retries = 3) {
     const emailData = {
       from: options.from || `"${process.env.FROM_NAME || 'OhTopUp'}" <${process.env.EMAIL_USER}>`,
@@ -380,15 +473,165 @@ class EmailService {
           }
         );
 
-        // If this is the last attempt, throw the error
+        // If this is the last attempt, try to store to file instead
         if (attempt === retries) {
-          throw new Error(`Failed to send email after ${retries} attempts: ${error.message}`);
+          console.log('🔄 All email attempts failed, storing to file as fallback...');
+          try {
+            const storeResult = await this.storeEmailToFile(emailData);
+            return {
+              success: false,
+              stored: true,
+              message: 'Email stored for later delivery',
+              filename: storeResult.filename
+            };
+          } catch (storeError) {
+            console.error('Failed to store email to file:', storeError);
+            throw new Error(`Failed to send email after ${retries} attempts and storage failed: ${error.message}`);
+          }
         }
 
-        // Wait before retry (exponential backoff)
-        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+        // Wait before retry (optimized backoff)
+        const delay = Math.min(500 * Math.pow(1.5, attempt - 1), 3000); // Faster, shorter delays
         await new Promise(resolve => setTimeout(resolve, delay));
       }
+    }
+  }
+
+  // Queue email for background processing
+  async queueEmail(options) {
+    const emailJob = {
+      id: Date.now() + Math.random(),
+      options,
+      timestamp: new Date(),
+      retries: 0,
+      maxRetries: this.maxRetries
+    };
+
+    this.queue.push(emailJob);
+
+    console.log(`📧 Email queued for background processing: ${options.subject} to ${options.to}`);
+
+    // Log queuing
+    await createLog(
+      'info',
+      `Email queued for background processing: ${options.subject}`,
+      'system',
+      null,
+      null,
+      {
+        emailType: options.emailType || 'general',
+        recipient: options.to,
+        queueSize: this.queue.length
+      }
+    );
+
+    return { success: true, queued: true, jobId: emailJob.id };
+  }
+
+  // Start background queue processor
+  startQueueProcessor() {
+    setInterval(async () => {
+      if (this.isProcessing || this.queue.length === 0) return;
+
+      this.isProcessing = true;
+
+      try {
+        const emailJob = this.queue.shift();
+        if (!emailJob) return;
+
+        console.log(`⚙️ Processing queued email: ${emailJob.options.subject} to ${emailJob.options.to}`);
+
+        try {
+          const result = await this.sendEmailDirect(emailJob.options);
+          console.log(`✅ Queued email sent successfully: ${result.messageId}`);
+        } catch (error) {
+          console.error(`❌ Queued email failed:`, error.message);
+
+          // Add to retry queue if retries available
+          if (emailJob.retries < emailJob.maxRetries) {
+            emailJob.retries++;
+            this.retryQueue.push(emailJob);
+            console.log(`Email added to retry queue (attempt ${emailJob.retries}/${emailJob.maxRetries})`);
+          } else {
+            console.error(`Email permanently failed after ${emailJob.maxRetries} attempts`);
+          }
+        }
+      } catch (error) {
+        console.error('Queue processing error:', error);
+      } finally {
+        this.isProcessing = false;
+      }
+    }, 2000); // Process every 2 seconds
+  }
+
+  // Start retry processor
+  startRetryProcessor() {
+    setInterval(async () => {
+      if (this.retryQueue.length === 0) return;
+
+      const now = Date.now();
+      const jobsToProcess = this.retryQueue.filter(job =>
+        (now - job.timestamp.getTime()) >= this.retryDelay
+      );
+
+      for (const job of jobsToProcess) {
+        // Remove from retry queue
+        const index = this.retryQueue.indexOf(job);
+        if (index > -1) this.retryQueue.splice(index, 1);
+
+        // Add back to main queue
+        this.queue.push(job);
+        console.log(`🔄 Retrying email after delay: ${job.options.subject} (attempt ${job.retries + 1}/${job.maxRetries})`);
+      }
+    }, 30000); // Check every 30 seconds
+  }
+
+  // Direct email sending without retry logic (for queue processing)
+  async sendEmailDirect(options) {
+    const emailData = {
+      from: options.from || `"${process.env.FROM_NAME || 'OhTopUp'}" <${process.env.EMAIL_USER}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+      headers: {
+        'List-Unsubscribe': `<${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe>`,
+        'X-Mailer': 'OhTopUp Email Service',
+        ...options.headers
+      },
+      trackingSettings: {
+        clickTracking: { enable: false },
+        openTracking: { enable: false },
+        ...options.trackingSettings
+      },
+      mailSettings: {
+        sandboxMode: {
+          enable: options.sandboxMode || false
+        },
+        ...options.mailSettings
+      },
+      ...options
+    };
+
+    try {
+      let result;
+      if (this.provider === 'sendgrid') {
+        result = await sgMail.send(emailData);
+      } else {
+        result = await this.transporter.sendMail(emailData);
+      }
+
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('Direct email send failed, storing to file:', error.message);
+      // Store to file as fallback
+      const storeResult = await this.storeEmailToFile(emailData);
+      return {
+        success: false,
+        stored: true,
+        message: 'Email stored for later delivery',
+        filename: storeResult.filename
+      };
     }
   }
 
@@ -400,12 +643,33 @@ class EmailService {
         ...data
       });
 
-      return await this.sendEmail({
-        to: recipient,
-        subject,
-        html,
-        emailType: templateName
-      });
+      // Use queue for critical emails to prevent transaction failures
+      if (templateName === 'transaction' || templateName === 'bet-dice-win-admin' || templateName === 'dice-win-admin') {
+        return await this.queueEmail({
+          to: recipient,
+          subject,
+          html,
+          emailType: templateName
+        });
+      }
+
+      // Try direct send for non-critical emails, fallback to queue if it fails
+      try {
+        return await this.sendEmail({
+          to: recipient,
+          subject,
+          html,
+          emailType: templateName
+        });
+      } catch (error) {
+        console.warn(`Direct email send failed, queuing instead:`, error.message);
+        return await this.queueEmail({
+          to: recipient,
+          subject,
+          html,
+          emailType: templateName
+        });
+      }
     } catch (error) {
       console.error(`Template email send failed:`, error.message);
       throw error;
@@ -471,6 +735,25 @@ class EmailService {
       manipulationMode: winDetails.manipulationMode,
       seed: winDetails.seed,
       adminDashboardUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/dice`
+    });
+  }
+
+  // Send bet dice game win notification to admin
+  async sendBetDiceWinAdminNotification(adminEmail, winDetails) {
+    return this.sendTemplate('bet-dice-win-admin', adminEmail, {
+      userName: winDetails.userName,
+      userEmail: winDetails.userEmail,
+      betAmount: winDetails.betAmount,
+      odds: winDetails.odds,
+      difficulty: winDetails.difficulty,
+      diceCount: winDetails.diceCount,
+      dice: winDetails.dice,
+      winnings: winDetails.winnings,
+      gameTime: new Date(winDetails.gameTime).toLocaleString(),
+      expectedValue: winDetails.expectedValue,
+      houseEdge: winDetails.houseEdge,
+      netLoss: (winDetails.winnings - winDetails.betAmount).toLocaleString(),
+      adminDashboardUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/bet-dice`
     });
   }
 

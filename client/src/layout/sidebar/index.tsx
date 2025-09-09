@@ -9,7 +9,7 @@ import {
   FaQuestionCircle,
   FaBars,
   FaTimes,
-  FaGamepad,
+  FaBullseye,
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import logo from "../../assets/logo/new-dark.png";
@@ -26,7 +26,7 @@ const Sidebar = () => {
     { label: "Wallet", icon: FaWallet, to: "/wallet" },
     { label: "Referral", icon: FaUserFriends, to: "/referral" },
     { label: "User Ranking", icon: FaUserFriends, to: "/rank" },
-    { label: "Dice Game", icon: FaGamepad, to: "/dice" },
+    { label: "Bet Dice Game", icon: FaBullseye, to: "/bet-dice" },
     { label: "Settings", icon: FaCog, to: "/settings" },
     { label: "Help & Support", icon: FaQuestionCircle, to: "/support" },
   ];

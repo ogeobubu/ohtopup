@@ -10,13 +10,28 @@ const Utility = require("../model/Utility");
 
 const purchaseElectricity = async (req, res, next) => {
   try {
-    const { serviceID, billersCode, variation_code, amount, phone } =
+    const { serviceID, billersCode, variation_code, amount, phone, transactionPin } =
       validationService.validateElectricityPurchaseInput(req);
 
     const transactionContact = billersCode;
 
     const user = await dbService.findUserById(req.user.id);
     const wallet = await dbService.findWalletByUserId(req.user.id);
+
+    // Verify transaction PIN
+    if (!user.transactionPin) {
+      return next({
+        status: 400,
+        message: "Transaction PIN not set. Please set your transaction PIN in settings.",
+      });
+    }
+
+    if (user.transactionPin !== transactionPin) {
+      return next({
+        status: 400,
+        message: "Invalid transaction PIN.",
+      });
+    }
 
     walletService.checkWalletForDebit(wallet, amount);
 

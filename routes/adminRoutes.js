@@ -120,6 +120,15 @@ const {
   getAvailableDiscos,
 } = require("../controllers/electricityController");
 
+const {
+  getAllTutorialsAdmin,
+  createTutorial,
+  updateTutorial,
+  deleteTutorial,
+  toggleTutorialStatus,
+  getTutorialCategories,
+} = require("../controllers/tutorialController");
+
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
 
@@ -247,5 +256,13 @@ router.get("/electricity/settings", authUser, authAdmin, getElectricitySettings)
 router.put("/electricity/settings", authUser, authAdmin, updateElectricitySettings);
 router.post("/electricity/settings/reset", authUser, authAdmin, resetElectricitySettings);
 router.get("/electricity/discos", authUser, authAdmin, getAvailableDiscos);
+
+// Tutorial management routes
+router.get("/tutorials", authUser, authAdmin, getAllTutorialsAdmin);
+router.post("/tutorials", authUser, authAdmin, createTutorial);
+router.put("/tutorials/:id", authUser, authAdmin, updateTutorial);
+router.delete("/tutorials/:id", authUser, authAdmin, deleteTutorial);
+router.patch("/tutorials/:id/toggle", authUser, authAdmin, toggleTutorialStatus);
+router.get("/tutorials/categories", authUser, authAdmin, getTutorialCategories);
 
 module.exports = router;
