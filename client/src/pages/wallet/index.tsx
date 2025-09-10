@@ -12,9 +12,12 @@ import {
   getBanks,
   updateUser,
   getUser,
+  initiatePaystackDeposit,
+  verifyPaystackDeposit,
   depositWallet,
   verifyBankAccount,
   getRates,
+  getWalletSettings,
 } from "../../api";
 import Modal from "../../admin/components/modal";
 import { toast } from "react-toastify";
@@ -91,6 +94,12 @@ const Wallet = () => {
   const [reference, setReference] = useState("");
   // New state to manage deposit option
   const [depositOption, setDepositOption] = useState(null);
+  // State for withdrawal transaction details modal
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+
+  // Wallet settings state
+  const [walletSettings, setWalletSettings] = useState(null);
 
   const copyToClipboard = (text) => {
     navigator.clipboard
@@ -126,10 +135,54 @@ const Wallet = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const refParam = queryParams.get("ref");
+    const successParam = queryParams.get("success");
+    const errorParam = queryParams.get("error");
+    const statusParam = queryParams.get("status");
+    const referenceParam = queryParams.get("reference");
+
     if (refParam) {
       setRef(refParam);
     }
-  }, []);
+
+    // Handle Paystack callback responses
+    if (successParam === "true") {
+      toast.success("Payment successful! Your wallet has been credited.");
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (errorParam) {
+      let errorMessage = "Payment failed. Please try again.";
+      switch (errorParam) {
+        case "payment_failed":
+          errorMessage = "Payment was declined. Please check your card details and try again.";
+          break;
+        case "verification_failed":
+          errorMessage = "Payment verification failed. Please contact support.";
+          break;
+        case "verification_error":
+          errorMessage = "There was an error verifying your payment. Please contact support.";
+          break;
+        case "callback_error":
+          errorMessage = "Payment processing error. Please contact support.";
+          break;
+        case "missing_reference":
+          errorMessage = "Payment reference missing. Please try again.";
+          break;
+      }
+      toast.error(errorMessage);
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (statusParam === "pending") {
+      toast.info("Payment is being processed. Please wait a few minutes.");
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Refresh wallet data if we have a reference (successful payment)
+    if (referenceParam && successParam === "true") {
+      queryClient.invalidateQueries({ queryKey: ["wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    }
+  }, [queryClient]);
 
   const handleSearchChange = (e) => {
     setReference(e.target.value);
@@ -172,12 +225,48 @@ const Wallet = () => {
     queryFn: getUser,
   });
 
-  const config = {
-    reference: `txn_${Date.now()}_${user?._id}`,
-    email: user?.email,
-    amount: totalAmount * 100,
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_LIVE_KEY,
+  const { data: walletSettingsData, error: walletSettingsError } = useQuery({
+    queryKey: ["walletSettings"],
+    queryFn: getWalletSettings,
+    enabled: selectedCard === "Naira Wallet", // Only fetch when on wallet tab
+  });
+
+  // Update wallet settings state when data is fetched
+  useEffect(() => {
+    if (walletSettingsData) {
+      console.log('Wallet settings fetched:', walletSettingsData);
+      setWalletSettings(walletSettingsData);
+    }
+  }, [walletSettingsData]);
+
+  // Validate Paystack configuration
+  const getPaystackConfig = () => {
+    if (!user?.email) {
+      console.error('Paystack config error: User email is missing');
+      return null;
+    }
+    if (!user?._id) {
+      console.error('Paystack config error: User ID is missing');
+      return null;
+    }
+    if (!totalAmount || totalAmount <= 0) {
+      console.error('Paystack config error: Invalid amount', totalAmount);
+      return null;
+    }
+    if (!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY) {
+      console.error('Paystack config error: Public key is missing');
+      return null;
+    }
+
+    return {
+      reference: `txn_${Date.now()}_${user._id}`,
+      email: user.email,
+      amount: Math.round(totalAmount * 100), // Ensure it's an integer
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+    };
   };
+
+  const config = getPaystackConfig();
 
   useEffect(() => {
     if (bankData) {
@@ -201,7 +290,15 @@ const Wallet = () => {
       } else {
         const parsedValue = parseFloat(value);
         if (!isNaN(parsedValue)) {
-          const fee = parsedValue * (rates?.depositRate / 100);
+          // Calculate fee based on wallet settings
+          let fee = 0;
+          if (walletSettingsData?.paystackFee) {
+            const { percentage, fixedFee, cap } = walletSettingsData.paystackFee;
+            fee = Math.min(cap || 2000, (parsedValue * (percentage || 1.5) / 100) + (fixedFee || 100));
+          } else {
+            // Fallback to old calculation
+            fee = parsedValue * (rates?.depositRate / 100);
+          }
           setTotalAmount(parsedValue + fee);
         } else {
           setTotalAmount(0);
@@ -213,25 +310,36 @@ const Wallet = () => {
   const formattedAmount = amount ? amount.toString() : "";
 
   const handlePaystackSuccessAction = async (reference) => {
-    if (reference.status === "success") {
-      try {
-        const response = await depositWallet({
-          userId: user?._id,
-          amount,
-          reference: reference.reference,
-        });
+    console.log('Paystack success callback:', reference);
+    setLoading(true);
 
-        if (response) {
-          toast.success("Payment successful!");
-          setIsDepositModalOpen(false);
-          queryClient.invalidateQueries({ queryKey: ["wallet"] });
-          queryClient.invalidateQueries({ queryKey: ["transactions"] });
-        }
-      } catch (error) {
-        toast.error("Error during deposit: " + error.message);
-      } finally {
+    try {
+      // The reference object from react-paystack contains the transaction reference
+      const transactionRef = reference.reference || reference.trxref;
+
+      if (!transactionRef) {
+        console.error('No transaction reference in Paystack response');
+        toast.error("Payment reference missing. Please contact support.");
         setLoading(false);
+        return;
       }
+
+      // Verify the payment with our backend
+      const verifyResponse = await verifyPaystackDeposit(transactionRef, user?._id);
+
+      if (verifyResponse) {
+        toast.success("Payment successful! Funds have been added to your wallet.");
+        setIsDepositModalOpen(false);
+        setAmount(0);
+        setTotalAmount(0);
+        queryClient.invalidateQueries({ queryKey: ["wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      }
+    } catch (error) {
+      console.error("Error during Paystack verification:", error);
+      toast.error("Payment verification failed. Please contact support if amount was debited.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -239,12 +347,15 @@ const Wallet = () => {
     console.log("closed");
   };
 
-  const componentProps = {
+  const componentProps = config ? {
     ...config,
-    text: "Pay Now",
+    text: loading ? "Processing..." : "Pay Now",
     onSuccess: (reference) => handlePaystackSuccessAction(reference),
-    onClose: handlePaystackCloseAction,
-  };
+    onClose: () => {
+      console.log('Paystack payment modal closed');
+      setLoading(false);
+    },
+  } : {};
 
   const handleShowBanks = () => {
     setShowBanks(!showBanks);
@@ -271,8 +382,9 @@ const Wallet = () => {
         accountNumber: value,
         bankCode: selectedBank?.code,
       });
+      console.log(response.data)
       setIsVerifying(false);
-      setAccountName(response.data.data.account_name);
+      setAccountName(response.data.account_name);
     }
   };
 
@@ -303,14 +415,26 @@ const Wallet = () => {
     {
       header: "Reference",
       render: (row) => (
-        <p
-          title={row.reference}
-          className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
-        >
-          {row.reference && row.reference.length > 10
-            ? `${row.reference.slice(0, 15)}...`
-            : row.reference}
-        </p>
+        <div className="flex items-center space-x-2">
+          <p
+            title={row.reference}
+            className="w-full whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            {row.reference && row.reference.length > 10
+              ? `${row.reference.slice(0, 15)}...`
+              : row.reference}
+          </p>
+          <button
+            onClick={() => {
+              setSelectedTransaction(row);
+              setIsTransactionModalOpen(true);
+            }}
+            className="text-blue-500 hover:text-blue-700 text-xs underline"
+            title="View Details"
+          >
+            View
+          </button>
+        </div>
       ),
     },
     {
@@ -465,8 +589,8 @@ const Wallet = () => {
                   </button>
 
                   <button
-                    onClick={() => toast.error("Feature not available. Try again later!")}
-                    className="flex flex-col items-center justify-center p-3 md:p-4 rounded-lg border-2 border-dashed border-red-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group opacity-60"
+                    onClick={() => setIsWithdrawModalOpen(true)}
+                    className="flex flex-col items-center justify-center p-3 md:p-4 rounded-lg border-2 border-dashed border-red-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
                   >
                     <div className="w-10 h-10 md:w-12 md:h-12 bg-red-500 rounded-full flex items-center justify-center mb-1 md:mb-2 group-hover:scale-110 transition-transform">
                       <FaMinus className="text-white text-base md:text-lg" />
@@ -556,6 +680,135 @@ const Wallet = () => {
                       </div>
                     </>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Wallet Settings Information */}
+          {walletSettingsData && (
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Maintenance Mode Alert */}
+              {walletSettingsData.maintenanceMode && (
+                <div className={`p-4 rounded-lg border-2 ${
+                  isDarkMode
+                    ? 'bg-red-900/20 border-red-600 text-red-200'
+                    : 'bg-red-50 border-red-200 text-red-800'
+                }`}>
+                  <div className="flex items-center space-x-2">
+                    <FaExclamationCircle className="text-red-500 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-sm">Maintenance Mode</h4>
+                      <p className="text-xs mt-1">
+                        {walletSettingsData.maintenanceMessage || "Wallet services are temporarily unavailable"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Transaction Limits */}
+              <div className={`p-4 rounded-lg ${
+                isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
+              }`}>
+                <h4 className={`font-semibold text-sm mb-3 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Transaction Limits
+                </h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                      Min Deposit:
+                    </span>
+                    <span className={`font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      ₦{walletSettingsData.minDepositAmount || 100}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                      Max Deposit:
+                    </span>
+                    <span className={`font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      ₦{walletSettingsData.maxDepositAmount?.toLocaleString() || "1,000,000"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                      Min Withdrawal:
+                    </span>
+                    <span className={`font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      ₦{walletSettingsData.minWithdrawalAmount || 100}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Processing Fees */}
+              <div className={`p-4 rounded-lg ${
+                isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
+              }`}>
+                <h4 className={`font-semibold text-sm mb-3 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Processing Fees
+                </h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                      Paystack Fee:
+                    </span>
+                    <span className={`font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {walletSettingsData.paystackFee?.percentage || 1.5}% + ₦{walletSettingsData.paystackFee?.fixedFee || 100}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                      Fee Cap:
+                    </span>
+                    <span className={`font-medium ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      ₦{walletSettingsData.paystackFee?.cap || 2000}
+                    </span>
+                  </div>
+                  <div className="text-xs mt-2 p-2 rounded bg-blue-50 dark:bg-blue-900/20">
+                    <p className={isDarkMode ? 'text-blue-200' : 'text-blue-800'}>
+                      💡 Processing fees are automatically deducted from your deposits
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Low Balance Alert */}
+          {walletSettingsData && walletData?.balance < (walletSettingsData.lowBalanceThreshold || 1000) && (
+            <div className={`mt-4 p-4 rounded-lg border-l-4 border-yellow-500 ${
+              isDarkMode ? 'bg-yellow-900/20' : 'bg-yellow-50'
+            }`}>
+              <div className="flex items-center space-x-2">
+                <FaExclamationCircle className="text-yellow-500 flex-shrink-0" />
+                <div>
+                  <h4 className={`font-semibold text-sm ${
+                    isDarkMode ? 'text-yellow-200' : 'text-yellow-800'
+                  }`}>
+                    Low Balance Alert
+                  </h4>
+                  <p className={`text-xs mt-1 ${
+                    isDarkMode ? 'text-yellow-300' : 'text-yellow-700'
+                  }`}>
+                    Your wallet balance is below ₦{walletSettingsData.lowBalanceThreshold || 1000}.
+                    Consider adding funds to avoid transaction interruptions.
+                  </p>
                 </div>
               </div>
             </div>
@@ -742,7 +995,7 @@ const Wallet = () => {
                     <TextField
                       name="amount"
                       label="Deposit Amount (₦)"
-                      placeholder="Enter amount (minimum ₦100)"
+                      placeholder={`Enter amount (minimum ₦${walletSettingsData?.minDepositAmount || 100})`}
                       value={formattedAmount}
                       onChange={handleAmountChange}
                       type="text"
@@ -802,29 +1055,31 @@ const Wallet = () => {
                       <div className="flex items-center space-x-2">
                         <FaExclamationCircle className="text-yellow-500 flex-shrink-0" />
                         <span className={isDarkMode ? 'text-yellow-200' : 'text-yellow-800'}>
-                          Minimum deposit amount is ₦100
+                          Minimum deposit amount is ₦{walletSettingsData?.minDepositAmount || 100}
                         </span>
                       </div>
                     </div>
 
                     {/* Payment Button */}
                     <div className="pt-4">
-                      <Button
-                        loading={loading}
-                        disabled={amount < 100 || loading}
-                        className={`w-full py-3 text-lg font-semibold ${
-                          amount >= 100
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                        {...componentProps}
-                      >
+                      {config ? (
                         <PaystackButton
                           {...componentProps}
-                          disabled={amount < 100}
-                          className="w-full"
+                          disabled={amount < (walletSettingsData?.minDepositAmount || 100) || loading}
+                          className={`w-full py-3 text-lg font-semibold rounded-lg transition-colors ${
+                            amount >= (walletSettingsData?.minDepositAmount || 100) && !loading
+                              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
                         />
-                      </Button>
+                      ) : (
+                        <button
+                          disabled
+                          className="w-full py-3 text-lg font-semibold rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed"
+                        >
+                          Loading payment details...
+                        </button>
+                      )}
                     </div>
                   </div>
                 </>
@@ -954,7 +1209,251 @@ const Wallet = () => {
               isDarkMode={isDarkMode}
               rates={rates}
               formatNairaAmount={formatNairaAmount}
+              walletSettings={walletSettings}
             />
+            {console.log('Passing walletSettings to Withdraw:', walletSettings)}
+          </Modal>
+
+          {/* Transaction Details Modal */}
+          <Modal
+            isOpen={isTransactionModalOpen}
+            closeModal={() => {
+              setIsTransactionModalOpen(false);
+              setSelectedTransaction(null);
+            }}
+            title="Withdrawal Transaction Details"
+            isDarkMode={isDarkMode}
+          >
+            {selectedTransaction && (
+              <div className="space-y-6">
+                {/* Transaction Header */}
+                <div className={`p-4 rounded-lg ${
+                  isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
+                }`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className={`text-lg font-semibold ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        Transaction #{selectedTransaction.reference}
+                      </h3>
+                      <p className={`text-sm ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {new Date(selectedTransaction.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <Chip status={selectedTransaction.status} />
+                  </div>
+                </div>
+
+                {/* Transaction Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Amount & Status */}
+                  <div className={`p-4 rounded-lg ${
+                    isDarkMode ? 'bg-gray-800' : 'bg-white border'
+                  }`}>
+                    <h4 className={`font-semibold mb-3 ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      Transaction Information
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                          Amount:
+                        </span>
+                        <span className={`font-semibold text-lg ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {formatNairaAmount(selectedTransaction.amount)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                          Status:
+                        </span>
+                        <Chip status={selectedTransaction.status} />
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                          Type:
+                        </span>
+                        <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>
+                          Withdrawal
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bank Details */}
+                  <div className={`p-4 rounded-lg ${
+                    isDarkMode ? 'bg-gray-800' : 'bg-white border'
+                  }`}>
+                    <h4 className={`font-semibold mb-3 ${
+                      isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      Bank Information
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                          Bank Name:
+                        </span>
+                        <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>
+                          {selectedTransaction.bankName || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                          Account Number:
+                        </span>
+                        <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>
+                          {selectedTransaction.accountNumber || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
+                          Bank Code:
+                        </span>
+                        <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>
+                          {selectedTransaction.bankCode || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Timeline */}
+                <div className={`p-4 rounded-lg ${
+                  isDarkMode ? 'bg-gray-800' : 'bg-white border'
+                }`}>
+                  <h4 className={`font-semibold mb-4 ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Transaction Timeline
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        selectedTransaction.status === 'pending' ? 'bg-yellow-500' :
+                        ['approved', 'processing', 'completed'].includes(selectedTransaction.status) ? 'bg-green-500' :
+                        'bg-red-500'
+                      }`}></div>
+                      <div>
+                        <p className={`font-medium ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          Request Submitted
+                        </p>
+                        <p className={`text-sm ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {new Date(selectedTransaction.timestamp).toLocaleString()}
+                        </p>
+                        {/* Fee Information */}
+                        {selectedTransaction.feeAmount > 0 && (
+                          <div className={`mt-2 p-2 rounded text-xs ${
+                            isDarkMode ? 'bg-blue-900/20' : 'bg-blue-50'
+                          }`}>
+                            <p className={isDarkMode ? 'text-blue-200' : 'text-blue-800'}>
+                              Fee: ₦{selectedTransaction.feeAmount?.toLocaleString() || '0'} |
+                              Deducted {selectedTransaction.feeDeductionMethod === 'fromWallet' ? 'from wallet' : 'from withdrawal'}
+                            </p>
+                            {selectedTransaction.originalAmount && selectedTransaction.originalAmount !== selectedTransaction.amount && (
+                              <p className={`text-xs mt-1 ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+                                Original request: ₦{selectedTransaction.originalAmount.toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {['approved', 'processing', 'completed', 'rejected', 'failed'].includes(selectedTransaction.status) && (
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          ['approved', 'processing', 'completed'].includes(selectedTransaction.status) ? 'bg-green-500' : 'bg-red-500'
+                        }`}></div>
+                        <div>
+                          <p className={`font-medium ${
+                            isDarkMode ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {selectedTransaction.status === 'approved' && 'Approved by Admin'}
+                            {selectedTransaction.status === 'processing' && 'Processing Started'}
+                            {selectedTransaction.status === 'completed' && 'Completed Successfully'}
+                            {selectedTransaction.status === 'rejected' && 'Rejected by Admin'}
+                            {selectedTransaction.status === 'failed' && 'Failed to Process'}
+                          </p>
+                          <p className={`text-sm ${
+                            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
+                            Status updated
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Failure/Rejection Reason */}
+                {(selectedTransaction.status === 'rejected' || selectedTransaction.status === 'failed') && (
+                  <div className={`p-4 rounded-lg border-l-4 ${
+                    selectedTransaction.status === 'rejected'
+                      ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                      : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                  }`}>
+                    <h4 className={`font-semibold mb-3 ${
+                      selectedTransaction.status === 'rejected'
+                        ? 'text-red-800 dark:text-red-200'
+                        : 'text-orange-800 dark:text-orange-200'
+                    }`}>
+                      {selectedTransaction.status === 'rejected' ? 'Rejection Reason' : 'Failure Reason'}
+                    </h4>
+                    <div className={`p-3 rounded-lg ${
+                      selectedTransaction.status === 'rejected'
+                        ? 'bg-red-100 dark:bg-red-800/30'
+                        : 'bg-orange-100 dark:bg-orange-800/30'
+                    }`}>
+                      <p className={`text-sm ${
+                        selectedTransaction.status === 'rejected'
+                          ? 'text-red-700 dark:text-red-300'
+                          : 'text-orange-700 dark:text-orange-300'
+                      }`}>
+                        {selectedTransaction.status === 'rejected'
+                          ? (selectedTransaction.rejectionReason || 'No specific reason provided.')
+                          : (selectedTransaction.failureReason || 'No specific reason provided.')
+                        }
+                      </p>
+                    </div>
+                    {selectedTransaction.status === 'failed' && (
+                      <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm text-blue-800 dark:text-blue-200">
+                          <strong>Note:</strong> The withdrawal amount has been refunded to your wallet balance.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Button */}
+                <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-600">
+                  <button
+                    onClick={() => {
+                      setIsTransactionModalOpen(false);
+                      setSelectedTransaction(null);
+                    }}
+                    className={`px-4 py-2 rounded-lg transition-colors ${
+                      isDarkMode
+                        ? 'bg-gray-700 text-white hover:bg-gray-600'
+                        : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                    }`}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
           </Modal>
         </>
       )}

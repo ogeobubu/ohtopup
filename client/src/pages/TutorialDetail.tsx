@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../layout/header";
 import Footer from "../pages/landing/footer";
+import VideoPlayer from "../components/VideoPlayer";
 import { getAllTutorials, getTutorialCategories } from "../api";
 import {
   FaBook,
@@ -28,6 +29,7 @@ const TutorialDetail = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const videoPlayerRef = useRef(null);
 
   const { data: tutorialsData, isLoading: tutorialsLoading } = useQuery({
     queryKey: ["tutorials"],
@@ -175,7 +177,14 @@ const TutorialDetail = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
-                <button className="flex items-center justify-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm md:text-base">
+                <button
+                  onClick={() => {
+                    if (tutorial.type === 'video' && tutorial.videoUrl && videoPlayerRef.current) {
+                      videoPlayerRef.current.play();
+                    }
+                  }}
+                  className="flex items-center justify-center space-x-2 px-4 md:px-6 py-2.5 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm md:text-base"
+                >
                   <FaPlay className="text-sm" />
                   <span>Start Tutorial</span>
                 </button>
@@ -205,15 +214,16 @@ const TutorialDetail = () => {
                 <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-3 md:mb-4">
                   Video Tutorial
                 </h2>
-                <div className="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <FaPlay className="text-3xl md:text-4xl text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">Video Player</p>
-                    <p className="text-xs md:text-sm text-gray-500 dark:text-gray-500 mt-1">
-                      Video URL: {tutorial.videoUrl}
-                    </p>
-                  </div>
-                </div>
+                <VideoPlayer
+                  ref={videoPlayerRef}
+                  url={tutorial.videoUrl}
+                  title={tutorial.title}
+                  description={tutorial.description}
+                  duration={tutorial.duration}
+                  onPlay={() => console.log('Video started')}
+                  onPause={() => console.log('Video paused')}
+                  onEnded={() => console.log('Video ended')}
+                />
               </div>
             )}
 

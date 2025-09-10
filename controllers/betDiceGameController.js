@@ -97,6 +97,9 @@ const playBetDiceGame = async (req, res) => {
       // Create default settings if none exist
       settings = new BetDiceGameSettings();
       await settings.save();
+      console.log(`Bet Dice Settings - Created new settings with maxDiceCount: ${settings.maxDiceCount}`);
+    } else {
+      console.log(`Bet Dice Settings - Retrieved existing settings with maxDiceCount: ${settings.maxDiceCount}`);
     }
 
     // Check if game is enabled
@@ -136,6 +139,7 @@ const playBetDiceGame = async (req, res) => {
     }
 
     // Validate dice count
+    console.log(`Bet Dice Validation - diceCount: ${diceCount}, maxDiceCount: ${settings.maxDiceCount}, difficulty: ${difficulty}`);
     if (diceCount < 2 || diceCount > settings.maxDiceCount) {
       return res.status(400).json({
         message: `Dice count must be between 2 and ${settings.maxDiceCount}`
@@ -648,14 +652,24 @@ const updateBetDiceSettings = async (req, res) => {
       settings = new BetDiceGameSettings();
     }
 
-    // Update settings
+    // Update settings with proper nested object handling
     Object.keys(newSettings).forEach(key => {
       if (newSettings[key] !== undefined) {
         if (typeof newSettings[key] === 'object' && newSettings[key] !== null) {
+          // Ensure the parent object exists
+          if (!settings[key]) {
+            settings[key] = {};
+          }
+
           // Handle nested objects
           Object.keys(newSettings[key]).forEach(subKey => {
             if (newSettings[key][subKey] !== undefined) {
               if (typeof newSettings[key][subKey] === 'object' && newSettings[key][subKey] !== null) {
+                // Ensure the nested object exists
+                if (!settings[key][subKey]) {
+                  settings[key][subKey] = {};
+                }
+
                 // Handle deeply nested objects (like difficultyLevels)
                 Object.keys(newSettings[key][subKey]).forEach(deepKey => {
                   if (newSettings[key][subKey][deepKey] !== undefined) {
@@ -777,11 +791,21 @@ const resetBetDiceSettings = async (req, res) => {
       settings = new BetDiceGameSettings();
     }
 
-    // Reset all settings to defaults
+    // Reset all settings to defaults with proper nested object handling
     Object.keys(defaultSettings).forEach(key => {
       if (typeof defaultSettings[key] === 'object' && defaultSettings[key] !== null) {
+        // Ensure the parent object exists
+        if (!settings[key]) {
+          settings[key] = {};
+        }
+
         Object.keys(defaultSettings[key]).forEach(subKey => {
           if (typeof defaultSettings[key][subKey] === 'object' && defaultSettings[key][subKey] !== null) {
+            // Ensure the nested object exists
+            if (!settings[key][subKey]) {
+              settings[key][subKey] = {};
+            }
+
             Object.keys(defaultSettings[key][subKey]).forEach(deepKey => {
               settings[key][subKey][deepKey] = defaultSettings[key][subKey][deepKey];
             });
@@ -820,6 +844,48 @@ const resetBetDiceSettings = async (req, res) => {
   }
 };
 
+// Force reset bet dice settings (for emergency fixes)
+const forceResetBetDiceSettings = async (req, res) => {
+  try {
+    // Only allow admins to force reset
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    // Delete existing settings
+    await BetDiceGameSettings.deleteMany({});
+
+    // Create new settings with correct defaults
+    const newSettings = new BetDiceGameSettings();
+    await newSettings.save();
+
+    console.log(`Bet Dice Settings - Force reset completed. New maxDiceCount: ${newSettings.maxDiceCount}`);
+
+    // Log the force reset
+    await createLog(
+      'warning',
+      `Bet dice game settings force reset by admin`,
+      'admin',
+      req.user?.id,
+      req.user?.email,
+      {
+        forceReset: true,
+        newMaxDiceCount: newSettings.maxDiceCount,
+        timestamp: new Date()
+      },
+      req
+    );
+
+    res.status(200).json({
+      message: "Bet dice game settings force reset to defaults",
+      settings: newSettings
+    });
+  } catch (error) {
+    console.error("Error force resetting bet dice game settings:", error);
+    res.status(500).json({ message: "Error force resetting bet dice game settings" });
+  }
+};
+
 module.exports = {
   playBetDiceGame,
   getBetDiceHistory,
@@ -829,4 +895,5 @@ module.exports = {
   getBetDiceSettings,
   updateBetDiceSettings,
   resetBetDiceSettings,
+  forceResetBetDiceSettings,
 };

@@ -128,7 +128,7 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className={`bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 py-3`}>
+    <nav className={`relative bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 py-3`}>
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
         <div className={`text-gray-800 dark:text-white mb-2 md:mb-0`}>
           <span className="text-lg md:text-xl font-bold">Hello</span>, {user?.username} 👋
@@ -145,7 +145,7 @@ const Header = () => {
             <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-800" />
           )}
         </button>
-        <div className="relative" ref={notificationRef}>
+        <div ref={notificationRef}>
           <button
             className="bg-gray-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             onClick={toggleNotification}
@@ -163,7 +163,7 @@ const Header = () => {
 
           {isNotificationOpen && (
             <div
-              className="absolute z-10 right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 shadow-lg rounded-md p-3 max-h-96 overflow-hidden"
+              className="absolute z-10 left-0 right-0 sm:right-0 sm:left-auto mt-2 w-full sm:w-80 md:w-96 bg-white dark:bg-gray-800 shadow-lg rounded-md p-3 max-h-96 overflow-hidden"
               role="menu"
               aria-label="Notifications menu"
             >

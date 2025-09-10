@@ -12,6 +12,7 @@ const xRoutes = require("./routes/xRoutes");
 const airtimeRoutes = require("./routes/airtimeRoutes");
 require("dotenv").config();
 const path = require("path");
+const crypto = require("crypto");
 const xController = require("./controllers/xController");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -21,18 +22,49 @@ const { handleServiceError } = require('./middleware/errorHandler');
 
 const app = express();
 
+// Middleware to generate CSP nonce
+app.use((req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+
 // Use helmet to set secure HTTP headers with CSP configuration
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://www.googletagmanager.com",
+          "https://s3-eu-west-1.amazonaws.com",
+          "https://applepay.cdn-apple.com",
+          "https://checkout.paystack.com",
+          (req, res) => `'nonce-${res.locals.nonce}'`
+        ],
+        scriptSrcElem: [
+          "'self'",
+          "https://www.googletagmanager.com",
+          "https://s3-eu-west-1.amazonaws.com",
+          "https://applepay.cdn-apple.com",
+          "https://checkout.paystack.com",
+          (req, res) => `'nonce-${res.locals.nonce}'`
+        ],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https://www.googleapis.com", "https://api.paystack.co", "https://checkout.paystack.com"],
+        connectSrc: [
+          "'self'",
+          "https://www.googleapis.com",
+          "https://api.paystack.co",
+          "https://checkout.paystack.com",
+          "https://s3-eu-west-1.amazonaws.com"
+        ],
         frameSrc: ["'self'", "https://checkout.paystack.com"],
         objectSrc: ["'none'"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        mediaSrc: ["'self'"],
+        manifestSrc: ["'self'"],
       },
     },
   })
@@ -61,8 +93,10 @@ app.use(
     saveUninitialized: true,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // only true in prod
+      secure: process.env.NODE_ENV === "production", // HTTPS required for SameSite=None
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
     },
   })
 );
@@ -72,8 +106,23 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
   })
 );
+
+// Additional headers for cross-site cookie support and storage access
+app.use((req, res, next) => {
+  res.header('Cross-Origin-Embedder-Policy', 'credentialless');
+  res.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+
+  // Additional headers for better cookie and storage support
+  if (req.headers['sec-fetch-site'] === 'cross-site') {
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  next();
+});
 
 app.set('trust proxy', 1);
 
@@ -201,7 +250,27 @@ const startServer = async () => {
 
     // Catch-all route for React app (must be last)
     app.get("*", (req, res) => {
-      res.sendFile(path.join(frontendBuildPath, "index.html"));
+      const fs = require('fs');
+      const htmlPath = path.join(frontendBuildPath, "index.html");
+
+      // Check if the built HTML exists, if not serve from client directory
+      if (fs.existsSync(htmlPath)) {
+        let html = fs.readFileSync(htmlPath, 'utf8');
+        // Replace nonce placeholder with actual nonce
+        html = html.replace(/<%= nonce %>/g, res.locals.nonce);
+        res.send(html);
+      } else {
+        // Fallback to client/index.html for development
+        const devHtmlPath = path.join(__dirname, "client/index.html");
+        if (fs.existsSync(devHtmlPath)) {
+          let html = fs.readFileSync(devHtmlPath, 'utf8');
+          // Replace nonce placeholder with actual nonce
+          html = html.replace(/<%= nonce %>/g, res.locals.nonce);
+          res.send(html);
+        } else {
+          res.sendFile(path.join(frontendBuildPath, "index.html"));
+        }
+      }
     });
 
     // Error handler for CSRF errors (add before your main error handler)

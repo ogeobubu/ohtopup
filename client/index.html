@@ -65,7 +65,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade" />
 
     <!-- Performance Hints -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -276,7 +276,7 @@
     </script>
     
     <!-- Additional Performance & SEO Scripts -->
-    <script>
+    <script nonce="<%= nonce %>">
       // Dynamic favicon based on theme
       const setFavicon = (isDarkMode) => {
         const favicon = document.getElementById('favicon');
@@ -346,7 +346,7 @@
     <script type="module" src="/src/main.tsx"></script>
 
     <!-- Additional SEO and Performance Scripts -->
-    <script>
+    <script nonce="<%= nonce %>">
       // Service Worker Registration for PWA capabilities
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

@@ -800,3 +800,104 @@ export const updateClubKonnectCredentials = async (credentials) => {
     throw new Error(error.response?.data?.message || "Error updating ClubKonnect credentials");
   }
 };
+
+// Wallet Settings API functions
+export const getWalletSettings = async () => {
+  try {
+    const response = await instance.get(`/wallet/settings`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching wallet settings");
+  }
+};
+
+export const updateWalletSettings = async (settings) => {
+  try {
+    const response = await instance.put(`/wallet/settings`, settings);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error updating wallet settings");
+  }
+};
+
+export const resetWalletSettings = async () => {
+  try {
+    const response = await instance.post(`/wallet/settings/reset`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error resetting wallet settings");
+  }
+};
+
+// Withdrawal Management API functions
+export const getWithdrawalsForAdmin = async (params = {}) => {
+  try {
+    const response = await instance.get(`/withdrawals`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching withdrawals");
+  }
+};
+
+export const approveWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/withdrawals/${id}/approve`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error approving withdrawal");
+  }
+};
+
+export const rejectWithdrawal = async (id, reason) => {
+  try {
+    const response = await instance.put(`/withdrawals/${id}/reject`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error rejecting withdrawal");
+  }
+};
+
+export const processWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/withdrawals/${id}/process`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error processing withdrawal");
+  }
+};
+
+export const completeWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/withdrawals/${id}/complete`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error completing withdrawal");
+  }
+};
+
+export const failWithdrawal = async (id, reason) => {
+  try {
+    const response = await instance.put(`/withdrawals/${id}/fail`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error failing withdrawal");
+  }
+};
+
+export const retryWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/withdrawals/${id}/retry`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error retrying withdrawal");
+  }
+};
+
+export const getWithdrawalAuditLogs = async (params = {}) => {
+  try {
+    const response = await instance.get(`/withdrawals/audit-logs`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching audit logs");
+  }
+};

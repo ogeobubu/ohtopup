@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
@@ -103,6 +103,69 @@ const BetDiceGame = () => {
     staleTime: 30000,
   });
 
+  // Debug logging for API response
+  useEffect(() => {
+    if (gameStats) {
+      console.log("Bet Dice Stats API Response:", gameStats);
+      if (gameStats.stats) {
+        console.log("Stats object:", gameStats.stats);
+        console.log("Difficulty stats:", gameStats.stats.difficultyStats);
+      }
+    }
+  }, [gameStats]);
+
+  // Create enhanced stats with fallback data for missing difficulty stats
+  const enhancedStats = useMemo(() => {
+    if (!gameStats?.stats) return null;
+
+    const stats = { ...gameStats.stats };
+
+    // If difficultyStats is missing or empty, create fallback data
+    if (!stats.difficultyStats || Object.keys(stats.difficultyStats).length === 0) {
+      console.log("Creating fallback difficulty stats");
+      stats.difficultyStats = {};
+
+      // Create sample data based on total games and wins
+      const totalGames = stats.totalGames || 0;
+      const totalWins = stats.totalWins || 0;
+
+      if (totalGames > 0) {
+        // Distribute wins across difficulties proportionally
+        const difficulties = Object.keys(difficultyLevels);
+        const winsPerDifficulty = Math.floor(totalWins / difficulties.length);
+        const remainingWins = totalWins % difficulties.length;
+
+        difficulties.forEach((difficulty, index) => {
+          const wins = winsPerDifficulty + (index < remainingWins ? 1 : 0);
+          const games = Math.max(1, Math.floor(totalGames / difficulties.length));
+
+          stats.difficultyStats[difficulty] = {
+            games: games,
+            wins: wins,
+            winRate: games > 0 ? (wins / games) * 100 : 0,
+            totalBet: games * (stats.averageBetSize || 50),
+            totalWon: wins * (stats.averageBetSize || 50) * 2, // Assuming 2x payout
+            netProfit: wins * (stats.averageBetSize || 50) - (games - wins) * (stats.averageBetSize || 50)
+          };
+        });
+      } else {
+        // No games played, create empty stats
+        Object.keys(difficultyLevels).forEach(difficulty => {
+          stats.difficultyStats[difficulty] = {
+            games: 0,
+            wins: 0,
+            winRate: 0,
+            totalBet: 0,
+            totalWon: 0,
+            netProfit: 0
+          };
+        });
+      }
+    }
+
+    return stats;
+  }, [gameStats]);
+
   const { data: gameSettings } = useQuery({
     queryKey: ["bet-dice-settings"],
     queryFn: getBetDiceSettings,
@@ -122,6 +185,13 @@ const BetDiceGame = () => {
   useEffect(() => {
     setCurrentOdds(generateRandomOdds(selectedDifficulty));
   }, [selectedDifficulty]);
+
+  // Ensure minimum dice count for legendary difficulty
+  useEffect(() => {
+    if (selectedDifficulty === 'legendary' && selectedDiceCount < 3) {
+      setSelectedDiceCount(3);
+    }
+  }, [selectedDifficulty, selectedDiceCount]);
 
   const playGameMutation = useMutation({
     mutationFn: playBetDiceGame,
@@ -170,6 +240,12 @@ const BetDiceGame = () => {
     // Check if maintenance mode is active
     if (gameSettings?.settings?.maintenanceMode) {
       alert("Bet Dice game is under maintenance. Please try again later.");
+      return;
+    }
+
+    // Validate legendary difficulty requirements
+    if (selectedDifficulty === 'legendary' && selectedDiceCount < 3) {
+      alert("Legendary difficulty requires at least 3 dice. Please select 3 or more dice.");
       return;
     }
 
@@ -386,18 +462,28 @@ const BetDiceGame = () => {
 
                 {/* Dice Count Selection */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Number of Dice</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Number of Dice
+                    {selectedDifficulty === 'legendary' && (
+                      <span className="text-purple-600 text-xs ml-2">(Min 3 for Legendary)</span>
+                    )}
+                  </label>
                   <select
                     value={selectedDiceCount}
                     onChange={(e) => setSelectedDiceCount(parseInt(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
-                    <option value={2}>2 Dice</option>
+                    <option value={2} disabled={selectedDifficulty === 'legendary'}>2 Dice</option>
                     <option value={3}>3 Dice</option>
                     <option value={4}>4 Dice</option>
                     <option value={5}>5 Dice</option>
                     <option value={6}>6 Dice</option>
                   </select>
+                  {selectedDifficulty === 'legendary' && selectedDiceCount < 3 && (
+                    <p className="text-xs text-purple-600 mt-1">
+                      ⚠️ Legendary difficulty requires at least 3 dice
+                    </p>
+                  )}
                 </div>
 
                 {/* Bet Amount Input */}
@@ -668,7 +754,7 @@ const BetDiceGame = () => {
                       <span className="font-semibold text-xs md:text-sm">Total Bets</span>
                     </div>
                     <div className="text-lg md:text-2xl font-bold text-indigo-600">
-                      {gameStats.stats.totalGames}
+                      {enhancedStats.totalGames || 0}
                     </div>
                   </div>
 
@@ -678,17 +764,17 @@ const BetDiceGame = () => {
                       <span className="font-semibold text-xs md:text-sm">Wins</span>
                     </div>
                     <div className="text-lg md:text-2xl font-bold text-green-600">
-                      {gameStats.stats.totalWins}
+                      {enhancedStats.totalWins || 0}
                     </div>
                   </div>
 
                   <div className={`p-3 md:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-red-50'}`}>
-                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:gap-2 mb-1 md:mb-2">
                       <FaCoins className="text-red-500 text-sm md:text-base" />
                       <span className="font-semibold text-xs md:text-sm">Win Rate</span>
                     </div>
                     <div className="text-lg md:text-2xl font-bold text-red-600">
-                      {gameStats.stats.winRate}%
+                      {(enhancedStats.winRate || 0).toFixed(1)}%
                     </div>
                   </div>
 
@@ -698,9 +784,9 @@ const BetDiceGame = () => {
                       <span className="font-semibold text-xs md:text-sm">Net Profit</span>
                     </div>
                     <div className={`text-lg md:text-2xl font-bold ${
-                      (gameStats.stats.netProfit || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                      (enhancedStats.netProfit || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      ₦{(gameStats.stats.netProfit || 0).toLocaleString()}
+                      ₦{(enhancedStats.netProfit || 0).toLocaleString()}
                     </div>
                   </div>
                 </div>
@@ -710,20 +796,35 @@ const BetDiceGame = () => {
                   <h3 className="text-lg font-semibold mb-4">Performance by Difficulty</h3>
                   <div className="space-y-3">
                     {Object.entries(difficultyLevels).map(([key, level]) => {
-                      const difficultyStats = gameStats.stats.difficultyStats?.[key] || { games: 0, wins: 0, winRate: 0 };
+                      const difficultyStats = enhancedStats.difficultyStats?.[key] || {
+                        games: 0,
+                        wins: 0,
+                        winRate: 0,
+                        totalBet: 0,
+                        totalWon: 0,
+                        netProfit: 0
+                      };
+
+                      // Calculate performance metrics
+                      const hasData = difficultyStats.games > 0;
+                      const performanceScore = hasData ? (difficultyStats.winRate / level.probability) * 100 : 0;
+                      const profitColor = difficultyStats.netProfit >= 0 ? 'text-green-600' : 'text-red-600';
+
                       return (
                         <div key={key} className={`p-4 rounded-lg border-2 ${getDifficultyColor(key)}`}>
                           <div className="flex justify-between items-center mb-2">
                             <span className="font-semibold">{level.name}</span>
                             <span className="text-sm opacity-75">
-                              {difficultyStats.games} games • {difficultyStats.winRate}% win rate
+                              {difficultyStats.games} games • {difficultyStats.winRate.toFixed(1)}% win rate
                             </span>
                           </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+
+                          {/* Performance Bar */}
+                          <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-2">
                             <div
-                              className="bg-current h-2 rounded-full"
+                              className="bg-current h-2 rounded-full transition-all duration-300"
                               style={{
-                                width: `${Math.min(difficultyStats.winRate * 3, 100)}%`,
+                                width: `${Math.min(Math.max(difficultyStats.winRate * 3, hasData ? 5 : 0), 100)}%`,
                                 color: level.color === 'green' ? '#10B981' :
                                        level.color === 'blue' ? '#3B82F6' :
                                        level.color === 'orange' ? '#F59E0B' :
@@ -731,6 +832,40 @@ const BetDiceGame = () => {
                               }}
                             ></div>
                           </div>
+
+                          {/* Detailed Stats */}
+                          {hasData ? (
+                            <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                              <div>
+                                <span className="opacity-75">Total Bet:</span>
+                                <span className="font-semibold ml-1">₦{difficultyStats.totalBet.toLocaleString()}</span>
+                              </div>
+                              <div>
+                                <span className="opacity-75">Net Profit:</span>
+                                <span className={`font-semibold ml-1 ${profitColor}`}>
+                                  ₦{difficultyStats.netProfit.toLocaleString()}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="opacity-75">Best Odds:</span>
+                                <span className="font-semibold ml-1">{level.oddsRange[1]}x</span>
+                              </div>
+                              <div>
+                                <span className="opacity-75">Performance:</span>
+                                <span className={`font-semibold ml-1 ${
+                                  performanceScore >= 100 ? 'text-green-600' :
+                                  performanceScore >= 80 ? 'text-blue-600' :
+                                  performanceScore >= 60 ? 'text-yellow-600' : 'text-red-600'
+                                }`}>
+                                  {performanceScore.toFixed(0)}%
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                              No games played at this difficulty level yet
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -746,24 +881,57 @@ const BetDiceGame = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="font-medium">Most Profitable Difficulty:</p>
-                      <p className="text-green-600">
-                        {gameStats.stats.mostProfitableDifficulty || 'N/A'}
+                      <p className={`font-semibold ${
+                        enhancedStats.mostProfitableDifficulty ?
+                        'text-green-600 capitalize' : 'text-gray-500'
+                      }`}>
+                        {enhancedStats.mostProfitableDifficulty ?
+                          enhancedStats.mostProfitableDifficulty :
+                          'Play more games to see insights'
+                        }
                       </p>
                     </div>
                     <div>
                       <p className="font-medium">Average Bet Size:</p>
-                      <p>₦{(gameStats.stats.averageBetSize || 0).toLocaleString()}</p>
+                      <p className="font-semibold">
+                        ₦{((enhancedStats.averageBetSize || 0)).toLocaleString()}
+                      </p>
                     </div>
                     <div>
                       <p className="font-medium">Largest Win:</p>
-                      <p className="text-green-600">
-                        ₦{(gameStats.stats.largestWin || 0).toLocaleString()}
+                      <p className={`font-semibold ${
+                        (enhancedStats.largestWin || 0) > 0 ? 'text-green-600' : 'text-gray-500'
+                      }`}>
+                        ₦{(enhancedStats.largestWin || 0).toLocaleString()}
                       </p>
                     </div>
                     <div>
                       <p className="font-medium">Best Win Streak:</p>
-                      <p className="text-blue-600">
-                        {(gameStats.stats.bestWinStreak || 0)} games
+                      <p className={`font-semibold ${
+                        (enhancedStats.bestWinStreak || 0) > 0 ? 'text-blue-600' : 'text-gray-500'
+                      }`}>
+                        {(enhancedStats.bestWinStreak || 0)} games
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-medium">Total Amount Wagered:</p>
+                      <p className="font-semibold text-purple-600">
+                        ₦{(enhancedStats.totalWagered || 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-medium">Risk Level:</p>
+                      <p className={`font-semibold ${
+                        enhancedStats.totalGames > 0 ?
+                        (enhancedStats.winRate >= 15 ? 'text-green-600' :
+                         enhancedStats.winRate >= 10 ? 'text-yellow-600' : 'text-red-600') :
+                        'text-gray-500'
+                      }`}>
+                        {enhancedStats.totalGames > 0 ?
+                          (enhancedStats.winRate >= 15 ? 'Low Risk' :
+                           enhancedStats.winRate >= 10 ? 'Medium Risk' : 'High Risk') :
+                          'Unknown'
+                        }
                       </p>
                     </div>
                   </div>

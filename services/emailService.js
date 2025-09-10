@@ -71,6 +71,16 @@ class EmailService {
                   <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Amount:</div>
                   <div style="display: table-cell; padding: 5px 0; color: #555;">{{amount}}</div>
                 </div>
+                {{#processingFee}}
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Processing Fee:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #dc3545;">-{{processingFee}}</div>
+                </div>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Credited Amount:</div>
+                  <div style="display: table-cell; padding: 5px 0; color: #28a745; font-weight: bold;">{{amount}}</div>
+                </div>
+                {{/processingFee}}
                 {{#balance}}
                 <div style="display: table-row;">
                   <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">New Balance:</div>
@@ -689,7 +699,9 @@ class EmailService {
       productName: transactionDetails.product_name || 'Service',
       amount: transactionDetails.amount || 'N/A',
       balance: transactionDetails.balance,
-      reference: transactionDetails.reference
+      reference: transactionDetails.reference,
+      processingFee: transactionDetails.processingFee,
+      originalAmount: transactionDetails.originalAmount
     });
   }
 

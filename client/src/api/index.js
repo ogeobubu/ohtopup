@@ -346,12 +346,33 @@ export const deleteBank = async (id) => {
   }
 };
 
-export const depositWallet = async (data) => {
+export const initiatePaystackDeposit = async (data) => {
   try {
-    const response = await instance.post(`/deposit`, data);
+    const response = await instance.post(`/wallet/deposit/paystack/initiate`, data);
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error fetching user");
+    throw new Error(error.response?.data?.message || "Error initiating Paystack deposit");
+  }
+};
+
+export const verifyPaystackDeposit = async (reference, userId) => {
+  try {
+    const response = await instance.post(`/wallet/deposit/paystack/verify`, {
+      reference,
+      userId
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error verifying Paystack deposit");
+  }
+};
+
+export const depositWallet = async (data) => {
+  try {
+    const response = await instance.post(`/wallet/deposit`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error depositing to wallet");
   }
 };
 
@@ -1408,5 +1429,88 @@ export const toggleTutorialStatus = async (id) => {
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error toggling tutorial status");
+  }
+};
+
+// Wallet Settings API functions (User-side)
+export const getWalletSettings = async () => {
+  try {
+    const response = await instance.get(`/wallet/settings`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching wallet settings");
+  }
+};
+
+// Admin Withdrawal Management API functions
+export const getWithdrawalsForAdmin = async (params = {}) => {
+  try {
+    const response = await instance.get(`/admin/withdrawals`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching withdrawals");
+  }
+};
+
+export const approveWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/admin/withdrawals/${id}/approve`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error approving withdrawal");
+  }
+};
+
+export const rejectWithdrawal = async (id, reason) => {
+  try {
+    const response = await instance.put(`/admin/withdrawals/${id}/reject`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error rejecting withdrawal");
+  }
+};
+
+export const processWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/admin/withdrawals/${id}/process`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error processing withdrawal");
+  }
+};
+
+export const completeWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/admin/withdrawals/${id}/complete`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error completing withdrawal");
+  }
+};
+
+export const failWithdrawal = async (id, reason) => {
+  try {
+    const response = await instance.put(`/admin/withdrawals/${id}/fail`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error failing withdrawal");
+  }
+};
+
+export const retryWithdrawal = async (id, reason = null) => {
+  try {
+    const response = await instance.put(`/admin/withdrawals/${id}/retry`, { reason });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error retrying withdrawal");
+  }
+};
+
+export const getWithdrawalAuditLogs = async (params = {}) => {
+  try {
+    const response = await instance.get(`/admin/withdrawals/audit-logs`, { params });
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching audit logs");
   }
 };

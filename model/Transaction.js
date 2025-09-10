@@ -22,7 +22,7 @@ const transactionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "completed", "failed"],
+      enum: ["pending", "approved", "processing", "completed", "rejected", "failed"],
       default: "pending",
     },
     bankName: {
@@ -53,10 +53,51 @@ const transactionSchema = new mongoose.Schema(
         "bank_transfer",
         "card_payment",
         "naira_wallet",
-        "CARD",    
-        "ACCOUNT_TRANSFER", 
+        "CARD",
+        "ACCOUNT_TRANSFER",
       ],
       required: true,
+    },
+    // Additional fields for withdrawal tracking
+    adminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    rejectionReason: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    failureReason: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    processingStartedAt: {
+      type: Date,
+      default: null,
+    },
+    completedAt: {
+      type: Date,
+      default: null,
+    },
+    estimatedCompletionTime: {
+      type: Date,
+      default: null,
+    },
+    gatewayReference: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    retryCount: {
+      type: Number,
+      default: 0,
+    },
+    lastRetryAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }

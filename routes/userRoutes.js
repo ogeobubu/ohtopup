@@ -61,6 +61,7 @@ const {
   getBetDiceSettings,
   updateBetDiceSettings,
   resetBetDiceSettings,
+  forceResetBetDiceSettings,
 } = require("../controllers/betDiceGameController");
 
 const {
@@ -281,6 +282,7 @@ router.post("/admin/dice/settings/reset", auth, resetDiceGameSettings);
 router.get("/admin/bet-dice/settings", auth, getBetDiceSettings);
 router.put("/admin/bet-dice/settings", auth, updateBetDiceSettings);
 router.post("/admin/bet-dice/settings/reset", auth, resetBetDiceSettings);
+router.post("/admin/bet-dice/settings/force-reset", auth, forceResetBetDiceSettings);
 
 // Admin Dice Game Routes
 router.get("/admin/dice/games", auth, getAllGames);

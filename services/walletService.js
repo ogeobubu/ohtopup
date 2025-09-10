@@ -6,6 +6,8 @@ const User = require("../model/User");
 const axios = require("axios");
 require("dotenv").config();
 
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
+
 const checkWalletForDebit = (wallet, amount) => {
     if (!wallet) {
          throw { status: 404, message: "Wallet not found." };
@@ -91,14 +93,21 @@ const handleReferralDepositReward = async (userId, amount) => {
     return;
   }
 
-  const user = await User.findById(userId).populate('wallet');
+  const user = await User.findById(userId);
   if (!user) {
     console.warn(`Referral reward attempted for non-existent user: ${userId}`);
     return;
   }
 
+  // Find the user's wallet
+  const wallet = await Wallet.findOne({ userId });
+  if (!wallet) {
+    console.warn(`Referral reward attempted for user ${userId} but no wallet found`);
+    return;
+  }
+
   const userDepositTransactions = await Transaction.countDocuments({
-      walletId: user.wallet._id,
+      walletId: wallet._id,
       type: 'deposit',
       status: 'completed'
   });
@@ -231,7 +240,7 @@ const fetchPaystackTransaction = async (reference) => {
           `https://api.paystack.co/transaction/verify/${reference}`,
           {
             headers: {
-              Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+              Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
             },
           }
         );
@@ -293,6 +302,35 @@ const initiatePaystackTransfer = async (transferData) => {
     }
 };
 
+const calculatePaystackFee = async (amount) => {
+    try {
+        const WalletSettings = require("../model/WalletSettings");
+        let settings = await WalletSettings.findOne();
+
+        if (!settings) {
+            // Use default values if no settings exist
+            settings = {
+                paystackFee: {
+                    percentage: 1.5,
+                    fixedFee: 100,
+                    cap: 2000
+                }
+            };
+        }
+
+        const fee = Math.min(
+            settings.paystackFee.cap,
+            (amount * (settings.paystackFee.percentage / 100)) + settings.paystackFee.fixedFee
+        );
+        return Math.round(fee * 100) / 100; // Round to 2 decimal places
+    } catch (error) {
+        console.error("Error calculating Paystack fee:", error);
+        // Fallback to default calculation
+        const fee = Math.min(2000, (amount * 0.015) + 100);
+        return Math.round(fee * 100) / 100;
+    }
+};
+
 const verifyBankAccount = async (accountNumber, bankCode) => {
     try {
         const response = await axios.get(
@@ -332,4 +370,5 @@ module.exports = {
   createPaystackRecipient,
   initiatePaystackTransfer,
   verifyBankAccount,
+  calculatePaystackFee,
 };

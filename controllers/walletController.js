@@ -1,8 +1,10 @@
 // walletController.js
-
+require("dotenv").config()
 const Wallet = require("../model/Wallet");
 const User = require("../model/User");
 const Transaction = require("../model/Transaction");
+const WalletSettings = require("../model/WalletSettings");
+const WithdrawalAuditLog = require("../model/WithdrawalAuditLog");
 const axios = require("axios");
 const { handleServiceError } = require("../middleware/errorHandler");
 
@@ -216,17 +218,25 @@ const depositPaystackWallet = async (req, res) => {
         });
     }
 
+    // Calculate Paystack processing fee
+    const processingFee = await walletService.calculatePaystackFee(amount);
+    const creditedAmount = amount - processingFee;
+
     // CORRECTED: Pass arguments individually
     const transaction = await walletService.recordTransaction(
       wallet._id, // walletId
       reference, // reference
-      amount, // amount
+      creditedAmount, // amount
       "deposit", // type
       "completed", // status
-      "paystack" // paymentMethod
+      "paystack", // paymentMethod
+      {
+        processingFee: processingFee,
+        originalAmount: amount
+      } // details
     );
 
-    await walletService.creditWallet(wallet, amount);
+    await walletService.creditWallet(wallet, creditedAmount);
 
     wallet.transactions.push(transaction._id);
     await wallet.save();
@@ -243,6 +253,8 @@ const depositPaystackWallet = async (req, res) => {
       amount: transaction.amount,
       balance: wallet.balance,
       reference: transaction.reference,
+      processingFee: processingFee,
+      originalAmount: amount,
     }).catch(error => {
       console.error('Async Paystack deposit email failed:', error.message);
     });
@@ -276,29 +288,82 @@ const depositPaystackWallet = async (req, res) => {
 const depositWalletWithPaystack = async (req, res) => {
   const { userId, amount, paymentMethod, email } = req.body;
 
+  // Input validation
+  if (!userId || !amount || !email) {
+    console.error("Missing required fields for Paystack deposit:", { userId, amount, email });
+    return res.status(400).json({
+      message: "Missing required fields: userId, amount, email"
+    });
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    console.error(`Invalid email format for Paystack deposit: ${email}`);
+    return res.status(400).json({
+      message: "Invalid email format"
+    });
+  }
+
+  if (amount < 100) {
+    console.error(`Invalid amount for Paystack deposit: ${amount}`);
+    return res.status(400).json({
+      message: "Amount must be at least ₦100"
+    });
+  }
+
+  // Ensure amount is a valid number
+  const parsedAmount = parseFloat(amount);
+  if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    console.error(`Invalid amount value for Paystack deposit: ${amount}`);
+    return res.status(400).json({
+      message: "Amount must be a valid positive number"
+    });
+  }
+
+  let transaction = null;
   try {
+    console.log(`Initiating Paystack deposit for user ${userId}, amount: ₦${amount}`);
+
     const wallet = await dbService.findWalletByUserId(userId);
+    if (!wallet) {
+      console.error(`Wallet not found for user ${userId}`);
+      return res.status(404).json({ message: "User wallet not found" });
+    }
 
     const transactionReference = `txn_${Date.now()}_${userId}`;
     const totalAmount = amount * 100;
 
-    // CORRECTED: Pass arguments individually
-    const transaction = await walletService.recordTransaction(
-      wallet._id, // walletId
-      transactionReference, // reference
-      amount, // amount
-      "deposit", // type
-      "pending", // status
-      paymentMethod // paymentMethod
+    // Record transaction as pending
+    transaction = await walletService.recordTransaction(
+      wallet._id,
+      transactionReference,
+      amount,
+      "deposit",
+      "pending",
+      paymentMethod || "paystack"
     );
+
+    console.log(`Transaction recorded: ${transactionReference}`);
 
     const paymentData = {
       email,
       amount: totalAmount,
       currency: "NGN",
       reference: transactionReference,
-      callback_url: `${process.env.BASE_URL}/api/wallet/deposit/paystack/verify`,
+      callback_url: `${process.env.CLIENT_URL}/wallet?ref=${transactionReference}`,
+      metadata: {
+        userId: userId,
+        walletId: wallet._id.toString(),
+        transactionId: transaction._id.toString()
+      }
     };
+
+    console.log("Sending payment data to Paystack:", {
+      email: paymentData.email,
+      amount: paymentData.amount,
+      reference: paymentData.reference
+    });
 
     const response = await axios.post(
       "https://api.paystack.co/transaction/initialize",
@@ -308,44 +373,106 @@ const depositWalletWithPaystack = async (req, res) => {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
+        timeout: 30000 // 30 second timeout
       }
     );
 
+    // Check for Paystack API errors
+    if (!response.data || !response.data.status) {
+      console.error("Paystack API error:", response.data);
+
+      // Mark transaction as failed
+      if (transaction) {
+        await walletService.updateTransactionStatus(transactionReference, "failed");
+        console.log(`Transaction ${transactionReference} marked as failed due to Paystack API error`);
+      }
+
+      return res.status(500).json({
+        message: "Paystack initialization failed",
+        error: response.data?.message || "Unknown Paystack error",
+        details: response.data
+      });
+    }
+
+    // Check for specific "Invalid transaction parameters" error
+    if (response.data.message && response.data.message.includes("Invalid transaction parameters")) {
+      console.error("Paystack invalid transaction parameters:", {
+        paymentData,
+        response: response.data
+      });
+
+      // Mark transaction as failed
+      if (transaction) {
+        await walletService.updateTransactionStatus(transactionReference, "failed");
+        console.log(`Transaction ${transactionReference} marked as failed due to invalid parameters`);
+      }
+
+      return res.status(400).json({
+        message: "Invalid transaction parameters",
+        error: "Please check your payment details and try again",
+        details: {
+          amount: paymentData.amount,
+          email: paymentData.email,
+          reference: paymentData.reference
+        }
+      });
+    }
+
     if (
-      !response.data ||
-      !response.data.status ||
       !response.data.data ||
       !response.data.data.authorization_url
     ) {
-      console.error(
-        "Paystack initialization failed after recording transaction:",
-        response.data
-      );
-      await walletService.updateTransactionStatus(
-        transactionReference,
-        "failed"
-      );
+      console.error("Invalid Paystack response structure:", response.data);
+
+      // Mark transaction as failed
+      if (transaction) {
+        await walletService.updateTransactionStatus(transactionReference, "failed");
+        console.log(`Transaction ${transactionReference} marked as failed due to invalid response structure`);
+      }
+
       return res.status(500).json({
         message: "Paystack initialization failed",
-        error: response.data?.message || "Invalid response from Paystack",
+        error: response.data?.message || "Invalid response structure from Paystack",
       });
     }
+
+    console.log(`Paystack payment initialized successfully: ${transactionReference}`);
 
     res.json({
       reference: transactionReference,
       url: response.data.data.authorization_url,
+      message: "Payment initialized successfully"
     });
+
   } catch (error) {
-    console.error(
-      "Error initiating deposit with Paystack:",
-      error.response?.data || error
-    );
-    if (error.status) {
-      return res.status(error.status).json({ message: error.message });
+    console.error("Error initiating deposit with Paystack:", {
+      error: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      userId,
+      amount
+    });
+
+    // Mark transaction as failed if it was created
+    if (transaction && transaction.reference) {
+      try {
+        await walletService.updateTransactionStatus(transaction.reference, "failed");
+        console.log(`Transaction ${transaction.reference} marked as failed due to error`);
+      } catch (updateError) {
+        console.error("Failed to update transaction status:", updateError);
+      }
     }
+
+    if (error.response?.status) {
+      return res.status(error.response.status).json({
+        message: error.response.data?.message || "Paystack service error",
+        error: error.response.data
+      });
+    }
+
     res.status(500).json({
       message: "Error initiating deposit with Paystack",
-      error: error.response?.data || "Internal Server Error",
+      error: error.message || "Internal Server Error",
     });
   }
 };
@@ -612,14 +739,66 @@ const verifyMonnifyTransaction = async (req, res) => {
   }
 };
 
+const handlePaystackCallback = async (req, res) => {
+  const { reference, trxref } = req.query;
+
+  console.log(`Paystack callback received: reference=${reference}, trxref=${trxref}`);
+
+  if (!reference) {
+    console.error("Paystack callback: Missing reference parameter");
+    return res.redirect(`${process.env.CLIENT_URL}/wallet?error=missing_reference`);
+  }
+
+  try {
+    // Verify the transaction with Paystack
+    const paystackData = await walletService.fetchPaystackTransaction(reference);
+
+    if (!paystackData) {
+      console.error(`Paystack callback: Failed to fetch transaction data for ${reference}`);
+      return res.redirect(`${process.env.CLIENT_URL}/wallet?error=verification_failed`);
+    }
+
+    console.log(`Paystack callback: Transaction status - ${paystackData.status}`);
+
+    if (paystackData.status === 'success') {
+      // Try to verify and complete the transaction
+      try {
+        const verifyResponse = await verifyPaystackTransaction({
+          body: { reference, userId: null }
+        }, {
+          status: () => ({ json: () => {} }),
+          json: () => {}
+        });
+
+        console.log(`Paystack callback: Verification completed for ${reference}`);
+        return res.redirect(`${process.env.CLIENT_URL}/wallet?success=true&reference=${reference}`);
+      } catch (verifyError) {
+        console.error(`Paystack callback: Verification error for ${reference}:`, verifyError);
+        return res.redirect(`${process.env.CLIENT_URL}/wallet?error=verification_error&reference=${reference}`);
+      }
+    } else if (paystackData.status === 'failed') {
+      console.log(`Paystack callback: Transaction failed - ${reference}`);
+      return res.redirect(`${process.env.CLIENT_URL}/wallet?error=payment_failed&reference=${reference}`);
+    } else {
+      console.log(`Paystack callback: Transaction pending - ${reference}`);
+      return res.redirect(`${process.env.CLIENT_URL}/wallet?status=pending&reference=${reference}`);
+    }
+
+  } catch (error) {
+    console.error(`Paystack callback: Error processing callback for ${reference}:`, error);
+    return res.redirect(`${process.env.CLIENT_URL}/wallet?error=callback_error&reference=${reference}`);
+  }
+};
+
 const verifyPaystackTransaction = async (req, res) => {
   const { reference, userId } = req.body;
 
   if (!reference) {
-    return res
-      .status(400)
-      .json({ message: "Transaction reference is required." });
+    console.error("Paystack verification: Missing transaction reference");
+    return res.status(400).json({ message: "Transaction reference is required." });
   }
+
+  console.log(`Verifying Paystack transaction: ${reference}, userId: ${userId}`);
 
   let transaction;
 
@@ -627,51 +806,51 @@ const verifyPaystackTransaction = async (req, res) => {
     transaction = await walletService.findTransactionByReference(reference);
 
     if (!transaction) {
-      console.warn(
-        `Paystack verification request for unknown transaction reference: ${reference}`
-      );
+      console.warn(`Paystack verification: Unknown transaction reference: ${reference}`);
     } else if (transaction.status === "completed") {
-      console.log(
-        `Paystack verification request for already completed transaction: ${reference}`
-      );
-      return res
-        .status(200)
-        .json({
-          message: "Transaction already completed.",
-          transactionData: null,
-        });
+      console.log(`Paystack verification: Transaction already completed: ${reference}`);
+      return res.status(200).json({
+        message: "Transaction already completed.",
+        transactionData: null,
+      });
     }
 
-    const paystackTransactionData =
-      await walletService.fetchPaystackTransaction(reference);
+    console.log(`Fetching Paystack transaction data for: ${reference}`);
+    const paystackTransactionData = await walletService.fetchPaystackTransaction(reference);
+
+    if (!paystackTransactionData) {
+      console.error(`Paystack verification: No transaction data received for ${reference}`);
+      if (transaction && transaction.status !== "completed") {
+        await walletService.updateTransactionStatus(reference, "failed");
+      }
+      return res.status(500).json({ message: "Failed to fetch transaction data from Paystack." });
+    }
+
+    console.log(`Paystack transaction status: ${paystackTransactionData.status}`);
 
     const userIdToCredit = transaction
       ? (await Wallet.findById(transaction.walletId))?.userId
-      : userId; // Direct model find here
+      : userId;
+
     if (!userIdToCredit) {
-      console.error(
-        `Cannot determine user ID for crediting for transaction reference: ${reference}`
-      );
+      console.error(`Paystack verification: Cannot determine user ID for transaction ${reference}`);
       if (transaction && transaction.status !== "completed") {
         await walletService.updateTransactionStatus(reference, "failed");
       } else if (!transaction) {
-        // CORRECTED: Pass arguments individually
         await walletService.recordTransaction(
-          null, // walletId (unknown)
-          reference, // reference
-          paystackTransactionData.amount / 100, // amount
-          "deposit", // type
-          "failed", // status (failed due to missing wallet)
-          "paystack", // paymentMethod
+          null,
+          reference,
+          paystackTransactionData.amount / 100,
+          "deposit",
+          "failed",
+          "paystack",
           {
             gatewayResponse: paystackTransactionData,
             error: "Wallet not found for user during verification",
-          } // details
+          }
         );
       }
-      return res
-        .status(500)
-        .json({ message: "Could not identify user for crediting." });
+      return res.status(500).json({ message: "Could not identify user for crediting." });
     }
 
     switch (paystackTransactionData.status) {
@@ -706,7 +885,11 @@ const verifyPaystackTransaction = async (req, res) => {
         const paystackAmount = paystackTransactionData.amount / 100;
         const localAmount = transaction?.amount;
 
-        await walletService.creditWallet(wallet, paystackAmount);
+        // Calculate Paystack processing fee
+        const processingFee = await walletService.calculatePaystackFee(paystackAmount);
+        const creditedAmount = paystackAmount - processingFee;
+
+        await walletService.creditWallet(wallet, creditedAmount);
 
         let completedTransaction;
         if (transaction) {
@@ -715,7 +898,8 @@ const verifyPaystackTransaction = async (req, res) => {
             "completed"
           );
           transaction.status = "completed";
-          transaction.amount = paystackAmount;
+          transaction.amount = creditedAmount;
+          transaction.processingFee = processingFee;
           if (!transaction.walletId) transaction.walletId = wallet._id;
           transaction.gatewayResponse = paystackTransactionData;
           await transaction.save();
@@ -724,11 +908,15 @@ const verifyPaystackTransaction = async (req, res) => {
           completedTransaction = await walletService.recordTransaction(
             wallet._id, // walletId
             reference, // reference
-            paystackAmount, // amount
+            creditedAmount, // amount
             "deposit", // type
             "completed", // status
             "paystack", // paymentMethod
-            { gatewayResponse: paystackTransactionData } // details
+            {
+              gatewayResponse: paystackTransactionData,
+              processingFee: processingFee,
+              originalAmount: paystackAmount
+            } // details
           );
           wallet.transactions.push(completedTransaction._id);
           await wallet.save();
@@ -750,6 +938,8 @@ const verifyPaystackTransaction = async (req, res) => {
           amount: completedTransaction.amount,
           balance: wallet.balance,
           reference: completedTransaction.reference,
+          processingFee: processingFee,
+          originalAmount: paystackAmount,
         }).catch(error => {
           console.error('Async Paystack verification email failed:', error.message);
         });
@@ -863,27 +1053,58 @@ const verifyPaystackTransaction = async (req, res) => {
 
 const withdrawWallet = async (req, res) => {
   const userId = req.user.id;
-  const { amount, bankName, accountNumber, bankCode } = req.body;
+  const { amount, bankName, accountNumber, bankCode, feeDeductionMethod } = req.body;
 
   try {
     const wallet = await dbService.findWalletByUserId(userId);
-    walletService.checkWalletForDebit(wallet, amount);
 
-    await walletService.debitWallet(wallet, amount);
+    // Get wallet settings to calculate fees
+    const walletSettings = await require("../model/WalletSettings").findOne();
+    let withdrawalAmount = amount;
+    let feeAmount = 0;
+
+    if (walletSettings?.deductFeesFromWithdrawals) {
+      const { percentage = 1, fixedFee = 50, cap = 500 } = walletSettings.withdrawalFee || {};
+      const percentageFee = amount * (percentage / 100);
+      feeAmount = Math.min(cap, fixedFee + percentageFee);
+
+      if (feeDeductionMethod === "fromWallet") {
+        // Deduct fee from wallet balance in addition to withdrawal amount
+        walletService.checkWalletForDebit(wallet, amount + feeAmount);
+        await walletService.debitWallet(wallet, amount + feeAmount);
+      } else if (feeDeductionMethod === "fromWithdrawal") {
+        // Deduct fee from withdrawal amount
+        withdrawalAmount = amount - feeAmount;
+        walletService.checkWalletForDebit(wallet, amount);
+        await walletService.debitWallet(wallet, amount);
+      } else {
+        // Default to deducting from wallet
+        walletService.checkWalletForDebit(wallet, amount + feeAmount);
+        await walletService.debitWallet(wallet, amount + feeAmount);
+      }
+    } else {
+      // No fee deduction enabled
+      walletService.checkWalletForDebit(wallet, amount);
+      await walletService.debitWallet(wallet, amount);
+    }
 
     // CORRECTED: Pass arguments individually
     const transaction = await walletService.recordTransaction(
       wallet._id, // walletId
       `txn-${Date.now()}`, // reference
-      amount, // amount
+      withdrawalAmount, // amount (actual amount to be transferred)
       "withdrawal", // type
-      "completed", // status
+      "pending", // status - changed to pending for admin approval
       "naira_wallet", // paymentMethod
       {
         // details object
         bankName,
         accountNumber,
         bankCode,
+        originalAmount: amount, // Original requested amount
+        feeAmount: feeAmount, // Fee charged
+        feeDeductionMethod: feeDeductionMethod, // How fee was deducted
+        totalDebited: feeDeductionMethod === "fromWallet" ? amount + feeAmount : amount, // Total amount debited from wallet
       }
     );
 
@@ -893,21 +1114,29 @@ const withdrawWallet = async (req, res) => {
     const user = await dbService.findUserById(userId);
 
     // Send email asynchronously to prevent transaction delays
+    const feeMessage = feeAmount > 0 ?
+      `A fee of ₦${feeAmount.toLocaleString()} has been ${feeDeductionMethod === "fromWallet" ? "deducted from your wallet" : "deducted from your withdrawal amount"}.` :
+      "";
+
     sendTransactionEmailNotification(user.email, user.username, {
       type: transaction.type,
-      product_name: "Wallet Withdrawal",
+      product_name: "Wallet Withdrawal Request",
       status: transaction.status,
       amount: transaction.amount,
       balance: wallet.balance,
       reference: transaction.reference,
       bankName: transaction.bankName,
       accountNumber: transaction.accountNumber,
+      feeAmount: feeAmount,
+      feeDeductionMethod: feeDeductionMethod,
+      originalAmount: amount,
+      message: `Your withdrawal request has been submitted and is pending admin approval. ${feeMessage}`,
     }).catch(error => {
       console.error('Async wallet withdrawal email failed:', error.message);
     });
 
     return res.status(200).json({
-      message: "Withdrawal successful",
+      message: "Withdrawal request submitted successfully. It will be processed after admin approval.",
       wallet: {
         balance: wallet.balance,
         transactions: wallet.transactions,
@@ -930,197 +1159,203 @@ const withdrawWallet = async (req, res) => {
 };
 
 const withdrawFromWallet = async (req, res, isOTP = false) => {
-  const userId = req.user.id;
-  const {
-    amount,
-    bankName,
-    accountNumber,
-    bankCode,
-    reference,
-    authorizationCode,
-  } = req.body;
+   const userId = req.user.id;
+   const {
+     amount,
+     bankName,
+     accountNumber,
+     bankCode,
+     reference,
+     authorizationCode,
+   } = req.body;
 
-  try {
-    const wallet = await dbService.findWalletByUserId(userId);
+   try {
+     const wallet = await dbService.findWalletByUserId(userId);
 
-    if (!isOTP) {
-      walletService.checkWalletForDebit(wallet, amount);
-    }
+     if (!isOTP) {
+       walletService.checkWalletForDebit(wallet, amount);
+     }
 
-    const apiKey = process.env.MONNIFY_API_KEY;
-    const clientSecret = process.env.MONNIFY_SECRET_KEY;
-    const base64Credentials = Buffer.from(`${apiKey}:${clientSecret}`).toString(
-      "base64"
-    );
+     if (!isOTP) {
+       // Direct withdrawal request - no 3rd party integration
+       await walletService.debitWallet(wallet, amount);
 
-    const accessToken = await walletService.authenticateMonnify(
-      base64Credentials
-    );
+       // CORRECTED: Pass arguments individually
+       const transaction = await walletService.recordTransaction(
+         wallet._id, // walletId
+         `txn-${Date.now()}`, // reference
+         amount, // amount
+         "withdrawal", // type
+         "pending", // status - changed to pending for admin approval
+         "bank_transfer", // paymentMethod - valid enum value for direct withdrawals
+         {
+           // details object
+           bankName,
+           accountNumber,
+           bankCode,
+         }
+       );
 
-    if (!isOTP) {
-      const transactionReference = `txn-${Date.now()}`;
-      const monnifyData = {
-        amount,
-        reference: transactionReference,
-        narration: "Withdrawal Request",
-        destinationBankCode: bankCode,
-        destinationAccountNumber: accountNumber,
-        currency: "NGN",
-        sourceAccountNumber: process.env.MONNIFY_ACCOUNT_NUMBER,
-        async: true,
-      };
-      const withdrawData = await walletService.initiateMonnifyWithdrawal(
-        accessToken,
-        monnifyData
-      );
+       wallet.transactions.push(transaction._id);
+       await wallet.save();
 
-      // CORRECTED: Pass arguments individually
-      const transaction = await walletService.recordTransaction(
-        wallet._id, // walletId
-        transactionReference, // reference
-        amount, // amount
-        "withdrawal", // type
-        "pending", // status
-        "monnify", // paymentMethod
-        {
-          // details
-          bankName,
-          accountNumber,
-          bankCode,
-          gatewayReference: withdrawData.responseBody?.disbursementReference, // Store Monnify's reference
-        }
-      );
+       const user = await dbService.findUserById(userId);
+   
+       // Send email to user asynchronously to prevent transaction delays
+       sendTransactionEmailNotification(user.email, user.username, {
+         type: transaction.type,
+         product_name: "Wallet Withdrawal Request",
+         status: transaction.status,
+         amount: transaction.amount,
+         balance: wallet.balance,
+         reference: transaction.reference,
+         bankName: transaction.bankName,
+         accountNumber: transaction.accountNumber,
+         message: "Your withdrawal request has been submitted and is pending admin approval.",
+       }).catch(error => {
+         console.error('Async wallet withdrawal email failed:', error.message);
+       });
+   
+       // Send email notification to admin about new withdrawal request
+       const adminEmail = process.env.EMAIL_USER || "ohtopup@gmail.com";
+       sendTransactionEmailNotification(adminEmail, "Admin", {
+         type: "withdrawal_request",
+         product_name: "New Withdrawal Request",
+         status: "pending",
+         amount: transaction.amount,
+         reference: transaction.reference,
+         bankName: transaction.bankName,
+         accountNumber: transaction.accountNumber,
+         userEmail: user.email,
+         username: user.username,
+         message: `A new withdrawal request of ₦${transaction.amount} has been submitted by ${user.username} (${user.email}). Please review and process.`,
+       }).catch(error => {
+         console.error('Async admin withdrawal notification email failed:', error.message);
+       });
 
-      wallet.transactions.push(transaction._id);
-      await wallet.save();
+       return res.status(200).json({
+         message: "Withdrawal request submitted successfully. It will be processed after admin approval.",
+         wallet: {
+           balance: wallet.balance,
+           transactions: wallet.transactions,
+         },
+         transaction: {
+           id: transaction._id,
+           amount: transaction.amount,
+           status: transaction.status,
+         },
+       });
+     } else {
+       // OTP verification for existing withdrawal request
+       const transaction = await walletService.findTransactionByReference(
+         reference
+       );
 
-      return res.status(200).json({
-        message:
-          "Withdrawal processing started. Please complete authorization.",
-        transaction: {
-          id: transaction._id,
-          amount: transaction.amount,
-          status: transaction.status,
-          reference: transaction.reference,
-          monnifyDisbursementRef:
-            withdrawData.responseBody?.disbursementReference,
-        },
-        monnifyResponse: withdrawData.responseBody,
-      });
-    } else {
-      const transaction = await walletService.findTransactionByReference(
-        reference
-      );
+       if (!transaction) {
+         return res
+           .status(404)
+           .json({
+             message: "Pending transaction not found with this reference.",
+           });
+       }
 
-      if (!transaction) {
-        return res
-          .status(404)
-          .json({
-            message: "Pending transaction not found with this reference.",
-          });
-      }
+       if (transaction.status !== "pending") {
+         return res
+           .status(400)
+           .json({
+             message: `Transaction status is ${transaction.status}, not pending for authorization.`,
+           });
+       }
+       if (
+         !transaction.walletId ||
+         transaction.walletId.toString() !== wallet._id.toString()
+       ) {
+         console.error(
+           `Security Alert: Transaction ${reference} wallet ID mismatch. User ${userId}, Tx Wallet ID ${transaction.walletId}`
+         );
+         return res
+           .status(403)
+           .json({ message: "Transaction does not belong to your wallet." });
+       }
 
-      if (transaction.status !== "pending") {
-        return res
-          .status(400)
-          .json({
-            message: `Transaction status is ${transaction.status}, not pending for authorization.`,
-          });
-      }
-      if (
-        !transaction.walletId ||
-        transaction.walletId.toString() !== wallet._id.toString()
-      ) {
-        console.error(
-          `Security Alert: Transaction ${reference} wallet ID mismatch. User ${userId}, Tx Wallet ID ${transaction.walletId}`
-        );
-        return res
-          .status(403)
-          .json({ message: "Transaction does not belong to your wallet." });
-      }
+       // For direct withdrawals, OTP verification is simplified
+       // In a real implementation, you might want to integrate with an SMS service
+       if (authorizationCode !== "123456") { // Simple OTP check for demo
+         return res.status(400).json({ message: "Invalid authorization code." });
+       }
 
-      const authorizationData = { reference, authorizationCode };
+       const completedTransaction = await walletService.updateTransactionStatus(
+         reference,
+         "completed"
+       );
+       transaction.status = "completed";
 
-      const withdrawData = await walletService.authorizeMonnifyWithdrawal(
-        accessToken,
-        authorizationData
-      );
+       if (!wallet.transactions.includes(transaction._id)) {
+         wallet.transactions.push(transaction._id);
+         await wallet.save();
+       }
 
-      await walletService.debitWallet(wallet, transaction.amount);
+       const user = await dbService.findUserById(userId);
 
-      const completedTransaction = await walletService.updateTransactionStatus(
-        reference,
-        "completed"
-      );
-      transaction.status = "completed";
+       // Send email asynchronously to prevent transaction delays
+       sendTransactionEmailNotification(user.email, user.username, {
+         type: completedTransaction.type,
+         product_name: "Wallet Withdrawal",
+         status: completedTransaction.status,
+         amount: completedTransaction.amount,
+         balance: wallet.balance,
+         reference: completedTransaction.reference,
+         bankName: completedTransaction.bankName,
+         accountNumber: completedTransaction.accountNumber,
+       }).catch(error => {
+         console.error('Async wallet withdrawal email failed:', error.message);
+       });
 
-      if (!wallet.transactions.includes(transaction._id)) {
-        wallet.transactions.push(transaction._id);
-        await wallet.save();
-      }
+       return res.status(200).json({
+         message: "Withdrawal successful",
+         wallet: {
+           balance: wallet.balance,
+           transactions: wallet.transactions,
+         },
+         transaction: {
+           id: transaction._id,
+           amount: transaction.amount,
+           status: transaction.status,
+           reference: transaction.reference,
+         },
+       });
+     }
+   } catch (error) {
+     console.error("Error in withdrawFromWallet:", error);
+     if (reference) {
+       try {
+         const tx = await walletService.findTransactionByReference(reference);
+         if (tx && tx.status === "pending") {
+           await walletService.updateTransactionStatus(reference, "failed");
+           console.log(
+             `Transaction ${reference} marked as failed due to withdrawal error.`
+           );
+         } else if (!tx) {
+           console.error(
+             `Withdrawal error for unknown transaction reference ${reference}`
+           );
+         }
+       } catch (updateError) {
+         console.error(
+           `Failed to mark transaction ${reference} as failed after withdrawal error:`,
+           updateError
+         );
+       }
+     }
 
-      const user = await dbService.findUserById(userId);
-
-      // Send email asynchronously to prevent transaction delays
-      sendTransactionEmailNotification(user.email, user.username, {
-        type: completedTransaction.type,
-        product_name: "Monnify Withdrawal",
-        status: completedTransaction.status,
-        amount: completedTransaction.amount,
-        balance: wallet.balance,
-        reference: completedTransaction.reference,
-        bankName: completedTransaction.bankName,
-        accountNumber: completedTransaction.accountNumber,
-      }).catch(error => {
-        console.error('Async Monnify withdrawal email failed:', error.message);
-      });
-
-      return res.status(200).json({
-        message: "Withdrawal successful",
-        wallet: {
-          balance: wallet.balance,
-          transactions: wallet.transactions,
-        },
-        transaction: {
-          id: transaction._id,
-          amount: transaction.amount,
-          status: transaction.status,
-          reference: transaction.reference,
-        },
-        monnifyResponse: withdrawData.responseBody,
-      });
-    }
-  } catch (error) {
-    console.error("Error in withdrawFromWallet (Monnify):", error);
-    if (reference) {
-      try {
-        const tx = await walletService.findTransactionByReference(reference);
-        if (tx && tx.status === "pending") {
-          await walletService.updateTransactionStatus(reference, "failed");
-          console.log(
-            `Transaction ${reference} marked as failed due to withdrawal error.`
-          );
-        } else if (!tx) {
-          console.error(
-            `Withdrawal error for unknown transaction reference ${reference}`
-          );
-        }
-      } catch (updateError) {
-        console.error(
-          `Failed to mark transaction ${reference} as failed after withdrawal error:`,
-          updateError
-        );
-      }
-    }
-
-    if (error.status) {
-      return res.status(error.status).json({ message: error.message });
-    }
-    res
-      .status(500)
-      .json({ message: error.message || "Error processing withdrawal" });
-  }
-};
+     if (error.status) {
+       return res.status(error.status).json({ message: error.message });
+     }
+     res
+       .status(500)
+       .json({ message: error.message || "Error processing withdrawal" });
+   }
+ };
 
 const withdrawMonnifyWallet = (req, res) => withdrawFromWallet(req, res, false);
 
@@ -1624,6 +1859,589 @@ const getTransactionDetails = async (req, res) => {
   }
 };
 
+// Wallet Settings Management
+const getWalletSettings = async (req, res) => {
+  try {
+    let settings = await WalletSettings.findOne();
+    if (!settings) {
+      // Create default settings if none exist
+      settings = new WalletSettings();
+      await settings.save();
+    }
+    res.json(settings);
+  } catch (error) {
+    console.error("Error fetching wallet settings:", error);
+    res.status(500).json({ message: "Error fetching wallet settings", error: error.message });
+  }
+};
+
+const updateWalletSettings = async (req, res) => {
+  try {
+    const updateData = req.body;
+    let settings = await WalletSettings.findOne();
+
+    if (!settings) {
+      settings = new WalletSettings(updateData);
+    } else {
+      // Update existing settings
+      Object.keys(updateData).forEach(key => {
+        if (typeof updateData[key] === 'object' && updateData[key] !== null) {
+          // Handle nested objects
+          Object.keys(updateData[key]).forEach(subKey => {
+            settings[key][subKey] = updateData[key][subKey];
+          });
+        } else {
+          settings[key] = updateData[key];
+        }
+      });
+    }
+
+    await settings.save();
+    res.json({ message: "Wallet settings updated successfully", settings });
+  } catch (error) {
+    console.error("Error updating wallet settings:", error);
+    res.status(500).json({ message: "Error updating wallet settings", error: error.message });
+  }
+};
+
+const resetWalletSettings = async (req, res) => {
+  try {
+    await WalletSettings.deleteMany({});
+    const defaultSettings = new WalletSettings();
+    await defaultSettings.save();
+    res.json({ message: "Wallet settings reset to defaults", settings: defaultSettings });
+  } catch (error) {
+    console.error("Error resetting wallet settings:", error);
+    res.status(500).json({ message: "Error resetting wallet settings", error: error.message });
+  }
+};
+
+// Helper function to create audit log
+const createAuditLog = async (transactionId, adminId, oldStatus, newStatus, action, reason = null, req = null) => {
+  try {
+    const transaction = await Transaction.findById(transactionId).populate('walletId');
+    if (!transaction) return;
+
+    const auditLog = new WithdrawalAuditLog({
+      transactionId,
+      adminId,
+      userId: transaction.walletId?.userId,
+      oldStatus,
+      newStatus,
+      action,
+      reason,
+      amount: transaction.amount,
+      bankDetails: {
+        bankName: transaction.bankName,
+        accountNumber: transaction.accountNumber,
+        accountName: transaction.accountName,
+        bankCode: transaction.bankCode,
+      },
+      gatewayReference: transaction.gatewayReference,
+      ipAddress: req?.ip || req?.connection?.remoteAddress,
+      userAgent: req?.get('User-Agent'),
+    });
+
+    await auditLog.save();
+  } catch (error) {
+    console.error('Error creating audit log:', error);
+  }
+};
+
+// Get all withdrawal requests for admin
+const getWithdrawalsForAdmin = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const { status, reference, userId } = req.query;
+
+    const query = { type: 'withdrawal' };
+
+    if (status) {
+      query.status = status;
+    }
+    if (reference) {
+      query.reference = { $regex: reference, $options: 'i' };
+    }
+    if (userId) {
+      const wallet = await Wallet.findOne({ userId });
+      if (wallet) {
+        query.walletId = wallet._id;
+      }
+    }
+
+    const withdrawals = await Transaction.find(query)
+      .populate({
+        path: 'walletId',
+        populate: {
+          path: 'userId',
+          select: 'username email phoneNumber',
+        },
+      })
+      .populate('adminId', 'username email')
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const withdrawalsWithDetails = withdrawals.map((withdrawal) => ({
+      _id: withdrawal._id,
+      reference: withdrawal.reference,
+      amount: withdrawal.amount,
+      status: withdrawal.status,
+      bankName: withdrawal.bankName,
+      accountNumber: withdrawal.accountNumber,
+      accountName: withdrawal.accountName,
+      bankCode: withdrawal.bankCode,
+      createdAt: withdrawal.createdAt,
+      processingStartedAt: withdrawal.processingStartedAt,
+      completedAt: withdrawal.completedAt,
+      estimatedCompletionTime: withdrawal.estimatedCompletionTime,
+      rejectionReason: withdrawal.rejectionReason,
+      gatewayReference: withdrawal.gatewayReference,
+      retryCount: withdrawal.retryCount,
+      lastRetryAt: withdrawal.lastRetryAt,
+      user: {
+        id: withdrawal.walletId?.userId?._id,
+        username: withdrawal.walletId?.userId?.username,
+        email: withdrawal.walletId?.userId?.email,
+        phoneNumber: withdrawal.walletId?.userId?.phoneNumber,
+      },
+      admin: withdrawal.adminId ? {
+        id: withdrawal.adminId._id,
+        username: withdrawal.adminId.username,
+        email: withdrawal.adminId.email,
+      } : null,
+    }));
+
+    const totalWithdrawals = await Transaction.countDocuments(query);
+    const totalPages = Math.ceil(totalWithdrawals / limit);
+
+    res.json({
+      currentPage: page,
+      totalPages,
+      totalWithdrawals,
+      withdrawals: withdrawalsWithDetails,
+    });
+  } catch (error) {
+    console.error('Error fetching withdrawals for admin:', error);
+    res.status(500).json({ message: 'Error fetching withdrawals', error: error.message });
+  }
+};
+
+// Approve withdrawal request
+const approveWithdrawal = async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const adminId = req.user.id;
+
+  try {
+    const withdrawal = await Transaction.findById(id);
+    if (!withdrawal || withdrawal.type !== 'withdrawal') {
+      return res.status(404).json({ message: 'Withdrawal request not found' });
+    }
+
+    if (withdrawal.status !== 'pending') {
+      return res.status(400).json({ message: `Cannot approve withdrawal with status: ${withdrawal.status}` });
+    }
+
+    const oldStatus = withdrawal.status;
+    withdrawal.status = 'approved';
+    withdrawal.adminId = adminId;
+    await withdrawal.save();
+
+    // Create audit log
+    await createAuditLog(id, adminId, oldStatus, 'approved', 'approve', reason, req);
+
+    // Send notification to user
+    const wallet = await Wallet.findById(withdrawal.walletId).populate('userId');
+    if (wallet?.userId) {
+      sendTransactionEmailNotification(
+        wallet.userId.email,
+        wallet.userId.username,
+        {
+          type: 'withdrawal',
+          product_name: 'Wallet Withdrawal',
+          status: 'approved',
+          amount: withdrawal.amount,
+          balance: wallet.balance,
+          reference: withdrawal.reference,
+          bankName: withdrawal.bankName,
+          accountNumber: withdrawal.accountNumber,
+        }
+      ).catch(error => console.error('Email notification failed:', error));
+    }
+
+    res.json({
+      message: 'Withdrawal request approved successfully',
+      withdrawal: {
+        id: withdrawal._id,
+        status: withdrawal.status,
+        adminId: withdrawal.adminId,
+      },
+    });
+  } catch (error) {
+    console.error('Error approving withdrawal:', error);
+    res.status(500).json({ message: 'Error approving withdrawal', error: error.message });
+  }
+};
+
+// Reject withdrawal request
+const rejectWithdrawal = async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const adminId = req.user.id;
+
+  try {
+    const withdrawal = await Transaction.findById(id);
+    if (!withdrawal || withdrawal.type !== 'withdrawal') {
+      return res.status(404).json({ message: 'Withdrawal request not found' });
+    }
+
+    if (!['pending', 'approved'].includes(withdrawal.status)) {
+      return res.status(400).json({ message: `Cannot reject withdrawal with status: ${withdrawal.status}` });
+    }
+
+    const oldStatus = withdrawal.status;
+    withdrawal.status = 'rejected';
+    withdrawal.rejectionReason = reason;
+    withdrawal.adminId = adminId;
+    await withdrawal.save();
+
+    // Refund amount to wallet if it was debited
+    if (oldStatus === 'approved') {
+      const wallet = await Wallet.findById(withdrawal.walletId);
+      if (wallet) {
+        await walletService.creditWallet(wallet, withdrawal.amount);
+      }
+    }
+
+    // Create audit log
+    await createAuditLog(id, adminId, oldStatus, 'rejected', 'reject', reason, req);
+
+    // Send notification to user
+    const wallet = await Wallet.findById(withdrawal.walletId).populate('userId');
+    if (wallet?.userId) {
+      sendTransactionEmailNotification(
+        wallet.userId.email,
+        wallet.userId.username,
+        {
+          type: 'withdrawal',
+          product_name: 'Wallet Withdrawal',
+          status: 'rejected',
+          amount: withdrawal.amount,
+          balance: wallet.balance,
+          reference: withdrawal.reference,
+          bankName: withdrawal.bankName,
+          accountNumber: withdrawal.accountNumber,
+          rejectionReason: reason,
+          message: `Your withdrawal request has been rejected. Reason: ${reason}`,
+        }
+      ).catch(error => console.error('Email notification failed:', error));
+    }
+
+    res.json({
+      message: 'Withdrawal request rejected successfully',
+      withdrawal: {
+        id: withdrawal._id,
+        status: withdrawal.status,
+        rejectionReason: withdrawal.rejectionReason,
+        adminId: withdrawal.adminId,
+      },
+    });
+  } catch (error) {
+    console.error('Error rejecting withdrawal:', error);
+    res.status(500).json({ message: 'Error rejecting withdrawal', error: error.message });
+  }
+};
+
+// Process withdrawal (initiate bank transfer)
+const processWithdrawal = async (req, res) => {
+  const { id } = req.params;
+  const { gatewayReference } = req.body;
+  const adminId = req.user.id;
+
+  try {
+    const withdrawal = await Transaction.findById(id);
+    if (!withdrawal || withdrawal.type !== 'withdrawal') {
+      return res.status(404).json({ message: 'Withdrawal request not found' });
+    }
+
+    if (withdrawal.status !== 'approved') {
+      return res.status(400).json({ message: `Cannot process withdrawal with status: ${withdrawal.status}` });
+    }
+
+    const oldStatus = withdrawal.status;
+    withdrawal.status = 'processing';
+    withdrawal.processingStartedAt = new Date();
+    withdrawal.estimatedCompletionTime = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days
+    withdrawal.gatewayReference = gatewayReference;
+    withdrawal.adminId = adminId;
+    await withdrawal.save();
+
+    // Create audit log
+    await createAuditLog(id, adminId, oldStatus, 'processing', 'process', null, req);
+
+    // Send notification to user
+    const wallet = await Wallet.findById(withdrawal.walletId).populate('userId');
+    if (wallet?.userId) {
+      sendTransactionEmailNotification(
+        wallet.userId.email,
+        wallet.userId.username,
+        {
+          type: 'withdrawal',
+          product_name: 'Wallet Withdrawal',
+          status: 'processing',
+          amount: withdrawal.amount,
+          balance: wallet.balance,
+          reference: withdrawal.reference,
+          bankName: withdrawal.bankName,
+          accountNumber: withdrawal.accountNumber,
+          estimatedCompletionTime: withdrawal.estimatedCompletionTime,
+        }
+      ).catch(error => console.error('Email notification failed:', error));
+    }
+
+    res.json({
+      message: 'Withdrawal processing initiated successfully',
+      withdrawal: {
+        id: withdrawal._id,
+        status: withdrawal.status,
+        processingStartedAt: withdrawal.processingStartedAt,
+        estimatedCompletionTime: withdrawal.estimatedCompletionTime,
+        gatewayReference: withdrawal.gatewayReference,
+        adminId: withdrawal.adminId,
+      },
+    });
+  } catch (error) {
+    console.error('Error processing withdrawal:', error);
+    res.status(500).json({ message: 'Error processing withdrawal', error: error.message });
+  }
+};
+
+// Complete withdrawal
+const completeWithdrawal = async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const adminId = req.user.id;
+
+  try {
+    const withdrawal = await Transaction.findById(id);
+    if (!withdrawal || withdrawal.type !== 'withdrawal') {
+      return res.status(404).json({ message: 'Withdrawal request not found' });
+    }
+
+    if (withdrawal.status !== 'processing') {
+      return res.status(400).json({ message: `Cannot complete withdrawal with status: ${withdrawal.status}` });
+    }
+
+    const oldStatus = withdrawal.status;
+    withdrawal.status = 'completed';
+    withdrawal.completedAt = new Date();
+    withdrawal.adminId = adminId;
+    await withdrawal.save();
+
+    // Create audit log
+    await createAuditLog(id, adminId, oldStatus, 'completed', 'complete', reason, req);
+
+    // Send notification to user
+    const wallet = await Wallet.findById(withdrawal.walletId).populate('userId');
+    if (wallet?.userId) {
+      sendTransactionEmailNotification(
+        wallet.userId.email,
+        wallet.userId.username,
+        {
+          type: 'withdrawal',
+          product_name: 'Wallet Withdrawal',
+          status: 'completed',
+          amount: withdrawal.amount,
+          balance: wallet.balance,
+          reference: withdrawal.reference,
+          bankName: withdrawal.bankName,
+          accountNumber: withdrawal.accountNumber,
+        }
+      ).catch(error => console.error('Email notification failed:', error));
+    }
+
+    res.json({
+      message: 'Withdrawal completed successfully',
+      withdrawal: {
+        id: withdrawal._id,
+        status: withdrawal.status,
+        completedAt: withdrawal.completedAt,
+        adminId: withdrawal.adminId,
+      },
+    });
+  } catch (error) {
+    console.error('Error completing withdrawal:', error);
+    res.status(500).json({ message: 'Error completing withdrawal', error: error.message });
+  }
+};
+
+// Mark withdrawal as failed
+const failWithdrawal = async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const adminId = req.user.id;
+
+  try {
+    const withdrawal = await Transaction.findById(id);
+    if (!withdrawal || withdrawal.type !== 'withdrawal') {
+      return res.status(404).json({ message: 'Withdrawal request not found' });
+    }
+
+    if (!['processing', 'approved'].includes(withdrawal.status)) {
+      return res.status(400).json({ message: `Cannot fail withdrawal with status: ${withdrawal.status}` });
+    }
+
+    const oldStatus = withdrawal.status;
+    withdrawal.status = 'failed';
+    withdrawal.failureReason = reason;
+    withdrawal.adminId = adminId;
+    await withdrawal.save();
+
+    // Refund amount to wallet
+    const wallet = await Wallet.findById(withdrawal.walletId);
+    if (wallet) {
+      await walletService.creditWallet(wallet, withdrawal.amount);
+    }
+
+    // Create audit log
+    await createAuditLog(id, adminId, oldStatus, 'failed', 'fail', reason, req);
+
+    // Send notification to user
+    if (wallet?.userId) {
+      const user = await User.findById(wallet.userId);
+      if (user) {
+        sendTransactionEmailNotification(
+          user.email,
+          user.username,
+          {
+            type: 'withdrawal',
+            product_name: 'Wallet Withdrawal',
+            status: 'failed',
+            amount: withdrawal.amount,
+            balance: wallet.balance,
+            reference: withdrawal.reference,
+            bankName: withdrawal.bankName,
+            accountNumber: withdrawal.accountNumber,
+            failureReason: reason,
+            message: `Your withdrawal request has failed and the amount has been refunded to your wallet. Reason: ${reason}`,
+          }
+        ).catch(error => console.error('Email notification failed:', error));
+      }
+    }
+
+    res.json({
+      message: 'Withdrawal marked as failed successfully',
+      withdrawal: {
+        id: withdrawal._id,
+        status: withdrawal.status,
+        adminId: withdrawal.adminId,
+      },
+    });
+  } catch (error) {
+    console.error('Error failing withdrawal:', error);
+    res.status(500).json({ message: 'Error failing withdrawal', error: error.message });
+  }
+};
+
+// Retry failed withdrawal
+const retryWithdrawal = async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+  const adminId = req.user.id;
+
+  try {
+    const withdrawal = await Transaction.findById(id);
+    if (!withdrawal || withdrawal.type !== 'withdrawal') {
+      return res.status(404).json({ message: 'Withdrawal request not found' });
+    }
+
+    if (withdrawal.status !== 'failed') {
+      return res.status(400).json({ message: `Cannot retry withdrawal with status: ${withdrawal.status}` });
+    }
+
+    // Get the wallet associated with this withdrawal
+    const wallet = await Wallet.findById(withdrawal.walletId);
+    if (!wallet) {
+      return res.status(404).json({ message: 'Associated wallet not found' });
+    }
+
+    // Check if wallet has sufficient balance for retry
+    try {
+      walletService.checkWalletForDebit(wallet, withdrawal.amount);
+    } catch (error) {
+      return res.status(400).json({
+        message: 'Insufficient funds in wallet for retry',
+        error: error.message
+      });
+    }
+
+    // Debit the amount from wallet again for retry
+    await walletService.debitWallet(wallet, withdrawal.amount);
+
+    const oldStatus = withdrawal.status;
+    withdrawal.status = 'approved'; // Reset to approved for re-processing
+    withdrawal.retryCount = (withdrawal.retryCount || 0) + 1;
+    withdrawal.lastRetryAt = new Date();
+    withdrawal.adminId = adminId;
+    await withdrawal.save();
+
+    // Create audit log
+    await createAuditLog(id, adminId, oldStatus, 'approved', 'retry', reason, req);
+
+    res.json({
+      message: 'Withdrawal retry initiated successfully - amount debited again',
+      withdrawal: {
+        id: withdrawal._id,
+        status: withdrawal.status,
+        retryCount: withdrawal.retryCount,
+        lastRetryAt: withdrawal.lastRetryAt,
+        adminId: withdrawal.adminId,
+      },
+    });
+  } catch (error) {
+    console.error('Error retrying withdrawal:', error);
+    res.status(500).json({ message: 'Error retrying withdrawal', error: error.message });
+  }
+};
+
+// Get withdrawal audit logs
+const getWithdrawalAuditLogs = async (req, res) => {
+  try {
+    const { transactionId, adminId, page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const query = {};
+    if (transactionId) query.transactionId = transactionId;
+    if (adminId) query.adminId = adminId;
+
+    const auditLogs = await WithdrawalAuditLog.find(query)
+      .populate('transactionId', 'reference amount status')
+      .populate('adminId', 'username email')
+      .populate('userId', 'username email')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const totalLogs = await WithdrawalAuditLog.countDocuments(query);
+    const totalPages = Math.ceil(totalLogs / limit);
+
+    res.json({
+      currentPage: parseInt(page),
+      totalPages,
+      totalLogs,
+      auditLogs,
+    });
+  } catch (error) {
+    console.error('Error fetching withdrawal audit logs:', error);
+    res.status(500).json({ message: 'Error fetching audit logs', error: error.message });
+  }
+};
+
 module.exports = {
   createWallet,
   getWallet,
@@ -1637,10 +2455,23 @@ module.exports = {
   getBanks,
   depositWalletWithPaystack,
   verifyPaystackTransaction,
+  handlePaystackCallback,
   withdrawWalletPaystack,
   depositWalletWithMonnify,
   verifyMonnifyTransaction,
   withdrawMonnifyWallet,
   withdrawMonnifyWalletOTP,
   depositPaystackWallet,
+  getWalletSettings,
+  updateWalletSettings,
+  resetWalletSettings,
+  // New withdrawal management functions
+  getWithdrawalsForAdmin,
+  approveWithdrawal,
+  rejectWithdrawal,
+  processWithdrawal,
+  completeWithdrawal,
+  failWithdrawal,
+  retryWithdrawal,
+  getWithdrawalAuditLogs,
 };

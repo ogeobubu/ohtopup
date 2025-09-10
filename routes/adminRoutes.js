@@ -25,6 +25,18 @@ const {
   toggleWalletStatus,
   getAllTransactions,
   getTransactionDetails,
+  getWalletSettings,
+  updateWalletSettings,
+  resetWalletSettings,
+  // New withdrawal management functions
+  getWithdrawalsForAdmin,
+  approveWithdrawal,
+  rejectWithdrawal,
+  processWithdrawal,
+  completeWithdrawal,
+  failWithdrawal,
+  retryWithdrawal,
+  getWithdrawalAuditLogs,
 } = require("../controllers/walletController");
 const {
   getAllUtilityTransactions,
@@ -154,6 +166,31 @@ router.get("/wallets", authUser, authAdmin, getWallets);
 router.patch("/wallets/:id/toggle", authUser, authAdmin, toggleWalletStatus);
 router.get("/transactions", authUser, authAdmin, getAllTransactions);
 router.get("/transactions/:requestId", authUser, authAdmin, getTransactionDetails);
+
+// Wallet Settings routes (Admin only)
+router.get("/wallet/settings", authUser, authAdmin, getWalletSettings);
+router.put("/wallet/settings", authUser, authAdmin, updateWalletSettings);
+router.post("/wallet/settings/reset", authUser, authAdmin, resetWalletSettings);
+
+// Withdrawal Management routes (Admin only)
+router.get("/withdrawals", authUser, authAdmin, getWithdrawalsForAdmin);
+router.put("/withdrawals/:id/approve", authUser, authAdmin, approveWithdrawal);
+router.put("/withdrawals/:id/reject", authUser, authAdmin, rejectWithdrawal);
+router.put("/withdrawals/:id/process", authUser, authAdmin, processWithdrawal);
+router.put("/withdrawals/:id/complete", authUser, authAdmin, completeWithdrawal);
+router.put("/withdrawals/:id/fail", authUser, authAdmin, failWithdrawal);
+router.put("/withdrawals/:id/retry", authUser, authAdmin, retryWithdrawal);
+router.get("/withdrawals/audit-logs", authUser, authAdmin, getWithdrawalAuditLogs);
+
+// Withdrawal Management Routes
+router.get("/withdrawals", authUser, authAdmin, getWithdrawalsForAdmin);
+router.put("/withdrawals/:id/approve", authUser, authAdmin, approveWithdrawal);
+router.put("/withdrawals/:id/reject", authUser, authAdmin, rejectWithdrawal);
+router.put("/withdrawals/:id/process", authUser, authAdmin, processWithdrawal);
+router.put("/withdrawals/:id/complete", authUser, authAdmin, completeWithdrawal);
+router.put("/withdrawals/:id/fail", authUser, authAdmin, failWithdrawal);
+router.put("/withdrawals/:id/retry", authUser, authAdmin, retryWithdrawal);
+router.get("/withdrawals/audit-logs", authUser, authAdmin, getWithdrawalAuditLogs);
 router.get(
   "/utility-transactions",
   authUser,

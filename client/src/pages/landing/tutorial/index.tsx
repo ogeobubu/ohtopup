@@ -278,7 +278,10 @@ const TutorialPage = () => {
 
                       {/* Action buttons */}
                       <div className="flex space-x-2">
-                        <button className="flex-1 bg-blue-600 text-white py-2 px-2 md:px-3 rounded text-xs md:text-sm hover:bg-blue-700 transition-colors font-medium flex items-center justify-center space-x-1">
+                        <button
+                          onClick={() => navigate(`/tutorial/${tutorial.id || tutorial._id}`)}
+                          className="flex-1 bg-blue-600 text-white py-2 px-2 md:px-3 rounded text-xs md:text-sm hover:bg-blue-700 transition-colors font-medium flex items-center justify-center space-x-1"
+                        >
                           <FaPlay className="text-xs" />
                           <span className="hidden sm:inline">Start</span>
                         </button>

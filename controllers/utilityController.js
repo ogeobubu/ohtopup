@@ -617,6 +617,14 @@ const usersRank = async (req, res) => {
   try {
     const { period = 'weekly' } = req.body;
 
+    // Validate period parameter
+    const validPeriods = ['weekly', 'monthly', 'all-time'];
+    if (!validPeriods.includes(period)) {
+      return res.status(400).json({
+        message: "Invalid period. Must be one of: weekly, monthly, all-time"
+      });
+    }
+
     // Calculate date range based on period
     let dateFilter = {};
     const currentDate = new Date();
@@ -643,48 +651,60 @@ const usersRank = async (req, res) => {
     }
 
     // Get utility transactions rankings
-    const utilityRankings = await Utility.aggregate([
-      ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
-      {
-        $group: {
-          _id: "$user",
-          utilityTransactionCount: { $sum: 1 },
-          utilityTotalAmount: { $sum: "$amount" },
-          utilityTotalRevenue: { $sum: "$revenue" },
-          utilitySuccessfulTransactions: {
-            $sum: { $cond: [{ $eq: ["$status", "delivered"] }, 1, 0] }
+    let utilityRankings = [];
+    try {
+      utilityRankings = await Utility.aggregate([
+        ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
+        {
+          $group: {
+            _id: "$user",
+            utilityTransactionCount: { $sum: 1 },
+            utilityTotalAmount: { $sum: "$amount" },
+            utilityTotalRevenue: { $sum: "$revenue" },
+            utilitySuccessfulTransactions: {
+              $sum: { $cond: [{ $eq: ["$status", "delivered"] }, 1, 0] }
+            },
+            utilityFailedTransactions: {
+              $sum: { $cond: [{ $eq: ["$status", "failed"] }, 1, 0] }
+            },
+            utilityAvgTransactionAmount: { $avg: "$amount" },
+            utilityLastTransactionDate: { $max: "$createdAt" },
+            utilityFirstTransactionDate: { $min: "$createdAt" },
           },
-          utilityFailedTransactions: {
-            $sum: { $cond: [{ $eq: ["$status", "failed"] }, 1, 0] }
-          },
-          utilityAvgTransactionAmount: { $avg: "$amount" },
-          utilityLastTransactionDate: { $max: "$createdAt" },
-          utilityFirstTransactionDate: { $min: "$createdAt" },
         },
-      },
-    ]);
+      ]);
+    } catch (error) {
+      console.error("Error aggregating utility rankings:", error);
+      utilityRankings = [];
+    }
 
     // Get bet dice game rankings
-    const betGameRankings = await BetDiceGame.aggregate([
-      ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
-      {
-        $group: {
-          _id: "$user",
-          betGameCount: { $sum: 1 },
-          betGameTotalAmount: { $sum: "$betAmount" },
-          betGameWins: {
-            $sum: { $cond: [{ $eq: ["$gameResult", "win"] }, 1, 0] }
+    let betGameRankings = [];
+    try {
+      betGameRankings = await BetDiceGame.aggregate([
+        ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
+        {
+          $group: {
+            _id: "$user",
+            betGameCount: { $sum: 1 },
+            betGameTotalAmount: { $sum: "$betAmount" },
+            betGameWins: {
+              $sum: { $cond: [{ $eq: ["$gameResult", "win"] }, 1, 0] }
+            },
+            betGameLosses: {
+              $sum: { $cond: [{ $eq: ["$gameResult", "lose"] }, 1, 0] }
+            },
+            betGameTotalWinnings: { $sum: "$winnings" },
+            betGameAvgBetAmount: { $avg: "$betAmount" },
+            betGameLastPlayedDate: { $max: "$playedAt" },
+            betGameFirstPlayedDate: { $min: "$playedAt" },
           },
-          betGameLosses: {
-            $sum: { $cond: [{ $eq: ["$gameResult", "lose"] }, 1, 0] }
-          },
-          betGameTotalWinnings: { $sum: "$winnings" },
-          betGameAvgBetAmount: { $avg: "$betAmount" },
-          betGameLastPlayedDate: { $max: "$playedAt" },
-          betGameFirstPlayedDate: { $min: "$playedAt" },
         },
-      },
-    ]);
+      ]);
+    } catch (error) {
+      console.error("Error aggregating bet game rankings:", error);
+      betGameRankings = [];
+    }
 
     // Combine utility and bet game rankings
     const combinedRankings = {};
@@ -745,38 +765,65 @@ const usersRank = async (req, res) => {
     }));
 
     // Now perform the aggregation with lookup and projection
-    const finalRankings = await User.aggregate([
-      {
-        $match: {
-          _id: { $in: rankings.map(r => r._id) }
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          username: 1,
-          email: 1,
+    let finalRankings = [];
+    try {
+      finalRankings = await User.aggregate([
+        {
+          $match: {
+            _id: { $in: rankings.map(r => r._id) }
+          }
         },
-      },
-    ]);
+        {
+          $project: {
+            _id: 1,
+            username: 1,
+            email: 1,
+          },
+        },
+      ]);
+    } catch (error) {
+      console.error("Error aggregating user rankings:", error);
+      finalRankings = [];
+    }
 
     // Merge the aggregated data with user info
     const rankingsWithUserInfo = rankings.map(ranking => {
-      const userInfo = finalRankings.find(u => u._id.toString() === ranking._id.toString());
-      return {
-        ...ranking,
-        username: userInfo?.username || 'Unknown',
-        email: userInfo?.email || 'Unknown',
-        // Calculate points based on multiple factors
-        points: (ranking.transactionCount * 10) + // 10 points per transaction
-                (ranking.successfulTransactions * 5) + // 5 bonus points for successful
-                (ranking.totalAmount / 100) + // 1 point per ₦100 spent
-                ((ranking.firstTransactionDate ?
-                  (new Date() - new Date(ranking.firstTransactionDate)) / (1000 * 60 * 60 * 24 * 30) : 0) * 2), // 2 points per month of activity
-        // Calculate success rate
-        successRate: ranking.transactionCount > 0 ?
-                    (ranking.successfulTransactions / ranking.transactionCount) * 100 : 0
-      };
+      try {
+        const userInfo = finalRankings.find(u => u._id.toString() === ranking._id.toString());
+        const safeUsername = userInfo?.username || 'Unknown';
+        const safeEmail = userInfo?.email || 'Unknown';
+
+        // Ensure all required numeric values are valid
+        const transactionCount = ranking.transactionCount || 0;
+        const successfulTransactions = ranking.successfulTransactions || 0;
+        const totalAmount = ranking.totalAmount || 0;
+        const firstTransactionDate = ranking.firstTransactionDate;
+
+        return {
+          ...ranking,
+          username: safeUsername,
+          email: safeEmail,
+          // Calculate points based on multiple factors
+          points: (transactionCount * 10) + // 10 points per transaction
+                  (successfulTransactions * 5) + // 5 bonus points for successful
+                  (totalAmount / 100) + // 1 point per ₦100 spent
+                  ((firstTransactionDate ?
+                    (new Date() - new Date(firstTransactionDate)) / (1000 * 60 * 60 * 24 * 30) : 0) * 2), // 2 points per month of activity
+          // Calculate success rate
+          successRate: transactionCount > 0 ?
+                      (successfulTransactions / transactionCount) * 100 : 0
+        };
+      } catch (error) {
+        console.error(`Error processing ranking for user ${ranking._id}:`, error);
+        // Return a safe fallback ranking
+        return {
+          ...ranking,
+          username: 'Unknown',
+          email: 'Unknown',
+          points: 0,
+          successRate: 0
+        };
+      }
     });
 
     // Sort by points
@@ -822,8 +869,13 @@ const usersRank = async (req, res) => {
       if (winner.avgTransactionAmount >= 5000) achievements.push("High Value");
       if (winner.totalAmount >= 100000) achievements.push("VIP");
 
+      // Safe username handling with null checks
+      const safeUsername = winner.username || 'Unknown';
+      const maskedUsername = typeof safeUsername === 'string' ?
+        safeUsername.replace(/.(?=.{3})/g, "*") : 'Unknown';
+
       return {
-        username: winner.username.replace(/.(?=.{3})/g, "*"),
+        username: maskedUsername,
         transactionCount: winner.transactionCount,
         totalAmount: winner.totalAmount,
         points: Math.round(winner.points),
@@ -834,10 +886,10 @@ const usersRank = async (req, res) => {
         title: title,
         achievements: achievements,
         // Additional metrics for admin view
-        email: winner.email,
+        email: winner.email || 'Unknown',
         successfulTransactions: winner.successfulTransactions,
         failedTransactions: winner.failedTransactions,
-        avgTransactionAmount: Math.round(winner.avgTransactionAmount),
+        avgTransactionAmount: Math.round(winner.avgTransactionAmount || 0),
         lastTransactionDate: winner.lastTransactionDate,
       };
     });
