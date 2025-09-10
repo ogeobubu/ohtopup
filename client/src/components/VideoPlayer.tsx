@@ -21,7 +21,7 @@ const getYouTubeVideoId = (url) => {
 };
 
 const getYouTubeEmbedUrl = (videoId) => {
-  return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`;
+  return `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
 };
 
 const VideoPlayer = forwardRef(({
