@@ -15,8 +15,8 @@ import { toggleDarkMode } from "../../../actions/themeActions";
 
 
 const Header = () => {
-  const user = useSelector(state => state.admin?.admin);
-  const isDarkMode = useSelector(state => state.theme?.isDarkMode);
+  const user = useSelector((state: any) => state.admin?.admin);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
@@ -36,7 +36,7 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("ohtopup-admin-token");
-    navigate("/admin");
+    navigate("/admin/login");
   };
 
   const {
@@ -61,7 +61,7 @@ const Header = () => {
     const date = new Date(dateInput);
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
     const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
-    const intervals = [
+    const intervals: [number, Intl.RelativeTimeFormatUnit][] = [
       [60, 'second'],
       [60, 'minute'],
       [24, 'hour'],
@@ -70,7 +70,7 @@ const Header = () => {
       [12, 'month'],
       [Number.POSITIVE_INFINITY, 'year'],
     ];
-    let unit = 'second';
+    let unit: Intl.RelativeTimeFormatUnit = 'second';
     let value = seconds;
     for (const [limit, nextUnit] of intervals) {
       if (value < limit) {

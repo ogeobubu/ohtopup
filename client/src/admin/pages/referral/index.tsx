@@ -46,7 +46,6 @@ const Referral = () => {
       { page: currentPage, limit, search: debouncedSearchTerm },
     ],
     queryFn: () => getReferralsApi(currentPage, limit, debouncedSearchTerm),
-    keepPreviousData: true,
   });
 
   useEffect(() => {

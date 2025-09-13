@@ -76,17 +76,20 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
   ];
 
   return useRoutes([
-    ...userRoutes,
+    {
+      path: "/admin/login",
+      element: <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />,
+    },
     {
       path: "/admin",
-      element: isLoginAdmin ? <Navigate to="/admin/dashboard" /> : <AdminLogin darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      ,
+      element: isLoginAdmin ? <Navigate to="/admin/dashboard" /> : <Navigate to="/admin/login" />,
     },
     {
       path: "/admin/*",
       element: AdminRoutes.element,
       children: AdminRoutes.children,
     },
+    ...userRoutes,
     {
       path: MainRoutes.path,
       element: MainRoutes.element,

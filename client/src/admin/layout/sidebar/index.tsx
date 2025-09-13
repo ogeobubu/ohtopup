@@ -21,7 +21,7 @@ import logoWhite from "../../../assets/logo/logo-color.svg";
 import { useSelector } from "react-redux";
 
 const Sidebar = () => {
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const sidebarRef = useRef(null);

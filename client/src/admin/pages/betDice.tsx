@@ -98,7 +98,7 @@ const AdminBetDiceGame = () => {
 
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
 
   const { data: betDiceGames, isLoading: gamesLoading, refetch: refetchGames } = useQuery({
     queryKey: ["admin-bet-dice-games"],

@@ -21,7 +21,8 @@ import {
   FaCreditCard,
   FaGamepad,
   FaUser,
-  FaHeadset
+  FaHeadset,
+  FaCheck
 } from "react-icons/fa";
 
 const TutorialDetail = () => {
@@ -29,6 +30,8 @@ const TutorialDetail = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState(null); // 'loading', 'success', 'error'
+  const [shareStatus, setShareStatus] = useState(null); // 'loading', 'success', 'error'
   const videoPlayerRef = useRef(null);
 
   const { data: tutorialsData, isLoading: tutorialsLoading } = useQuery({
@@ -68,6 +71,92 @@ const TutorialDetail = () => {
       default:
         return <FaBook className="text-blue-600 text-2xl" />;
     }
+  };
+
+  // Download guide functionality
+  const handleDownloadGuide = async () => {
+    setDownloadStatus('loading');
+
+    try {
+      // Create the guide content
+      let guideContent = `${tutorial.title}\n\n`;
+      guideContent += `Category: ${category?.name || tutorial.category}\n`;
+      guideContent += `Difficulty: ${tutorial.difficulty}\n`;
+      guideContent += `Duration: ${tutorial.duration}\n`;
+      guideContent += `Type: ${tutorial.type}\n\n`;
+      guideContent += `Description:\n${tutorial.description}\n\n`;
+
+      if (tutorial.steps && tutorial.steps.length > 0) {
+        guideContent += `Step-by-Step Guide:\n\n`;
+        tutorial.steps.forEach((step, index) => {
+          guideContent += `${index + 1}. ${step}\n\n`;
+        });
+      }
+
+      if (tutorial.videoUrl) {
+        guideContent += `Video URL: ${tutorial.videoUrl}\n`;
+      }
+
+      // Create and download the file
+      const blob = new Blob([guideContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${tutorial.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_guide.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setDownloadStatus('success');
+      setTimeout(() => setDownloadStatus(null), 3000);
+    } catch (error) {
+      console.error('Download failed:', error);
+      setDownloadStatus('error');
+      setTimeout(() => setDownloadStatus(null), 3000);
+    }
+  };
+
+  // Share tutorial functionality
+  const handleShareTutorial = async () => {
+    setShareStatus('loading');
+
+    const shareUrl = window.location.href;
+    const shareTitle = tutorial.title;
+    const shareText = `Check out this tutorial: ${tutorial.title} - ${tutorial.description}`;
+
+    try {
+      // Try to use the Web Share API if available
+      if (navigator.share) {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        setShareStatus('success');
+      } else {
+        // Fallback to copying to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        setShareStatus('success');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+      // Fallback to copying URL manually
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setShareStatus('success');
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError);
+        setShareStatus('error');
+      }
+    }
+
+    setTimeout(() => setShareStatus(null), 3000);
   };
 
   if (tutorialsLoading) {
@@ -200,9 +289,23 @@ const TutorialDetail = () => {
                     <FaBookmark className="text-sm" />
                     <span className="hidden sm:inline">{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
                   </button>
-                  <button className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3 md:px-4 py-2.5 md:py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm">
-                    <FaShare className="text-sm" />
-                    <span className="hidden sm:inline">Share</span>
+                  <button
+                    onClick={handleShareTutorial}
+                    disabled={shareStatus === 'loading'}
+                    className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-3 md:px-4 py-2.5 md:py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {shareStatus === 'loading' ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                    ) : shareStatus === 'success' ? (
+                      <FaCheck className="text-sm text-green-600" />
+                    ) : (
+                      <FaShare className="text-sm" />
+                    )}
+                    <span className="hidden sm:inline">
+                      {shareStatus === 'loading' ? 'Sharing...' :
+                       shareStatus === 'success' ? 'Shared!' :
+                       'Share'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -364,13 +467,43 @@ const TutorialDetail = () => {
                 Quick Actions
               </h3>
               <div className="space-y-2">
-                <button className="w-full flex items-center space-x-2 px-3 md:px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors text-sm">
-                  <FaDownload className="text-sm flex-shrink-0" />
-                  <span>Download Guide</span>
+                <button
+                  onClick={handleDownloadGuide}
+                  disabled={downloadStatus === 'loading'}
+                  className="w-full flex items-center space-x-2 px-3 md:px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {downloadStatus === 'loading' ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                  ) : downloadStatus === 'success' ? (
+                    <FaCheck className="text-sm flex-shrink-0 text-green-600" />
+                  ) : (
+                    <FaDownload className="text-sm flex-shrink-0" />
+                  )}
+                  <span>
+                    {downloadStatus === 'loading' ? 'Downloading...' :
+                     downloadStatus === 'success' ? 'Downloaded!' :
+                     downloadStatus === 'error' ? 'Download Failed' :
+                     'Download Guide'}
+                  </span>
                 </button>
-                <button className="w-full flex items-center space-x-2 px-3 md:px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors text-sm">
-                  <FaShare className="text-sm flex-shrink-0" />
-                  <span>Share Tutorial</span>
+                <button
+                  onClick={handleShareTutorial}
+                  disabled={shareStatus === 'loading'}
+                  className="w-full flex items-center space-x-2 px-3 md:px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {shareStatus === 'loading' ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                  ) : shareStatus === 'success' ? (
+                    <FaCheck className="text-sm flex-shrink-0 text-green-600" />
+                  ) : (
+                    <FaShare className="text-sm flex-shrink-0" />
+                  )}
+                  <span>
+                    {shareStatus === 'loading' ? 'Sharing...' :
+                     shareStatus === 'success' ? 'Link Copied!' :
+                     shareStatus === 'error' ? 'Share Failed' :
+                     'Share Tutorial'}
+                  </span>
                 </button>
               </div>
             </div>

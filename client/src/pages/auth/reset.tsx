@@ -82,7 +82,7 @@ const Reset = ({ darkMode }) => {
     <div className={`flex md:flex-row justify-between ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       <div className="w-full py-0 md:py-4">
         <div className="max-w-md flex justify-center flex-col w-auto m-auto space-y-6">
-          <Logo className="mx-auto w-auto" darkMode={darkMode} />
+          <Logo className="mx-auto w-auto" darkMode={darkMode} href="/" />
           <div className="flex justify-center flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg md:text-xl font-semibold">
               Reset Password
@@ -178,7 +178,7 @@ const Reset = ({ darkMode }) => {
                     Resend Code
                   </button>
                   <div className="my-3">
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button type="submit" onClick={() => {}} onSuccess={() => {}} disabled={isSubmitting}>
                       Reset
                     </Button>
                   </div>

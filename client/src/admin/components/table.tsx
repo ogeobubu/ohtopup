@@ -3,7 +3,7 @@ import emptyImage from "../../assets/undraw_receipt_re_fre3.svg";
 import { useSelector } from "react-redux";
 
 const Table = ({ columns, data }) => {
-  const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
 
   return (
     <div className={`md:w-full w-64 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>

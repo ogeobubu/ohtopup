@@ -49,6 +49,7 @@ app.use(
           "https://s3-eu-west-1.amazonaws.com",
           "https://applepay.cdn-apple.com",
           "https://checkout.paystack.com",
+          "https://www.youtube.com",
           (req, res) => `'nonce-${res.locals.nonce}'`
         ],
         styleSrc: ["'self'", "'unsafe-inline'"],
@@ -58,12 +59,14 @@ app.use(
           "https://www.googleapis.com",
           "https://api.paystack.co",
           "https://checkout.paystack.com",
-          "https://s3-eu-west-1.amazonaws.com"
+          "https://s3-eu-west-1.amazonaws.com",
+          "https://www.youtube.com",
+          "https://youtube.com"
         ],
-        frameSrc: ["'self'", "https://checkout.paystack.com"],
+        frameSrc: ["'self'", "https://checkout.paystack.com", "https://www.youtube.com", "https://youtube.com"],
         objectSrc: ["'none'"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        mediaSrc: ["'self'"],
+        mediaSrc: ["'self'", "https://www.youtube.com", "https://youtube.com", "https://youtu.be"],
         manifestSrc: ["'self'"],
       },
     },
@@ -104,10 +107,33 @@ app.use(
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        process.env.CLIENT_URL,
+        process.env.MOBILE_APP_URL,
+        'http://localhost:3000', // Common React dev server
+        'http://localhost:5173', // Vite dev server
+        'http://localhost:5174', // Vite dev server
+        'http://localhost:8081', // Common Expo dev server
+        'http://127.0.0.1:3000', // Localhost with IP
+        'http://127.0.0.1:5173', // Vite dev server with IP
+        'http://10.0.2.2:3000', // Android emulator localhost
+        'http://192.168.1.1:3000', // Common local network IP
+        // Add your production mobile app URLs here
+      ].filter(Boolean); // Remove undefined values
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'x-mobile-app'],
   })
 );
 
@@ -120,6 +146,10 @@ app.use((req, res, next) => {
   if (req.headers['sec-fetch-site'] === 'cross-site') {
     res.header('Access-Control-Allow-Credentials', 'true');
   }
+
+  // Additional headers for mobile app compatibility
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, x-mobile-app');
 
   next();
 });
@@ -139,11 +169,18 @@ app.use((req, res, next) => {
 });
 
 // CSRF protection (after session/cookie parser, before routes)
-// Skip CSRF for newsletter subscription and admin login (public endpoints)
+// Skip CSRF for newsletter subscription, admin login, and mobile app endpoints
 app.use((req, res, next) => {
   if (req.path === '/api/users/newsletter/subscribe' ||
       req.path === '/api/users/newsletter/unsubscribe' ||
-      req.path === '/api/users/admin/auth/login') {
+      req.path === '/api/users/admin/auth/login' ||
+      req.path === '/api/users/login' ||
+      req.path === '/api/users/create' ||
+      req.path === '/api/users/forgot' ||
+      req.path === '/api/users/reset' ||
+      req.path === '/api/users/resend-otp' ||
+      req.path === '/api/users/verify' ||
+      req.path.startsWith('/api/users/')) { // Skip CSRF for all user API endpoints
     return next();
   }
   csurf()(req, res, next);

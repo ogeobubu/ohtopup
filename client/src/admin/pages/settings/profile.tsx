@@ -13,7 +13,7 @@ import { updateAdminRedux } from "../../../actions/adminActions";
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.admin.admin);
+  const user = useSelector((state: any) => (state as any).admin?.admin);
   const [isPhoneNumberEditMode, setIsPhoneNumberEditMode] = useState(false);
   const formik = useFormik({
     initialValues: {
@@ -29,8 +29,8 @@ const Profile = () => {
     },
   });
 
-  const { mutate, isLoading } = useMutation({
-    mutationFn: (phoneNumber) => updateAdmin({ phoneNumber }),
+  const { mutate, isPending } = useMutation({
+    mutationFn: (phoneNumber: string) => updateAdmin({ phoneNumber }),
     onSuccess: (data) => {
       toast.success("Phone number updated successfully");
       dispatch(updateAdminRedux(data));
@@ -38,9 +38,9 @@ const Profile = () => {
       formik.resetForm();
       formik.setFieldValue("phoneNumber", data.phoneNumber);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       const errorMessage =
-        error.response?.data?.message || "Failed to update phone number";
+        error?.response?.data?.message || "Failed to update phone number";
       toast.error(errorMessage);
     },
   });
@@ -191,7 +191,7 @@ const Profile = () => {
                   onChange={(phone) => formik.setFieldValue("phoneNumber", phone)}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter phone number"
-                  disabled={isLoading}
+                  disabled={isPending}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && formik.isValid) {
                       formik.handleSubmit();
@@ -210,18 +210,18 @@ const Profile = () => {
                 <button
                   type="button"
                   onClick={closeModal}
-                  disabled={isLoading}
+                  disabled={isPending}
                   className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={!formik.values.phoneNumber || isLoading}
+                  disabled={!formik.values.phoneNumber || isPending}
                   onClick={formik.handleSubmit}
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
                 >
-                  {isLoading ? (
+                  {isPending ? (
                     <span className="flex items-center justify-center">
                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

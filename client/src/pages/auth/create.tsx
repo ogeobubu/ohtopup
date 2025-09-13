@@ -58,7 +58,7 @@ const Create = ({ darkMode }) => {
       toast.success(data.message);
       navigate("/verify");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       const errorMessage = error.response?.data?.message || "Error creating account";
       toast.error(errorMessage);
     },
@@ -84,7 +84,7 @@ const Create = ({ darkMode }) => {
     <div className="flex md:flex-row justify-between">
       <div className="w-full py-0 md:py-4 h-screen overflow-y-auto">
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-4">
-          <Logo className="mx-auto w-auto" darkMode={darkMode} />
+          <Logo className="mx-auto w-auto" darkMode={darkMode} href="/" />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
               Create Your Account
@@ -243,7 +243,7 @@ const Create = ({ darkMode }) => {
                   </div>
 
                   <div className="my-6">
-                    <Button disabled={!(isValid && dirty)} type="submit">
+                    <Button disabled={!(isValid && dirty)} type="submit" onClick={() => {}} onSuccess={() => {}}>
                       Create Account
                     </Button>
                   </div>

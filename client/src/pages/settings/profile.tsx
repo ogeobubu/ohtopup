@@ -14,11 +14,11 @@ import percentageImage from "../../assets/percentage.svg";
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector((state: any) => state.user?.user);
   const [isPhoneNumberEditMode, setIsPhoneNumberEditMode] = useState(false);
   const [isKYCEditMode, setIsKYCEditMode] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode); // Get theme state
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false); // Get theme state
 
   const formik = useFormik({
     initialValues: {
@@ -34,8 +34,8 @@ const Profile = () => {
     },
   });
 
-  const { mutate, isLoading } = useMutation({
-    mutationFn: (phoneNumber) => updateUser({ phoneNumber }),
+  const { mutate, isPending } = useMutation({
+    mutationFn: (phoneNumber: string) => updateUser({ phoneNumber }),
     onSuccess: (data) => {
       toast.success("Phone number updated successfully");
       dispatch(updateUserDispatch(data));
@@ -43,9 +43,9 @@ const Profile = () => {
       formik.resetForm();
       formik.setFieldValue("phoneNumber", data.phoneNumber);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       const errorMessage =
-        error.response?.data?.message || "Failed to update phone number";
+        error?.response?.data?.message || "Failed to update phone number";
       toast.error(errorMessage);
     },
   });
@@ -156,7 +156,7 @@ const Profile = () => {
                 onChange={(phone) => formik.setFieldValue("phoneNumber", phone)}
                 className={`w-full p-2 border rounded bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="Enter phone number"
-                disabled={isLoading}
+                disabled={isPending}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && formik.isValid) {
                     formik.handleSubmit();
@@ -172,10 +172,11 @@ const Profile = () => {
             <div className="my-6">
               <Button
                 type="submit"
-                disabled={!formik.values.phoneNumber || isLoading}
+                disabled={!formik.values.phoneNumber || isPending}
                 onClick={formik.handleSubmit}
+                onSuccess={() => {}}
               >
-                {isLoading ? (
+                {isPending ? (
                   <span className="flex items-center justify-center">
                     <svg
                       className="animate-spin h-5 w-5 mr-3"

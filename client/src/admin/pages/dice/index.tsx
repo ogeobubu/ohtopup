@@ -74,7 +74,7 @@ const AdminDiceGame = () => {
   });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
 
   const { data: diceGames, isLoading: gamesLoading, refetch: refetchGames } = useQuery({
     queryKey: ["admin-dice-games"],

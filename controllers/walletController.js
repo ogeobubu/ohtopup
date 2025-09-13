@@ -192,7 +192,7 @@ const depositWallet = async (req, res) => {
 };
 
 const depositPaystackWallet = async (req, res) => {
-  const { userId, amount: rawAmount, reference } = req.body;
+  const { userId, amount: rawAmount, reference, callbackUrl } = req.body;
 
   const amount = Number(rawAmount);
 
@@ -286,7 +286,7 @@ const depositPaystackWallet = async (req, res) => {
 };
 
 const depositWalletWithPaystack = async (req, res) => {
-  const { userId, amount, paymentMethod, email } = req.body;
+  const { userId, amount, paymentMethod, email, callbackUrl } = req.body;
 
   // Input validation
   if (!userId || !amount || !email) {
@@ -331,27 +331,25 @@ const depositWalletWithPaystack = async (req, res) => {
       return res.status(404).json({ message: "User wallet not found" });
     }
 
-    const transactionReference = `txn_${Date.now()}_${userId}`;
     const totalAmount = amount * 100;
 
-    // Record transaction as pending
     transaction = await walletService.recordTransaction(
       wallet._id,
-      transactionReference,
+      `txn_${Date.now()}_${userId}`, // temporary reference for tracking
       amount,
       "deposit",
       "pending",
       paymentMethod || "paystack"
     );
 
-    console.log(`Transaction recorded: ${transactionReference}`);
+    console.log(`Transaction recorded with temp reference: txn_${Date.now()}_${userId}`);
 
     const paymentData = {
       email,
       amount: totalAmount,
       currency: "NGN",
-      reference: transactionReference,
-      callback_url: `${process.env.CLIENT_URL}/wallet?ref=${transactionReference}`,
+      // Let Paystack generate the reference
+      callback_url: callbackUrl || `${process.env.CLIENT_URL}/wallet`,
       metadata: {
         userId: userId,
         walletId: wallet._id.toString(),
@@ -383,8 +381,8 @@ const depositWalletWithPaystack = async (req, res) => {
 
       // Mark transaction as failed
       if (transaction) {
-        await walletService.updateTransactionStatus(transactionReference, "failed");
-        console.log(`Transaction ${transactionReference} marked as failed due to Paystack API error`);
+        await walletService.updateTransactionStatus(transaction.reference, "failed");
+        console.log(`Transaction ${transaction.reference} marked as failed due to Paystack API error`);
       }
 
       return res.status(500).json({
@@ -403,8 +401,8 @@ const depositWalletWithPaystack = async (req, res) => {
 
       // Mark transaction as failed
       if (transaction) {
-        await walletService.updateTransactionStatus(transactionReference, "failed");
-        console.log(`Transaction ${transactionReference} marked as failed due to invalid parameters`);
+        await walletService.updateTransactionStatus(transaction.reference, "failed");
+        console.log(`Transaction ${transaction.reference} marked as failed due to invalid parameters`);
       }
 
       return res.status(400).json({
@@ -426,8 +424,8 @@ const depositWalletWithPaystack = async (req, res) => {
 
       // Mark transaction as failed
       if (transaction) {
-        await walletService.updateTransactionStatus(transactionReference, "failed");
-        console.log(`Transaction ${transactionReference} marked as failed due to invalid response structure`);
+        await walletService.updateTransactionStatus(transaction.reference, "failed");
+        console.log(`Transaction ${transaction.reference} marked as failed due to invalid response structure`);
       }
 
       return res.status(500).json({
@@ -436,10 +434,22 @@ const depositWalletWithPaystack = async (req, res) => {
       });
     }
 
-    console.log(`Paystack payment initialized successfully: ${transactionReference}`);
+    // Get Paystack's generated reference
+    const paystackReference = response.data.data.reference;
+    console.log('Paystack generated reference:', paystackReference);
+
+    // Store transaction with Paystack's reference
+    transaction.reference = paystackReference;
+    await transaction.save();
+
+    // Update wallet transactions array
+    wallet.transactions.push(transaction._id);
+    await wallet.save();
+
+    console.log(`Payment initialized with Paystack reference: ${paystackReference}`);
 
     res.json({
-      reference: transactionReference,
+      reference: paystackReference, // Return Paystack's reference
       url: response.data.data.authorization_url,
       message: "Payment initialized successfully"
     });
@@ -454,7 +464,7 @@ const depositWalletWithPaystack = async (req, res) => {
     });
 
     // Mark transaction as failed if it was created
-    if (transaction && transaction.reference) {
+    if (transaction) {
       try {
         await walletService.updateTransactionStatus(transaction.reference, "failed");
         console.log(`Transaction ${transaction.reference} marked as failed due to error`);
@@ -741,11 +751,19 @@ const verifyMonnifyTransaction = async (req, res) => {
 
 const handlePaystackCallback = async (req, res) => {
   const { reference, trxref } = req.query;
+  const userAgent = req.headers['user-agent'] || '';
+  const isMobileRequest = req.headers['x-mobile-app'] === 'true' || 
+                         userAgent.includes('Expo') || 
+                         userAgent.includes('React Native');
 
-  console.log(`Paystack callback received: reference=${reference}, trxref=${trxref}`);
+  console.log(`Paystack callback received: reference=${reference}, trxref=${trxref}, isMobile=${isMobileRequest}`);
 
   if (!reference) {
     console.error("Paystack callback: Missing reference parameter");
+    
+    if (isMobileRequest) {
+      return res.redirect(`ohtopupmobile://wallet?error=missing_reference`);
+    }
     return res.redirect(`${process.env.CLIENT_URL}/wallet?error=missing_reference`);
   }
 
@@ -755,6 +773,10 @@ const handlePaystackCallback = async (req, res) => {
 
     if (!paystackData) {
       console.error(`Paystack callback: Failed to fetch transaction data for ${reference}`);
+      
+      if (isMobileRequest) {
+        return res.redirect(`ohtopupmobile://wallet?error=verification_failed&reference=${reference}`);
+      }
       return res.redirect(`${process.env.CLIENT_URL}/wallet?error=verification_failed`);
     }
 
@@ -771,23 +793,140 @@ const handlePaystackCallback = async (req, res) => {
         });
 
         console.log(`Paystack callback: Verification completed for ${reference}`);
+        
+        if (isMobileRequest) {
+          return res.redirect(`ohtopupmobile://wallet?success=true&reference=${reference}&trxref=${trxref || reference}`);
+        }
         return res.redirect(`${process.env.CLIENT_URL}/wallet?success=true&reference=${reference}`);
       } catch (verifyError) {
         console.error(`Paystack callback: Verification error for ${reference}:`, verifyError);
+        
+        if (isMobileRequest) {
+          return res.redirect(`ohtopupmobile://wallet?error=verification_error&reference=${reference}&trxref=${trxref || reference}`);
+        }
         return res.redirect(`${process.env.CLIENT_URL}/wallet?error=verification_error&reference=${reference}`);
       }
     } else if (paystackData.status === 'failed') {
       console.log(`Paystack callback: Transaction failed - ${reference}`);
+      
+      if (isMobileRequest) {
+        return res.redirect(`ohtopupmobile://wallet?error=payment_failed&reference=${reference}&trxref=${trxref || reference}`);
+      }
       return res.redirect(`${process.env.CLIENT_URL}/wallet?error=payment_failed&reference=${reference}`);
     } else {
       console.log(`Paystack callback: Transaction pending - ${reference}`);
+      
+      if (isMobileRequest) {
+        return res.redirect(`ohtopupmobile://wallet?status=pending&reference=${reference}&trxref=${trxref || reference}`);
+      }
       return res.redirect(`${process.env.CLIENT_URL}/wallet?status=pending&reference=${reference}`);
     }
 
   } catch (error) {
     console.error(`Paystack callback: Error processing callback for ${reference}:`, error);
+    
+    if (isMobileRequest) {
+      return res.redirect(`ohtopupmobile://wallet?error=callback_error&reference=${reference}&trxref=${trxref || reference}`);
+    }
     return res.redirect(`${process.env.CLIENT_URL}/wallet?error=callback_error&reference=${reference}`);
   }
+};
+
+const handlePaystackWebhook = async (req, res) => {
+  try {
+    // Verify webhook signature (IMPORTANT for security)
+    const secret = process.env.PAYSTACK_SECRET_KEY;
+    const hash = crypto.createHmac('sha512', secret)
+      .update(JSON.stringify(req.body))
+      .digest('hex');
+    
+    if (hash !== req.headers['x-paystack-signature']) {
+      console.error('Invalid webhook signature');
+      return res.status(400).send('Invalid signature');
+    }
+
+    const event = req.body;
+    console.log('Paystack webhook received:', event.event);
+
+    if (event.event === 'charge.success') {
+      const { reference, amount, customer, metadata } = event.data;
+      
+      // Find the user by reference or metadata
+      const userId = metadata?.userId || await findUserByReference(reference);
+      
+      if (!userId) {
+        console.error('User not found for reference:', reference);
+        return res.status(200).send('User not found');
+      }
+
+      // Verify and complete the transaction
+      await completeWalletDeposit({
+        userId,
+        reference,
+        amount: amount / 100, // Convert from kobo to naira
+        paystackData: event.data
+      });
+
+      console.log(`Payment completed via webhook: ${reference} - ₦${amount / 100}`);
+    }
+
+    res.status(200).send('Webhook processed');
+  } catch (error) {
+    console.error('Webhook processing error:', error);
+    res.status(500).send('Webhook processing failed');
+  }
+};
+
+const storePaymentReference = async (reference, userId, amount) => {
+  // Store in your database
+  await Transaction.create({
+    reference,
+    userId,
+    amount,
+    status: 'pending',
+    createdAt: new Date()
+  });
+};
+
+// Find user by payment reference
+const findUserByReference = async (reference) => {
+  const transaction = await Transaction.findOne({ 
+    where: { reference, status: 'pending' } 
+  });
+  return transaction?.userId;
+};
+
+// Complete the wallet deposit
+const completeWalletDeposit = async ({ userId, reference, amount, paystackData }) => {
+  const transaction = await Transaction.findOne({ 
+    where: { reference, userId } 
+  });
+
+  if (!transaction || transaction.status !== 'pending') {
+    throw new Error('Invalid transaction');
+  }
+
+  // Update transaction status
+  await Transaction.update(
+    { status: 'completed', completedAt: new Date() },
+    { where: { reference } }
+  );
+
+  // Credit user wallet
+  await db.wallets.increment('balance', { 
+    by: amount, 
+    where: { userId } 
+  });
+
+  // Log the transaction
+  await db.walletTransactions.create({
+    userId,
+    type: 'deposit',
+    amount,
+    reference,
+    description: 'Paystack deposit',
+    metadata: paystackData
+  });
 };
 
 const verifyPaystackTransaction = async (req, res) => {
@@ -2465,6 +2604,7 @@ module.exports = {
   getWalletSettings,
   updateWalletSettings,
   resetWalletSettings,
+  handlePaystackWebhook,
   // New withdrawal management functions
   getWithdrawalsForAdmin,
   approveWithdrawal,
@@ -2474,4 +2614,5 @@ module.exports = {
   failWithdrawal,
   retryWithdrawal,
   getWithdrawalAuditLogs,
+
 };

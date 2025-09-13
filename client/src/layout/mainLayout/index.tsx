@@ -3,6 +3,7 @@ import Header from "../header";
 import Sidebar from "../sidebar";
 import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
+import OfflineIndicator from "../../components/ui/OfflineIndicator";
 
 const MainLayout = () => {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
@@ -46,6 +47,9 @@ const MainLayout = () => {
           </div>
         </footer>
       </div>
+
+      {/* Offline Indicator */}
+      <OfflineIndicator />
     </div>
   );
 };

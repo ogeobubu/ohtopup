@@ -30,7 +30,7 @@ const Forgot = ({ darkMode }) => {
     <div className="flex md:flex-row justify-between">
       <div className="w-full py-0 md:py-4">
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-6">
-          <Logo className="mx-auto w-auto" darkMode={darkMode} />
+          <Logo className="mx-auto w-auto" darkMode={darkMode} href="/" />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
               Forgot Password
@@ -68,6 +68,8 @@ const Forgot = ({ darkMode }) => {
                   <div className="my-3">
                     <Button
                       type="submit"
+                      onClick={() => {}}
+                      onSuccess={() => {}}
                       disabled={!(isValid && dirty) || isSubmitting}
                     >
                       {isSubmitting ? "Sending..." : "Recover Password"}

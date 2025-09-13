@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 const Notification = () => {
   const dispatch = useDispatch();
   const emailNotificationsEnabled = useSelector(
-    (state) => state.user?.user?.emailNotificationsEnabled
+    (state: any) => state.user?.user?.emailNotificationsEnabled
   );
   const [isOn, setIsOn] = React.useState(emailNotificationsEnabled);
 
@@ -18,7 +18,7 @@ const Notification = () => {
   }, [emailNotificationsEnabled]);
 
   const mutation = useMutation({
-    mutationFn: (emailNotificationsEnabled) =>
+    mutationFn: (emailNotificationsEnabled: boolean) =>
       updateUser({ emailNotificationsEnabled }),
     onSuccess: (data) => {
       toast.success("Notification preference updated successfully!");

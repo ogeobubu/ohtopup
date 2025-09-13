@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const MainLayout = () => {
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
 
   return (
     <div

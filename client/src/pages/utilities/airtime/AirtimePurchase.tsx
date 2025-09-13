@@ -6,6 +6,7 @@ import Modal from "../../../admin/components/modal";
 import useAirtimePurchase from "./hooks/useAirtimePurchase";
 import { formatPhoneNumber, formatNairaAmount } from "../../../utils";
 import { FaMobileAlt, FaCheck, FaUser, FaCreditCard, FaChevronRight } from "react-icons/fa";
+import { useOfflineQueue } from "../../../hooks/useOfflineQueue";
 
 const Loader = () => (
   <div className="flex items-center justify-center py-8">
@@ -52,6 +53,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
   });
 
   const [isConfirming, setIsConfirming] = useState(false);
+  const { isOnline, addToQueue } = useOfflineQueue();
 
   // Initialize phone number
   useEffect(() => {
@@ -141,6 +143,23 @@ const AirtimePurchase = ({ isDarkMode }) => {
       setIsConfirming(true);
       const formattedPhone = formatPhoneNumber(phoneNumber);
 
+      if (!isOnline) {
+        // Queue transaction for offline processing
+        const queuedTransaction = {
+          type: 'airtime',
+          amount: parseFloat(selectedAmount),
+          phoneNumber: formattedPhone,
+          provider: selectedNetwork,
+          transactionPin: transactionPin
+        };
+
+        addToQueue(queuedTransaction);
+        alert('Transaction queued! It will be processed when you\'re back online.');
+        setIsModalOpen(false);
+        return;
+      }
+
+      // Online purchase
       await mutateAsync({
         serviceID: selectedNetwork, // This is the network code (e.g., "mtn", "glo")
         amount: selectedAmount,
@@ -341,6 +360,28 @@ const AirtimePurchase = ({ isDarkMode }) => {
           <Loader />
         ) : (
           <div className="flex flex-col bg-white rounded-2xl pb-8 md:pb-0">
+
+            {/* Offline Status Banner */}
+            {!isOnline && (
+              <div className="mx-3 md:mx-4 mb-2 md:mb-3">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-3 md:p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-sm md:text-base">⚠️</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm md:text-base font-semibold text-yellow-900 dark:text-yellow-100">
+                        You're Offline
+                      </h3>
+                      <p className="text-xs md:text-sm text-yellow-700 dark:text-yellow-300">
+                        Your transaction will be queued and processed when you're back online
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Step 1: Network Selection */}
             {currentStep === 1 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
@@ -445,6 +486,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                     placeholder="Enter amount"
                     min="50"
                   />
+
 
                   {/* Selected Amount Display */}
                   {selectedAmount && (
@@ -572,6 +614,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         placeholder="+2348012345678"
                         autoFocus
                       />
+
+
                       {phoneError && (
                         <p className="text-xs text-red-600 mt-2 font-medium">{phoneError}</p>
                       )}
@@ -762,7 +806,11 @@ const AirtimePurchase = ({ isDarkMode }) => {
                   <button
                     onClick={confirmPurchase}
                     disabled={isConfirming}
-                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
+                    className={`flex-1 px-3 md:px-4 py-2 md:py-3 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm ${
+                      isOnline
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'bg-orange-500 hover:bg-orange-600'
+                    }`}
                   >
                     {isConfirming ? (
                       <div className="flex items-center justify-center gap-1">
@@ -773,8 +821,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       <div className="flex items-center justify-center gap-1">
                         <FaCreditCard className="text-xs md:text-sm" />
                         <span>
-                          Pay ₦{commissionAmount > 0 ? adjustedAmount.toFixed(2) : selectedAmount}
-                          {commissionAmount > 0 && (
+                          {isOnline ? 'Pay' : 'Queue'} ₦{commissionAmount > 0 ? adjustedAmount.toFixed(2) : selectedAmount}
+                          {commissionAmount > 0 && isOnline && (
                             <span className="text-xs block text-green-600">
                               (Save ₦{commissionAmount.toFixed(2)})
                             </span>

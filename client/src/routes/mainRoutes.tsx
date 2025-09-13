@@ -16,7 +16,7 @@ import DiceGame from "../pages/dice";
 import BetDiceGame from "../pages/betDice";
 
 const TransactionDetailWrapper = () => {
-  const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);
+  const isDarkMode = useSelector((state:any) => state.theme && state.theme.isDarkMode);
   return <TransactionDetail isDarkMode={isDarkMode} />;
 };
 
@@ -29,51 +29,51 @@ const MainRoutes = {
   ),
   children: [
     {
-      path: "/dashboard",
+      path: "dashboard",
       element: <Dashboard />,
     },
     {
-      path: "/transactions",
+      path: "transactions",
       element: <Transactions />,
     },
     {
-      path: "/transactions/:requestId",
+      path: "transactions/:requestId",
       element: <TransactionDetailWrapper />,
     },
     {
-      path: "/wallet",
+      path: "wallet",
       element: <Wallet />,
     },
     {
-      path: "/wallet/:id",
+      path: "wallet/:id",
       element: <Confirmation />,
     },
     {
-      path: "/referral",
+      path: "referral",
       element: <Referral />,
     },
     {
-      path: "/settings",
+      path: "settings",
       element: <Settings />,
     },
     {
-      path: "/utilities",
+      path: "utilities",
       element: <Utilities />,
     },
     {
-      path: "/rank",
+      path: "rank",
       element: <Rank />,
     },
     {
-      path: "/support",
+      path: "support",
       element: <Support />,
     },
     {
-      path: "/dice",
+      path: "dice",
       element: <DiceGame />,
     },
     {
-      path: "/bet-dice",
+      path: "bet-dice",
       element: <BetDiceGame />,
     },
   ],

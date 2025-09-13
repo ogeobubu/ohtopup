@@ -112,6 +112,7 @@ const PhoneNumberInput = ({ name, isDarkMode, disabled, onNetworkDetected }) => 
         )}
       </div>
 
+
       {/* Network detection message */}
       {detectedNetwork && field.value && (
         <div className="mt-2 text-sm text-green-600 dark:text-green-400">

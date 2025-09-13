@@ -9,9 +9,11 @@ import NetworkProviderSelector from "./NetworkProviderSelector";
 import PhoneNumberInput from "./PhoneNumberInput";
 import QuickAmounts from "./QuickAmounts";
 import TransactionSummary from "../../data/components/TransactionSummary";
+import { useOfflineQueue } from "../../../../hooks/useOfflineQueue";
 
 const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
   const [detectedNetwork, setDetectedNetwork] = useState(null);
+  const { isOnline, addToQueue } = useOfflineQueue();
 
   // Fetch airtime limits from API
   const { data: limitsData, isLoading: limitsLoading } = useQuery({
@@ -101,6 +103,29 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
     }
   };
 
+  // Handle form submission with offline support
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    if (!isOnline) {
+      // Queue transaction for offline processing
+      const queuedTransaction = {
+        type: 'airtime',
+        amount: parseFloat(values.amount),
+        phoneNumber: values.phoneNumber,
+        provider: values.provider,
+        transactionPin: values.transactionPin
+      };
+
+      addToQueue(queuedTransaction);
+      alert('Transaction queued! It will be processed when you\'re back online.');
+      resetForm();
+      setSubmitting(false);
+      return;
+    }
+
+    // Online submission
+    await onSubmit(values, { setSubmitting, resetForm });
+  };
+
   return (
     <Formik
       initialValues={{
@@ -110,7 +135,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
         transactionPin: "",
       }}
       validationSchema={validationSchema}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
     >
       {({ values, setFieldValue, isSubmitting }) => (
         <Form className="flex flex-col space-y-6">
@@ -192,6 +217,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
               onChange={(amount) => setFieldValue("amount", amount.toString())}
               isSubmitting={isSubmitting}
             />
+
           </div>
 
           {/* Transaction PIN Section */}
@@ -236,6 +262,18 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
             />
           </div>
 
+          {/* Offline Status */}
+          {!isOnline && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3 mb-4">
+              <div className="flex items-center text-yellow-800 dark:text-yellow-200">
+                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <span className="text-sm font-medium">You're offline - Transaction will be queued</span>
+              </div>
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             type="submit"
@@ -243,7 +281,9 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
             className={`relative w-full py-4 px-6 font-semibold rounded-xl transition-all duration-200 transform ${
               !values.provider || !values.phoneNumber || !values.amount || !values.transactionPin || isSubmitting
                 ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                : isOnline
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
             }`}
           >
             {isSubmitting ? (
@@ -259,7 +299,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
                 <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Proceed to Payment
+                {isOnline ? "Proceed to Payment" : "Queue Transaction"}
               </span>
             )}
           </button>

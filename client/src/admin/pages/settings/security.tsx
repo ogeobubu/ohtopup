@@ -11,7 +11,7 @@ import * as Yup from "yup";
 
 const Security = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector((state: any) => state.user?.user);
   const [changePassword, setChangePassword] = useState(false);
   const [isKYCEditMode, setIsKYCEditMode] = useState(false);
 
@@ -151,7 +151,7 @@ const Security = () => {
                   <ErrorMessage name="confirmPassword" component="div" className="text-red-500" />
                 </div>
                 <div className="my-6">
-                  <Button type="submit" disabled={isSubmitting}>
+                  <Button type="submit" onClick={() => {}} onSuccess={() => {}} disabled={isSubmitting}>
                     {isSubmitting ? "Submitting..." : "Submit"}
                   </Button>
                 </div>

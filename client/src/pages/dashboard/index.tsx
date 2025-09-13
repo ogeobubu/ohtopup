@@ -7,6 +7,7 @@ import Wallet from "./wallet";
 import Refer from "./refer";
 import Gift from "./gift";
 import Shortcut from "./shortcut";
+import AIRecommendations from "../../components/ui/AIRecommendations";
 import { FaArrowUp, FaArrowDown, FaClock, FaCheckCircle, FaTimesCircle, FaSpinner } from "react-icons/fa";
 import { formatNairaAmount } from "../../utils";
 
@@ -103,6 +104,12 @@ const Dashboard = () => {
           </div>
           <Shortcut />
         </div>
+
+        {/* AI Recommendations Section */}
+        <AIRecommendations
+          transactions={transactionsData?.transactions || []}
+          walletBalance={walletData?.balance || 0}
+        />
 
         {/* Recent Activity */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">

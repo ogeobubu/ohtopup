@@ -14,8 +14,8 @@ const Referral = () => {
   const [limit] = useState(10);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-  const user = useSelector((state) => state.user.user);
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const user = useSelector((state: any) => state.user?.user);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
 
   const {
     data: referrals,
@@ -28,7 +28,6 @@ const Referral = () => {
       { page: currentPage, limit, search: debouncedSearchTerm },
     ],
     queryFn: () => getReferralsApi(currentPage, limit, debouncedSearchTerm),
-    keepPreviousData: true,
   });
 
   useEffect(() => {

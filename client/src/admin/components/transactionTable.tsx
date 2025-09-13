@@ -4,7 +4,7 @@ import { MdRefresh } from "react-icons/md";
 import PropTypes from 'prop-types';
 
 const TransactionTable = ({ data, onRequery }) => {
-  const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
 
   return (
     <div className={`rounded-lg overflow-hidden shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>

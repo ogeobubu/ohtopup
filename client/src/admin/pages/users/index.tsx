@@ -14,8 +14,8 @@ import { formatNairaAmount } from "../../../utils";
 import { toast } from "react-toastify";
 
 const UserManagement = () => {
-  const users = useSelector((state) => state.admin.users);
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+  const users = useSelector((state: any) => state.admin?.users);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -32,7 +32,6 @@ const UserManagement = () => {
     queryKey: ["users", currentPage, searchTerm, filter, status],
     queryFn: () =>
       getAllUsers(currentPage, 10, searchTerm, filter?.value, status),
-    keepPreviousData: true,
   });
 
   const { data: analyticsData, isLoading: isAnalyticsLoading } = useQuery({
@@ -71,7 +70,7 @@ const UserManagement = () => {
       updateUser(updatedUser._id, { isDeleted: updatedUser.isDeleted }),
     onSuccess: (data) => {
       dispatch(updateAdminRedux(data));
-      queryClient.invalidateQueries(["users"]);
+      queryClient.invalidateQueries({ queryKey: ["users"] } as any);
       toggleModal();
     },
     onError: (error) => {
@@ -163,7 +162,7 @@ const UserManagement = () => {
             <FaEdit className="inline h-3 w-3" />
           </button>
           <button
-            onClick={() => handleToggleDelete(user)}
+            onClick={() => handleToggleDelete()}
             className={`rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
               user?.isDeleted
                 ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
@@ -508,21 +507,21 @@ const UserManagement = () => {
               <button
                 type="button"
                 onClick={toggleModal}
-                disabled={mutation.isLoading}
+                disabled={mutation.isPending}
                 className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleToggleDelete}
-                disabled={mutation.isLoading}
+                disabled={mutation.isPending}
                 className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative ${
                   currentUser?.isDeleted
                     ? 'bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white'
                     : 'bg-gradient-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 text-white'
                 }`}
               >
-                {mutation.isLoading ? (
+                {mutation.isPending ? (
                   <span className="flex items-center justify-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

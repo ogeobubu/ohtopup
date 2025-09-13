@@ -253,7 +253,7 @@ const Wallet = () => {
       console.error('Paystack config error: Invalid amount', totalAmount);
       return null;
     }
-    if (!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY) {
+    if (!import.meta.env.VITE_PAYSTACK_PUBLIC_TEST_KEY) {
       console.error('Paystack config error: Public key is missing');
       return null;
     }

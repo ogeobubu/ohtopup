@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -14,7 +14,15 @@ const storeToken = (token) => {
 };
 
 const Login = ({ darkMode, toggleDarkMode }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  // Check if already logged in as admin and redirect to dashboard
+  useEffect(() => {
+    const adminToken = localStorage.getItem('ohtopup-admin-token');
+    if (adminToken) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [navigate]);
   const mutation = useMutation({
     mutationFn: loginAdmin,
     onSuccess: (data) => {
@@ -40,7 +48,7 @@ const Login = ({ darkMode, toggleDarkMode }) => {
     <div className="flex md:flex-row justify-between">
       <div className="w-full py-0 md:py-4 h-screen overflow-y-auto">
         <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-4">
-          <Logo className="mx-auto w-auto" darkMode={darkMode} />
+          <Logo className="mx-auto w-auto" darkMode={darkMode} href="/admin/login" />
           <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg font-semibold">Welcome Back Admin,</h3>
             <p className="text-gray-600">
@@ -86,13 +94,15 @@ const Login = ({ darkMode, toggleDarkMode }) => {
                   <div className="my-3">
                     <Button
                       type="submit"
+                      onClick={() => {}}
+                      onSuccess={() => {}}
                       disabled={
                         !(isValid && dirty) ||
                         isSubmitting ||
-                        mutation.isLoading
+                        mutation.isPending
                       }
                     >
-                      {isSubmitting || mutation.isLoading
+                      {isSubmitting || mutation.isPending
                         ? "Logging in..."
                         : "Login"}
                     </Button>

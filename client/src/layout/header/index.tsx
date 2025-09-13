@@ -17,8 +17,8 @@ type NotificationItem = {
 };
 
 const Header = () => {
-  const user = useSelector(state => state.user.user);
-  const isDarkMode = useSelector(state => state.theme.isDarkMode);
+  const user = useSelector((state: any) => state.user?.user);
+  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
