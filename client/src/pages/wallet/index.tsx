@@ -262,7 +262,7 @@ const Wallet = () => {
       reference: `txn_${Date.now()}_${user._id}`,
       email: user.email,
       amount: Math.round(totalAmount * 100), // Ensure it's an integer
-      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_TEST_KEY,
     };
   };
 

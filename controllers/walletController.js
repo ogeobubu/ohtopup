@@ -354,7 +354,11 @@ const depositWalletWithPaystack = async (req, res) => {
       metadata: {
         userId: userId,
         walletId: wallet._id.toString(),
-        transactionId: transaction._id.toString()
+        transactionId: transaction._id.toString(),
+        isMobile: req.headers['x-mobile-app'] === 'true' ||
+                  req.headers['user-agent']?.includes('Expo') ||
+                  req.headers['user-agent']?.includes('React Native') ||
+                  false
       }
     };
 
@@ -753,17 +757,47 @@ const verifyMonnifyTransaction = async (req, res) => {
 const handlePaystackCallback = async (req, res) => {
   const { reference, trxref } = req.query;
   const userAgent = req.headers['user-agent'] || '';
-  const isMobileRequest = req.headers['x-mobile-app'] === 'true' || 
-                         userAgent.includes('Expo') || 
-                         userAgent.includes('React Native');
+  const referrer = req.headers['referer'] || req.headers['referrer'] || '';
+
+  // Enhanced mobile detection
+  const isMobileRequest = req.headers['x-mobile-app'] === 'true' ||
+                          userAgent.includes('Expo') ||
+                          userAgent.includes('React Native') ||
+                          referrer.includes('exp://') ||  // Expo development
+                          referrer.includes('localhost:8081') && userAgent.includes('Mobile') || // Mobile web
+                          userAgent.includes('Android') ||
+                          userAgent.includes('iPhone') ||
+                          userAgent.includes('iPad');
+
+  console.log(`Callback detection:`, {
+    userAgent: userAgent.substring(0, 100),
+    referrer,
+    xMobileApp: req.headers['x-mobile-app'],
+    isMobileRequest
+  });
+
+  // If we still can't determine mobile status, try to get it from transaction metadata
+  let finalIsMobileRequest = isMobileRequest;
+  if (!finalIsMobileRequest && reference) {
+    try {
+      const transaction = await Transaction.findOne({ reference });
+      if (transaction?.metadata?.isMobile) {
+        finalIsMobileRequest = true;
+        console.log('Mobile status detected from transaction metadata');
+      }
+    } catch (error) {
+      console.log('Could not check transaction metadata for mobile status');
+    }
+  }
 
   console.log(`Paystack callback received: reference=${reference}, trxref=${trxref}, isMobile=${isMobileRequest}`);
 
   if (!reference) {
     console.error("Paystack callback: Missing reference parameter");
-    
-    if (isMobileRequest) {
-      return res.redirect(`ohtopupmobile://wallet?error=missing_reference`);
+
+    if (finalIsMobileRequest) {
+      const mobileUrl = process.env.MOBILE_APP_URL || 'ohtopupmobile://wallet';
+      return res.redirect(`${mobileUrl}?error=missing_reference`);
     }
     return res.redirect(`${process.env.CLIENT_URL}/wallet?error=missing_reference`);
   }
@@ -775,8 +809,9 @@ const handlePaystackCallback = async (req, res) => {
     if (!paystackData) {
       console.error(`Paystack callback: Failed to fetch transaction data for ${reference}`);
       
-      if (isMobileRequest) {
-        return res.redirect(`ohtopupmobile://wallet?error=verification_failed&reference=${reference}`);
+      if (finalIsMobileRequest) {
+        const mobileUrl = process.env.MOBILE_APP_URL || 'ohtopupmobile://wallet';
+        return res.redirect(`${mobileUrl}?error=verification_failed&reference=${reference}`);
       }
       return res.redirect(`${process.env.CLIENT_URL}/wallet?error=verification_failed`);
     }
@@ -795,30 +830,34 @@ const handlePaystackCallback = async (req, res) => {
 
         console.log(`Paystack callback: Verification completed for ${reference}`);
         
-        if (isMobileRequest) {
-          return res.redirect(`ohtopupmobile://wallet?success=true&reference=${reference}&trxref=${trxref || reference}`);
+        if (finalIsMobileRequest) {
+          const mobileUrl = process.env.MOBILE_APP_URL || 'ohtopupmobile://wallet';
+          return res.redirect(`${mobileUrl}?success=true&reference=${reference}&trxref=${trxref || reference}`);
         }
         return res.redirect(`${process.env.CLIENT_URL}/wallet?success=true&reference=${reference}`);
       } catch (verifyError) {
         console.error(`Paystack callback: Verification error for ${reference}:`, verifyError);
         
-        if (isMobileRequest) {
-          return res.redirect(`ohtopupmobile://wallet?error=verification_error&reference=${reference}&trxref=${trxref || reference}`);
+        if (finalIsMobileRequest) {
+          const mobileUrl = process.env.MOBILE_APP_URL || 'ohtopupmobile://wallet';
+          return res.redirect(`${mobileUrl}?error=verification_error&reference=${reference}&trxref=${trxref || reference}`);
         }
         return res.redirect(`${process.env.CLIENT_URL}/wallet?error=verification_error&reference=${reference}`);
       }
     } else if (paystackData.status === 'failed') {
       console.log(`Paystack callback: Transaction failed - ${reference}`);
       
-      if (isMobileRequest) {
-        return res.redirect(`ohtopupmobile://wallet?error=payment_failed&reference=${reference}&trxref=${trxref || reference}`);
+      if (finalIsMobileRequest) {
+        const mobileUrl = process.env.MOBILE_APP_URL || 'ohtopupmobile://wallet';
+        return res.redirect(`${mobileUrl}?error=payment_failed&reference=${reference}&trxref=${trxref || reference}`);
       }
       return res.redirect(`${process.env.CLIENT_URL}/wallet?error=payment_failed&reference=${reference}`);
     } else {
       console.log(`Paystack callback: Transaction pending - ${reference}`);
       
-      if (isMobileRequest) {
-        return res.redirect(`ohtopupmobile://wallet?status=pending&reference=${reference}&trxref=${trxref || reference}`);
+      if (finalIsMobileRequest) {
+        const mobileUrl = process.env.MOBILE_APP_URL || 'ohtopupmobile://wallet';
+        return res.redirect(`${mobileUrl}?status=pending&reference=${reference}&trxref=${trxref || reference}`);
       }
       return res.redirect(`${process.env.CLIENT_URL}/wallet?status=pending&reference=${reference}`);
     }
@@ -826,8 +865,9 @@ const handlePaystackCallback = async (req, res) => {
   } catch (error) {
     console.error(`Paystack callback: Error processing callback for ${reference}:`, error);
     
-    if (isMobileRequest) {
-      return res.redirect(`ohtopupmobile://wallet?error=callback_error&reference=${reference}&trxref=${trxref || reference}`);
+    if (finalIsMobileRequest) {
+      const mobileUrl = process.env.MOBILE_APP_URL || 'ohtopupmobile://wallet';
+      return res.redirect(`${mobileUrl}?error=callback_error&reference=${reference}&trxref=${trxref || reference}`);
     }
     return res.redirect(`${process.env.CLIENT_URL}/wallet?error=callback_error&reference=${reference}`);
   }
