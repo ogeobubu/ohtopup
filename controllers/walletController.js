@@ -1,5 +1,6 @@
 // walletController.js
 require("dotenv").config()
+const crypto = require('crypto');
 const Wallet = require("../model/Wallet");
 const User = require("../model/User");
 const Transaction = require("../model/Transaction");
