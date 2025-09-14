@@ -45,6 +45,7 @@ app.use(
         ],
         scriptSrcElem: [
           "'self'",
+          "'unsafe-inline'",
           "https://www.googletagmanager.com",
           "https://s3-eu-west-1.amazonaws.com",
           "https://applepay.cdn-apple.com",
