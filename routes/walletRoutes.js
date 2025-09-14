@@ -21,7 +21,8 @@ const {
   getWalletSettings,
   updateWalletSettings,
   resetWalletSettings,
-  handlePaystackWebhook
+  handlePaystackWebhook,
+  testWebhook
 } = require("../controllers/walletController");
 const auth = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -36,7 +37,8 @@ router.post("/deposit", auth, depositWallet);
 router.post("/deposit/paystack/initiate", auth, depositWalletWithPaystack);
 router.post("/deposit/paystack/verify", auth, verifyPaystackTransaction);
 router.get("/deposit/paystack/callback", handlePaystackCallback);
-router.get("/deposit/paystack/webhook", handlePaystackWebhook);
+router.post("/deposit/paystack/webhook", handlePaystackWebhook);
+router.post("/deposit/paystack/test-webhook", testWebhook); // Test endpoint - remove in production
 router.post("/deposit/paystack/confirm", auth, depositPaystackWallet);
 
 // Withdrawal routes

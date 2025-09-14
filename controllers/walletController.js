@@ -834,47 +834,190 @@ const handlePaystackCallback = async (req, res) => {
 };
 
 const handlePaystackWebhook = async (req, res) => {
+  // Paystack webhook IP addresses for validation
+  const paystackIPs = ['52.31.139.75', '52.49.173.169', '52.214.14.220'];
+  const clientIP = req.ip || req.connection.remoteAddress;
+
+  // Optional: Validate IP address (remove this check if not needed)
+  // if (!paystackIPs.includes(clientIP)) {
+  //   console.warn('Webhook received from unauthorized IP:', clientIP);
+  //   return res.status(403).send('Unauthorized IP');
+  // }
+
   try {
     // Verify webhook signature (IMPORTANT for security)
     const secret = process.env.PAYSTACK_SECRET_KEY;
     const hash = crypto.createHmac('sha512', secret)
       .update(JSON.stringify(req.body))
       .digest('hex');
-    
+
     if (hash !== req.headers['x-paystack-signature']) {
       console.error('Invalid webhook signature');
       return res.status(400).send('Invalid signature');
     }
 
     const event = req.body;
-    console.log('Paystack webhook received:', event.event);
+    console.log('Paystack webhook received:', {
+      event: event.event,
+      reference: event.data?.reference,
+      amount: event.data?.amount,
+      ip: clientIP
+    });
 
-    if (event.event === 'charge.success') {
-      const { reference, amount, customer, metadata } = event.data;
-      
-      // Find the user by reference or metadata
-      const userId = metadata?.userId || await findUserByReference(reference);
-      
-      if (!userId) {
-        console.error('User not found for reference:', reference);
-        return res.status(200).send('User not found');
-      }
+    // Return 200 OK immediately to acknowledge receipt
+    res.status(200).send('Webhook received');
 
-      // Verify and complete the transaction
-      await completeWalletDeposit({
-        userId,
-        reference,
-        amount: amount / 100, // Convert from kobo to naira
-        paystackData: event.data
-      });
+    // Process the event asynchronously (don't wait for response)
+    processWebhookEvent(event).catch(error => {
+      console.error('Error processing webhook event:', error);
+    });
 
-      console.log(`Payment completed via webhook: ${reference} - ₦${amount / 100}`);
-    }
-
-    res.status(200).send('Webhook processed');
   } catch (error) {
     console.error('Webhook processing error:', error);
-    res.status(500).send('Webhook processing failed');
+    // Still return 200 to prevent retries for signature validation errors
+    res.status(200).send('Webhook received but processing failed');
+  }
+};
+
+// Process webhook events asynchronously
+const processWebhookEvent = async (event) => {
+  try {
+    switch (event.event) {
+      case 'charge.success':
+        await handleChargeSuccess(event);
+        break;
+
+      case 'charge.failed':
+        await handleChargeFailed(event);
+        break;
+
+      case 'transfer.success':
+        await handleTransferSuccess(event);
+        break;
+
+      case 'transfer.failed':
+        await handleTransferFailed(event);
+        break;
+
+      case 'transfer.reversed':
+        await handleTransferReversed(event);
+        break;
+
+      default:
+        console.log('Unhandled webhook event:', event.event);
+    }
+  } catch (error) {
+    console.error('Error in processWebhookEvent:', error);
+    throw error;
+  }
+};
+
+// Handle successful charge
+const handleChargeSuccess = async (event) => {
+  const { reference, amount, customer, metadata } = event.data;
+
+  console.log(`Processing charge.success for reference: ${reference}`);
+
+  // Find the user by reference or metadata
+  let userId = metadata?.userId;
+  if (!userId) {
+    userId = await findUserByReference(reference);
+  }
+
+  if (!userId) {
+    console.error('User not found for reference:', reference);
+    return;
+  }
+
+  // Verify and complete the transaction
+  await completeWalletDeposit({
+    userId,
+    reference,
+    amount: amount / 100, // Convert from kobo to naira
+    paystackData: event.data
+  });
+
+  console.log(`Payment completed via webhook: ${reference} - ₦${amount / 100}`);
+};
+
+// Handle failed charge
+const handleChargeFailed = async (event) => {
+  const { reference, amount, customer, metadata } = event.data;
+
+  console.log(`Processing charge.failed for reference: ${reference}`);
+
+  // Find and mark transaction as failed
+  const transaction = await Transaction.findOne({ reference });
+  if (transaction && transaction.status === 'pending') {
+    transaction.status = 'failed';
+    transaction.gatewayResponse = event.data;
+    await transaction.save();
+
+    console.log(`Transaction ${reference} marked as failed`);
+  }
+};
+
+// Handle successful transfer
+const handleTransferSuccess = async (event) => {
+  const { reference, amount, recipient } = event.data;
+
+  console.log(`Processing transfer.success for reference: ${reference}`);
+
+  // Update withdrawal transaction status
+  const transaction = await Transaction.findOne({ reference });
+  if (transaction && transaction.type === 'withdrawal') {
+    transaction.status = 'completed';
+    transaction.completedAt = new Date();
+    transaction.gatewayResponse = event.data;
+    await transaction.save();
+
+    console.log(`Withdrawal ${reference} marked as completed`);
+  }
+};
+
+// Handle failed transfer
+const handleTransferFailed = async (event) => {
+  const { reference, amount, recipient } = event.data;
+
+  console.log(`Processing transfer.failed for reference: ${reference}`);
+
+  // Update withdrawal transaction status and refund wallet
+  const transaction = await Transaction.findOne({ reference });
+  if (transaction && transaction.type === 'withdrawal' && transaction.status === 'processing') {
+    transaction.status = 'failed';
+    transaction.failureReason = 'Transfer failed';
+    transaction.gatewayResponse = event.data;
+    await transaction.save();
+
+    // Refund the amount to wallet
+    const wallet = await Wallet.findById(transaction.walletId);
+    if (wallet) {
+      await walletService.creditWallet(wallet, transaction.amount);
+      console.log(`Refunded ₦${transaction.amount} to wallet for failed transfer ${reference}`);
+    }
+  }
+};
+
+// Handle reversed transfer
+const handleTransferReversed = async (event) => {
+  const { reference, amount, recipient } = event.data;
+
+  console.log(`Processing transfer.reversed for reference: ${reference}`);
+
+  // Update withdrawal transaction status and refund wallet
+  const transaction = await Transaction.findOne({ reference });
+  if (transaction && transaction.type === 'withdrawal') {
+    transaction.status = 'failed';
+    transaction.failureReason = 'Transfer reversed';
+    transaction.gatewayResponse = event.data;
+    await transaction.save();
+
+    // Refund the amount to wallet
+    const wallet = await Wallet.findById(transaction.walletId);
+    if (wallet) {
+      await walletService.creditWallet(wallet, transaction.amount);
+      console.log(`Refunded ₦${transaction.amount} to wallet for reversed transfer ${reference}`);
+    }
   }
 };
 
@@ -891,16 +1034,18 @@ const storePaymentReference = async (reference, userId, amount) => {
 
 // Find user by payment reference
 const findUserByReference = async (reference) => {
-  const transaction = await Transaction.findOne({ 
-    where: { reference, status: 'pending' } 
+  const transaction = await Transaction.findOne({
+    reference,
+    status: 'pending'
   });
   return transaction?.userId;
 };
 
 // Complete the wallet deposit
 const completeWalletDeposit = async ({ userId, reference, amount, paystackData }) => {
-  const transaction = await Transaction.findOne({ 
-    where: { reference, userId } 
+  const transaction = await Transaction.findOne({
+    reference,
+    userId
   });
 
   if (!transaction || transaction.status !== 'pending') {
@@ -908,26 +1053,18 @@ const completeWalletDeposit = async ({ userId, reference, amount, paystackData }
   }
 
   // Update transaction status
-  await Transaction.update(
-    { status: 'completed', completedAt: new Date() },
-    { where: { reference } }
-  );
+  transaction.status = 'completed';
+  transaction.completedAt = new Date();
+  transaction.gatewayResponse = paystackData;
+  await transaction.save();
 
   // Credit user wallet
-  await db.wallets.increment('balance', { 
-    by: amount, 
-    where: { userId } 
-  });
+  const wallet = await Wallet.findOne({ userId });
+  if (wallet) {
+    await walletService.creditWallet(wallet, amount);
+  }
 
-  // Log the transaction
-  await db.walletTransactions.create({
-    userId,
-    type: 'deposit',
-    amount,
-    reference,
-    description: 'Paystack deposit',
-    metadata: paystackData
-  });
+  console.log(`Wallet deposit completed: ${reference} - ₦${amount}`);
 };
 
 const verifyPaystackTransaction = async (req, res) => {
@@ -2582,6 +2719,16 @@ const getWithdrawalAuditLogs = async (req, res) => {
   }
 };
 
+// Test webhook endpoint (remove in production)
+const testWebhook = async (req, res) => {
+  console.log('Test webhook received:', req.body);
+  res.status(200).json({
+    message: 'Test webhook received successfully',
+    timestamp: new Date().toISOString(),
+    body: req.body
+  });
+};
+
 module.exports = {
   createWallet,
   getWallet,
@@ -2606,6 +2753,7 @@ module.exports = {
   updateWalletSettings,
   resetWalletSettings,
   handlePaystackWebhook,
+  testWebhook,
   // New withdrawal management functions
   getWithdrawalsForAdmin,
   approveWithdrawal,
