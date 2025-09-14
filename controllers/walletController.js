@@ -1093,13 +1093,25 @@ const findUserByReference = async (reference) => {
 
 // Complete the wallet deposit
 const completeWalletDeposit = async ({ userId, reference, amount, paystackData }) => {
-  const transaction = await Transaction.findOne({
-    reference,
-    userId
-  });
+  // Find transaction by reference first
+  const transaction = await Transaction.findOne({ reference });
 
-  if (!transaction || transaction.status !== 'pending') {
-    throw new Error('Invalid transaction');
+  if (!transaction) {
+    throw new Error('Transaction not found');
+  }
+
+  if (transaction.status !== 'pending') {
+    throw new Error('Invalid transaction status');
+  }
+
+  // Verify that the userId matches the wallet's userId
+  const wallet = await Wallet.findById(transaction.walletId);
+  if (!wallet) {
+    throw new Error('Wallet not found');
+  }
+
+  if (wallet.userId.toString() !== userId.toString()) {
+    throw new Error('User ID mismatch');
   }
 
   // Update transaction status
@@ -1109,10 +1121,7 @@ const completeWalletDeposit = async ({ userId, reference, amount, paystackData }
   await transaction.save();
 
   // Credit user wallet
-  const wallet = await Wallet.findOne({ userId });
-  if (wallet) {
-    await walletService.creditWallet(wallet, amount);
-  }
+  await walletService.creditWallet(wallet, amount);
 
   console.log(`Wallet deposit completed: ${reference} - ₦${amount}`);
 };
