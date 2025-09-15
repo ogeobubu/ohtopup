@@ -26,7 +26,7 @@ const sendResendResetOTPEmail = async (username, email, otpCode) => {
         <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
           <p style="font-size: 24px; font-weight: bold; text-align: center;">${otpCode}</p>
         </div>
-        <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This code is valid for 10 minutes. If you did not request a password reset, you can safely ignore this email.</p>
+        <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This code is valid for 15 minutes. If you did not request a password reset, you can safely ignore this email.</p>
         <a href="https://ohtopup.onrender.com/reset-password" style="background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">Reset Password</a>
       </div>
     `,
