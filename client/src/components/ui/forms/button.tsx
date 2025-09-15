@@ -4,13 +4,13 @@ import { FaSpinner } from 'react-icons/fa';
 const Button = ({
   variant = 'primary',
   children,
-  onClick,
+  onClick = () => {},
   className = '',
   darkMode = false,
   disabled = false,
   loading = false,
   size = 'lg',
-  onSuccess,
+  onSuccess = () => {},
   ...props
 }) => {
   const getButtonStyles = () => {

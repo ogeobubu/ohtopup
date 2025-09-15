@@ -2,8 +2,23 @@ import React, { useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { toast } from "react-toastify";
 
-const FormInput = ({
-  type,
+interface FormInputProps {
+  type?: string;
+  placeholder?: string;
+  value?: string;
+  onChange?: (e: any) => void;
+  label?: string;
+  error?: any;
+  name?: string;
+  min?: string;
+  disabled?: boolean;
+  helperText?: string;
+  isDarkMode?: boolean;
+  onBlur?: (e: any) => void;
+}
+
+const FormInput: React.FC<FormInputProps> = ({
+  type = "text",
   placeholder,
   value,
   onChange,
@@ -14,6 +29,7 @@ const FormInput = ({
   disabled = false,
   helperText,
   isDarkMode,
+  onBlur,
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -38,6 +54,7 @@ const FormInput = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           min={min}
           disabled={disabled}
           className={`w-full p-2 border rounded bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 pr-16 ${

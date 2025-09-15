@@ -253,7 +253,7 @@ const Wallet = () => {
       console.error('Paystack config error: Invalid amount', totalAmount);
       return null;
     }
-    if (!import.meta.env.VITE_PAYSTACK_PUBLIC_TEST_KEY) {
+    if (!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY) {
       console.error('Paystack config error: Public key is missing');
       return null;
     }
@@ -261,8 +261,8 @@ const Wallet = () => {
     return {
       reference: `txn_${Date.now()}_${user._id}`,
       email: user.email,
-      amount: Math.round(totalAmount * 100), // Ensure it's an integer
-      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_TEST_KEY,
+      amount: Math.round(totalAmount * 100),
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
     };
   };
 
@@ -837,11 +837,9 @@ const Wallet = () => {
                 value={formik.values.accountNumber}
                 onChange={handleAccountNumberChange}
                 onBlur={formik.handleBlur}
-                className={`border ${
-                  formik.touched.accountNumber && formik.errors.accountNumber
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
+                error={formik.touched.accountNumber && formik.errors.accountNumber}
+                type="text"
+                isDarkMode={isDarkMode}
               />
               {formik.touched.accountNumber && formik.errors.accountNumber && (
                 <div className="text-red-500 text-sm mb-3">
@@ -855,11 +853,8 @@ const Wallet = () => {
                 value={accountName}
                 disabled
                 onBlur={formik.handleBlur}
-                className={`border ${
-                  formik.touched.accountName && formik.errors.accountName
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
+                type="text"
+                isDarkMode={isDarkMode}
               />
               <Button type="submit" disabled={!selectedBank}>
                 Add Bank Account
@@ -1000,6 +995,8 @@ const Wallet = () => {
                       onChange={handleAmountChange}
                       type="text"
                       isDarkMode={isDarkMode}
+                      error={false}
+                      onBlur={() => {}}
                     />
 
                     {/* Amount Summary */}
@@ -1064,7 +1061,16 @@ const Wallet = () => {
                     <div className="pt-4">
                       {config ? (
                         <PaystackButton
-                          {...componentProps}
+                          publicKey={config.publicKey}
+                          email={config.email}
+                          amount={config.amount}
+                          reference={config.reference}
+                          text={loading ? "Processing..." : "Pay Now"}
+                          onSuccess={(reference) => handlePaystackSuccessAction(reference)}
+                          onClose={() => {
+                            console.log('Paystack payment modal closed');
+                            setLoading(false);
+                          }}
                           disabled={amount < (walletSettingsData?.minDepositAmount || 100) || loading}
                           className={`w-full py-3 text-lg font-semibold rounded-lg transition-colors ${
                             amount >= (walletSettingsData?.minDepositAmount || 100) && !loading
@@ -1211,7 +1217,6 @@ const Wallet = () => {
               formatNairaAmount={formatNairaAmount}
               walletSettings={walletSettings}
             />
-            {console.log('Passing walletSettings to Withdraw:', walletSettings)}
           </Modal>
 
           {/* Transaction Details Modal */}
