@@ -49,6 +49,13 @@ const recordTransaction = async (
   paymentMethod,
   details = {}
 ) => {
+  // Check if transaction with this reference already exists
+  const existingTransaction = await Transaction.findOne({ reference });
+  if (existingTransaction) {
+    console.warn(`Transaction with reference ${reference} already exists. Returning existing transaction.`);
+    return existingTransaction;
+  }
+
   const transaction = new Transaction({
     walletId,
     amount,

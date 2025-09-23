@@ -433,6 +433,50 @@ const getUserReferrals = async (userId, page = 1, limit = 10, search = "") => {
   };
 };
 
+const changePin = async (userId, currentPin, newPin) => {
+  const user = await findUserById(userId);
+
+  // Check if user has a PIN set
+  if (!user.transactionPin) {
+    throw {
+      status: 400,
+      message: "No transaction PIN set. Please set a PIN first."
+    };
+  }
+
+  // Verify current PIN
+  if (user.transactionPin !== currentPin) {
+    throw {
+      status: 400,
+      message: "Current PIN is incorrect"
+    };
+  }
+
+  // Check if new PIN is different from current
+  if (currentPin === newPin) {
+    throw {
+      status: 400,
+      message: "New PIN must be different from current PIN"
+    };
+  }
+
+  // Update PIN
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { transactionPin: newPin },
+    { new: true, runValidators: true }
+  ).exec();
+
+  return {
+    message: "Transaction PIN updated successfully",
+    user: {
+      id: updatedUser._id,
+      username: updatedUser.username,
+      email: updatedUser.email
+    }
+  };
+};
+
 
 module.exports = {
   findUserById,
@@ -450,4 +494,5 @@ module.exports = {
   softDeleteUser,
   redeemPoints,
   getUserReferrals,
+  changePin,
 };

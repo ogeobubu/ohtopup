@@ -1,5 +1,6 @@
 const Notification = require('../model/Notification');
 const User = require('../model/User');
+const PushToken = require('../model/PushToken');
 
 const createNotification = async (userId, title, message, link) => {
   let notifications = [];
@@ -16,6 +17,9 @@ const createNotification = async (userId, title, message, link) => {
       });
       await notification.save();
       notifications.push(notification);
+
+      // Send push notification
+      await sendPushNotification(user._id, title, message);
     }
     return notifications;
   } else {
@@ -26,6 +30,10 @@ const createNotification = async (userId, title, message, link) => {
 
     const notification = new Notification({ userId, title, message, link });
     await notification.save();
+
+    // Send push notification
+    await sendPushNotification(userId, title, message);
+
     return notification;
   }
 };
@@ -120,6 +128,74 @@ const markNotificationAsRead = async (notificationId, userId) => {
     return notification;
 };
 
+const registerPushToken = async (userId, pushToken, platform) => {
+    if (!userId || !pushToken) {
+        throw { status: 400, message: "User ID and push token are required." };
+    }
+
+    // Find existing push token for this user and platform
+    const existingToken = await PushToken.findOne({ userId, platform });
+
+    if (existingToken) {
+        // Update existing token
+        existingToken.token = pushToken;
+        existingToken.updatedAt = new Date();
+        await existingToken.save();
+        return existingToken;
+    } else {
+        // Create new push token
+        const pushTokenDoc = new PushToken({
+            userId,
+            token: pushToken,
+            platform,
+        });
+        await pushTokenDoc.save();
+        return pushTokenDoc;
+    }
+};
+
+const sendPushNotification = async (userId, title, message) => {
+    try {
+        // Get user's push tokens
+        const pushTokens = await PushToken.find({ userId });
+
+        if (pushTokens.length === 0) {
+            console.log(`No push tokens found for user ${userId}`);
+            return;
+        }
+
+        // Send push notification to Expo
+        const expo = require('expo-server-sdk').Expo;
+        const expoClient = new expo();
+
+        const messages = pushTokens.map(pushToken => ({
+            to: pushToken.token,
+            title,
+            body: message,
+            data: { userId },
+            sound: 'default',
+            priority: 'default',
+        }));
+
+        const chunks = expoClient.chunkPushNotifications(messages);
+        const tickets = [];
+
+        for (const chunk of chunks) {
+            try {
+                const ticketChunk = await expoClient.sendPushNotificationsAsync(chunk);
+                tickets.push(...ticketChunk);
+            } catch (error) {
+                console.error('Error sending push notification chunk:', error);
+            }
+        }
+
+        console.log(`Push notifications sent to ${pushTokens.length} devices for user ${userId}`);
+        return tickets;
+    } catch (error) {
+        console.error('Error sending push notification:', error);
+    }
+};
+
 
 module.exports = {
   createNotification,
@@ -128,4 +204,5 @@ module.exports = {
   getUserNotifications,
   deleteNotification,
   markNotificationAsRead,
+  registerPushToken,
 };

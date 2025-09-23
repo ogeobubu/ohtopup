@@ -14,8 +14,10 @@ const {
   deleteBankAccount,
   verifyBankAccount,
   redeemPoints,
+  changePin,
   googleAuth,
-    googleAuthCallback
+    googleAuthCallback,
+  refreshToken
 } = require("../controllers/userController");
 
 const {
@@ -77,11 +79,12 @@ const {
   depositWalletWithMonnify,
   verifyMonnifyTransaction,
   withdrawMonnifyWallet,
-  depositPaystackWallet
+  depositPaystackWallet,
+  testWebhookWithTransaction
 } = require("../controllers/walletController");
 
 const { buyAirtime } = require("../controllers/airtimeController")
-const { buyData, getDataVariations } = require("../controllers/dataController")
+const { buyData, getDataVariations, getDataSettings, getDataStats } = require("../controllers/dataController")
 const {
   purchaseElectricity,
   getElectricitySettings,
@@ -153,7 +156,9 @@ router.post("/reset", verifyOtpAndResetPassword);
 router.post("/resend-otp", resendOtp);
 router.get("/", auth, getUser);
 router.patch("/", auth, updateUser);
+router.patch("/change-pin", auth, changePin);
 router.delete("/", auth, softDeleteUser);
+
 
 // Google OAuth routes
 router.get("/auth/google", googleAuth);
@@ -170,12 +175,17 @@ router.post("/deposit", auth, depositPaystackWallet);
 router.get("/verify-payment/:ref", auth, verifyPaystackTransaction);
 router.post("/verify-account", auth, verifyBankAccount);
 
+// Test webhook with existing transaction (for testing purposes)
+router.post("/test-webhook", auth, testWebhookWithTransaction);
+
 router.post("/airtime", auth, buyAirtime);
 router.get("/airtime-providers", auth, getActiveAirtimeNetworkProviders);
 // router.get("/data", auth, variationCodes);
 router.get("/data", auth, getVariations);
 router.post("/data", auth, buyData);
 router.get("/data-variations", auth, getDataVariations);
+router.get("/data/settings", auth, getDataSettings);
+router.get("/data/stats", auth, getDataStats);
 router.get("/service-id", getServiceID);
 router.get("/cable", auth, variationTVCodes);
 router.post("/cable/verify", auth, verifySmartcard);
@@ -230,6 +240,25 @@ router.get("/achievements", auth, getUserAchievements);
 
 router.get("/notifications", auth, getNotifications);
 router.patch("/notification/:id", auth, readNotification);
+router.post("/register-push-token", auth, (req, res) => {
+  // Import notification service
+  const notificationService = require("../services/notificationService");
+
+  const { pushToken, platform } = req.body;
+  const userId = req.user.id;
+
+  notificationService.registerPushToken(userId, pushToken, platform)
+    .then(result => {
+      res.status(200).json({
+        message: "Push token registered successfully",
+        result
+      });
+    })
+    .catch(error => {
+      console.error("Error registering push token:", error);
+      res.status(500).json({ message: "Failed to register push token" });
+    });
+});
 
 router.post("/ticket", auth, createTicket);
 router.get("/tickets", auth, getUserTickets);

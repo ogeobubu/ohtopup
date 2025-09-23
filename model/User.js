@@ -205,6 +205,14 @@ const userSchema = new mongoose.Schema(
         message: 'Transaction PIN must be 4-6 digits'
       }
     },
+    refreshToken: {
+      type: String,
+      default: null,
+    },
+    refreshTokenExpires: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

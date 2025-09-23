@@ -8,7 +8,7 @@ const getAllSelectedPlans = async (req, res) => {
 
     let query = {};
 
-    if (network) query.network = network;
+    if (network) query.network = network.toUpperCase();
     if (provider) query.providerName = provider;
     if (isActive !== undefined) query.isActive = isActive === 'true';
 
@@ -44,7 +44,7 @@ const getSelectedPlansForUsers = async (req, res) => {
       isVisible: true
     };
 
-    if (network) query.network = network;
+    if (network) query.network = network.toUpperCase();
 
     const selectedPlans = await SelectedDataPlan.find(query)
       .populate('provider', 'name displayName isActive')

@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { getWallet, getUser, getAirtimeProviders, getAirtimeSettings } from "../../../api";
 import Modal from "../../../admin/components/modal";
 import useAirtimePurchase from "./hooks/useAirtimePurchase";
-import { formatPhoneNumber, formatNairaAmount } from "../../../utils";
+import { formatPhoneNumber, formatNairaAmount, extractNetworkFromPhoneNumber } from "../../../utils";
 import { FaMobileAlt, FaCheck, FaUser, FaCreditCard, FaChevronRight } from "react-icons/fa";
 import { useOfflineQueue } from "../../../hooks/useOfflineQueue";
 
@@ -26,6 +26,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
   const [pinError, setPinError] = useState('');
   const [currentStep, setCurrentStep] = useState(1); // 1: Network, 2: Amount, 3: Phone, 4: PIN, 5: Confirm
   const [networkReset, setNetworkReset] = useState(false); // Track if network was reset
+  const [detectedNetwork, setDetectedNetwork] = useState(''); // Auto-detected network from phone number
+  const [networkConflict, setNetworkConflict] = useState(false); // Track if there's a conflict between selected and detected network
 
   // Fetch wallet and providers
   const { data: walletData, isLoading: isWalletLoading } = useQuery({
@@ -119,6 +121,17 @@ const AirtimePurchase = ({ isDarkMode }) => {
     const cleanValue = value.replace(/[^\d+\s-()]/g, '');
     setPhoneNumber(cleanValue);
     setPhoneError(validatePhoneNumber(cleanValue));
+
+    // Auto-detect network from phone number
+    const detected = extractNetworkFromPhoneNumber(cleanValue);
+    setDetectedNetwork(detected || '');
+
+    // Check for network conflict
+    if (detected && selectedNetwork && detected !== selectedNetwork) {
+      setNetworkConflict(true);
+    } else {
+      setNetworkConflict(false);
+    }
   };
 
   // Handle network change - reset dependent data
@@ -136,6 +149,22 @@ const AirtimePurchase = ({ isDarkMode }) => {
     }
 
     setSelectedNetwork(network);
+    // Reset network conflict and detected network when manually changing network
+    setNetworkConflict(false);
+    setDetectedNetwork('');
+  };
+
+  // Handle network conflict resolution
+  const resolveNetworkConflict = (useDetected) => {
+    if (useDetected) {
+      // Switch to detected network
+      handleNetworkChange(detectedNetwork);
+    } else {
+      // Keep current network, reset phone number to clear conflict
+      setPhoneNumber('');
+      setDetectedNetwork('');
+      setNetworkConflict(false);
+    }
   };
 
   const confirmPurchase = async () => {
@@ -556,6 +585,18 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         const formattedNumber = formatPhoneNumberForDisplay(user.phoneNumber);
                         setPhoneNumber(formattedNumber);
                         setPhoneError('');
+
+                        // Auto-detect network from registered number
+                        const detected = extractNetworkFromPhoneNumber(user.phoneNumber);
+                        setDetectedNetwork(detected || '');
+
+                        // Check for network conflict
+                        if (detected && selectedNetwork && detected !== selectedNetwork) {
+                          setNetworkConflict(true);
+                        } else {
+                          setNetworkConflict(false);
+                        }
+
                         setCurrentStep(4);
                       }
                     }}
@@ -619,6 +660,56 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       {phoneError && (
                         <p className="text-xs text-red-600 mt-2 font-medium">{phoneError}</p>
                       )}
+
+                      {/* Network Detection Display */}
+                      {detectedNetwork && !phoneError && (
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                              <FaMobileAlt className="text-blue-600 text-xs" />
+                            </div>
+                            <div className="text-sm text-blue-800">
+                              <span className="font-medium">Detected Network: {detectedNetwork?.toUpperCase()}</span>
+                              {selectedNetwork === detectedNetwork && (
+                                <span className="text-green-600 ml-1">✓ Matches selected network</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Network Conflict Warning */}
+                      {networkConflict && (
+                        <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-orange-600 text-xs">⚠️</span>
+                            </div>
+                            <div className="text-sm text-orange-800">
+                              <span className="font-medium">Network Mismatch Detected</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-orange-700 mb-3">
+                            The phone number you entered belongs to <strong>{detectedNetwork?.toUpperCase()}</strong>,
+                            but you selected <strong>{selectedNetwork?.toUpperCase()}</strong>.
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => resolveNetworkConflict(true)}
+                              className="flex-1 px-3 py-2 bg-blue-600 text-white text-xs rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                            >
+                              Switch to {detectedNetwork?.toUpperCase()}
+                            </button>
+                            <button
+                              onClick={() => resolveNetworkConflict(false)}
+                              className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 text-xs rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                            >
+                              Keep {selectedNetwork?.toUpperCase()}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       <p className="text-xs text-gray-500 mt-2">
                         Enter a valid Nigerian phone number (e.g., +2348012345678, 08012345678, or 8012345678)
                       </p>

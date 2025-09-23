@@ -7,9 +7,8 @@ const {
   sendConfirmationEmail,
   sendVerificationEmail,
   sendLoginNotificationEmail,
-  sendForgotPasswordEmail,
-  sendResendResetOTPEmail,
 } = require("../controllers/email/sendTransactionEmailNotification");
+const emailService = require("./emailService");
 const dbService = require("./dbService");
 const walletService = require("./walletService");
 
@@ -173,6 +172,66 @@ const loginAdminUser = async (email, password) => {
   return token;
 };
 
+const generateRefreshToken = () => {
+  return jwt.sign(
+    { type: 'refresh' },
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+};
+
+const refreshAccessToken = async (refreshToken) => {
+  try {
+    // Verify the refresh token
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+    );
+
+    // Find user with this refresh token
+    const user = await User.findOne({
+      refreshToken: refreshToken,
+      refreshTokenExpires: { $gt: new Date() },
+      isDeleted: false
+    });
+
+    if (!user) {
+      throw { status: 401, message: "Invalid or expired refresh token" };
+    }
+
+    // Generate new access token
+    const payload = { user: { id: user._id, role: user.role } };
+    const secret = process.env.JWT_SECRET;
+    const newAccessToken = jwt.sign(payload, secret, { expiresIn: "15m" });
+
+    // Optionally generate new refresh token (token rotation)
+    const newRefreshToken = generateRefreshToken();
+    const newRefreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    // Update refresh token in database
+    await User.updateOne(
+      { _id: user._id },
+      {
+        refreshToken: newRefreshToken,
+        refreshTokenExpires: newRefreshTokenExpires
+      }
+    );
+
+    return {
+      token: newAccessToken,
+      refreshToken: newRefreshToken
+    };
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      throw { status: 401, message: "Invalid refresh token" };
+    }
+    if (error.name === 'TokenExpiredError') {
+      throw { status: 401, message: "Refresh token expired" };
+    }
+    throw error;
+  }
+};
+
 const loginUser = async (email, password) => {
   const user = await User.findOne({ email, isDeleted: false });
 
@@ -196,11 +255,29 @@ const loginUser = async (email, password) => {
 
   await sendLoginNotificationEmail(user.email);
 
+  // Generate access token
   const payload = { user: { id: user._id, role: user.role } };
   const secret = process.env.JWT_SECRET;
-  const token = jwt.sign(payload, secret, { expiresIn: "7d" });
+  const token = jwt.sign(payload, secret, { expiresIn: "15m" }); // Shorter expiration for access token
 
-  return { message: "Login successful!", token };
+  // Generate refresh token
+  const refreshToken = generateRefreshToken();
+  const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+  // Store refresh token in database
+  await User.updateOne(
+    { _id: user._id },
+    {
+      refreshToken: refreshToken,
+      refreshTokenExpires: refreshTokenExpires
+    }
+  );
+
+  return {
+    message: "Login successful!",
+    token,
+    refreshToken
+  };
 };
 
 const forgotPassword = async (email) => {
@@ -218,7 +295,7 @@ const forgotPassword = async (email) => {
     { otp: user.otp, otpExpires: user.otpExpires }
   );
 
-  await sendForgotPasswordEmail(email, user, user.username);
+  await emailService.sendPasswordResetEmail(email, user.username, otp);
   return { message: "OTP sent to your email." };
 };
 
@@ -264,7 +341,7 @@ const resendOtp = async (email) => {
     throw { status: 500, message: "Failed to update OTP." };
   }
 
-  await sendResendResetOTPEmail(user.username, user.email, user.otp);
+  await emailService.sendPasswordResetEmail(user.email, user.username, user.otp);
 
   return { message: "OTP resent successfully." };
 };
@@ -277,5 +354,6 @@ module.exports = {
   forgotPassword,
   verifyOtpAndResetPassword,
   resendOtp,
-  loginAdminUser
+  loginAdminUser,
+  refreshAccessToken
 };

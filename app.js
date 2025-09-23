@@ -8,6 +8,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const walletRoutes = require("./routes/walletRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const authRoutes = require("./routes/authRoutes").authRouter
+const authUserRoutes = require("./routes/authUserRoutes");
 const xRoutes = require("./routes/xRoutes");
 const airtimeRoutes = require("./routes/airtimeRoutes");
 require("dotenv").config();
@@ -119,16 +120,23 @@ app.use(
         'http://localhost:5173', // Vite dev server
         'http://localhost:5174', // Vite dev server
         'http://localhost:8081', // Common Expo dev server
+        'http://localhost:19006', // Expo web default port
         'http://127.0.0.1:3000', // Localhost with IP
         'http://127.0.0.1:5173', // Vite dev server with IP
+        'http://127.0.0.1:8081', // Expo dev server with IP
+        'http://127.0.0.1:19006', // Expo web with IP
         'http://10.0.2.2:3000', // Android emulator localhost
         'http://192.168.1.1:3000', // Common local network IP
+        'http://192.168.1.1:8081', // Common local network IP for Expo
+        'http://192.168.1.1:19006', // Common local network IP for Expo web
         // Add your production mobile app URLs here
       ].filter(Boolean); // Remove undefined values
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
+        console.log('CORS blocked origin:', origin);
+        console.log('Allowed origins:', allowedOrigins);
         return callback(new Error('Not allowed by CORS'));
       }
     },
@@ -170,8 +178,15 @@ app.use((req, res, next) => {
 });
 
 // CSRF protection (after session/cookie parser, before routes)
-// Skip CSRF for newsletter subscription, admin login, and mobile app endpoints
+// Skip CSRF for newsletter subscription, admin login, mobile app requests, and airtime
 app.use((req, res, next) => {
+  // Skip CSRF for mobile app requests (identified by x-mobile-app header)
+  if (req.headers['x-mobile-app'] === 'true') {
+    console.log('Skipping CSRF for mobile app request:', req.path);
+    return next();
+  }
+
+  // Skip CSRF for specific endpoints that don't need protection
   if (req.path === '/api/users/newsletter/subscribe' ||
       req.path === '/api/users/newsletter/unsubscribe' ||
       req.path === '/api/users/admin/auth/login' ||
@@ -181,9 +196,13 @@ app.use((req, res, next) => {
       req.path === '/api/users/reset' ||
       req.path === '/api/users/resend-otp' ||
       req.path === '/api/users/verify' ||
+      req.path === '/api/users/airtime' || // Skip CSRF for airtime purchases
+      req.path === '/api/users/airtime/limits' || // Skip CSRF for airtime limits
+      req.path === '/api/users/airtime/settings' || // Skip CSRF for airtime settings
       req.path.startsWith('/api/users/')) { // Skip CSRF for all user API endpoints
     return next();
   }
+
   csurf()(req, res, next);
 });
 
@@ -248,6 +267,7 @@ const startServer = async () => {
     app.use("/api/users/chat", chatRoutes);
     app.use("/api/users/admin/chat", chatRoutes);
     app.use("/api/users/admin/auth", authRoutes);
+    app.use("/api/auth", authUserRoutes);
     app.use("/api/users/admin/x", xRoutes);
     app.use("/api/users", airtimeRoutes);
 

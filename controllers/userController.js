@@ -173,6 +173,32 @@ const redeemPoints = async (req, res, next) => {
   }
 };
 
+const changePin = async (req, res, next) => {
+  const userId = req.user.id;
+  const { currentPin, newPin } = req.body;
+
+  // Validate input
+  if (!currentPin || !newPin) {
+    return res.status(400).json({
+      message: 'Current PIN and new PIN are required'
+    });
+  }
+
+  // Validate PIN format (4-6 digits)
+  if (!/^\d{4,6}$/.test(currentPin) || !/^\d{4,6}$/.test(newPin)) {
+    return res.status(400).json({
+      message: 'PIN must be 4-6 digits'
+    });
+  }
+
+  try {
+    const result = await userService.changePin(userId, currentPin, newPin);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const googleAuth = async (req, res) => {
   try {
     const authUrl = oauthService.getGoogleAuthURL();
@@ -199,6 +225,21 @@ const googleAuthCallback = async (req, res) => {
   }
 };
 
+const refreshToken = async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: 'Refresh token is required' });
+  }
+
+  try {
+    const result = await authService.refreshAccessToken(refreshToken);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createUser,
   getReferrals,
@@ -214,6 +255,8 @@ module.exports = {
   deleteBankAccount,
   verifyBankAccount,
   redeemPoints,
+  changePin,
   googleAuth,
   googleAuthCallback,
+  refreshToken,
 };

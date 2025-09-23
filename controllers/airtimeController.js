@@ -113,20 +113,32 @@ const buyAirtime = async (req, res, next) => {
       });
     }
 
-    // Extract network from phone number
-    networkName = extractNetworkFromPhoneNumber(billersCode);
-    if (!networkName) {
-      return next({
-        status: 400,
-        message: "Unable to determine network from phone number. Please check the number.",
-      });
+    // Handle test phone numbers for testing purposes
+    const testPhoneNumbers = {
+      '08011111111': { network: 'mtn', scenario: 'successful' },
+      '201000000000': { network: 'mtn', scenario: 'pending' },
+      '500000000000': { network: 'mtn', scenario: 'unexpected' },
+      '400000000000': { network: 'mtn', scenario: 'no_response' },
+      '300000000000': { network: 'mtn', scenario: 'timeout' }
+    };
+
+    let testScenario = null;
+    if (testPhoneNumbers[billersCode]) {
+      networkName = testPhoneNumbers[billersCode].network;
+      testScenario = testPhoneNumbers[billersCode].scenario;
+      console.log(`Test phone number detected: ${billersCode}, scenario: ${testScenario}`);
+    } else {
+      // Extract network from phone number for regular numbers
+      networkName = extractNetworkFromPhoneNumber(billersCode);
+      if (!networkName) {
+        return next({
+          status: 400,
+          message: "Unable to determine network from phone number. Please check the number.",
+        });
+      }
     }
 
     const correctServiceId = await getServiceIdForNetwork(networkName, provider._id);
-    console.log('correctServiceId from database:', correctServiceId);
-    console.log('networkName:', networkName);
-    console.log('provider._id:', provider._id);
-    console.log('provider.name:', provider.name);
 
     if (!correctServiceId) {
       console.log('Using fallback default service IDs');
@@ -161,16 +173,148 @@ const buyAirtime = async (req, res, next) => {
       }
     } else {
       actualServiceId = correctServiceId;
-      console.log('Using database service ID:', actualServiceId);
+      
     }
-
-    console.log('Final actualServiceId before API call:', actualServiceId);
 
     request_id = generateRequestId();
     if (!request_id) {
       return next({
         status: 500,
         message: "Could not process request ID. Please try again.",
+      });
+    }
+
+    // Handle test scenarios for test phone numbers
+    if (testScenario) {
+      console.log(`Handling test scenario: ${testScenario} for phone: ${billersCode}`);
+
+      switch (testScenario) {
+        case 'successful':
+          // Simulate successful transaction - continue with normal flow but we'll mock the API response
+          console.log('Simulating successful transaction for test phone number');
+          break; // Continue with normal flow
+
+        case 'pending':
+          // Simulate pending response
+          console.log('Simulating pending response for test phone number');
+          return next({
+            status: 202,
+            message: "Transaction is being processed. Please check back in a few minutes.",
+          });
+
+        case 'unexpected':
+          // Simulate unexpected response
+          console.log('Simulating unexpected response for test phone number');
+          return next({
+            status: 500,
+            message: "Unexpected response from payment provider. Please try again.",
+          });
+
+        case 'no_response':
+          // Simulate no response
+          console.log('Simulating no response for test phone number');
+          return next({
+            status: 504,
+            message: "Payment provider is not responding. Please try again later.",
+          });
+
+        case 'timeout':
+          // Simulate timeout
+          console.log('Simulating timeout for test phone number');
+          return next({
+            status: 408,
+            message: "Request timed out. Please try again.",
+          });
+
+        default:
+          console.log('Unknown test scenario, continuing with normal flow');
+      }
+    }
+
+    // Handle failed scenario for random phone numbers not in test list
+    // COMMENTED OUT: This was causing all non-test phone numbers to fail
+    // Uncomment the following block only for testing purposes
+    /*
+    if (!testScenario) {
+      // For any random phone number not in test list, simulate failed transaction
+      console.log(`Random phone number detected: ${billersCode}, simulating failed transaction`);
+      return next({
+        status: 502,
+        message: "The transaction could not be completed. Please try again or contact support if the issue persists.",
+      });
+    }
+    */
+
+    // Handle successful test scenario with mock response
+    if (testScenario === 'successful') {
+      console.log('Processing successful test scenario with mock response');
+
+      // Create mock successful response
+      const mockApiResponse = {
+        success: true,
+        data: {
+          code: '000',
+          response_description: 'TRANSACTION SUCCESSFUL',
+          requestId: request_id,
+          reference: request_id,
+          transaction_date: {
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toTimeString().split(' ')[0]
+          },
+          amount: parseInt(amount),
+          phone: billersCode.replace(/\D/g, ''),
+          content: {
+            transactions: {
+              status: 'delivered',
+              product_name: 'MTN Airtime',
+              unique_element: billersCode.replace(/\D/g, ''),
+              unit_price: parseInt(amount),
+              quantity: 1,
+              total_amount: parseInt(amount),
+              discount: null,
+              transactionId: request_id
+            }
+          }
+        }
+      };
+
+      // Skip actual API call and use mock response
+      apiResponse = mockApiResponse;
+
+      // Skip to transaction processing
+      const apiResponseData = apiResponse.success ? apiResponse.data : apiResponse;
+      const newTransaction = await transactionService.processPaymentApiResponse(
+        apiResponseData,
+        amount,
+        user._id,
+        request_id,
+        actualServiceId,
+        transactionContact,
+        {
+          provider: provider.name,
+          network: networkName,
+          transactionType: 'airtime',
+          commissionAmount: commissionAmount,
+          adjustedAmount: adjustedAmount
+        }
+      );
+
+      const result = await transactionService.handlePaymentOutcome(
+        newTransaction,
+        wallet,
+        adjustedAmount,
+        user._id,
+        transactionContact
+      );
+
+      return res.status(result.status).json({
+        message: result.message,
+        provider: provider.displayName,
+        network: networkName,
+        ...(result.transactionDetails && {
+          transaction: result.transactionDetails,
+        }),
+        ...(result.newBalance !== undefined && { newBalance: result.newBalance }),
       });
     }
 
@@ -218,23 +362,34 @@ const buyAirtime = async (req, res, next) => {
 
         // Check if VTPass returned an error (either HTTP error or transaction failure)
         if (!apiResponse.success) {
-          console.log('VTPass transaction failed:', {
-            error: apiResponse.error,
-            responseCode: apiResponse.data?.code,
-            transactionStatus: apiResponse.data?.content?.transactions?.status,
-            responseDescription: apiResponse.data?.response_description,
-            fullResponse: apiResponse.data,
-            requestData: {
-              request_id,
-              serviceID: actualServiceId,
-              amount: parseInt(amount),
-              phone: parseInt(billersCode.replace(/\D/g, ''))
-            }
-          });
+          const responseCode = apiResponse.data?.code;
+          const responseDescription = apiResponse.data?.response_description;
+          const errorMessage = apiResponse.error;
+
+          // Map VTPass error codes to user-friendly messages
+          let userFriendlyMessage = 'Payment service temporarily unavailable. Please try again in a few minutes.';
+          let errorType = 'vtpass_transaction_failed';
+
+          if (responseCode === '019' || responseDescription?.toUpperCase().includes('DUPLICATE')) {
+            userFriendlyMessage = 'This transaction appears to be a duplicate. Please wait 15 seconds before trying again with the same recipient.';
+            errorType = 'duplicate_transaction';
+          } else if (responseCode === '016' || responseDescription?.toUpperCase().includes('TRANSACTION FAILED')) {
+            userFriendlyMessage = 'The transaction could not be completed. Please try again or contact support if the issue persists.';
+            errorType = 'transaction_failed';
+          } else if (responseDescription?.toUpperCase().includes('INSUFFICIENT BALANCE')) {
+            userFriendlyMessage = 'Your wallet balance is not enough for this purchase. Please top up your wallet.';
+            errorType = 'insufficient_balance';
+          } else if (responseDescription?.toUpperCase().includes('INVALID')) {
+            userFriendlyMessage = 'Invalid request parameters. Please check your input and try again.';
+            errorType = 'invalid_request';
+          } else if (responseDescription?.toUpperCase().includes('SERVICE UNAVAILABLE')) {
+            userFriendlyMessage = 'The airtime service is temporarily unavailable. Please try again later.';
+            errorType = 'service_unavailable';
+          }
 
           await createLog(
             'error',
-            `VTPass airtime purchase failed: ${apiResponse.error} (Code: ${apiResponse.data?.code})`,
+            `VTPass airtime purchase failed: ${errorMessage} (Code: ${responseCode})`,
             'transaction',
             req.user?.id,
             req.user?.email,
@@ -243,12 +398,12 @@ const buyAirtime = async (req, res, next) => {
               serviceID: actualServiceId,
               network: networkName,
               requestId: request_id,
-              errorType: 'vtpass_transaction_failed',
+              errorType,
               // Enhanced VTPass error details for admin debugging
               vtpassErrorDetails: {
-                responseCode: apiResponse.data?.code,
+                responseCode,
                 transactionStatus: apiResponse.data?.content?.transactions?.status,
-                responseDescription: apiResponse.data?.response_description,
+                responseDescription,
                 transactionRef: apiResponse.data?.content?.transactions?.transactionId,
                 requestId: apiResponse.data?.requestId,
                 amount: apiResponse.data?.amount,
@@ -277,7 +432,7 @@ const buyAirtime = async (req, res, next) => {
 
           return next({
             status: 502,
-            message: apiResponse.error || 'Payment service temporarily unavailable. Please try again in a few minutes.',
+            message: userFriendlyMessage,
           });
         }
       } else if (provider.name === 'clubkonnect') {
@@ -302,9 +457,28 @@ const buyAirtime = async (req, res, next) => {
 
         // Check if Clubkonnect returned an error
         if (!apiResponse.success) {
+          const errorMessage = apiResponse.error;
+          let userFriendlyMessage = 'Payment service temporarily unavailable. Please try again in a few minutes.';
+          let errorType = 'clubkonnect_api_error';
+
+          // Map Clubkonnect error messages to user-friendly messages
+          if (errorMessage?.toLowerCase().includes('duplicate')) {
+            userFriendlyMessage = 'This transaction appears to be a duplicate. Please wait 15 seconds before trying again with the same recipient.';
+            errorType = 'duplicate_transaction';
+          } else if (errorMessage?.toLowerCase().includes('insufficient') || errorMessage?.toLowerCase().includes('balance')) {
+            userFriendlyMessage = 'Your wallet balance is not enough for this purchase. Please top up your wallet.';
+            errorType = 'insufficient_balance';
+          } else if (errorMessage?.toLowerCase().includes('invalid')) {
+            userFriendlyMessage = 'Invalid request parameters. Please check your input and try again.';
+            errorType = 'invalid_request';
+          } else if (errorMessage?.toLowerCase().includes('timeout') || errorMessage?.toLowerCase().includes('unavailable')) {
+            userFriendlyMessage = 'The airtime service is temporarily unavailable. Please try again later.';
+            errorType = 'service_unavailable';
+          }
+
           await createLog(
             'error',
-            `Clubkonnect airtime purchase failed: ${apiResponse.error}`,
+            `Clubkonnect airtime purchase failed: ${errorMessage}`,
             'transaction',
             req.user?.id,
             req.user?.email,
@@ -313,7 +487,7 @@ const buyAirtime = async (req, res, next) => {
               serviceID: actualServiceId,
               network: networkName,
               requestId: request_id,
-              errorType: 'clubkonnect_api_error',
+              errorType,
               clubkonnectError: apiResponse.details,
               billersCode: billersCode.replace(/(\d{3})\d{6}(\d{3})/, '$1******$2')
             },
@@ -322,7 +496,7 @@ const buyAirtime = async (req, res, next) => {
 
           return next({
             status: 502,
-            message: apiResponse.error || 'Payment service temporarily unavailable. Please try again in a few minutes.',
+            message: userFriendlyMessage,
           });
         }
       } else {
@@ -332,6 +506,21 @@ const buyAirtime = async (req, res, next) => {
         });
       }
     } catch (apiError) {
+      let userFriendlyMessage = 'Payment service temporarily unavailable. Please try again in a few minutes.';
+      let errorType = 'api_call_failed';
+
+      // Map API call errors to user-friendly messages
+      if (apiError.message?.toLowerCase().includes('timeout')) {
+        userFriendlyMessage = 'The request timed out. Please try again.';
+        errorType = 'api_timeout';
+      } else if (apiError.message?.toLowerCase().includes('network') || apiError.code === 'ECONNREFUSED') {
+        userFriendlyMessage = 'Network connection failed. Please check your internet connection and try again.';
+        errorType = 'network_error';
+      } else if (apiError.message?.toLowerCase().includes('certificate') || apiError.code === 'CERT_HAS_EXPIRED') {
+        userFriendlyMessage = 'Security certificate error. Please try again later.';
+        errorType = 'certificate_error';
+      }
+
       await createLog(
         'error',
         `Airtime purchase API call failed: ${apiError.message}`,
@@ -343,7 +532,8 @@ const buyAirtime = async (req, res, next) => {
           serviceID: actualServiceId,
           network: networkName,
           requestId: request_id,
-          errorType: 'api_call_failed',
+          errorType,
+          errorCode: apiError.code,
           errorStack: apiError.stack,
           billersCode: billersCode.replace(/(\d{3})\d{6}(\d{3})/, '$1******$2')
         },
@@ -352,7 +542,7 @@ const buyAirtime = async (req, res, next) => {
 
       return next({
         status: 502,
-        message: 'Payment service temporarily unavailable. Please try again in a few minutes.',
+        message: userFriendlyMessage,
       });
     }
 
@@ -506,7 +696,7 @@ const extractNetworkFromPhoneNumber = (phoneNumber) => {
   // Nigerian phone number prefixes
   if (cleanNumber.startsWith('234')) {
     const prefix = cleanNumber.substring(3, 6);
-    if (['703', '706', '803', '806', '810', '813', '814', '816', '903', '906'].includes(prefix)) {
+    if (['801','703', '706', '803', '806', '810', '813', '814', '816', '903', '906'].includes(prefix)) {
       return 'mtn';
     }
     if (['705', '805', '807', '811', '815', '905'].includes(prefix)) {
@@ -523,7 +713,7 @@ const extractNetworkFromPhoneNumber = (phoneNumber) => {
   // Handle 0-prefixed numbers
   if (cleanNumber.startsWith('0')) {
     const prefix = cleanNumber.substring(1, 4);
-    if (['703', '706', '803', '806', '810', '813', '814', '816', '903', '906'].includes(prefix)) {
+    if (['801', '703', '706', '803', '806', '810', '813', '814', '816', '903', '906'].includes(prefix)) {
       return 'mtn';
     }
     if (['705', '805', '807', '811', '815', '905'].includes(prefix)) {

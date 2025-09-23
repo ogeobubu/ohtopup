@@ -193,7 +193,7 @@ const depositWallet = async (req, res) => {
 };
 
 const depositPaystackWallet = async (req, res) => {
-  const { userId, amount: rawAmount, reference, callbackUrl } = req.body;
+  const { userId, amount: rawAmount, reference, callbackUrl, transactionPin } = req.body;
 
   const amount = Number(rawAmount);
 
@@ -207,6 +207,21 @@ const depositPaystackWallet = async (req, res) => {
   }
 
   try {
+    const user = await dbService.findUserById(userId);
+
+    // Verify transaction PIN
+    if (!user.transactionPin) {
+      return res.status(400).json({
+        message: "Transaction PIN not set. Please set your transaction PIN in settings.",
+      });
+    }
+
+    if (user.transactionPin !== transactionPin) {
+      return res.status(400).json({
+        message: "Invalid transaction PIN.",
+      });
+    }
+
     const wallet = await dbService.findWalletByUserId(userId);
 
     const existingCompletedTx =
@@ -243,8 +258,6 @@ const depositPaystackWallet = async (req, res) => {
     await wallet.save();
 
     await walletService.handleReferralDepositReward(userId, amount);
-
-    const user = await dbService.findUserById(userId);
 
     // Send email asynchronously to prevent transaction delays
     sendTransactionEmailNotification(user.email, user.username, {
@@ -1072,14 +1085,22 @@ const handleTransferReversed = async (event) => {
 };
 
 const storePaymentReference = async (reference, userId, amount) => {
+  // Check if transaction already exists
+  const existingTransaction = await Transaction.findOne({ reference });
+  if (existingTransaction) {
+    console.warn(`Transaction with reference ${reference} already exists. Skipping duplicate creation.`);
+    return existingTransaction;
+  }
+
   // Store in your database
-  await Transaction.create({
+  const transaction = await Transaction.create({
     reference,
     userId,
     amount,
     status: 'pending',
     createdAt: new Date()
   });
+  return transaction;
 };
 
 // Find user by payment reference
@@ -1098,6 +1119,12 @@ const completeWalletDeposit = async ({ userId, reference, amount, paystackData }
 
   if (!transaction) {
     throw new Error('Transaction not found');
+  }
+
+  // Check if transaction is already completed to prevent duplicate processing
+  if (transaction.status === 'completed') {
+    console.log(`Transaction ${reference} already completed, skipping duplicate processing`);
+    return; // Silently return without error to prevent webhook retries
   }
 
   if (transaction.status !== 'pending') {
@@ -1122,6 +1149,15 @@ const completeWalletDeposit = async ({ userId, reference, amount, paystackData }
 
   // Credit user wallet
   await walletService.creditWallet(wallet, amount);
+
+  // Send push notification for successful deposit (only once when status changes to completed)
+  const notificationService = require('../services/notificationService');
+  await notificationService.createNotification(
+    userId,
+    'Wallet Funded Successfully',
+    `Your wallet has been credited with ₦${amount.toLocaleString()}. New balance: ₦${wallet.balance.toLocaleString()}`,
+    '/wallet'
+  );
 
   console.log(`Wallet deposit completed: ${reference} - ₦${amount}`);
 };
@@ -1917,7 +1953,7 @@ const getAllTransactions = async (req, res) => {
 
 const getTransactionsByUser = async (req, res) => {
   const userId = req.user.id;
-  const { type, page = 1, limit = 10, reference } = req.query;
+  const { type, page = 1, limit = 10, reference, status } = req.query;
 
   try {
     const wallet = await dbService.findWalletByUserId(userId);
@@ -1931,6 +1967,11 @@ const getTransactionsByUser = async (req, res) => {
       walletFilters.reference = { $regex: reference, $options: "i" };
     }
 
+    // Add status filter for wallet transactions
+    if (status) {
+      walletFilters.status = status;
+    }
+
     // Get utility transactions (data, airtime, cable, electricity)
     const utilityFilters = {
       user: userId,
@@ -1942,6 +1983,11 @@ const getTransactionsByUser = async (req, res) => {
 
     if (reference) {
       utilityFilters.requestId = { $regex: reference, $options: "i" };
+    }
+
+    // Add status filter for utility transactions
+    if (status) {
+      utilityFilters.status = status;
     }
 
     console.log('Wallet Controller - Utility query filters:', utilityFilters);
@@ -1963,21 +2009,50 @@ const getTransactionsByUser = async (req, res) => {
         type: utilityTransactions[0].type,
         product_name: utilityTransactions[0].product_name,
         user: utilityTransactions[0].user
-      } : null
+      } : null,
+      // Check for potential duplicates and reference overlaps
+      walletRefs: walletTransactions.map(tx => tx.reference),
+      utilityRefs: utilityTransactions.map(tx => tx.requestId),
+      overlappingRefs: walletTransactions
+        .filter(tx => utilityTransactions.some(utx => utx.requestId === tx.reference))
+        .map(tx => tx.reference),
+      duplicateWalletRefs: walletTransactions.filter((tx, index, arr) =>
+        arr.findIndex(t => t.reference === tx.reference) !== index
+      ).map(tx => tx.reference),
+      duplicateUtilityRefs: utilityTransactions.filter((tx, index, arr) =>
+        arr.findIndex(t => t.requestId === tx.requestId) !== index
+      ).map(tx => tx.requestId)
     });
 
-    // Combine and sort all transactions by date
-    const allTransactions = [
-      ...walletTransactions.map(tx => ({
-        ...tx.toJSON(),
-        transactionType: 'wallet',
-        ...(tx.type === "withdrawal" && {
-          bankName: tx.bankName,
-          accountNumber: tx.accountNumber,
-          bankCode: tx.bankCode,
-        }),
-      })),
-      ...utilityTransactions.map(tx => ({
+    // Combine and sort all transactions by date, ensuring no duplicates
+    // Use reference/requestId as deduplication key, preferring utility transactions over wallet transactions
+    const transactionMap = new Map();
+
+    // Add wallet transactions first (lower priority)
+    walletTransactions.forEach(tx => {
+      const key = tx.reference; // Use reference for deduplication
+      if (!transactionMap.has(key)) {
+        transactionMap.set(key, {
+          ...tx.toJSON(),
+          transactionType: 'wallet',
+          ...(tx.type === "withdrawal" && {
+            bankName: tx.bankName,
+            accountNumber: tx.accountNumber,
+            bankCode: tx.bankCode,
+          }),
+        });
+      } else {
+        console.warn(`Duplicate wallet transaction found with reference: ${key}`);
+      }
+    });
+
+    // Add utility transactions (higher priority - will override wallet transactions with same reference)
+    utilityTransactions.forEach(tx => {
+      const key = tx.requestId; // Use requestId as deduplication key
+      if (transactionMap.has(key)) {
+        console.log(`Utility transaction ${key} overriding existing transaction`);
+      }
+      transactionMap.set(key, {
         ...tx.toJSON(),
         transactionType: 'utility',
         // Map utility transaction fields to match wallet transaction format
@@ -1994,12 +2069,15 @@ const getTransactionsByUser = async (req, res) => {
         ...(tx.dataPlan && { dataPlan: tx.dataPlan }),
         ...(tx.dataAmount && { dataAmount: tx.dataAmount }),
         ...(tx.validity && { validity: tx.validity }),
-        ...(tx.transactionType && { transactionType: tx.transactionType }),
         ...(tx.token && { token: tx.token }),
         ...(tx.units && { units: tx.units }),
         ...(tx.subscription_type && { subscription_type: tx.subscription_type }),
-      }))
-    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      });
+    });
+
+    // Convert map to array and sort by date
+    const allTransactions = Array.from(transactionMap.values())
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     // Apply type filter if specified (for wallet transactions only)
     let filteredTransactions = allTransactions;
@@ -2024,11 +2102,16 @@ const getTransactionsByUser = async (req, res) => {
       totalCombined: allTransactions.length,
       filteredCount: filteredTransactions.length,
       paginatedCount: paginatedTransactions.length,
+      deduplicationEffective: (walletTransactions.length + utilityTransactions.length) > allTransactions.length,
+      duplicatesRemoved: (walletTransactions.length + utilityTransactions.length) - allTransactions.length,
+      referenceBasedDeduplication: true,
+      utilityTransactionsOverrideWallet: true,
       sampleTransaction: paginatedTransactions[0] ? {
         type: paginatedTransactions[0].type,
         transactionType: paginatedTransactions[0].transactionType,
         product_name: paginatedTransactions[0].product_name,
-        status: paginatedTransactions[0].status
+        status: paginatedTransactions[0].status,
+        reference: paginatedTransactions[0].reference
       } : null
     });
 
@@ -2788,6 +2871,65 @@ const testWebhook = async (req, res) => {
   });
 };
 
+// Test webhook with existing transaction
+const testWebhookWithTransaction = async (req, res) => {
+  try {
+    const { reference } = req.body;
+
+    if (!reference) {
+      return res.status(400).json({
+        message: 'Reference is required for webhook test'
+      });
+    }
+
+    // Find the transaction
+    const transaction = await Transaction.findOne({ reference });
+    if (!transaction) {
+      return res.status(404).json({
+        message: 'Transaction not found with the provided reference'
+      });
+    }
+
+    // Simulate a Paystack webhook payload
+    const mockWebhookData = {
+      event: 'charge.success',
+      data: {
+        reference: reference,
+        amount: transaction.amount * 100, // Convert to kobo
+        customer: {
+          email: 'test@example.com'
+        },
+        metadata: {
+          userId: transaction.walletId.toString(),
+          transactionId: transaction._id.toString()
+        }
+      }
+    };
+
+    console.log('Testing webhook with mock data:', mockWebhookData);
+
+    // Process the webhook
+    await processWebhookEvent(mockWebhookData);
+
+    res.status(200).json({
+      message: 'Webhook test completed successfully',
+      transaction: {
+        reference: transaction.reference,
+        status: transaction.status,
+        amount: transaction.amount
+      },
+      webhookProcessed: true
+    });
+
+  } catch (error) {
+    console.error('Error testing webhook:', error);
+    res.status(500).json({
+      message: 'Error testing webhook',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createWallet,
   getWallet,
@@ -2813,6 +2955,7 @@ module.exports = {
   resetWalletSettings,
   handlePaystackWebhook,
   testWebhook,
+  testWebhookWithTransaction,
   // New withdrawal management functions
   getWithdrawalsForAdmin,
   approveWithdrawal,

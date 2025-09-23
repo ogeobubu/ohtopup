@@ -1,0 +1,27 @@
+{
+  "from": "\"OhTopUp\" <ohtopup@gmail.com>",
+  "to": "ogeobubu@gmail.com",
+  "subject": "Transaction Pending: Data Plan Purchase",
+  "html": "\n        <div style=\"font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n          <div style=\"text-align: center; padding-bottom: 20px;\">\n            <div style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0;\">\n              <h1 style=\"margin: 0; font-size: 24px;\">Transaction Update</h1>\n            </div>\n          </div>\n          <div style=\"background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px;\">\n            <p style=\"font-size: 16px; line-height: 1.5; color: #555;\">Hello <strong>ogeobubu</strong>,</p>\n            <p style=\"font-size: 16px; line-height: 1.5; color: #555;\">Your recent transaction is <strong style=\"color: #dc3545;\">Pending</strong>.</p>\n\n            <div style=\"margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;\">\n              <div style=\"display: table; width: 100%;\">\n                <div style=\"display: table-row;\">\n                  <div style=\"display: table-cell; padding: 5px 0; font-weight: bold; color: #333;\">Type:</div>\n                  <div style=\"display: table-cell; padding: 5px 0; color: #555;\">Transaction</div>\n                </div>\n                <div style=\"display: table-row;\">\n                  <div style=\"display: table-cell; padding: 5px 0; font-weight: bold; color: #333;\">Description:</div>\n                  <div style=\"display: table-cell; padding: 5px 0; color: #555;\">Data Plan Purchase</div>\n                </div>\n                <div style=\"display: table-row;\">\n                  <div style=\"display: table-cell; padding: 5px 0; font-weight: bold; color: #333;\">Amount:</div>\n                  <div style=\"display: table-cell; padding: 5px 0; color: #555;\">100</div>\n                </div>\n                \n                \n                \n              </div>\n            </div>\n\n            <p style=\"font-size: 14px; color: #888; margin-top: 20px;\">If you have any questions, please contact our support team.</p>\n            <p style=\"font-size: 14px; color: #888;\">Thank you for using OhTopUp!</p>\n          </div>\n          <div style=\"text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;\">\n            <p>&copy; 2025 OhTopUp. All rights reserved.</p>\n            <p>OhTopUp | Lagos, Nigeria</p>\n            <p><a href=\"{{unsubscribeUrl}}\" style=\"color: #aaa;\">Unsubscribe</a></p>\n          </div>\n        </div>\n      ",
+  "headers": {
+    "List-Unsubscribe": "<http://localhost:5173/unsubscribe>",
+    "X-Mailer": "OhTopUp Email Service"
+  },
+  "trackingSettings": {
+    "clickTracking": {
+      "enable": false
+    },
+    "openTracking": {
+      "enable": false
+    }
+  },
+  "mailSettings": {
+    "sandboxMode": {
+      "enable": false
+    }
+  },
+  "emailType": "transaction",
+  "storedAt": "2025-09-16T17:26:51.704Z",
+  "status": "stored",
+  "filename": "email-1758043611704-dc7m1fvar.json"
+}

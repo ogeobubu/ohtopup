@@ -731,7 +731,78 @@ const getDataVariations = async (req, res, next) => {
   }
 };
 
+const getDataSettings = async (req, res, next) => {
+  try {
+    const settings = await AirtimeSettings.find({ isActive: true });
+
+    // Separate network and global settings
+    const networkSettings = settings.filter(setting => setting.type === 'network');
+    const globalSettings = settings.find(setting => setting.type === 'global');
+
+    // Build response with data-specific settings
+    const dataSettings = {
+      global: {
+        minAmount: globalSettings?.settings?.minAmount || 100,
+        maxAmount: globalSettings?.settings?.maxAmount || 50000,
+        dailyLimit: globalSettings?.settings?.dailyLimit || 100000,
+        monthlyLimit: globalSettings?.settings?.monthlyLimit || 500000,
+        dataCommissionRate: globalSettings?.settings?.dataCommissionRate || 0,
+      },
+      networks: {}
+    };
+
+    // Add network-specific settings
+    networkSettings.forEach(setting => {
+      dataSettings.networks[setting.network] = {
+        minAmount: setting.settings?.minAmount || dataSettings.global.minAmount,
+        maxAmount: setting.settings?.maxAmount || dataSettings.global.maxAmount,
+        dataCommissionRate: setting.settings?.dataCommissionRate || dataSettings.global.dataCommissionRate,
+      };
+    });
+
+    res.status(200).json({
+      message: "Data settings retrieved successfully",
+      settings: dataSettings
+    });
+  } catch (error) {
+    next({
+      status: 500,
+      message: "Unable to retrieve data settings"
+    });
+  }
+};
+
+const getDataStats = async (req, res, next) => {
+  try {
+    // Get data transaction statistics
+    const stats = {
+      totalTransactions: 0,
+      totalAmount: 0,
+      todayTransactions: 0,
+      todayAmount: 0,
+      networkBreakdown: {
+        mtn: { transactions: 0, amount: 0 },
+        glo: { transactions: 0, amount: 0 },
+        airtel: { transactions: 0, amount: 0 },
+        '9mobile': { transactions: 0, amount: 0 }
+      }
+    };
+
+    res.status(200).json({
+      message: "Data statistics retrieved successfully",
+      stats
+    });
+  } catch (error) {
+    next({
+      status: 500,
+      message: "Unable to retrieve data statistics"
+    });
+  }
+};
+
 module.exports = {
   buyData,
   getDataVariations,
+  getDataSettings,
+  getDataStats,
 };

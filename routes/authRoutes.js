@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const { TwitterApi } = require("twitter-api-v2");
+const { refreshToken } = require("../controllers/userController");
 require("dotenv").config();
 
 const appKey = process.env.X_API_KEY;
@@ -100,6 +101,9 @@ router.get("/x/callback", async (req, res) => {
     res.status(500).send("Error connecting X account.");
   }
 });
+
+// Refresh token endpoint
+router.post("/refresh", refreshToken);
 
 module.exports = {
   authRouter: router,

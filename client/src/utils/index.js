@@ -43,6 +43,49 @@ export const formatPhoneNumber = (phoneNumber) => {
   return cleanPhone;
 };
 
+export const extractNetworkFromPhoneNumber = (phoneNumber) => {
+  if (!phoneNumber) return null;
+
+  // Remove any non-numeric characters
+  const cleanNumber = phoneNumber.replace(/\D/g, '');
+
+  // Nigerian phone number prefixes
+  if (cleanNumber.startsWith('234')) {
+    const prefix = cleanNumber.substring(3, 6);
+    if (['801', '703', '706', '803', '806', '810', '813', '814', '816', '903', '906'].includes(prefix)) {
+      return 'mtn';
+    }
+    if (['705', '805', '807', '811', '815', '905'].includes(prefix)) {
+      return 'glo';
+    }
+    if (['701', '708', '802', '808', '812', '901', '902', '904', '907', '912'].includes(prefix)) {
+      return 'airtel';
+    }
+    if (['809', '817', '818', '909', '908'].includes(prefix)) {
+      return '9mobile';
+    }
+  }
+
+  // Handle 0-prefixed numbers
+  if (cleanNumber.startsWith('0')) {
+    const prefix = cleanNumber.substring(1, 4);
+    if (['801', '703', '706', '803', '806', '810', '813', '814', '816', '903', '906'].includes(prefix)) {
+      return 'mtn';
+    }
+    if (['705', '805', '807', '811', '815', '905'].includes(prefix)) {
+      return 'glo';
+    }
+    if (['701', '708', '802', '808', '812', '901', '902', '904', '907', '912'].includes(prefix)) {
+      return 'airtel';
+    }
+    if (['809', '817', '818', '909', '908'].includes(prefix)) {
+      return '9mobile';
+    }
+  }
+
+  return null;
+};
+
 export const customStyles = {
   control: (provided) => ({
     ...provided,

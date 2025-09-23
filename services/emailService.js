@@ -719,7 +719,7 @@ class EmailService {
     return this.sendTemplate('password-reset', email, {
       fullName,
       otp,
-      resetUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password`
+      resetUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset`
     });
   }
 

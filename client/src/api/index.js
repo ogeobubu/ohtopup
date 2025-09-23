@@ -399,7 +399,39 @@ export const purchaseAirtime = async (data) => {
     const response = await instance.post("/airtime", data);
     return response.data;
   } catch (error) {
-    throw new Error(error.response.data.message || "Error purchasing airtime");
+    // Enhanced error handling for airtime purchases
+    if (error.response?.data?.message) {
+      const serverMessage = error.response.data.message.toLowerCase();
+
+      // Map specific server error messages to user-friendly messages
+      if (serverMessage.includes('unable to determine network') || serverMessage.includes('network from phone number')) {
+        throw new Error('Unable to determine network from phone number. Please check the number and try again.');
+      } else if (serverMessage.includes('invalid phone') || serverMessage.includes('phone number')) {
+        throw new Error('Please enter a valid Nigerian phone number.');
+      } else if (serverMessage.includes('invalid amount') || serverMessage.includes('amount too low') || serverMessage.includes('minimum amount')) {
+        throw new Error('Please enter a valid amount (minimum ₦50).');
+      } else if (serverMessage.includes('duplicate')) {
+        throw new Error('This transaction appears to be a duplicate. Please wait 15 seconds before trying again with the same recipient.');
+      } else if (serverMessage.includes('insufficient balance') || serverMessage.includes('low balance')) {
+        throw new Error('Your wallet balance is not enough for this purchase. Please top up your wallet.');
+      } else if (serverMessage.includes('invalid pin') || serverMessage.includes('wrong pin') ||
+                 serverMessage.includes('transaction pin')) {
+        throw new Error('The transaction PIN you entered is incorrect. Please try again.');
+      } else if (serverMessage.includes('transaction failed') || serverMessage.includes('could not be completed') || serverMessage.includes('transaction could not')) {
+        throw new Error('The transaction could not be completed. Please try again or contact support if the issue persists.');
+      } else if (serverMessage.includes('service unavailable')) {
+        throw new Error('The airtime service is temporarily unavailable. Please try again later.');
+      } else {
+        // Use the server's message for other cases
+        throw new Error(error.response.data.message);
+      }
+    } else if (error.response?.status === 502) {
+      throw new Error('Payment service temporarily unavailable. Please try again in a few minutes.');
+    } else if (error.code === 'NETWORK_ERROR' || error.code === 'ECONNABORTED') {
+      throw new Error('Network connection failed. Please check your internet connection and try again.');
+    } else {
+      throw new Error('An unexpected error occurred while purchasing airtime. Please try again.');
+    }
   }
 };
 
