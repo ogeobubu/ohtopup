@@ -32,12 +32,22 @@ class EmailService {
       case 'gmail':
       default:
         this.transporter = nodemailer.createTransport({
-           service: 'gmail',
-           auth: {
-             user: process.env.EMAIL_USER,
-             pass: process.env.EMAIL_PASS,
-           },
-         });
+            service: 'gmail',
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+            },
+            // Add connection timeout and retry settings
+            pool: true,
+            maxConnections: 5,
+            maxMessages: 100,
+            rateDelta: 1000,
+            rateLimit: 5,
+            // Add timeout settings
+            connectionTimeout: 60000, // 60 seconds
+            greetingTimeout: 30000,   // 30 seconds
+            socketTimeout: 60000,     // 60 seconds
+          });
         break;
     }
   }
@@ -501,7 +511,8 @@ class EmailService {
         }
 
         // Wait before retry (optimized backoff)
-        const delay = Math.min(500 * Math.pow(1.5, attempt - 1), 3000); // Faster, shorter delays
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Exponential backoff: 1s, 2s, 4s, 8s, 10s max
+        console.log(`⏳ Waiting ${delay}ms before retry attempt ${attempt + 1}`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
