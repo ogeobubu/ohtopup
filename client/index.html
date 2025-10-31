@@ -8,10 +8,12 @@
     <!-- Primary Meta Tags -->
     <title>OhTopUp | Best Utility Bills Payment Platform in Nigeria | Airtime, Data, Cable TV, Electricity</title>
     <meta name="title" content="OhTopUp | Best Utility Bills Payment Platform in Nigeria | Airtime, Data, Cable TV, Electricity" />
-    <meta name="description" content="Nigeria's #1 utility payment platform. Buy airtime, data bundles, cable TV subscriptions, electricity bills instantly. Fast, secure, affordable. Pay bills online with ease. Get instant recharge for all networks - MTN, Airtel, Glo, 9mobile." />
-    <meta name="keywords" content="buy airtime online Nigeria, data bundles Nigeria, cable TV subscription Nigeria, electricity bill payment Nigeria, utility bills Nigeria, mobile recharge Nigeria, internet data Nigeria, DSTV subscription, GOTV subscription, PHCN bill, prepaid electricity Nigeria, cheap airtime Nigeria, instant recharge Nigeria, online bill payment Nigeria, utility services Nigeria, telecom services Nigeria" />
+    <meta name="description" content="Nigeria's #1 utility payment platform. Buy airtime, data bundles, cable TV subscriptions, electricity bills instantly. Fast, secure, affordable. Pay bills online with ease. Get instant recharge for all networks - MTN, Airtel, Glo, 9mobile. Best rates, 24/7 support." />
+    <meta name="keywords" content="buy airtime online Nigeria, data bundles Nigeria, cable TV subscription Nigeria, electricity bill payment Nigeria, utility bills Nigeria, mobile recharge Nigeria, internet data Nigeria, DSTV subscription, GOTV subscription, PHCN bill, prepaid electricity Nigeria, cheap airtime Nigeria, instant recharge Nigeria, online bill payment Nigeria, utility services Nigeria, telecom services Nigeria, MTN airtime, Airtel data, Glo recharge, 9mobile bundles, Nigerian utility payments, Lagos bill payment, Abuja electricity, Port Harcourt cable TV" />
     <meta name="author" content="OhTopUp" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1, snippet" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
     <meta name="bingbot" content="index, follow" />
     <meta name="language" content="English" />
@@ -72,6 +74,8 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="/src/main.tsx" as="script" />
+    <link rel="preload" href="/ohtopup-high-resolution-logo-white.png" as="image" />
 
     <!-- Structured Data - Organization -->
     <script type="application/ld+json">
@@ -318,23 +322,23 @@
     </script>
 
     <!-- Google Analytics (if needed) -->
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_TRACKING_ID"></script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'GA_TRACKING_ID');
-    </script> -->
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
 
-    <!-- Microsoft Clarity (if needed) -->
-    <!-- <script type="text/javascript">
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
       (function(c,l,a,r,i,t,y){
           c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
           t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
           y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", "CLARITY_PROJECT_ID");
-    </script> -->
+    </script>
 
   </head>
   <body>
@@ -358,6 +362,18 @@
               console.log('SW registration failed: ', registrationError);
             });
         });
+      }
+
+      // Core Web Vitals tracking
+      if ('web-vitals' in window) {
+        import('https://unpkg.com/web-vitals@3?module')
+          .then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+            getCLS(console.log);
+            getFID(console.log);
+            getFCP(console.log);
+            getLCP(console.log);
+            getTTFB(console.log);
+          });
       }
 
       // Preload critical resources

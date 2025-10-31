@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage with images -->
+  <url>
+    <loc>https://ohtopup.name.ng</loc>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/ohtopup-high-resolution-logo-white.png</image:loc>
+      <image:title>OhTopUp Logo</image:title>
+      <image:caption>OhTopUp - Nigeria's Leading Utility Payment Platform</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/ohtopup-high-resolution-logo-transparent.png</image:loc>
+      <image:title>OhTopUp Transparent Logo</image:title>
+      <image:caption>OhTopUp Brand Logo</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Airtime page -->
+  <url>
+    <loc>https://ohtopup.name.ng/airtime</loc>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/mtn.png</image:loc>
+      <image:title>MTN Airtime Recharge</image:title>
+      <image:caption>Buy MTN airtime online in Nigeria</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/airtel.png</image:loc>
+      <image:title>Airtel Airtime Recharge</image:title>
+      <image:caption>Buy Airtel airtime online in Nigeria</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/glo.png</image:loc>
+      <image:title>Glo Airtime Recharge</image:title>
+      <image:caption>Buy Glo airtime online in Nigeria</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/9mobile.png</image:loc>
+      <image:title>9mobile Airtime Recharge</image:title>
+      <image:caption>Buy 9mobile airtime online in Nigeria</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Data page -->
+  <url>
+    <loc>https://ohtopup.name.ng/data</loc>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/mtn.png</image:loc>
+      <image:title>MTN Data Bundles</image:title>
+      <image:caption>Buy MTN data bundles online in Nigeria</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/airtel.png</image:loc>
+      <image:title>Airtel Data Bundles</image:title>
+      <image:caption>Buy Airtel data bundles online in Nigeria</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/glo.png</image:loc>
+      <image:title>Glo Data Bundles</image:title>
+      <image:caption>Buy Glo data bundles online in Nigeria</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/9mobile.png</image:loc>
+      <image:title>9mobile Data Bundles</image:title>
+      <image:caption>Buy 9mobile data bundles online in Nigeria</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Cable TV page -->
+  <url>
+    <loc>https://ohtopup.name.ng/cable</loc>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/dstv.png</image:loc>
+      <image:title>DSTV Subscription</image:title>
+      <image:caption>Buy DSTV subscription online in Nigeria</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/gotv.png</image:loc>
+      <image:title>GOTV Subscription</image:title>
+      <image:caption>Buy GOTV subscription online in Nigeria</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Electricity page -->
+  <url>
+    <loc>https://ohtopup.name.ng/electricity</loc>
+    <image:image>
+      <image:loc>https://ohtopup.name.ng/electricity-icon.png</image:loc>
+      <image:title>Electricity Bill Payment</image:title>
+      <image:caption>Pay electricity bills online in Nigeria</image:caption>
+    </image:image>
+  </url>
+
+</urlset>
