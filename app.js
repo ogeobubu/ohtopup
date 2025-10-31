@@ -116,6 +116,9 @@ app.use(
       const allowedOrigins = [
         process.env.CLIENT_URL,
         process.env.MOBILE_APP_URL,
+        'https://ohtopup.name.ng',
+        'https://www.ohtopup.name.ng',
+        'https://ohtopup.onrender.com', // Render deployment URL
         'http://localhost:3000', // Common React dev server
         'http://localhost:5173', // Vite dev server
         'http://localhost:5174', // Vite dev server
@@ -131,6 +134,14 @@ app.use(
         'http://192.168.1.1:19006', // Common local network IP for Expo web
         // Add your production mobile app URLs here
       ].filter(Boolean); // Remove undefined values
+
+      // In production, allow all origins from your domain
+      if (process.env.NODE_ENV === 'production' && origin && (
+        origin.includes('ohtopup.name.ng') ||
+        origin.includes('ohtopup.onrender.com')
+      )) {
+        return callback(null, true);
+      }
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
