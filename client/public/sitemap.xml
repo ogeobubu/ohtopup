@@ -6,140 +6,211 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://ohtopup.onrender.com</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- Main Services -->
   <url>
-    <loc>https://ohtopup.onrender.com/airtime</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/airtime</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/data</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/data</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/cable</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/cable</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/electricity</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/electricity</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- User Dashboard -->
   <url>
-    <loc>https://ohtopup.onrender.com/dashboard</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/dashboard</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/wallet</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/wallet</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/transactions</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/transactions</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Authentication Pages -->
   <url>
-    <loc>https://ohtopup.onrender.com/login</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/login</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/register</loc>
-    <lastmod>2024-12-08</lastmod>
+    <loc>https://ohtopup.name.ng/create</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/verify</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/forgot</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/reset</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <!-- Support Pages -->
   <url>
-    <loc>https://ohtopup.onrender.com/support</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/support</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/contact</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/contact</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <!-- Static Pages -->
   <url>
-    <loc>https://ohtopup.onrender.com/about</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/about</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/privacy</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/pricing</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/terms</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/terms</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/tutorials</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- User Features -->
+  <url>
+    <loc>https://ohtopup.name.ng/referral</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/settings</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/utilities</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/rank</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/dice</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://ohtopup.name.ng/bet-dice</loc>
+    <lastmod>2025-10-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 
   <!-- Network-specific pages -->
   <url>
-    <loc>https://ohtopup.onrender.com/mtn</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/mtn</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/airtel</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/airtel</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/glo</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/glo</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://ohtopup.onrender.com/9mobile</loc>
-    <lastmod>2024-12-07</lastmod>
+    <loc>https://ohtopup.name.ng/9mobile</loc>
+    <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

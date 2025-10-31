@@ -19,7 +19,7 @@
 - **UI Components**: Transaction PIN modal for secure purchases
 
 ### Assumptions
-- Backend API is deployed and accessible at `https://ohtopup.onrender.com/api`
+- Backend API is deployed and accessible at `https://ohtopup.name.ng/api`
 - Users are authenticated and have valid JWT tokens
 - Transaction PIN is set and verified on the backend
 - Network connectivity is available for API calls
@@ -117,7 +117,7 @@ Create environment variables for API configuration:
 ```typescript
 // constants/Config.ts
 export const API_CONFIG = {
-  BASE_URL: 'https://ohtopup.onrender.com/api',
+  BASE_URL: 'https://ohtopup.name.ng/api',
   TIMEOUT: 10000,
 };
 
@@ -175,7 +175,7 @@ import axios, { AxiosInstance } from 'axios';
 import { store } from '../store';
 import { logout } from '../store/slices/authSlice';
 
-const BASE_URL = 'https://ohtopup.onrender.com/api';
+const BASE_URL = 'https://ohtopup.name.ng/api';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -1999,7 +1999,7 @@ export const SecurityUtils = {
 
   // Validate request origin
   validateOrigin: (origin: string): boolean => {
-    const allowedOrigins = ['https://ohtopup.onrender.com'];
+    const allowedOrigins = ['https://ohtopup.name.ng'];
     return allowedOrigins.includes(origin);
   },
 
@@ -2064,7 +2064,7 @@ Ensure all data is transmitted securely:
 
 ```typescript
 // Ensure all API calls use HTTPS
-const BASE_URL = 'https://ohtopup.onrender.com/api';
+const BASE_URL = 'https://ohtopup.name.ng/api';
 
 // Validate SSL certificates
 const httpsConfig = {
@@ -2526,7 +2526,7 @@ describe('Airtime Purchase', () => {
 
   it('should handle network errors', async () => {
     // Mock network failure
-    await device.setURLBlacklist(['https://ohtopup.onrender.com/*']);
+    await device.setURLBlacklist(['https://ohtopup.name.ng/*']);
 
     await element(by.text('Buy Airtime')).tap();
     await element(by.id('phone-input')).typeText('08031234567');

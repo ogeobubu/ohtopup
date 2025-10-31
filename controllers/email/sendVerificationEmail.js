@@ -29,7 +29,7 @@ const sendVerificationEmail = async (username, email, confirmationCode) => {
             <p style="font-size: 24px; font-weight: bold; text-align: center;">${confirmationCode}</p>
           </div>
           <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This code expires in 1 hour. If you didn't initiate this action, you can ignore this email.</p>
-          <a href="https://ohtopup.onrender.com/verify" style="background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">Verify Email</a>
+          <a href="https://ohtopup.name.ng/verify" style="background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">Verify Email</a>
         </div>
       `,
   };

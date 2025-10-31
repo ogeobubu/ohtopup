@@ -138,7 +138,7 @@ const createNotification = async (req, res, next) => {
             "username email"
           );
           if (user) {
-            let link = "https://ohtopup.onrender.com/dashboard";
+            let link = "https://ohtopup.name.ng/dashboard";
 
             await sendNotificationEmail(
               user.email,
@@ -169,7 +169,7 @@ const createNotification = async (req, res, next) => {
         return res.status(201).json({ notification: result.toObject() });
       }
 
-      let link = "https://ohtopup.onrender.com/dashboard";
+      let link = "https://ohtopup.name.ng/dashboard";
 
       await sendNotificationEmail(
         user.email,
@@ -308,7 +308,7 @@ const addPoint = async (req, res, next) => {
         user.username,
         notificationTitle,
         notificationMessage,
-        "https://ohtopup.onrender.com/wallet"
+        "https://ohtopup.name.ng/wallet"
       );
     }
 

@@ -46,7 +46,7 @@ const Referral = () => {
         await navigator.share({
           title: "Join me on this platform!",
           text: `Use my referral code: ${user?.referralCode}`,
-          url: `https://ohtopup.onrender.com/create?code=${user?.referralCode}`,
+          url: `https://ohtopup.name.ng/create?code=${user?.referralCode}`,
         });
         toast.success("Referral link shared successfully!");
       } catch {

@@ -45,7 +45,7 @@ const generateMarketingContent = async (req, res) => {
 1. TWEET (${randomTone} tone, focus on ${randomAngle}):
 - Length: 240-280 characters (leave room for engagement)
 - Include: ${randomEmoji} emoji and a clear CTA
-- Highlight: ohtopup.onrender.com's benefits (Airtime/Data/Electricity/CableTV)
+- Highlight: ohtopup.name.ng's benefits (Airtime/Data/Electricity/CableTV)
 - Avoid generic phrasing - be specific and compelling
 - Example structure: "Struggling with [pain point]? [Solution benefit]! [CTA]"
 

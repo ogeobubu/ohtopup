@@ -24,4 +24,4 @@ Allow: *.webp
 Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://ohtopup.onrender.com/sitemap.xml
+Sitemap: https://ohtopup.name.ng/sitemap.xml
