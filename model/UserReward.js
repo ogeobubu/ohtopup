@@ -52,7 +52,6 @@ const userRewardSchema = new mongoose.Schema(
 // Index for efficient queries
 userRewardSchema.index({ user: 1, status: 1 });
 userRewardSchema.index({ reward: 1 });
-userRewardSchema.index({ redemptionCode: 1 });
 userRewardSchema.index({ expiresAt: 1 });
 
 const UserReward = mongoose.model("UserReward", userRewardSchema);

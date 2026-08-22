@@ -17,34 +17,35 @@
     "build-all": "cd client && npx vite build && cd .. && yarn install"
   },
   "dependencies": {
-    "@google/genai": "^0.12.0",
     "@google/generative-ai": "^0.24.1",
     "@paystack/inline-js": "^2.22.1",
     "@sendgrid/mail": "^8.1.5",
-    "axios": "^1.7.7",
-    "bcrypt": "^5.1.1",
+    "axios": "^1.19.0",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
-    "crypto": "^1.0.1",
     "csurf": "^1.11.0",
     "dotenv": "^16.4.5",
     "expo-server-sdk": "^4.0.0",
-    "express": "^4.21.1",
-    "express-rate-limit": "^8.0.1",
-    "express-session": "^1.18.1",
-    "google-auth-library": "^9.15.1",
-    "googleapis": "^144.0.0",
+    "express": "^4.22.2",
+    "express-rate-limit": "^8.6.2",
+    "express-session": "^1.19.0",
+    "google-auth-library": "^11.0.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
-    "mongoose": "^8.8.1",
-    "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.16",
-    "react-paystack": "^6.0.0",
+    "mongoose": "^8.24.3",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^9.0.5",
     "twitter-api-v2": "^1.23.0"
   },
   "devDependencies": {
     "concurrently": "^7.0.0",
-    "nodemon": "^3.1.7",
-    "puppeteer": "^24.19.0"
+    "nodemon": "^3.1.14"
+  },
+  "overrides": {
+    "cookie": "^0.7.2"
+  },
+  "resolutions": {
+    "cookie": "^0.7.2"
   }
 }

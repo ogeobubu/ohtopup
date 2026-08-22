@@ -119,7 +119,6 @@ providerSchema.pre('save', async function(next) {
 });
 
 // Index for efficient queries
-providerSchema.index({ name: 1 });
 providerSchema.index({ isActive: 1 });
 providerSchema.index({ isDefault: 1 });
 providerSchema.index({ healthStatus: 1 });

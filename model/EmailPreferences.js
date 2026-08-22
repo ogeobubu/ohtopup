@@ -123,9 +123,6 @@ const emailPreferencesSchema = new mongoose.Schema({
 });
 
 // Indexes
-emailPreferencesSchema.index({ userId: 1 });
-emailPreferencesSchema.index({ unsubscribeToken: 1 });
-emailPreferencesSchema.index({ verificationToken: 1 });
 emailPreferencesSchema.index({ emailFrequency: 1 });
 
 // Pre-save middleware

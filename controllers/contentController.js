@@ -3,15 +3,20 @@ require("dotenv").config();
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
-if (!GOOGLE_API_KEY) {
-  console.error("GOOGLE_API_KEY not found in environment variables.");
-  process.exit(1);
-}
-
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+const model = GOOGLE_API_KEY
+  ? new GoogleGenerativeAI(GOOGLE_API_KEY).getGenerativeModel({
+      model: "gemini-1.5-flash-latest",
+    })
+  : null;
 
 const generateMarketingContent = async (req, res) => {
+  if (!model) {
+    return res.status(503).json({
+      error: "Content generation is not configured",
+      details: "GOOGLE_API_KEY is missing from the server environment",
+    });
+  }
+
   // Add dynamic elements to ensure variety
   const tones = [
     "exciting",

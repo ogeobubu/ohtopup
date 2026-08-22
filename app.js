@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -11,7 +13,6 @@ const authRoutes = require("./routes/authRoutes").authRouter
 const authUserRoutes = require("./routes/authUserRoutes");
 const xRoutes = require("./routes/xRoutes");
 const airtimeRoutes = require("./routes/airtimeRoutes");
-require("dotenv").config();
 const path = require("path");
 const crypto = require("crypto");
 const xController = require("./controllers/xController");
@@ -236,6 +237,14 @@ const PORT = process.env.PORT || 5001;
 
 const connectToDatabase = async () => {
   try {
+    const mongoUri = process.env.MONGODB_URI;
+
+    if (!mongoUri) {
+      throw new Error(
+        "MONGODB_URI is required. Add it to the root .env file (see .env.example)."
+      );
+    }
+
     // Set connection options for better reliability
     const options = {
       serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
@@ -243,7 +252,7 @@ const connectToDatabase = async () => {
       bufferCommands: false, // Disable mongoose buffering
     };
 
-    await mongoose.connect(process.env.MONGODB_URI, options);
+    await mongoose.connect(mongoUri, options);
     console.log("MongoDB connected successfully");
 
     // Add connection event listeners

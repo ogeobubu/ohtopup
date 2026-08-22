@@ -16,9 +16,6 @@ const settingsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for efficient queries
-settingsSchema.index({ type: 1 });
-
 const Settings = mongoose.model("Settings", settingsSchema);
 
 module.exports = Settings;
