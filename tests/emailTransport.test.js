@@ -27,3 +27,55 @@ test('Resend transport maps messages, protects BCC, and sanitizes errors', async
   delete process.env.RESEND_API_KEY;
   await assert.rejects(transport.sendMail({}), /RESEND_API_KEY is required/);
 });
+
+test('Resend exposes the rejection reason without exposing credentials', async (t) => {
+  const original = { ...process.env };
+  t.after(() => { process.env = original; });
+  process.env.EMAIL_PROVIDER = 'resend';
+  process.env.RESEND_API_KEY = 'test-secret';
+  process.env.RESEND_FROM_EMAIL = 'mail@example.com';
+  const post = t.mock.method(axios, 'post', async () => {
+    throw { response: { status: 403, data: { name: 'validation_error', message: 'The example.com domain is not verified. test-secret Bearer private-token re_privatekey' } } };
+  });
+  const transport = createTransport();
+  await assert.rejects(transport.sendMail({ to: 'user@example.com' }), error => {
+    assert.match(error.message, /example.com domain is not verified/);
+    assert.doesNotMatch(error.message, /test-secret|private-token|re_privatekey/);
+    assert.equal(error.code, 'validation_error');
+    assert.equal(error.statusCode, 403);
+    assert.equal(error.retryable, false);
+    assert.equal(error.config, undefined);
+    return true;
+  });
+  for (const status of [429, 503]) {
+    post.mock.mockImplementation(async () => { throw { response: { status } }; });
+    await assert.rejects(transport.sendMail({ to: 'user@example.com' }), error => error.retryable === true);
+  }
+});
+
+test('Permission failures are attempted once and retained for later delivery', async () => {
+  const fs = require('node:fs');
+  const vm = require('node:vm');
+  const path = require('node:path');
+  const filename = path.resolve(__dirname, '../services/emailService.js');
+  const localRequire = require('node:module').createRequire(filename);
+  const sandbox = {
+    module: { exports: {} }, process: { env: { EMAIL_PROVIDER: 'resend' } },
+    console: { log() {}, error() {} },
+    setInterval: () => ({ unref() {} }),
+    require: name => name === '../controllers/systemLogController' ? { createLog: async () => {} } : localRequire(name),
+  };
+  vm.runInNewContext(fs.readFileSync(filename, 'utf8'), sandbox, { filename });
+  const service = sandbox.module.exports;
+  let attempts = 0;
+  let stored;
+  service.transporter = { sendMail: async () => { attempts++; throw Object.assign(new Error('Domain not verified'), { retryable: false }); } };
+  service.storeEmailToFile = async data => { stored = data; return { filename: 'queued.json' }; };
+  const result = await service.sendEmail({ to: 'user@example.com', subject: 'Login notification' });
+  assert.equal(attempts, 1);
+  assert.equal(stored.subject, 'Login notification');
+  assert.equal(result.success, false);
+  assert.equal(result.stored, true);
+  assert.equal(result.retryable, false);
+  assert.equal(result.error, 'Domain not verified');
+});

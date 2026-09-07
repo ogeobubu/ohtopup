@@ -497,15 +497,19 @@ class EmailService {
           }
         );
 
-        // If this is the last attempt, try to store to file instead
-        if (attempt === retries) {
-          console.log('🔄 All email attempts failed, storing to file as fallback...');
+        // Permission and validation failures need a configuration fix, not retries.
+        if (attempt === retries || error.retryable === false) {
+          console.log(error.retryable === false
+            ? 'Email rejected; skipping retries and storing to file for later delivery.'
+            : '🔄 All email attempts failed, storing to file as fallback...');
           try {
             const storeResult = await this.storeEmailToFile(emailData);
             return {
               success: false,
               stored: true,
               message: 'Email stored for later delivery',
+              error: error.message,
+              retryable: error.retryable !== false,
               filename: storeResult.filename
             };
           } catch (storeError) {

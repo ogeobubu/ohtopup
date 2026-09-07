@@ -2,6 +2,19 @@ const axios = require('axios');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+function configurationError(message) {
+  return Object.assign(new Error(message), { retryable: false });
+}
+
+function safeErrorDetail(value) {
+  if (typeof value !== 'string') return '';
+  let detail = value;
+  if (process.env.RESEND_API_KEY) detail = detail.split(process.env.RESEND_API_KEY).join('[redacted]');
+  return detail.replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/re_[A-Za-z0-9_-]+/g, '[redacted]')
+    .replace(/[\r\n\t]/g, ' ').slice(0, 500);
+}
+
 // Keep the sendMail interface shared by account, transactional and newsletter mail.
 function createTransport(smtpOptions) {
   if (process.env.EMAIL_PROVIDER !== 'resend') {
@@ -12,9 +25,9 @@ function createTransport(smtpOptions) {
   }
 
   function verify() {
-    if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY is required');
+    if (!process.env.RESEND_API_KEY) throw configurationError('RESEND_API_KEY is required');
     if (!process.env.RESEND_FROM_EMAIL) {
-      throw new Error('RESEND_FROM_EMAIL is required');
+      throw configurationError('RESEND_FROM_EMAIL is required');
     }
     return true; // Configuration check only; does not send a health-check email.
   }
@@ -24,7 +37,7 @@ function createTransport(smtpOptions) {
     async sendMail(options) {
       verify();
       if (options.sandboxMode || options.mailSettings?.sandboxMode?.enable) {
-        throw new Error('Resend does not support sandboxMode');
+        throw configurationError('Resend does not support sandboxMode');
       }
       const sender = process.env.RESEND_FROM_EMAIL;
       const payload = {
@@ -50,7 +63,13 @@ function createTransport(smtpOptions) {
       } catch (error) {
         // Never expose Axios config: it contains the Authorization header.
         const status = error.response?.status;
-        throw new Error(status ? `Resend email request failed (HTTP ${status})` : 'Resend email request failed');
+        const detail = safeErrorDetail(error.response?.data?.message);
+        const message = status ? `Resend email request failed (HTTP ${status})` : 'Resend email request failed';
+        throw Object.assign(new Error(`${message}${detail ? `: ${detail}` : ''}`), {
+          statusCode: status,
+          code: safeErrorDetail(error.response?.data?.name) || 'resend_request_failed',
+          retryable: !status || status === 408 || status === 429 || status >= 500,
+        });
       }
     },
   };
