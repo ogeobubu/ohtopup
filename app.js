@@ -141,7 +141,7 @@ app.use(
 
       // In production, allow all origins from your domain
       if (process.env.NODE_ENV === 'production' && origin && (
-        ['https://ohtopup.name.ng', 'https://www.ohtopup.name.ng', 'https://ohtopup.onrender.com'].includes(origin)
+        ['https://ohtopup.pxxlspace.cv', 'https://ohtopup.name.ng', 'https://www.ohtopup.name.ng', 'https://ohtopup.onrender.com'].includes(origin)
       )) {
         return callback(null, true);
       }
