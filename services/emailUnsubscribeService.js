@@ -1,3 +1,4 @@
+const { emailLayout, escapeHtml } = require('./email/layout');
 const EmailPreferences = require('../model/EmailPreferences');
 const { createLog } = require('../controllers/systemLogController');
 const emailService = require('./emailService');
@@ -182,42 +183,12 @@ class EmailUnsubscribeService {
   async sendUnsubscribeConfirmation(email, emailType) {
     try {
       const subject = 'Unsubscribe Confirmation - OhTopUp';
-      const html = `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">Unsubscribe Confirmation</h1>
-          </div>
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello,</p>
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">
-              You have successfully unsubscribed from <strong>${emailType === 'all' ? 'all' : emailType}</strong> emails from OhTopUp.
-            </p>
-
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin-top: 0; color: #333;">What happens next?</h3>
-              <ul style="color: #555;">
-                <li>You will no longer receive ${emailType === 'all' ? 'any' : emailType} emails from us</li>
-                <li>You can update your preferences anytime from your account settings</li>
-                <li>You will still receive important security notifications</li>
-              </ul>
-            </div>
-
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/settings/notifications"
-                 style="background-color: #007bff; color: #fff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
-                Update Preferences
-              </a>
-            </div>
-
-            <p style="font-size: 14px; color: #888; margin-top: 20px;">
-              If you didn't request this unsubscribe, please contact our support team.
-            </p>
-          </div>
-          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; ${new Date().getFullYear()} OhTopUp. All rights reserved.</p>
-          </div>
-        </div>
-      `;
+      const html = emailLayout(`
+        <h1 style="margin:0 0 18px;font-size:22px;font-weight:600;color:#18232d;">Email preferences updated</h1>
+        <p style="margin:0 0 16px;color:#626d79;">You’ve unsubscribed from ${escapeHtml(emailType === 'all' ? 'optional' : emailType)} emails from OhTopUp.</p>
+        <p style="margin:0 0 16px;color:#626d79;">You’ll still receive important security notifications. You can change your preferences in your account settings.</p>
+        <a href="${escapeHtml(process.env.FRONTEND_URL || 'http://localhost:5173')}/settings/notifications" style="display:inline-block;margin:8px 0;padding:12px 20px;background-color:#3057c5;color:#fff;border-radius:4px;text-decoration:none;">Update preferences</a>
+      `);
 
       await emailService.sendEmail({
         to: email,

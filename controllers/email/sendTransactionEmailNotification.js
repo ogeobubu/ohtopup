@@ -1,3 +1,4 @@
+const { emailLayout } = require('../../services/email/layout');
 const { createTransport } = require('../../services/emailTransport');
 
 require("dotenv").config();
@@ -9,7 +10,7 @@ const createTransporter = () => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    
+
   });
 };
 
@@ -49,18 +50,18 @@ const sendResendResetOTPEmail = async (username, email, otpCode) => {
       to: email,
       from: process.env.EMAIL_USER,
       subject: "Your OTP Code for Password Reset - OhTopUp",
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
-          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Hello, ${username}!</h2>
-          <p style="font-size: 16px; line-height: 1.5;">We received a request to reset your password. To proceed, please use the One-Time Password (OTP) provided below:</p>
-          <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
-            <p style="font-size: 24px; font-weight: bold; text-align: center;">${otpCode}</p>
+      html: emailLayout(`
+        <div>
+
+          <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Hello, ${username}!</h2>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">We received a request to reset your password. To proceed, please use the One-Time Password (OTP) provided below:</p>
+          <div>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">${otpCode}</p>
           </div>
-          <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This code is valid for 10 minutes. If you did not request a password reset, you can safely ignore this email.</p>
-          <a href="http://localhost:5173/reset-password" style="background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">Reset Password</a>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">This code is valid for 10 minutes. If you did not request a password reset, you can safely ignore this email.</p>
+          <a href="http://localhost:5173/reset-password" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">Reset Password</a>
         </div>
-      `,
+      `),
     };
 
     await transporter.sendMail(mailOptions);
@@ -85,20 +86,20 @@ const sendVerificationEmail = async (username, email, confirmationCode) => {
       to: email,
       from: process.env.EMAIL_USER,
       subject: "Verification Code - OhTopUp",
-      html: `
-          <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-            <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
-            <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Welcome to OhTopUp, ${username}!</h2>
-            <p style="font-size: 16px; line-height: 1.5;">Thank you for creating an account. Please verify your email address to activate your account and start using our services.</p>
-            <p style="font-size: 16px; line-height: 1.5;">We noticed that you requested a new verification code. Here it is:</p>
-            <p style="font-size: 16px; line-height: 1.5;">Your verification code is:</p>
-            <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
-              <p style="font-size: 24px; font-weight: bold; text-align: center;">${confirmationCode}</p>
+      html: emailLayout(`
+          <div>
+
+            <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Welcome to OhTopUp, ${username}!</h2>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Thank you for creating an account. Please verify your email address to activate your account and start using our services.</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">We noticed that you requested a new verification code. Here it is:</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Your verification code is:</p>
+            <div>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">${confirmationCode}</p>
             </div>
-            <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This code expires in 10 minutes. If you didn't initiate this action, you can ignore this email.</p>
-            <a href="http://localhost:5173/verify" style="background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">Verify Email</a>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">This code expires in 10 minutes. If you didn't initiate this action, you can ignore this email.</p>
+            <a href="http://localhost:5173/verify" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">Verify Email</a>
           </div>
-        `,
+        `),
     };
 
     await transporter.sendMail(mailOptions);
@@ -142,41 +143,39 @@ const sendTransactionEmailAdminNotification = async (
     const result = await emailService.sendEmail({
       to: email,
       subject: `${transactionType} ${transactionStatus}: ${subjectProductName}`,
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <div style="text-align: center; padding-bottom: 20px;">
-             <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
-             <h1 style="color: #333; font-size: 24px; font-weight: bold;">Transaction Update</h1>
-          </div>
-          <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello ${username},</p>
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">The recent transaction is <strong>${transactionStatus}</strong>.</p>
+      html: emailLayout(`
+        <div>
+          <div>
 
-            <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #007bff; border-radius: 4px;">
-                <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Type:</strong> ${transactionType}</p>
-                <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Description:</strong> ${subjectProductName}</p>
-                <p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Amount:</strong> ${transactionAmount}</p>
+             <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Transaction Update</h1>
+          </div>
+          <div>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Hello ${username},</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">The recent transaction is <strong>${transactionStatus}</strong>.</p>
+
+            <div>
+                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;"><strong>Type:</strong> ${transactionType}</p>
+                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;"><strong>Description:</strong> ${subjectProductName}</p>
+                <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;"><strong>Amount:</strong> ${transactionAmount}</p>
                 ${
                   transactionDetails.balance
-                    ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>New Balance:</strong> ${transactionDetails.balance}</p>`
+                    ? `<p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;"><strong>New Balance:</strong> ${transactionDetails.balance}</p>`
                     : ""
                 }
                 ${
                   transactionDetails.reference
-                    ? `<p style="font-size: 16px; margin: 5px 0; color: #333;"><strong>Reference:</strong> ${transactionDetails.reference}</p>`
+                    ? `<p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;"><strong>Reference:</strong> ${transactionDetails.reference}</p>`
                     : ""
                 }
             </div>
 
 
-            <p style="font-size: 14px; color: #888; margin-top: 20px;">If you have any questions, please contact our support team.</p>
-            <p style="font-size: 14px; color: #888; margin-top: 5px;">Thank you for using our service.</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">If you have any questions, please contact our support team.</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Thank you for using our service.</p>
           </div>
-           <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-              <p>&copy; ${new Date().getFullYear()} OhTopUp Inc. All rights reserved.</p>
-           </div>
+
         </div>
-      `,
+      `),
       emailType: 'admin_transaction_notification'
     });
     console.log("Admin transaction notification email sent successfully!", result.messageId);
@@ -195,15 +194,15 @@ const sendLoginNotificationEmail = async (userEmail) => {
       to: process.env.EMAIL_USER,
       from: userEmail,
       subject: "User Login Notification",
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
-          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">User Login Notification</h2>
-          <p style="font-size: 16px; line-height: 1.5;">A user has successfully logged in:</p>
-          <p style="font-size: 16px; line-height: 1.5;"><strong>Email:</strong> ${userEmail}</p>
-          <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This is an automated message. Please do not reply.</p>
+      html: emailLayout(`
+        <div>
+
+          <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">User Login Notification</h2>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">A user has successfully logged in:</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;"><strong>Email:</strong> ${userEmail}</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">This is an automated message. Please do not reply.</p>
         </div>
-      `,
+      `),
       emailType: 'login_notification'
     });
     console.log("Login notification email sent successfully!", result.messageId);
@@ -217,31 +216,29 @@ const sendNotificationEmail = async (email, username, title, message, link) => {
   const result = await emailService.sendEmail({
     to: email,
     subject: `Notification: ${title}`,
-    html: `
-      <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    html: emailLayout(`
+      <div>
 
-        <div style="text-align: center; padding-bottom: 20px;">
-           <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; height: auto; display: block; margin: 0 auto 15px;">
-           <h1 style="color: #333; font-size: 24px; font-weight: bold;">New Notification</h1>
+        <div>
+
+           <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">New Notification</h1>
         </div>
-        <div style="background-color: #ffffff; padding: 20px; border-radius: 8px;">
-          <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello ${username},</p>
-          <p style="font-size: 16px; line-height: 1.5; color: #555;">You have received a new notification:</p>
-          <h2 style="color: #007bff; font-size: 20px;">${title}</h2>
-          <p style="font-size: 16px; line-height: 1.5; color: #555;">${message}</p>
+        <div>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Hello ${username},</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">You have received a new notification:</p>
+          <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">${title}</h2>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">${message}</p>
           ${
             link
-              ? `<p style="font-size: 16px; line-height: 1.5; color: #007bff;"><a href="${link}">View Details</a></p>`
+              ? `<p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;"><a href="${link}">View Details</a></p>`
               : ""
           }
-          <p style="font-size: 14px; color: #888; margin-top: 20px;">If you have any questions, feel free to reach out to our support team.</p>
-          <p style="font-size: 14px; color: #888; margin-top: 5px;">Thank you for being with us.</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">If you have any questions, feel free to reach out to our support team.</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Thank you for being with us.</p>
         </div>
-         <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; ${new Date().getFullYear()} OhTopUp Inc. All rights reserved.</p>
-         </div>
+
       </div>
-    `,
+    `),
     emailType: 'notification'
   });
   console.log("Notification email sent successfully!", result.messageId);
@@ -255,15 +252,15 @@ const sendWaitlistEmail = async (
   const result = await emailService.sendEmail({
     to: email,
     subject,
-    html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
-          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">OhTopUp Waitlist!</h2>
-          <p style="font-size: 16px; line-height: 1.5;">${message}</p>
-          <p style="font-size: 16px; line-height: 1.5;">We will notify you when we launch!</p>
-          <p style="font-size: 14px; color: #888; margin-bottom: 20px;">If you have any questions, feel free to reach out to us.</p>
+    html: emailLayout(`
+        <div>
+
+          <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">OhTopUp Waitlist!</h2>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">${message}</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">We will notify you when we launch!</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">If you have any questions, feel free to reach out to us.</p>
         </div>
-      `,
+      `),
     emailType: 'waitlist'
   });
   console.log("Waitlist email sent successfully!", result.messageId);

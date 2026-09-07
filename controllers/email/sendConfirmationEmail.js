@@ -1,3 +1,4 @@
+const { emailLayout } = require('../../services/email/layout');
 const { createTransport } = require('../../services/emailTransport');
 
 const sendConfirmationEmail = async (email, username, confirmationCode) => {
@@ -18,19 +19,19 @@ const sendConfirmationEmail = async (email, username, confirmationCode) => {
     to: email,
     from: process.env.EMAIL_USER,
     subject: "Confirm Your OhTopUp Account",
-    html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
-          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Welcome to OhTopUp, ${username}!</h2>
-          <p style="font-size: 16px; line-height: 1.5;">Thank you for creating an account. Please verify your email address to activate your account and start using our services.</p>
-          <p style="font-size: 16px; line-height: 1.5;">Your confirmation code is:</p>
-          <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
-            <p style="font-size: 24px; font-weight: bold; text-align: center;">${confirmationCode}</p>
+    html: emailLayout(`
+        <div>
+
+          <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Welcome to OhTopUp, ${username}!</h2>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Thank you for creating an account. Please verify your email address to activate your account and start using our services.</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Your confirmation code is:</p>
+          <div>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">${confirmationCode}</p>
           </div>
-          <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This code expires in 1 hour. If you didn't initiate this action, you can ignore this email.</p>
-          <a href="http://localhost:5173/verify" style="background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">Verify Email</a>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">This code expires in 1 hour. If you didn't initiate this action, you can ignore this email.</p>
+          <a href="http://localhost:5173/verify" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">Verify Email</a>
         </div>
-      `,
+      `),
   };
 
   try {

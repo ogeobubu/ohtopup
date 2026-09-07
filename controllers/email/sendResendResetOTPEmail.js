@@ -1,3 +1,4 @@
+const { emailLayout } = require('../../services/email/layout');
 const { createTransport } = require('../../services/emailTransport');
 
 const sendResendResetOTPEmail = async (username, email, otpCode) => {
@@ -18,18 +19,18 @@ const sendResendResetOTPEmail = async (username, email, otpCode) => {
     to: email,
     from: process.env.EMAIL_USER,
     subject: "Your OTP Code for Password Reset - OhTopUp",
-    html: `
-      <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-        <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
-        <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Hello, ${username}!</h2>
-        <p style="font-size: 16px; line-height: 1.5;">We received a request to reset your password. To proceed, please use the One-Time Password (OTP) provided below:</p>
-        <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0;">
-          <p style="font-size: 24px; font-weight: bold; text-align: center;">${otpCode}</p>
+    html: emailLayout(`
+      <div>
+
+        <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Hello, ${username}!</h2>
+        <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">We received a request to reset your password. To proceed, please use the One-Time Password (OTP) provided below:</p>
+        <div>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">${otpCode}</p>
         </div>
-        <p style="font-size: 14px; color: #888; margin-bottom: 20px;">This code is valid for 15 minutes. If you did not request a password reset, you can safely ignore this email.</p>
-        <a href="https://ohtopup.name.ng/reset-password" style="background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">Reset Password</a>
+        <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">This code is valid for 15 minutes. If you did not request a password reset, you can safely ignore this email.</p>
+        <a href="https://ohtopup.name.ng/reset-password" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">Reset Password</a>
       </div>
-    `,
+    `),
   };
 
   await transporter.sendMail(mailOptions);

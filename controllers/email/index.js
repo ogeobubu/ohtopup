@@ -1,3 +1,4 @@
+const { emailLayout } = require('../../services/email/layout');
 const { createTransport } = require('../../services/emailTransport');
 
 const sendWaitlistEmail = async (
@@ -11,15 +12,15 @@ const sendWaitlistEmail = async (
     to: email,
     from: process.env.EMAIL_USER,
     subject,
-    html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <img src="https://i.ibb.co/4RTfSVRT/logo-remove.png" alt="OhTopUp Inc" style="width: 100px; display: block; margin-bottom: 20px;">
-          <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">OhTopUp Waitlist!</h2>
-          <p style="font-size: 16px; line-height: 1.5;">${message}</p>
-          <p style="font-size: 16px; line-height: 1.5;">We will notify you when we launch!</p>
-          <p style="font-size: 14px; color: #888; margin-bottom: 20px;">If you have any questions, feel free to reach out to us.</p>
+    html: emailLayout(`
+        <div>
+
+          <h2 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">OhTopUp Waitlist!</h2>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">${message}</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">We will notify you when we launch!</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">If you have any questions, feel free to reach out to us.</p>
         </div>
-      `,
+      `),
   };
 
   await transporter.sendMail(mailOptions);

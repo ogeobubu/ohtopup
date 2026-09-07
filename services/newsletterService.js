@@ -1,3 +1,4 @@
+const { emailLayout } = require('./email/layout');
 const { createTransport } = require('./emailTransport');
 const Newsletter = require('../model/Newsletter');
 
@@ -55,43 +56,13 @@ class NewsletterService {
   }
 
   formatNewsletterHTML(content) {
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>OhTopUp Newsletter</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-            .content { background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; }
-            .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0; border-top: none; font-size: 12px; color: #666; }
-            .unsubscribe { margin-top: 15px; }
-            .unsubscribe a { color: #667eea; text-decoration: none; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>OhTopUp Newsletter</h1>
-              <p>Your trusted utility payment partner</p>
-            </div>
-            <div class="content">
-              ${content.replace(/\n/g, '<br>')}
-            </div>
-            <div class="footer">
-              <p>You're receiving this because you subscribed to OhTopUp newsletters.</p>
-              <div class="unsubscribe">
-                <a href="${process.env.FRONTEND_URL}/unsubscribe">Unsubscribe from future newsletters</a>
-              </div>
-              <p>&copy; ${new Date().getFullYear()} OhTopUp. All rights reserved.</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+    return emailLayout(`
+      <h1 style="margin:0 0 18px;font-size:22px;font-weight:600;color:#18232d;">OhTopUp newsletter</h1>
+      <div style="font-size:14px;line-height:1.7;color:#626d79;">${content.replace(/\n/g, '<br>')}</div>
+    `, {
+      unsubscribeUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe`,
+      footerNote: 'You’re receiving this because you subscribed to OhTopUp newsletters.',
+    });
   }
 
   stripHtmlTags(html) {

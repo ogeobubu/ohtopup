@@ -1,3 +1,4 @@
+const { emailLayout } = require('./email/layout');
 const { createTransport } = require('./emailTransport');
 const sgMail = require('@sendgrid/mail');
 const { createLog } = require('../controllers/systemLogController');
@@ -60,312 +61,281 @@ class EmailService {
     // Email templates
     this.templates.set('transaction', {
       subject: '{{type}} {{status}}: {{productName}}',
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <div style="text-align: center; padding-bottom: 20px;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0;">
-              <h1 style="margin: 0; font-size: 24px;">Transaction Update</h1>
+      html: emailLayout(`
+        <div>
+          <div>
+            <div>
+              <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Transaction Update</h1>
             </div>
           </div>
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px;">
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello <strong>{{username}}</strong>,</p>
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Your recent transaction is <strong style="color: {{statusColor}};">{{status}}</strong>.</p>
+          <div>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Hello <strong>{{username}}</strong>,</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Your recent transaction is <strong style="color:#18232d;font-weight:600;">{{status}}</strong>.</p>
 
-            <div style="margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
-              <div style="display: table; width: 100%;">
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Type:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{type}}</div>
+            <div>
+              <div style="display:table;width:100%;margin:20px 0;">
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Type:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{type}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Description:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{productName}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Description:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{productName}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Amount:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{amount}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Amount:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{amount}}</div>
                 </div>
                 {{#processingFee}}
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Processing Fee:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #dc3545;">-{{processingFee}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Processing Fee:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">-{{processingFee}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Credited Amount:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #28a745; font-weight: bold;">{{amount}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Credited Amount:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{amount}}</div>
                 </div>
                 {{/processingFee}}
                 {{#balance}}
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">New Balance:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{balance}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">New Balance:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{balance}}</div>
                 </div>
                 {{/balance}}
                 {{#reference}}
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Reference:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{reference}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Reference:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{reference}}</div>
                 </div>
                 {{/reference}}
               </div>
             </div>
 
-            <p style="font-size: 14px; color: #888; margin-top: 20px;">If you have any questions, please contact our support team.</p>
-            <p style="font-size: 14px; color: #888;">Thank you for using OhTopUp!</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">If you have any questions, please contact our support team.</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Thank you for using OhTopUp!</p>
           </div>
-          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
-            <p>OhTopUp | Lagos, Nigeria</p>
-            <p><a href="{{unsubscribeUrl}}" style="color: #aaa;">Unsubscribe</a></p>
-          </div>
+
         </div>
-      `
+      `, { unsubscribeUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe` })
     });
 
     this.templates.set('welcome', {
       subject: 'Welcome to OhTopUp, {{username}}!',
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 28px;">Welcome to OhTopUp!</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px;">Your trusted utility payment partner</p>
+      html: emailLayout(`
+        <div>
+          <div>
+            <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Welcome to OhTopUp!</h1>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Your trusted utility payment partner</p>
           </div>
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello <strong>{{username}}</strong>,</p>
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Thank you for creating an account with OhTopUp! We're excited to have you on board.</p>
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Your confirmation code is:</p>
-            <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-              <span style="font-size: 32px; font-weight: bold; color: #007bff; letter-spacing: 3px;">{{confirmationCode}}</span>
+          <div>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Hello <strong>{{username}}</strong>,</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Thank you for creating an account with OhTopUp! We're excited to have you on board.</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Your confirmation code is:</p>
+            <div>
+              <span style="display:block;margin:20px 0;padding:18px;background-color:#f7f8fa;border:1px solid #e2e6e9;text-align:center;font-size:30px;font-weight:600;letter-spacing:5px;color:#18232d;">{{confirmationCode}}</span>
             </div>
-            <p style="font-size: 14px; color: #888;">This code expires in 10 minutes. If you didn't create this account, you can ignore this email.</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="{{verifyUrl}}" style="background-color: #007bff; color: #fff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Verify Email</a>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">This code expires in 10 minutes. If you didn't create this account, you can ignore this email.</p>
+            <div>
+              <a href="{{verifyUrl}}" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">Verify Email</a>
             </div>
-            <p style="font-size: 14px; color: #888; margin-top: 20px;">Welcome aboard! 🚀</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Welcome aboard! 🚀</p>
           </div>
-          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
-            <p>OhTopUp | Lagos, Nigeria</p>
-            <p><a href="{{unsubscribeUrl}}" style="color: #aaa;">Unsubscribe</a></p>
-          </div>
+
         </div>
-      `
+      `, { unsubscribeUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe` })
     });
 
     this.templates.set('password-reset', {
       subject: 'Reset Your OhTopUp Password',
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">Password Reset</h1>
+      html: emailLayout(`
+        <div>
+          <div>
+            <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Password Reset</h1>
           </div>
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello <strong>{{fullName}}</strong>,</p>
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">We received a request to reset your password. Use the code below to complete your password reset:</p>
-            <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-              <span style="font-size: 32px; font-weight: bold; color: #dc3545; letter-spacing: 3px;">{{otp}}</span>
+          <div>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Hello <strong>{{fullName}}</strong>,</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">We received a request to reset your password. Use the code below to complete your password reset:</p>
+            <div>
+              <span style="display:block;margin:20px 0;padding:18px;background-color:#f7f8fa;border:1px solid #e2e6e9;text-align:center;font-size:30px;font-weight:600;letter-spacing:5px;color:#18232d;">{{otp}}</span>
             </div>
-            <p style="font-size: 14px; color: #888;">This code expires in 10 minutes. If you didn't request a password reset, you can ignore this email.</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="{{resetUrl}}" style="background-color: #dc3545; color: #fff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Reset Password</a>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">This code expires in 10 minutes. If you didn't request a password reset, you can ignore this email.</p>
+            <div>
+              <a href="{{resetUrl}}" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">Reset Password</a>
             </div>
           </div>
-          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
-            <p>OhTopUp | Lagos, Nigeria</p>
-            <p><a href="{{unsubscribeUrl}}" style="color: #aaa;">Unsubscribe</a></p>
-          </div>
+
         </div>
-      `
+      `, { unsubscribeUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe` })
     });
 
     this.templates.set('email-verification', {
       subject: 'Verify Your OhTopUp Email Address',
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">Verify Your Email</h1>
+      html: emailLayout(`
+        <div>
+          <div>
+            <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">Verify Your Email</h1>
           </div>
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Hello <strong>{{userName}}</strong>,</p>
-            <p style="font-size: 16px; line-height: 1.5; color: #555;">Welcome to OhTopUp! Please verify your email address to complete your registration and start using our services.</p>
+          <div>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Hello <strong>{{userName}}</strong>,</p>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">Welcome to OhTopUp! Please verify your email address to complete your registration and start using our services.</p>
 
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin-top: 0; color: #333;">Why verify your email?</h3>
-              <ul style="color: #555;">
-                <li>Receive important transaction notifications</li>
-                <li>Access your account securely</li>
-                <li>Get updates about new features and offers</li>
-                <li>Ensure delivery of critical communications</li>
-              </ul>
+            <div>
+              <a href="{{verificationUrl}}" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">Verify Email Address</a>
             </div>
 
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="{{verificationUrl}}" style="background-color: #28a745; color: #fff; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 16px;">Verify Email Address</a>
-            </div>
-
-            <p style="font-size: 14px; color: #888; text-align: center;">
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">
               This link will expire in 24 hours for security reasons.
             </p>
 
-            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin: 20px 0;">
-              <p style="margin: 0; font-size: 14px; color: #856404;">
+            <div>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">
                 <strong>Didn't create an account?</strong> You can safely ignore this email.
               </p>
             </div>
           </div>
-          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
-            <p>OhTopUp | Lagos, Nigeria</p>
-          </div>
+
         </div>
-      `
+      `, { unsubscribeUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/unsubscribe` })
     });
 
     this.templates.set('dice-win-admin', {
       subject: '🎲 Dice Game Win Alert - {{userName}} Won {{winAmount}} Points',
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">🎲 Dice Game Win Alert</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px;">A user has won the dice game!</p>
+      html: emailLayout(`
+        <div>
+          <div>
+            <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">🎲 Dice Game Win Alert</h1>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">A user has won the dice game!</p>
           </div>
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
-              <h3 style="margin-top: 0; color: #28a745;">🎉 Win Details</h3>
-              <div style="display: table; width: 100%; margin-top: 15px;">
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Player:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{userName}} ({{userEmail}})</div>
+          <div>
+            <div>
+              <h3 style="margin:22px 0 10px;font-size:15px;line-height:1.5;font-weight:600;color:#18232d;">🎉 Win Details</h3>
+              <div style="display:table;width:100%;margin:20px 0;">
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Player:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{userName}} ({{userEmail}})</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Dice Roll:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{dice1}} + {{dice2}} = {{total}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Dice Roll:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{dice1}} + {{dice2}} = {{total}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Win Amount:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #28a745; font-weight: bold;">{{winAmount}} Points</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Win Amount:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{winAmount}} Points</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Entry Fee:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #dc3545;">₦{{entryFee}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Entry Fee:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">₦{{entryFee}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Game Time:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{gameTime}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Game Time:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{gameTime}}</div>
                 </div>
                 {{#manipulationApplied}}
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Manipulation:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #856404; font-weight: bold;">{{manipulationType}} ({{manipulationMode}})</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Manipulation:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{manipulationType}} ({{manipulationMode}})</div>
                 </div>
                 {{/manipulationApplied}}
               </div>
             </div>
 
-            <div style="background-color: #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h4 style="margin-top: 0; color: #495057;">💰 Revenue Impact</h4>
-              <p style="margin: 10px 0; color: #6c757d;">
+            <div>
+              <h4 style="margin:22px 0 10px;font-size:15px;line-height:1.5;font-weight:600;color:#18232d;">💰 Revenue Impact</h4>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">
                 <strong>House Loss:</strong> ₦{{entryFee}} (entry fee paid but points awarded)<br>
                 <strong>Points Awarded:</strong> {{winAmount}} points to user account
               </p>
             </div>
 
             {{#manipulationApplied}}
-            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin: 20px 0;">
-              <p style="margin: 0; font-size: 14px; color: #856404;">
+            <div>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">
                 <strong>⚠️ Manipulation Alert:</strong> This win was generated using {{manipulationType}} mode ({{manipulationMode}}).
                 {{#seed}}Seed: {{seed}}{{/seed}}
               </p>
             </div>
             {{/manipulationApplied}}
 
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="{{adminDashboardUrl}}" style="background-color: #007bff; color: #fff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">View Admin Dashboard</a>
+            <div>
+              <a href="{{adminDashboardUrl}}" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">View Admin Dashboard</a>
             </div>
 
-            <p style="font-size: 12px; color: #888; text-align: center; margin-top: 20px;">
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">
               This is an automated notification for dice game wins. No action is required unless suspicious activity is detected.
             </p>
           </div>
-          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
-            <p>OhTopUp Admin System | Lagos, Nigeria</p>
-          </div>
+
         </div>
-      `
+      `)
     });
 
     this.templates.set('bet-dice-win-admin', {
       subject: '🎯 Bet Dice Game Win Alert - {{userName}} Won ₦{{winnings}}',
-      html: `
-        <div style="font-family: 'Open Sans', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background-color: #f5f5f5;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">🎯 Bet Dice Game Win Alert</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px;">A user has won the bet dice game!</p>
+      html: emailLayout(`
+        <div>
+          <div>
+            <h1 style="margin:0 0 18px;font-size:22px;line-height:1.35;font-weight:600;color:#18232d;">🎯 Bet Dice Game Win Alert</h1>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">A user has won the bet dice game!</p>
           </div>
-          <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
-              <h3 style="margin-top: 0; color: #667eea;">🎉 Win Details</h3>
-              <div style="display: table; width: 100%; margin-top: 15px;">
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Player:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{userName}} ({{userEmail}})</div>
+          <div>
+            <div>
+              <h3 style="margin:22px 0 10px;font-size:15px;line-height:1.5;font-weight:600;color:#18232d;">🎉 Win Details</h3>
+              <div style="display:table;width:100%;margin:20px 0;">
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Player:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{userName}} ({{userEmail}})</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Bet Amount:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">₦{{betAmount}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Bet Amount:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">₦{{betAmount}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Odds:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{odds}}x</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Odds:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{odds}}x</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Difficulty:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{difficulty}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Difficulty:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{difficulty}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Dice Count:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{diceCount}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Dice Count:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{diceCount}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Dice Roll:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{dice}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Dice Roll:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{dice}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Win Amount:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #28a745; font-weight: bold;">₦{{winnings}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Win Amount:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">₦{{winnings}}</div>
                 </div>
-                <div style="display: table-row;">
-                  <div style="display: table-cell; padding: 5px 0; font-weight: bold; color: #333;">Game Time:</div>
-                  <div style="display: table-cell; padding: 5px 0; color: #555;">{{gameTime}}</div>
+                <div style="display:table-row;">
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">Game Time:</div>
+                  <div style="display:table-cell;padding:8px 8px 8px 0;border-bottom:1px solid #e2e6e9;color:#18232d;">{{gameTime}}</div>
                 </div>
               </div>
             </div>
 
-            <div style="background-color: #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h4 style="margin-top: 0; color: #495057;">💰 Revenue Impact</h4>
-              <p style="margin: 10px 0; color: #6c757d;">
+            <div>
+              <h4 style="margin:22px 0 10px;font-size:15px;line-height:1.5;font-weight:600;color:#18232d;">💰 Revenue Impact</h4>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">
                 <strong>House Loss:</strong> ₦{{betAmount}} (bet amount paid but winnings awarded)<br>
                 <strong>Net Loss:</strong> ₦{{netLoss}} to house<br>
                 <strong>Expected Value:</strong> ₦{{expectedValue}} ({{houseEdge}}% house edge)
               </p>
             </div>
 
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="{{adminDashboardUrl}}" style="background-color: #667eea; color: #fff; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">View Admin Dashboard</a>
+            <div>
+              <a href="{{adminDashboardUrl}}" style="display:inline-block;margin:8px 0 24px;padding:12px 20px;background-color:#3057c5;color:#ffffff;border-radius:4px;font-size:14px;text-decoration:none;">View Admin Dashboard</a>
             </div>
 
-            <p style="font-size: 12px; color: #888; text-align: center; margin-top: 20px;">
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#626d79;">
               This is an automated notification for bet dice game wins. Large wins are monitored for responsible gaming.
             </p>
           </div>
-          <div style="text-align: center; margin-top: 20px; color: #aaa; font-size: 12px;">
-            <p>&copy; {{year}} OhTopUp. All rights reserved.</p>
-            <p>OhTopUp Admin System | Lagos, Nigeria</p>
-          </div>
+
         </div>
-      `
+      `)
     });
   }
 
