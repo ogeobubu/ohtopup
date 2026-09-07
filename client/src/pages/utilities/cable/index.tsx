@@ -198,7 +198,7 @@ const Cable = ({ user, isDarkMode }) => {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : identifersError ? (
-          <p className="text-center text-xl text-gray-500">
+          <p className="text-center text-xl text-[var(--ot-muted)]">
             A problem occurred or service is currently unavailable. Try again later!
           </p>
         ) : (
@@ -240,7 +240,7 @@ const Cable = ({ user, isDarkMode }) => {
                         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
                       </div>
                     ) : (
-                      <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2 dark:border-gray-600">
+                      <div className="flex justify-evenly space-x-4 border border-solid border-[var(--ot-line)] py-2 ">
                         {identifers?.map((provider) => (
                           <button
                             key={provider.serviceID}
@@ -274,7 +274,7 @@ const Cable = ({ user, isDarkMode }) => {
                   {formik.values.provider && (
                     <>
                       <div className="flex flex-col mt-3">
-                        <label className={`block text-gray-500 dark:text-gray-300`}>
+                        <label className={`block text-[var(--ot-muted)] `}>
                           Smart Card Number
                         </label>
                         <Field name="accountNumber">
@@ -284,7 +284,7 @@ const Cable = ({ user, isDarkMode }) => {
                                 {...field}
                                 type="text"
                                 value={field.value || ""}
-                                className="w-full border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                                className="w-full border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
                                 onChange={(e) => {
                                   form.setFieldValue(field.name, e.target.value);
                                   verifyAccountName(e.target.value);
@@ -307,13 +307,13 @@ const Cable = ({ user, isDarkMode }) => {
                       </div>
                       {accountNameLoading ? (
                         <div className="space-y-3 my-3">
-                          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
-                          <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                          <div className="h-10 bg-[var(--ot-bg)]  rounded animate-pulse"></div>
+                          <div className="h-10 bg-[var(--ot-bg)]  rounded animate-pulse"></div>
                         </div>
                       ) : accountNameApi && (
                         <>
                           <div className="flex flex-col">
-                            <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
+                            <label className={`mb-1 block text-[var(--ot-muted)] `}>
                               Smart Card Name
                             </label>
                             <Field name="accountName">
@@ -323,13 +323,13 @@ const Cable = ({ user, isDarkMode }) => {
                                   type="text"
                                   disabled
                                   value={accountNameApi?.data.Customer_Name}
-                                  className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                                  className="w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
                                 />
                               )}
                             </Field>
                           </div>
                           <div className="flex flex-col">
-                            <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
+                            <label className={`mb-1 block text-[var(--ot-muted)] `}>
                               Current Bouquet
                             </label>
                             <Field name="accountName">
@@ -339,7 +339,7 @@ const Cable = ({ user, isDarkMode }) => {
                                   type="text"
                                   disabled
                                   value={accountNameApi?.data.Current_Bouquet}
-                                  className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                                  className="w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
                                 />
                               )}
                             </Field>
@@ -356,11 +356,11 @@ const Cable = ({ user, isDarkMode }) => {
                       )}
                       {changeBouquet && (
                         <div>
-                          <label className="block text-gray-500 mb-2 dark:text-gray-300">
+                          <label className="block text-[var(--ot-muted)] mb-2 ">
                             Package Plan
                           </label>
                           {variationsLoading ? (
-                            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded animate-pulse"></div>
+                            <div className="h-10 bg-[var(--ot-bg)]  rounded animate-pulse"></div>
                           ) : (
                             <Select
                               options={options}
@@ -400,7 +400,7 @@ const Cable = ({ user, isDarkMode }) => {
                       )}
                       {!changeBouquet && (
                         <div className="flex flex-col mt-3">
-                          <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
+                          <label className={`mb-1 block text-[var(--ot-muted)] `}>
                             Amount
                           </label>
                           <Field name="amount">
@@ -410,7 +410,7 @@ const Cable = ({ user, isDarkMode }) => {
                                 type="text"
                                 disabled
                                 value={formatNairaAmount(accountNameApi?.data.Renewal_Amount)}
-                                className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                                className="w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
                                 onChange={(e) => {
                                   form.setFieldValue(
                                     field.name,
@@ -423,7 +423,7 @@ const Cable = ({ user, isDarkMode }) => {
                         </div>
                       )}
                       <div className="flex flex-col my-3">
-                        <label className={`mb-1 block text-gray-500 dark:text-gray-300 mb-2`}>
+                        <label className={`mb-1 block text-[var(--ot-muted)]  mb-2`}>
                           Phone Number
                         </label>
                         <Field name="phoneNumber">
@@ -436,7 +436,7 @@ const Cable = ({ user, isDarkMode }) => {
                               onChange={(value) =>
                                 form.setFieldValue(field.name, value)
                               }
-                              className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
+                              className={`w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)]  focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
                               placeholder="Enter phone number"
                               disabled={isSubmitting}
                             />
@@ -451,7 +451,7 @@ const Cable = ({ user, isDarkMode }) => {
 
                       {/* Transaction PIN Section */}
                       <div className="flex flex-col my-3">
-                        <label className={`mb-1 block text-gray-500 dark:text-gray-300`}>
+                        <label className={`mb-1 block text-[var(--ot-muted)] `}>
                           Transaction PIN
                         </label>
                         <Field name="transactionPin">
@@ -460,7 +460,7 @@ const Cable = ({ user, isDarkMode }) => {
                               {...field}
                               type="password"
                               placeholder="Enter your 4-6 digit PIN"
-                              className={`w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
+                              className={`w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)]  focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
                               disabled={isSubmitting}
                               maxLength={6}
                             />
@@ -471,15 +471,15 @@ const Cable = ({ user, isDarkMode }) => {
                           component="div"
                           className="text-red-500 text-sm"
                         />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs text-[var(--ot-muted)]  mt-1">
                           Enter your 4-6 digit transaction PIN to proceed
                         </p>
                       </div>
 
-                      <div className="bg-[#F7F9FB] dark:bg-gray-700 rounded-md p-4 w-full max-w-md mb-3">
+                      <div className="bg-[#F7F9FB]  rounded-md p-4 w-full max-w-md mb-3">
                         <div className="flex justify-between items-center">
-                          <h2 className="text-gray-700 dark:text-white">Total</h2>
-                          <p className="text-gray-800 dark:text-white">
+                          <h2 className="text-[var(--ot-ink)] dark:text-white">Total</h2>
+                          <p className="text-[var(--ot-ink)] dark:text-white">
                             {!changeBouquet
                               ? formatNairaAmount(accountNameApi?.data.Renewal_Amount)
                               : formatNairaAmount(formik.values.amount) || 0}

@@ -205,3 +205,10 @@
  .ot-modal input,.ot-modal select,.ot-modal textarea { font-size:16px; }
  .ot-modal button { min-height:40px; }
 }
+
+.ot-purchase-header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 24px; }
+.ot-purchase-header h2 { font-size:17px; font-weight:600; letter-spacing:-.3px; }
+.ot-purchase-header p { color:var(--ot-muted); font-size:12px; margin:4px 0 0; }
+.ot-purchase-content h3 { font-size:21px; font-weight:550; letter-spacing:-.4px; }
+.ot-purchase-content button { box-shadow:none; }
+@media(max-width:639px) { .ot-purchase-header { padding:14px 16px; }.ot-purchase-content h3 { font-size:20px; } }

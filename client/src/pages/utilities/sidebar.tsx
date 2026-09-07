@@ -70,13 +70,13 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           key={index}
           className={`border border-solid rounded-md transition-colors duration-200 ${
             activeTab === tab.name
-              ? "border-blue-600 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-200"
-              : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 hover:dark:bg-gray-700"
+              ? "border-blue-600 bg-[var(--ot-line)]  text-[var(--ot-muted)] "
+              : "border-[var(--ot-line)] text-[var(--ot-muted)] hover:bg-[var(--ot-bg)]    hover:"
           } flex w-full md:w-64 items-center space-x-4 px-4 py-4 cursor-pointer`}
           onClick={() => handleTabClick(tab)}
         >
           <tab.icon
-            className={`w-6 h-6 ${activeTab === tab.name ? "text-blue-500 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"}`}
+            className={`w-6 h-6 ${activeTab === tab.name ? "text-blue-500 dark:text-blue-400" : "text-[var(--ot-muted)] "}`}
           />
           <div className="flex flex-col gap-1">
             <span>{tab.label}</span>

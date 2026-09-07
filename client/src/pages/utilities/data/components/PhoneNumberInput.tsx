@@ -8,7 +8,7 @@ const PhoneNumberInput = ({ name, isDarkMode, disabled }) => {
 
   return (
     <div className="flex flex-col">
-      <label className="mb-2 block text-gray-500 dark:text-gray-300">Phone Number</label>
+      <label className="mb-2 block text-[var(--ot-muted)] ">Phone Number</label>
       <PhoneInput
         {...field}
         international
@@ -16,7 +16,7 @@ const PhoneNumberInput = ({ name, isDarkMode, disabled }) => {
         value={field.value}
         onChange={(value) => helpers.setValue(value)}
         className={`w-full p-2 border rounded-lg ${
-          isDarkMode ? 'bg-gray-800 text-gray-200 border-gray-600' : 'bg-gray-50 text-gray-900 border-gray-300'
+          isDarkMode ? 'bg-gray-800 text-gray-200 border-gray-600' : 'bg-[var(--ot-bg)] text-[var(--ot-ink)] border-[var(--ot-line)]'
         } focus:outline-none focus:ring-2 focus:ring-blue-500`}
         placeholder="Enter phone number"
         disabled={disabled}

@@ -22,11 +22,11 @@ const ConfirmationModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`rounded-lg p-6 w-full max-w-md ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+      <div className={`rounded-lg p-6 w-full max-w-md ${isDarkMode ? 'bg-gray-800' : 'bg-[var(--ot-paper)]'}`}>
+        <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
           Confirm Data Purchase
         </h3>
-        <div className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+        <div className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>
           <div className="grid grid-cols-2 gap-4 mb-3">
             <span>Network:</span>
             <span className="font-medium">{transactionDetails?.providerName}</span>
@@ -51,7 +51,7 @@ const ConfirmationModal = ({
             className={`px-4 py-2 rounded-md ${
               isDarkMode 
                 ? 'bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50' 
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:opacity-50'
+                : 'bg-[var(--ot-line)] text-[var(--ot-ink)] hover:bg-gray-300 disabled:opacity-50'
             }`}
           >
             Cancel

@@ -24,39 +24,39 @@ const ConfirmationModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className={`rounded-2xl shadow-2xl p-8 w-full max-w-lg transform transition-all duration-300 scale-100 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`rounded-2xl shadow-2xl p-8 w-full max-w-lg transform transition-all duration-300 scale-100 ${isDarkMode ? 'bg-gray-800' : 'bg-[var(--ot-paper)]'}`}>
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">
-            <svg className="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--ot-tint)] dark:bg-blue-900 rounded-full mb-4">
+            <svg className="h-8 w-8 text-[var(--ot-accent)] dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
             Confirm Purchase
           </h3>
-          <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-sm ${isDarkMode ? 'text-[var(--ot-muted)]' : 'text-[var(--ot-muted)]'}`}>
             Please review your airtime purchase details
           </p>
         </div>
 
         {/* Transaction Details */}
-        <div className={`mb-8 p-6 rounded-xl ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+        <div className={`mb-8 p-6 rounded-xl ${isDarkMode ? 'bg-gray-700' : 'bg-[var(--ot-bg)]'}`}>
           <div className="space-y-4">
-            <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
-              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Network Provider</span>
-              <span className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <div className="flex justify-between items-center py-2 border-b border-[var(--ot-line)] ">
+              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>Network Provider</span>
+              <span className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
                 {transactionDetails?.providerName}
               </span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
-              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Phone Number</span>
-              <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <div className="flex justify-between items-center py-2 border-b border-[var(--ot-line)] ">
+              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>Phone Number</span>
+              <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
                 {formatPhoneNumber(transactionDetails?.phoneNumber)}
               </span>
             </div>
             <div className="flex justify-between items-center py-2">
-              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Amount</span>
+              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>Amount</span>
               <span className={`font-bold text-xl text-green-600 dark:text-green-400`}>
                 {formatNairaAmount(transactionDetails?.amount)}
               </span>
@@ -89,7 +89,7 @@ const ConfirmationModal = ({
             className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
               isDarkMode
                 ? 'bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50'
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:opacity-50'
+                : 'bg-[var(--ot-line)] text-[var(--ot-ink)] hover:bg-gray-300 disabled:opacity-50'
             }`}
           >
             Cancel

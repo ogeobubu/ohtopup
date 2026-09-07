@@ -6,7 +6,7 @@ const NetworkProviderSelector = ({
   onProviderChange,
 }) => {
   return (
-    <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2">
+    <div className="flex justify-evenly space-x-4 border border-solid border-[var(--ot-line)] py-2">
       {providers?.map((provider) => {
         return (
             <button

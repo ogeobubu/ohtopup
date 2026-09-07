@@ -170,14 +170,14 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
           {/* Amount Section */}
           <div className="space-y-3">
             <div className="flex flex-col">
-              <label className="mb-2 block text-gray-700 dark:text-gray-300 font-medium">
+              <label className="mb-2 block text-[var(--ot-ink)]  font-medium">
                 Amount (₦)
               </label>
               <Field name="amount">
                 {({ field, form }) => (
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 dark:text-gray-400 text-sm">₦</span>
+                      <span className="text-[var(--ot-muted)]  text-sm">₦</span>
                     </div>
                     <input
                       {...field}
@@ -187,8 +187,8 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
                       className={`w-full pl-8 pr-4 py-3 border-2 rounded-lg transition-colors ${
                         form.errors.amount && form.touched.amount
                           ? "border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-600"
-                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
-                      } text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                          : "border-[var(--ot-line)]  bg-[var(--ot-paper)] "
+                      } text-[var(--ot-ink)]  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                       onChange={(e) => {
                         const value =
                           e.target.value === "" ? "" : parseFloat(e.target.value);
@@ -206,7 +206,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
                 component="div"
                 className="text-red-600 dark:text-red-400 text-sm mt-1 flex items-center"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-[var(--ot-muted)]  mt-1">
                 Minimum amount: ₦{currentLimits.minAmount}
               </p>
             </div>
@@ -223,7 +223,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
           {/* Transaction PIN Section */}
           <div className="space-y-2">
             <div className="flex flex-col">
-              <label className="mb-2 block text-gray-700 dark:text-gray-300 font-medium">
+              <label className="mb-2 block text-[var(--ot-ink)]  font-medium">
                 Transaction PIN
               </label>
               <Field name="transactionPin">
@@ -235,8 +235,8 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
                     className={`w-full px-4 py-3 border-2 rounded-lg transition-colors ${
                       form.errors.transactionPin && form.touched.transactionPin
                         ? "border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-600"
-                        : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
-                    } text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                        : "border-[var(--ot-line)]  bg-[var(--ot-paper)] "
+                    } text-[var(--ot-ink)]  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     disabled={isSubmitting}
                     maxLength={6}
                   />
@@ -247,14 +247,14 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
                 component="div"
                 className="text-red-600 dark:text-red-400 text-sm mt-1 flex items-center"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-[var(--ot-muted)]  mt-1">
                 Enter your 4-6 digit transaction PIN to proceed
               </p>
             </div>
           </div>
 
           {/* Transaction Summary */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4">
+          <div className="bg-[var(--ot-bg)] dark:from-gray-700 dark:to-gray-600 rounded-xl p-4">
             <TransactionSummary
               amount={values.amount ? parseFloat(values.amount) : 0}
               walletBalance={walletBalance}
@@ -280,7 +280,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
             disabled={!values.provider || !values.phoneNumber || !values.amount || !values.transactionPin || isSubmitting}
             className={`relative w-full py-4 px-6 font-semibold rounded-xl transition-all duration-200 transform ${
               !values.provider || !values.phoneNumber || !values.amount || !values.transactionPin || isSubmitting
-                ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                ? "bg-gray-300  text-[var(--ot-muted)]  cursor-not-allowed"
                 : isOnline
                 ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
                 : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"

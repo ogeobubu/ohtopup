@@ -7,8 +7,8 @@ const DataPlanSelector = ({ providerId, isDarkMode, onChange, value }) => {
 
   if (isLoading) {
     return (
-      <div className="h-12 bg-gray-100 dark:bg-gray-700 rounded-lg animate-pulse flex items-center justify-center">
-        <span className="text-gray-500 dark:text-gray-400">Loading plans...</span>
+      <div className="h-12 bg-[var(--ot-bg)]  rounded-lg animate-pulse flex items-center justify-center">
+        <span className="text-[var(--ot-muted)] ">Loading plans...</span>
       </div>
     );
   }
@@ -23,7 +23,7 @@ const DataPlanSelector = ({ providerId, isDarkMode, onChange, value }) => {
 
   return (
     <div className="mb-4">
-      <label className="block text-gray-500 dark:text-gray-300 mb-2">Data Plan</label>
+      <label className="block text-[var(--ot-muted)]  mb-2">Data Plan</label>
       <Select
         options={options}
         onChange={onChange}

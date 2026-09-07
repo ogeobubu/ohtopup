@@ -68,7 +68,7 @@ const DataPurchaseForm = ({
               {/* Transaction PIN Section */}
               <div className="space-y-2">
                 <div className="flex flex-col">
-                  <label className="mb-2 block text-gray-700 dark:text-gray-300 font-medium">
+                  <label className="mb-2 block text-[var(--ot-ink)]  font-medium">
                     Transaction PIN
                   </label>
                   <input
@@ -79,12 +79,12 @@ const DataPurchaseForm = ({
                     className={`w-full px-4 py-3 border-2 rounded-lg transition-colors ${
                       isDarkMode
                         ? 'border-gray-600 bg-gray-700 text-gray-200'
-                        : 'border-gray-300 bg-white text-gray-900'
+                        : 'border-[var(--ot-line)] bg-[var(--ot-paper)] text-[var(--ot-ink)]'
                     } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     disabled={isSubmitting}
                     maxLength={6}
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-[var(--ot-muted)]  mt-1">
                     Enter your 4-6 digit transaction PIN to proceed
                   </p>
                 </div>

@@ -1,3 +1,4 @@
+import PurchaseHeader from "../components/PurchaseHeader";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
@@ -9,7 +10,7 @@ import { FaBolt, FaCheck, FaCreditCard, FaChevronRight, FaUser, FaMapMarkerAlt }
 const Loader = () => (
   <div className="flex items-center justify-center py-8">
     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-500"></div>
-    <p className="mt-3 text-gray-600 dark:text-gray-400">Loading electricity services...</p>
+    <p className="mt-3 text-[var(--ot-muted)] ">Loading electricity services...</p>
   </div>
 );
 
@@ -227,97 +228,18 @@ const ElectricityPurchase = ({ isDarkMode }) => {
         closeModal={() => setIsModalOpen(false)}
         size="lg"
         showCloseButton={false}
-        stickyHeader={
-          <div className="bg-white">
-            {/* Progress Header */}
-            <div className="px-3 md:px-4 py-2 md:py-3">
-              <div className="flex items-center justify-between mb-2 md:mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 md:w-8 md:h-8 bg-yellow-600 rounded-full flex items-center justify-center">
-                    <FaBolt className="text-white text-xs md:text-sm" />
-                  </div>
-                  <div>
-                    <h2 className="text-base md:text-lg font-bold text-gray-900">Pay Electricity Bill</h2>
-                    <p className="text-xs text-gray-500">Quick and easy electricity payment</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                >
-                  <span className="text-gray-500 text-xs md:text-sm">×</span>
-                </button>
-              </div>
-
-              {/* Progress Indicator */}
-              <div className="flex items-center gap-1">
-                {[
-                  { step: 1, label: 'Disco' },
-                  { step: 2, label: 'Meter' },
-                  { step: 3, label: 'Details' },
-                  { step: 4, label: 'Amount' },
-                  { step: 5, label: 'Phone' },
-                  { step: 6, label: 'PIN' },
-                  { step: 7, label: 'Confirm' }
-                ].map(({ step, label }) => (
-                  <div key={step} className="flex items-center flex-1">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                      currentStep >= step
-                        ? 'bg-yellow-600 text-white'
-                        : 'bg-gray-200 text-gray-500'
-                    }`}>
-                      {currentStep > step ? <FaCheck className="text-xs" /> : step}
-                    </div>
-                    <span className={`ml-1 text-xs font-medium ${
-                      currentStep >= step ? 'text-yellow-600' : 'text-gray-500'
-                    }`}>
-                      {label}
-                    </span>
-                    {step < 7 && (
-                      <div className={`flex-1 h-0.5 mx-2 ${
-                        currentStep > step ? 'bg-yellow-600' : 'bg-gray-200'
-                      }`} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Balance Card */}
-            <div className="px-3 md:px-4 py-2 md:py-3 bg-gradient-to-r from-yellow-50 to-orange-50">
-              <div className="bg-white rounded-lg p-2 md:p-3 shadow-sm border border-yellow-100">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-600 rounded-full flex items-center justify-center">
-                      <FaCreditCard className="text-white text-xs md:text-sm" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600">Available Balance</p>
-                      <p className="text-lg md:text-xl font-bold text-gray-900">
-                        {formatNairaAmount(walletData?.balance || 0)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                    <p className="text-xs text-gray-500 mt-0.5">Active</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        }
+        stickyHeader={<PurchaseHeader title="Pay electricity bill" step={currentStep} total={7} onClose={() => setIsModalOpen(false)} />}
       >
         {isLoading ? (
           <Loader />
         ) : (
-          <div className="flex flex-col bg-white rounded-2xl">
+          <div className="ot-purchase-content flex flex-col">
             {/* Step 1: Disco Selection */}
             {currentStep === 1 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Choose Your Disco</h3>
-                  <p className="text-sm text-gray-600">Select your electricity distribution company</p>
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Choose Your Disco</h3>
+                  <p className="text-sm text-[var(--ot-muted)]">Select your electricity distribution company</p>
                 </div>
                 <div className="grid grid-cols-1 gap-2 md:gap-3 max-w-sm mx-auto">
                   {providers?.discos?.map(disco => (
@@ -326,20 +248,20 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       onClick={() => {
                         handleDiscoChange(disco.serviceID);
                       }}
-                      className={`p-3 md:p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
+                      className={`p-3 md:p-4 bg-[var(--ot-paper)] border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
                         selectedDisco === disco.serviceID
                           ? 'border-yellow-500 bg-yellow-50 shadow-md'
-                          : 'border-gray-200 hover:border-yellow-300'
+                          : 'border-[var(--ot-line)] hover:border-yellow-300'
                       }`}
                     >
                       <div className="text-center">
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
-                          <FaBolt className="text-yellow-600 text-base md:text-lg" />
+                          <FaBolt className="text-[var(--ot-accent)] text-base md:text-lg" />
                         </div>
-                        <div className="text-base md:text-lg font-bold text-gray-900 mb-1">
+                        <div className="text-base md:text-lg font-bold text-[var(--ot-ink)] mb-1">
                           {disco.displayName}
                         </div>
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-[var(--ot-muted)]">
                           Commission: {disco.commissionRate}%
                         </div>
                       </div>
@@ -347,7 +269,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                   ))}
                 </div>
 
-                {/* Navigation Buttons */}
+            {/* Navigation Buttons */}
                 <div className="mt-4 md:mt-6 flex justify-end">
                   <button
                     onClick={() => {
@@ -357,7 +279,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!selectedDisco}
-                    className="px-4 md:px-6 py-2 md:py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-4 md:px-6 py-2 md:py-3 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -383,22 +305,22 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                     </div>
 
                     {/* Amount Limits for Selected Disco */}
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="p-3 bg-[var(--ot-tint)] border border-blue-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
-                        <FaBolt className="text-blue-600 text-sm" />
-                        <span className="text-sm font-medium text-blue-800">Transaction Limits</span>
+                        <FaBolt className="text-[var(--ot-accent)] text-sm" />
+                        <span className="text-sm font-medium text-[var(--ot-accent)]">Transaction Limits</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="bg-white p-2 rounded border">
-                          <span className="text-blue-700 font-medium block">Minimum</span>
-                          <span className="text-blue-900 font-bold text-lg">₦{minAmount.toLocaleString()}</span>
+                        <div className="bg-[var(--ot-paper)] p-2 rounded border">
+                          <span className="text-[var(--ot-accent)] font-medium block">Minimum</span>
+                          <span className="text-[var(--ot-accent)] font-bold text-lg">₦{minAmount.toLocaleString()}</span>
                         </div>
-                        <div className="bg-white p-2 rounded border">
-                          <span className="text-blue-700 font-medium block">Maximum</span>
-                          <span className="text-blue-900 font-bold text-lg">₦{maxAmount.toLocaleString()}</span>
+                        <div className="bg-[var(--ot-paper)] p-2 rounded border">
+                          <span className="text-[var(--ot-accent)] font-medium block">Maximum</span>
+                          <span className="text-[var(--ot-accent)] font-bold text-lg">₦{maxAmount.toLocaleString()}</span>
                         </div>
                       </div>
-                      <p className="text-xs text-blue-600 mt-2">
+                      <p className="text-xs text-[var(--ot-accent)] mt-2">
                         These limits are configured by your electricity provider for secure transactions.
                       </p>
                     </div>
@@ -411,8 +333,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 2 && selectedDisco && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Meter Type</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Meter Type</h3>
+                  <p className="text-sm text-[var(--ot-muted)]">
                     Select your meter type for {providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}
                   </p>
                 </div>
@@ -437,10 +359,10 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       handleMeterTypeChange('prepaid');
                       setCurrentStep(3);
                     }}
-                    className={`w-full p-3 md:p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
+                    className={`w-full p-3 md:p-4 bg-[var(--ot-paper)] border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
                       selectedMeterType === 'prepaid'
                         ? 'border-yellow-500 bg-yellow-50 shadow-md'
-                        : 'border-gray-200 hover:border-yellow-300'
+                        : 'border-[var(--ot-line)] hover:border-yellow-300'
                     }`}
                   >
                     <div className="flex items-center gap-2 md:gap-3">
@@ -448,8 +370,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                         <FaBolt className="text-yellow-600 text-base md:text-lg" />
                       </div>
                       <div className="text-left flex-1">
-                        <div className="font-semibold text-gray-900 text-sm md:text-base">Prepaid Meter</div>
-                        <div className="text-gray-600 text-xs md:text-sm">Buy electricity token</div>
+                        <div className="font-semibold text-[var(--ot-ink)] text-sm md:text-base">Prepaid Meter</div>
+                        <div className="text-[var(--ot-muted)] text-xs md:text-sm">Buy electricity token</div>
                       </div>
                       <div className="text-yellow-600">
                         <FaChevronRight className="text-base md:text-lg" />
@@ -462,21 +384,21 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       handleMeterTypeChange('postpaid');
                       setCurrentStep(3);
                     }}
-                    className={`w-full p-3 md:p-4 bg-white border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
+                    className={`w-full p-3 md:p-4 bg-[var(--ot-paper)] border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
                       selectedMeterType === 'postpaid'
                         ? 'border-yellow-500 bg-yellow-50 shadow-md'
-                        : 'border-gray-200 hover:border-yellow-300'
+                        : 'border-[var(--ot-line)] hover:border-yellow-300'
                     }`}
                   >
                     <div className="flex items-center gap-2 md:gap-3">
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FaBolt className="text-blue-600 text-base md:text-lg" />
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-[var(--ot-tint)] rounded-lg flex items-center justify-center">
+                        <FaBolt className="text-[var(--ot-accent)] text-base md:text-lg" />
                       </div>
                       <div className="text-left flex-1">
-                        <div className="font-semibold text-gray-900 text-sm md:text-base">Postpaid Meter</div>
-                        <div className="text-gray-600 text-xs md:text-sm">Pay outstanding bill</div>
+                        <div className="font-semibold text-[var(--ot-ink)] text-sm md:text-base">Postpaid Meter</div>
+                        <div className="text-[var(--ot-muted)] text-xs md:text-sm">Pay outstanding bill</div>
                       </div>
-                      <div className="text-blue-600">
+                      <div className="text-[var(--ot-accent)]">
                         <FaChevronRight className="text-base md:text-lg" />
                       </div>
                     </div>
@@ -487,7 +409,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(1)}
-                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -499,12 +421,12 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 3 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Meter Details</h3>
-                  <p className="text-sm text-gray-600">Enter your meter number</p>
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Meter Details</h3>
+                  <p className="text-sm text-[var(--ot-muted)]">Enter your meter number</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
                     Meter Number
                   </label>
                   <input
@@ -515,28 +437,28 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       setMeterNumber(value);
                       await validateMeterNumber(value);
                     }}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder="Enter meter number"
                   />
 
                   {/* Amount Limits Info - Early visibility */}
                   {selectedDisco && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="mt-3 p-3 bg-[var(--ot-tint)] rounded-lg border border-blue-200">
                       <div className="flex items-center gap-2 mb-2">
-                        <FaBolt className="text-blue-600 text-sm" />
-                        <span className="text-sm font-medium text-blue-800">Purchase Limits</span>
+                        <FaBolt className="text-[var(--ot-accent)] text-sm" />
+                        <span className="text-sm font-medium text-[var(--ot-accent)]">Purchase Limits</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <span className="text-blue-700 font-medium">Min Amount:</span>
-                          <p className="text-blue-800 font-semibold">₦{minAmount.toLocaleString()}</p>
+                          <span className="text-[var(--ot-accent)] font-medium">Min Amount:</span>
+                          <p className="text-[var(--ot-accent)] font-semibold">₦{minAmount.toLocaleString()}</p>
                         </div>
                         <div>
-                          <span className="text-blue-700 font-medium">Max Amount:</span>
-                          <p className="text-blue-800 font-semibold">₦{maxAmount.toLocaleString()}</p>
+                          <span className="text-[var(--ot-accent)] font-medium">Max Amount:</span>
+                          <p className="text-[var(--ot-accent)] font-semibold">₦{maxAmount.toLocaleString()}</p>
                         </div>
                       </div>
-                      <p className="text-xs text-blue-600 mt-2">
+                      <p className="text-xs text-[var(--ot-accent)] mt-2">
                         These limits ensure secure and compliant transactions.
                       </p>
                     </div>
@@ -544,16 +466,16 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
                   {/* Customer Details Display */}
                   {customerName && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">Customer Details</h4>
+                    <div className="mt-4 p-4 bg-[var(--ot-bg)] rounded-lg border border-[var(--ot-line)]">
+                      <h4 className="font-semibold text-[var(--ot-ink)] mb-2">Customer Details</h4>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <FaUser className="text-gray-500 text-sm" />
-                          <span className="text-sm text-gray-700">{customerName}</span>
+                          <FaUser className="text-[var(--ot-muted)] text-sm" />
+                          <span className="text-sm text-[var(--ot-ink)]">{customerName}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <FaMapMarkerAlt className="text-gray-500 text-sm" />
-                          <span className="text-sm text-gray-700">{customerAddress}</span>
+                          <FaMapMarkerAlt className="text-[var(--ot-muted)] text-sm" />
+                          <span className="text-sm text-[var(--ot-ink)]">{customerAddress}</span>
                         </div>
                       </div>
                     </div>
@@ -564,7 +486,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(2)}
-                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -575,7 +497,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!meterNumber || !customerName}
-                    className="px-3 md:px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -587,12 +509,12 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 4 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Enter Amount</h3>
-                  <p className="text-sm text-gray-600">How much electricity do you want to purchase?</p>
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Enter Amount</h3>
+                  <p className="text-sm text-[var(--ot-muted)]">How much electricity do you want to purchase?</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
                     Amount (₦)
                   </label>
                   <input
@@ -605,7 +527,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       const calculatedSavings = calculateSavings(value, commissionRate);
                       setSavings(calculatedSavings);
                     }}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder={`Min: ₦${minAmount.toLocaleString()} - Max: ₦${maxAmount.toLocaleString()}`}
                     min={minAmount}
                     max={maxAmount}
@@ -620,8 +542,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                             <FaCreditCard className="text-yellow-600 text-sm" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-gray-900 text-sm">₦{parseFloat(selectedAmount).toLocaleString()}</h4>
-                            <p className="text-xs text-gray-600">Electricity purchase amount</p>
+                            <h4 className="font-bold text-[var(--ot-ink)] text-sm">₦{parseFloat(selectedAmount).toLocaleString()}</h4>
+                            <p className="text-xs text-[var(--ot-muted)]">Electricity purchase amount</p>
                           </div>
                         </div>
                       </div>
@@ -647,18 +569,18 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       )}
 
                       {/* Amount Limits Info */}
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="p-3 bg-[var(--ot-tint)] rounded-lg border border-blue-200">
                         <div className="flex items-center gap-2 mb-1">
-                          <FaBolt className="text-blue-600 text-sm" />
-                          <span className="text-sm font-medium text-blue-800">Amount Limits</span>
+                          <FaBolt className="text-[var(--ot-accent)] text-sm" />
+                          <span className="text-sm font-medium text-[var(--ot-accent)]">Amount Limits</span>
                         </div>
-                        <p className="text-sm text-blue-700">
+                        <p className="text-sm text-[var(--ot-accent)]">
                           Minimum: ₦{minAmount.toLocaleString()}
                         </p>
-                        <p className="text-sm text-blue-700">
+                        <p className="text-sm text-[var(--ot-accent)]">
                           Maximum: ₦{maxAmount.toLocaleString()}
                         </p>
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className="text-xs text-[var(--ot-accent)] mt-1">
                           These limits are set by your service provider for security and compliance.
                         </p>
                       </div>
@@ -670,7 +592,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(3)}
-                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -681,7 +603,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!selectedAmount}
-                    className="px-3 md:px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -693,19 +615,19 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 5 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Phone Number</h3>
-                  <p className="text-sm text-gray-600">We'll send your receipt to this number</p>
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Confirm Phone Number</h3>
+                  <p className="text-sm text-[var(--ot-muted)]">We'll send your receipt to this number</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder="+2348012345678"
                   />
                 </div>
@@ -714,7 +636,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(4)}
-                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -725,7 +647,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!phoneNumber}
-                    className="px-3 md:px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Continue to PIN
                   </button>
@@ -737,23 +659,23 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 6 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Enter Transaction PIN</h3>
-                  <p className="text-sm text-gray-600">Enter your 4-6 digit transaction PIN to proceed</p>
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Enter Transaction PIN</h3>
+                  <p className="text-sm text-[var(--ot-muted)]">Enter your 4-6 digit transaction PIN to proceed</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
                     Transaction PIN
                   </label>
                   <input
                     type="password"
                     value={transactionPin}
                     onChange={(e) => setTransactionPin(e.target.value)}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-gray-300 rounded-lg text-sm md:text-base font-medium bg-white focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder="Enter your PIN"
                     maxLength={6}
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  <p className="text-xs text-[var(--ot-muted)]  mt-2">
                     Enter your 4-6 digit transaction PIN to proceed with the payment
                   </p>
                 </div>
@@ -762,7 +684,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(5)}
-                    className="px-3 md:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -773,7 +695,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!transactionPin || transactionPin.length < 4 || transactionPin.length > 6}
-                    className="px-3 md:px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Continue to Payment
                   </button>
@@ -785,13 +707,13 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 7 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">Confirm Your Purchase</h3>
-                  <p className="text-sm text-gray-600">Review your electricity purchase details</p>
+                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Confirm Your Purchase</h3>
+                  <p className="text-sm text-[var(--ot-muted)]">Review your electricity purchase details</p>
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-white rounded-xl border-2 border-gray-200 p-3 md:p-4 mb-3 md:mb-4">
-                  <h4 className="text-sm md:text-base font-bold text-gray-900 mb-2 md:mb-3">Purchase Summary</h4>
+                <div className="bg-[var(--ot-paper)] rounded-xl border-2 border-[var(--ot-line)] p-3 md:p-4 mb-3 md:mb-4">
+                  <h4 className="text-sm md:text-base font-bold text-[var(--ot-ink)] mb-2 md:mb-3">Purchase Summary</h4>
 
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -800,8 +722,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           <FaBolt className="text-yellow-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900 text-sm">Electricity Provider</div>
-                          <div className="text-xs text-gray-600">
+                          <div className="font-medium text-[var(--ot-ink)] text-sm">Electricity Provider</div>
+                          <div className="text-xs text-[var(--ot-muted)]">
                             {providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}
                           </div>
                         </div>
@@ -810,12 +732,12 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <FaBolt className="text-blue-600 text-sm" />
+                        <div className="w-8 h-8 bg-[var(--ot-tint)] rounded-lg flex items-center justify-center">
+                          <FaBolt className="text-[var(--ot-accent)] text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900 text-sm">Meter Type</div>
-                          <div className="text-xs text-gray-600">{selectedMeterType?.toUpperCase()}</div>
+                          <div className="font-medium text-[var(--ot-ink)] text-sm">Meter Type</div>
+                          <div className="text-xs text-[var(--ot-muted)]">{selectedMeterType?.toUpperCase()}</div>
                         </div>
                       </div>
                     </div>
@@ -826,8 +748,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           <FaUser className="text-green-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900 text-sm">Customer Name</div>
-                          <div className="text-xs text-gray-600">{customerName}</div>
+                          <div className="font-medium text-[var(--ot-ink)] text-sm">Customer Name</div>
+                          <div className="text-xs text-[var(--ot-muted)]">{customerName}</div>
                         </div>
                       </div>
                     </div>
@@ -838,16 +760,16 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           <FaCreditCard className="text-purple-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900 text-sm">Amount</div>
-                          <div className="text-xs text-gray-600">₦{selectedAmount}</div>
+                          <div className="font-medium text-[var(--ot-ink)] text-sm">Amount</div>
+                          <div className="text-xs text-[var(--ot-muted)]">₦{selectedAmount}</div>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <div className="font-medium text-gray-900 text-sm">Purchase Amount</div>
-                        <div className="text-sm text-gray-900">
+                        <div className="font-medium text-[var(--ot-ink)] text-sm">Purchase Amount</div>
+                        <div className="text-sm text-[var(--ot-ink)]">
                           ₦{parseFloat(selectedAmount).toLocaleString()}
                         </div>
                       </div>
@@ -861,8 +783,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                         </div>
                       )}
 
-                      <div className="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-3">
-                        <div className="font-bold text-gray-900 text-base">You Pay</div>
+                      <div className="flex justify-between items-center py-3 bg-[var(--ot-bg)] rounded-lg px-3">
+                        <div className="font-bold text-[var(--ot-ink)] text-base">You Pay</div>
                         <div className="text-xl font-bold text-yellow-600">
                           ₦{(parseFloat(selectedAmount) - savings).toLocaleString()}
                         </div>
@@ -881,14 +803,14 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentStep(6)}
-                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
                   >
                     Previous
                   </button>
                   <button
                     onClick={confirmPurchase}
                     disabled={isConfirming}
-                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
                   >
                     {isConfirming ? (
                       <div className="flex items-center justify-center gap-1">
@@ -906,39 +828,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
               </div>
             )}
 
-            {/* Navigation for other steps */}
-            {currentStep < 6 && (
-              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
-                  >
-                    Cancel
-                  </button>
-                  <div className="text-xs text-gray-500 flex items-center">
-                    Step {currentStep} of 7
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* Final step navigation */}
-            {currentStep === 6 && (
-              <div className="bg-white border-t border-gray-200 px-4 py-3 mt-4 pb-8">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors text-sm"
-                  >
-                    Cancel
-                  </button>
-                  <div className="text-xs text-gray-500 flex items-center">
-                    Step 7 of 7 - Ready to Purchase
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </Modal>
@@ -955,10 +845,10 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               {purchaseResult.transaction?.status === 'delivered' ? <FaCheck className="text-green-600 text-2xl" /> : <span className="text-2xl">…</span>}
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{purchaseResult.transaction?.status === 'delivered' ? 'Purchase successful' : 'Purchase being checked'}</h3>
-            <p className="text-gray-600 mb-4">{purchaseResult.message}</p>
+            <h3 className="text-xl font-bold text-[var(--ot-ink)] mb-2">{purchaseResult.transaction?.status === 'delivered' ? 'Purchase successful' : 'Purchase being checked'}</h3>
+            <p className="text-[var(--ot-muted)] mb-4">{purchaseResult.message}</p>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="bg-[var(--ot-bg)] rounded-lg p-4 mb-4">
               <div className="space-y-2 text-left">
                 <div className="flex justify-between">
                   <span className="font-medium">Transaction ID:</span>
@@ -990,7 +880,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
               <button
                 onClick={handleRequeryTransaction}
                 disabled={isRequerying}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+                className="flex-1 bg-[#3057c5] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
               >
                 {isRequerying ? (
                   <div className="flex items-center justify-center gap-1">
