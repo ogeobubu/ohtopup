@@ -116,43 +116,39 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
+      const normalizedOrigin = origin.replace(/\/+$/, '');
+
       const allowedOrigins = [
         process.env.CLIENT_URL,
         process.env.MOBILE_APP_URL,
-        'https://ohtopup.pxxlspace.cv/',
+        'https://ohtopup.pxxlspace.cv',
         'https://ohtopup.name.ng',
         'https://www.ohtopup.name.ng',
-        'https://ohtopup.onrender.com', // Render deployment URL
-        'http://localhost:3000', // Common React dev server
-        'http://localhost:5173', // Vite dev server
-        'http://localhost:5174', // Vite dev server
-        'http://localhost:8081', // Common Expo dev server
-        'http://localhost:19006', // Expo web default port
-        'http://127.0.0.1:3000', // Localhost with IP
-        'http://127.0.0.1:5173', // Vite dev server with IP
-        'http://127.0.0.1:8081', // Expo dev server with IP
-        'http://127.0.0.1:19006', // Expo web with IP
-        'http://10.0.2.2:3000', // Android emulator localhost
-        'http://192.168.1.1:3000', // Common local network IP
-        'http://192.168.1.1:8081', // Common local network IP for Expo
-        'http://192.168.1.1:19006', // Common local network IP for Expo web
-        // Add your production mobile app URLs here
-      ].filter(Boolean); // Remove undefined values
+        'https://ohtopup.onrender.com',
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:8081',
+        'http://localhost:19006',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:8081',
+        'http://127.0.0.1:19006',
+        'http://10.0.2.2:3000',
+        'http://192.168.1.1:3000',
+        'http://192.168.1.1:8081',
+        'http://192.168.1.1:19006',
+      ]
+        .filter(Boolean)
+        .map((o) => o.replace(/\/+$/, ''));
 
-      // In production, allow all origins from your domain
-      if (process.env.NODE_ENV === 'production' && origin && (
-        ['https://ohtopup.pxxlspace.cv', 'https://ohtopup.name.ng', 'https://www.ohtopup.name.ng', 'https://ohtopup.onrender.com'].includes(origin)
-      )) {
+      if (allowedOrigins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        console.log('CORS blocked origin:', origin);
-        console.log('Allowed origins:', allowedOrigins);
-        return callback(new Error('Not allowed by CORS'));
-      }
+      console.log('CORS blocked origin:', origin);
+      console.log('Allowed origins:', allowedOrigins);
+      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
