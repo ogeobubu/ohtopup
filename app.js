@@ -277,6 +277,74 @@ const connectToDatabase = async () => {
   }
 };
 
+const frontendBuildPath = path.join(__dirname, "client/dist");
+const clientPublicPath = path.join(__dirname, "client/public");
+
+// Serve static files from client/dist (production build)
+app.use(express.static(frontendBuildPath));
+
+// Serve static files from client/public (includes sitemap.xml, robots.txt)
+app.use(express.static(clientPublicPath));
+
+// Specific route for sitemap.xml to ensure correct content-type
+app.get("/sitemap.xml", (req, res) => {
+  const sitemapPath = path.join(clientPublicPath, "sitemap.xml");
+  res.setHeader("Content-Type", "application/xml");
+  res.sendFile(sitemapPath, (err) => {
+    if (err) {
+      console.error("Error serving sitemap.xml:", err);
+      res.status(404).send("Sitemap not found");
+    }
+  });
+});
+
+// Specific route for robots.txt
+app.get("/robots.txt", (req, res) => {
+  const robotsPath = path.join(clientPublicPath, "robots.txt");
+  res.setHeader("Content-Type", "text/plain");
+  res.sendFile(robotsPath, (err) => {
+    if (err) {
+      console.error("Error serving robots.txt:", err);
+      res.status(404).send("Robots.txt not found");
+    }
+  });
+});
+
+// Catch-all route for React app (must be last)
+app.get("*", (req, res) => {
+  const fs = require('fs');
+  const htmlPath = path.join(frontendBuildPath, "index.html");
+
+  // Check if the built HTML exists, if not serve from client directory
+  if (fs.existsSync(htmlPath)) {
+    let html = fs.readFileSync(htmlPath, 'utf8');
+    // Replace nonce placeholder with actual nonce
+    html = html.replace(/<%= nonce %>/g, res.locals.nonce);
+    res.send(html);
+  } else {
+    // Fallback to client/index.html for development
+    const devHtmlPath = path.join(__dirname, "client/index.html");
+    if (fs.existsSync(devHtmlPath)) {
+      let html = fs.readFileSync(devHtmlPath, 'utf8');
+      // Replace nonce placeholder with actual nonce
+      html = html.replace(/<%= nonce %>/g, res.locals.nonce);
+      res.send(html);
+    } else {
+      res.sendFile(path.join(frontendBuildPath, "index.html"));
+    }
+  }
+});
+
+// Error handler for CSRF errors (add before your main error handler)
+app.use((err, req, res, next) => {
+  if (err.code === "EBADCSRFTOKEN") {
+    return res.status(403).json({ message: "Invalid CSRF token" });
+  }
+  next(err);
+});
+
+app.use(handleServiceError);
+
 // Start server only after database connection is established
 const startServer = async () => {
   try {
@@ -306,74 +374,6 @@ const startServer = async () => {
     }
     require('./services/paymentWorker').start();
     xController.startRepostJob();
-
-    const frontendBuildPath = path.join(__dirname, "client/dist");
-    const clientPublicPath = path.join(__dirname, "client/public");
-
-    // Serve static files from client/dist (production build)
-    app.use(express.static(frontendBuildPath));
-
-    // Serve static files from client/public (includes sitemap.xml, robots.txt)
-    app.use(express.static(clientPublicPath));
-
-    // Specific route for sitemap.xml to ensure correct content-type
-    app.get("/sitemap.xml", (req, res) => {
-      const sitemapPath = path.join(clientPublicPath, "sitemap.xml");
-      res.setHeader("Content-Type", "application/xml");
-      res.sendFile(sitemapPath, (err) => {
-        if (err) {
-          console.error("Error serving sitemap.xml:", err);
-          res.status(404).send("Sitemap not found");
-        }
-      });
-    });
-
-    // Specific route for robots.txt
-    app.get("/robots.txt", (req, res) => {
-      const robotsPath = path.join(clientPublicPath, "robots.txt");
-      res.setHeader("Content-Type", "text/plain");
-      res.sendFile(robotsPath, (err) => {
-        if (err) {
-          console.error("Error serving robots.txt:", err);
-          res.status(404).send("Robots.txt not found");
-        }
-      });
-    });
-
-    // Catch-all route for React app (must be last)
-    app.get("*", (req, res) => {
-      const fs = require('fs');
-      const htmlPath = path.join(frontendBuildPath, "index.html");
-
-      // Check if the built HTML exists, if not serve from client directory
-      if (fs.existsSync(htmlPath)) {
-        let html = fs.readFileSync(htmlPath, 'utf8');
-        // Replace nonce placeholder with actual nonce
-        html = html.replace(/<%= nonce %>/g, res.locals.nonce);
-        res.send(html);
-      } else {
-        // Fallback to client/index.html for development
-        const devHtmlPath = path.join(__dirname, "client/index.html");
-        if (fs.existsSync(devHtmlPath)) {
-          let html = fs.readFileSync(devHtmlPath, 'utf8');
-          // Replace nonce placeholder with actual nonce
-          html = html.replace(/<%= nonce %>/g, res.locals.nonce);
-          res.send(html);
-        } else {
-          res.sendFile(path.join(frontendBuildPath, "index.html"));
-        }
-      }
-    });
-
-    // Error handler for CSRF errors (add before your main error handler)
-    app.use((err, req, res, next) => {
-      if (err.code === "EBADCSRFTOKEN") {
-        return res.status(403).json({ message: "Invalid CSRF token" });
-      }
-      next(err);
-    });
-
-    app.use(handleServiceError);
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
