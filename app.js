@@ -53,6 +53,7 @@ app.use(
           "https://applepay.cdn-apple.com",
           "https://checkout.paystack.com",
           "https://www.youtube.com",
+          "https://www.clarity.ms",
           (req, res) => `'nonce-${res.locals.nonce}'`
         ],
         styleSrc: ["'self'", "'unsafe-inline'"],
