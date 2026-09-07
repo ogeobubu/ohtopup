@@ -141,7 +141,9 @@ app.use(
         .filter(Boolean)
         .map((a) => a.replace(/\/+$/, '').toLowerCase());
 
-      if (allowed.includes(o)) return callback(null, true);
+      if (allowed.some((a) => o === a || o.startsWith(a + '/') || a.startsWith(o + '/'))) {
+        return callback(null, true);
+      }
 
       console.log('CORS blocked:', origin);
       return callback(new Error('Not allowed by CORS'));
