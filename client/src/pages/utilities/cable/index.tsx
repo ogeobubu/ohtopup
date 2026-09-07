@@ -64,9 +64,7 @@ const Cable = ({ user, isDarkMode }) => {
     setIsSubmitting(false);
   };
 
-  useEffect(() => {
-    setIsModalOpen(true);
-  }, []);
+
 
   const {
     data: walletData,
@@ -187,15 +185,8 @@ const Cable = ({ user, isDarkMode }) => {
   };
 
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-6 h-full flex flex-col items-center justify-center">
-      <div className="relative">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center bg-blue-500 text-white font-semibold py-2 px-4 rounded-full"
-        >
-          <span className="animate-bounce">Click to Open Modal</span>
-        </button>
-      </div>
+    <div className="ot-utility-intro">
+      <div><h3>Renew your TV subscription</h3><p>Choose your provider and a package for your next renewal.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose TV package</button></div>
       <Modal
         isOpen={isModalOpen}
         closeModal={closeModal}

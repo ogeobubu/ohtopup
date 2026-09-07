@@ -1,127 +1,40 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import {
-  FaHome,
-  FaMoneyBillAlt,
-  FaWallet,
-  FaUserFriends,
-  FaCog,
-  FaQuestionCircle,
-  FaBars,
-  FaTimes,
-  FaBullseye,
-} from "react-icons/fa";
-import { useSelector } from "react-redux";
-import logo from "../../assets/logo/new-dark.png";
-import logoWhite from "../../assets/logo/logo-app.png";
-
-const Sidebar = () => {
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { FiGrid, FiCreditCard, FiClock, FiWifi, FiUsers, FiAward, FiSettings, FiHelpCircle, FiMenu, FiX, FiHexagon } from 'react-icons/fi';
+import Brand from '../../components/ui/Brand';
+const primary = [ ['/dashboard', 'Overview', FiGrid], ['/utilities', 'Make a payment', FiWifi], ['/wallet', 'Wallet', FiCreditCard], ['/transactions', 'Transactions', FiClock] ] as const;
+const secondary = [ ['/referral', 'Referrals', FiUsers], ['/rank', 'Rewards & ranking', FiAward], ['/bet-dice', 'Games', FiHexagon] ] as const;
+export default function Sidebar() {
+  const [open, setOpen] = useState(false);
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
-
-  const links = [
-    { label: "Home", icon: FaHome, to: "/dashboard" },
-    { label: "Transactions", icon: FaMoneyBillAlt, to: "/transactions" },
-    { label: "Wallet", icon: FaWallet, to: "/wallet" },
-    { label: "Referral", icon: FaUserFriends, to: "/referral" },
-    { label: "User Ranking", icon: FaUserFriends, to: "/rank" },
-    { label: "Bet Dice Game", icon: FaBullseye, to: "/bet-dice" },
-    { label: "Settings", icon: FaCog, to: "/settings" },
-    { label: "Help & Support", icon: FaQuestionCircle, to: "/support" },
-  ];
-
-  return (
-    <div className="relative">
-      {/* Mobile Menu Button */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`p-2 rounded-lg shadow-lg transition-colors duration-200 ${
-            isDarkMode
-              ? "bg-gray-800 text-white hover:bg-gray-700"
-              : "bg-white text-gray-800 hover:bg-gray-50"
-          }`}
-        >
-          <FaBars size={20} />
-        </button>
-      </div>
-
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={`fixed z-40 top-0 left-0 w-56 h-full p-6 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } ${
-          isDarkMode
-            ? "bg-gray-800 border-r border-gray-700"
-            : "bg-white border-r border-gray-200"
-        } shadow-xl`}
-      >
-        {/* Logo Section */}
-        <div className="mb-8 flex justify-between items-center">
-          <div className="flex justify-center items-center flex-1">
-            {isDarkMode ? (
-              <img src={logoWhite} alt="Logo" className="w-auto h-10" />
-            ) : (
-              <img src={logo} alt="Logo" className="w-auto h-10" />
-            )}
-          </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <FaTimes size={20} />
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1">
-          <ul className="space-y-2">
-            {links.map((link, index) => (
-              <li key={index}>
-                <Link
-                  to={link.to}
-                  onClick={() => setIsOpen(false)}
-                  className={`group flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                    location.pathname === link.to
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : `${
-                          isDarkMode
-                            ? "text-gray-300 hover:bg-gray-700 hover:text-white"
-                            : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                        }`
-                  }`}
-                >
-                  <link.icon className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">{link.label}</span>
-                  {location.pathname === link.to && (
-                    <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <div className={`text-xs ${
-            isDarkMode ? "text-gray-400" : "text-gray-500"
-          } text-center`}>
-            © 2024 OhTopUp Inc.
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Sidebar;
+  const panel = useRef<HTMLElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
+  useEffect(() => { setOpen(false); }, [location.pathname, location.search]);
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    panel.current?.querySelector<HTMLElement>('a')?.focus();
+    const keyboard = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setOpen(false); toggle.current?.focus(); }
+      if (e.key === 'Tab') {
+        const items = [...(panel.current?.querySelectorAll<HTMLElement>('a,button') || [])];
+        if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items.at(-1)?.focus(); }
+        else if (!e.shiftKey && document.activeElement === items.at(-1)) { e.preventDefault(); items[0]?.focus(); }
+      }
+    };
+    document.addEventListener('keydown', keyboard);
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', keyboard); };
+  }, [open]);
+  const links = (items: typeof primary | typeof secondary) => items.map(([to, label, Icon]) => <NavLink key={to} to={to} className="ot-side-link"><Icon /><span>{label}</span></NavLink>);
+  return <>
+    <button ref={toggle} className="ot-icon-button ot-mobile-only ot-sidebar-toggle" onClick={() => setOpen(true)} aria-label="Open account navigation" aria-expanded={open} aria-controls="account-navigation"><FiMenu /></button>
+    {open && <div className="ot-sidebar-overlay" onClick={() => { setOpen(false); toggle.current?.focus(); }} />}
+    <aside id="account-navigation" ref={panel} className={`ot-sidebar${open ? ' is-open' : ''}`} aria-label="Account navigation">
+      <div className="ot-sidebar-brand"><Brand to="/dashboard" /><button className="ot-icon-button ot-mobile-only" onClick={() => { setOpen(false); toggle.current?.focus(); }} aria-label="Close account navigation"><FiX /></button></div>
+      <p className="ot-sidebar-label">YOUR ACCOUNT</p><nav aria-label="Payments">{links(primary)}</nav>
+      <div className="ot-sidebar-secondary"><p className="ot-sidebar-label">MORE FROM OHTOPUP</p><nav aria-label="More">{links(secondary)}</nav></div>
+      <div className="ot-sidebar-bottom"><nav aria-label="Account settings"><NavLink className="ot-side-link" to="/settings"><FiSettings />Settings</NavLink><NavLink className="ot-side-link" to="/support"><FiHelpCircle />Help & support</NavLink></nav><small>© {new Date().getFullYear()} OhTopUp</small></div>
+    </aside>
+  </>;
+}

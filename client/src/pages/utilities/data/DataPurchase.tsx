@@ -98,9 +98,7 @@ const DataPurchase = ({ isDarkMode }) => {
   // Get plans for selected network
   const networkPlans = selectedNetwork && selectedPlansData?.plans ? selectedPlansData.plans[selectedNetwork] || [] : [];
 
-  useEffect(() => {
-    setIsModalOpen(true);
-  }, []);
+
 
   // Phone number validation
   const validatePhoneNumber = (phone) => {
@@ -197,20 +195,8 @@ const DataPurchase = ({ isDarkMode }) => {
   const isLoading = isSelectedPlansLoading || isWalletLoading || isUserLoading || isSettingsLoading;
 
   return (
-    <div className="border border-solid border-gray-200 rounded-xl p-4 md:p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-      <div className="text-center">
-        <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
-          <FaWifi className="text-white text-2xl md:text-3xl" />
-        </div>
-        <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Buy Data</h3>
-        <p className="text-gray-600 text-sm md:text-base mb-4 md:mb-6">Get instant data for your mobile devices</p>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm md:text-base"
-        >
-          Start Purchasing
-        </button>
-      </div>
+    <div className="ot-utility-intro">
+      <div><h3>Buy data</h3><p>Find a data plan for your network and your everyday needs.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose data</button></div>
 
       <Modal
         isDarkMode={isDarkMode}

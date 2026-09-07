@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import { FaBell, FaUserCircle, FaSignOutAlt, FaMoon, FaSun, FaCircle } from "react-icons/fa";
 import { clearUserData } from "../../actions/userActions";
@@ -21,6 +21,8 @@ const Header = () => {
   const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pageTitle = ({ dashboard: "Overview", utilities: "Payments", transactions: "Transactions", wallet: "Wallet", settings: "Settings", support: "Support", referral: "Referrals", rank: "Rewards", "bet-dice": "Games" })[location.pathname.split("/")[1]] || "Account";
 
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
@@ -128,32 +130,30 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className={`relative bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 py-3`}>
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-        <div className={`text-gray-800 dark:text-white mb-2 md:mb-0`}>
-          <span className="text-lg md:text-xl font-bold">Hello</span>, {user?.username} 👋
-        </div>
+    <nav className="ot-app-header" aria-label="Account controls">
+      <div className="ot-header-inner">
+        <div className="ot-header-title">Your account <span>/ &nbsp; {pageTitle}</span></div>
         <div className="flex items-center space-x-3">
         <button
-          className="bg-gray-100 dark:bg-gray-700 p-2 rounded-full"
+          className="ot-icon-button"
           onClick={() => dispatch(toggleDarkMode())}
           aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           {isDarkMode ? (
             <FaSun className="w-4 h-4 text-yellow-500" />
           ) : (
-            <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-800" />
+            <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-300" />
           )}
         </button>
         <div ref={notificationRef}>
           <button
-            className="bg-gray-100 p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="ot-icon-button"
             onClick={toggleNotification}
             aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
             aria-expanded={isNotificationOpen}
             aria-haspopup="menu"
           >
-            <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-800 cursor-pointer" />
+            <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-300 cursor-pointer" />
             {unreadCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center" aria-label={`${unreadCount} unread notifications`}>
                 {unreadCount > 9 ? '9+' : unreadCount}
@@ -226,11 +226,12 @@ const Header = () => {
 
         <div className="relative inline-block" ref={dropdownRef}>
           <button
-            className="bg-gray-100 p-2 rounded-full text-gray-700 hover:bg-gray-300"
+            className="ot-icon-button"
             onClick={toggleDropdown}
-            aria-label="User Menu"
+            aria-label="User menu"
+            aria-expanded={isDropdownOpen}
           >
-            <FaUserCircle className="text-gray-500 dark:text-gray-800 w-4 h-4" />
+            <FaUserCircle className="text-gray-500 dark:text-gray-300 w-4 h-4" />
           </button>
 
           {isDropdownOpen && (
@@ -245,8 +246,8 @@ const Header = () => {
                 >
                   <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
                   <div className="flex flex-col">
-                    <span className="text-[18px] dark:text-white">Profile</span>
-                    <small className="text-[14px] text-gray-400 dark:text-gray-300">View my profile</small>
+                    <span className="text-sm dark:text-white">Profile</span>
+                    <small className="text-xs text-gray-400 dark:text-gray-300">View my profile</small>
                   </div>
                 </li>
                 <li 
@@ -255,8 +256,8 @@ const Header = () => {
                 >
                   <FaSignOutAlt className="text-blue-500 w-5 h-5 mr-2" />
                   <div className="flex flex-col">
-                    <span className="text-[18px] dark:text-white">Logout</span>
-                    <small className="text-[14px] text-gray-400 dark:text-gray-300">Logout of your account</small>
+                    <span className="text-sm dark:text-white">Logout</span>
+                    <small className="text-xs text-gray-400 dark:text-gray-300">Logout of your account</small>
                   </div>
                 </li>
               </ul>

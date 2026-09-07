@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { toast } from "react-toastify";
 
@@ -31,6 +31,7 @@ const FormInput: React.FC<FormInputProps> = ({
   isDarkMode,
   onBlur,
 }) => {
+  const id = useId();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -39,16 +40,19 @@ const FormInput: React.FC<FormInputProps> = ({
 
   const handlePaste = () => {
     navigator.clipboard.readText().then((text) => {
-      onChange(text);
+      onChange?.({ target: { name, value: text } });
       toast.success("Text pasted successfully!");
-    });
+    }).catch(() => toast.error("Please paste directly into the field."));
   };
 
   return (
     <div className="mb-4">
-      {label && <label className={`block mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{label}</label>}
+      {label && <label htmlFor={id} className="ot-field-label">{label}</label>}
       <div className="relative">
         <input
+          id={id}
+          aria-invalid={!!error}
+          aria-describedby={error || helperText ? `${id}-message` : undefined}
           name={name}
           type={type === "password" && isPasswordVisible ? "text" : type}
           placeholder={placeholder}
@@ -57,13 +61,9 @@ const FormInput: React.FC<FormInputProps> = ({
           onBlur={onBlur}
           min={min}
           disabled={disabled}
-          className={`w-full p-2 border rounded bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 pr-16 ${
-            error
-              ? "border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500"
-              : "border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400"
-          }`}
+          className="ot-field pr-16"
         />
-        {helperText && <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{helperText}</span>}
+
         {label === "Referral Code (Optional)" && (
           <button
             type="button"
@@ -77,6 +77,7 @@ const FormInput: React.FC<FormInputProps> = ({
           <button
             type="button"
             onClick={togglePasswordVisibility}
+            aria-label={isPasswordVisible ? "Hide password" : "Show password"}
             className="absolute inset-y-0 right-0 flex items-center pr-3"
           >
             {isPasswordVisible ? (
@@ -87,6 +88,7 @@ const FormInput: React.FC<FormInputProps> = ({
           </button>
         )}
       </div>
+      {(error || helperText) && <p id={`${id}-message`} className={error ? "ot-field-error" : "text-xs mt-1 text-gray-500"}>{error || helperText}</p>}
     </div>
   );
 };

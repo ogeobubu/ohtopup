@@ -1,156 +1,61 @@
-import React, { useState } from "react";
-import { useMutation } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import Footer from "./footer";
-import Navbar from "./navbar";
-import Hero from "./hero";
-import Offer from "./offer";
-import AdditionalFeature from "./additional_feature";
-import Partners from "./partners";
-import FAQ from "./faq";
-import Rating from "./rating";
-import Usecase from "./use-case";
-import CTA from "./cta";
-import { subscribeNewsletter } from "../../api";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FiArrowRight, FiWifi, FiSmartphone, FiZap, FiTv, FiArrowUpRight, FiCheck } from 'react-icons/fi';
+import Navbar from './navbar';
+import Footer from './footer';
 
-const HomePage = () => {
-  const mutation = useMutation({
-    mutationFn: subscribeNewsletter,
-    onSuccess: () => {
-      toast.success("Successfully subscribed to newsletter!");
-      formik.resetForm();
-    },
-    onError: (error) => {
-      console.error("Error subscribing to newsletter:", error);
-      toast.error("Error subscribing to newsletter. Please try again.");
-    },
-  });
-
-  const formik = useFormik({
-    initialValues: {
-      email: '',
-    },
-    validationSchema: Yup.object({
-      email: Yup.string()
-        .email('Invalid email address')
-        .required('Email is required'),
-    }),
-    onSubmit: (values) => {
-      mutation.mutate(values);
-    },
-  });
-
-  return (
-    <div>
-      <Navbar />
-      <Hero
-        heading="Buy Airtime, Data, TV, and Electricity in Seconds"
-        subheading="Instant delivery, best prices, and bank‑grade security. Join thousands who top up smarter with OhTopUp."
-        buttonText="Create Free Account"
-        secondButtonText="Download App"
-        href="/create"
-      />
-
-      {/* Quick stats */}
-      <section className="bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="text-4xl mb-2">⚡</div>
-            <p className="text-xl font-bold text-blue-600 mb-1">Instant</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Real‑time delivery</p>
+const services = [
+  { name: 'Data', icon: FiWifi, title: 'Stay connected.', description: 'Find a data plan for your network and your day.', networks: ['MTN', 'Airtel', 'Glo', '9mobile'], action: 'Browse data plans', href: '/pricing' },
+  { name: 'Airtime', icon: FiSmartphone, title: 'Keep the conversation going.', description: 'Top up your number or send airtime to someone else.', networks: ['MTN', 'Airtel', 'Glo', '9mobile'], action: 'Get started', href: '/create' },
+  { name: 'Electricity', icon: FiZap, title: 'Take care of home.', description: 'Pay your electricity bill and keep the transaction in one place.', networks: ['Prepaid', 'Postpaid'], action: 'Get started', href: '/create' },
+  { name: 'TV', icon: FiTv, title: 'Make time for your favourites.', description: 'Manage your TV subscription alongside your other everyday payments.', networks: ['DStv', 'GOtv', 'StarTimes'], action: 'Get started', href: '/create' },
+];
+const questions = [
+  ['What can I pay for?', 'OhTopUp supports mobile data, airtime, electricity and TV subscriptions. Available plans and providers are shown before you purchase.'],
+  ['How do I get started?', 'Create an account, verify your email and set your transaction PIN. You can then fund your wallet and choose a service.'],
+  ['What if a payment is pending?', 'Check the transaction in your account before making another purchase. Pending purchases are checked with the provider; a confirmed failed purchase is refunded to your wallet.'],
+];
+export default function HomePage() {
+  const [selected, setSelected] = useState(0);
+  const service = services[selected];
+  return <div className="ot-public">
+    <Navbar />
+    <main id="main-content">
+      <section className="ot-container ot-hero">
+        <div className="ot-hero-copy"><p className="ot-eyebrow"><span className="ot-small-line" /> EVERYDAY PAYMENTS, SIMPLIFIED</p>
+          <h1>A little less admin.<br /><span>A lot more life.</span></h1>
+          <p className="ot-hero-description">Data, airtime and household bills. Take care of the essentials in one place, and get on with your day.</p>
+          <div className="ot-hero-actions"><Link to="/create" className="ot-button ot-button-primary">Create your account <FiArrowRight /></Link><Link to="/pricing" className="ot-text-link">Explore data plans <FiArrowUpRight /></Link></div>
+          <p className="ot-hero-note">For your phone. For your home. For the people you care about.</p>
+        </div>
+        <div className="ot-service-preview">
+          <div className="ot-preview-caption"><span>ONE ACCOUNT. YOUR EVERYDAY ESSENTIALS.</span><span>01 — 04</span></div>
+          <div className="ot-service-tabs" role="tablist" aria-label="Explore services">{services.map((item, i) => <button key={item.name} id={`service-tab-${i}`} role="tab" aria-selected={i === selected} aria-controls="service-panel" tabIndex={i === selected ? 0 : -1} onClick={() => setSelected(i)} onKeyDown={e => {
+            if (['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) {
+              e.preventDefault(); const next = e.key === 'Home' ? 0 : e.key === 'End' ? 3 : (i + (e.key === 'ArrowRight' ? 1 : 3)) % 4;
+              setSelected(next); document.getElementById(`service-tab-${next}`)?.focus();
+            }
+          }}><item.icon /><span>{item.name}</span></button>)}</div>
+          <div id="service-panel" role="tabpanel" aria-labelledby={`service-tab-${selected}`} className="ot-preview-body">
+            <div className="ot-preview-symbol"><service.icon aria-hidden="true" /></div>
+            <h2>{service.title}</h2><p>{service.description}</p>
+            <div className="ot-network-list">{service.networks.map(name => <span key={name}>{name}</span>)}</div>
+            <Link className="ot-preview-action" to={service.href}>{service.action}<FiArrowRight /></Link>
           </div>
-          <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="text-4xl mb-2">💸</div>
-            <p className="text-xl font-bold text-blue-600 mb-1">Save</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Competitive pricing</p>
-          </div>
-          <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="text-4xl mb-2">🔒</div>
-            <p className="text-xl font-bold text-blue-600 mb-1">Secure</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Bank‑grade protection</p>
-          </div>
-          <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="text-4xl mb-2">🕑</div>
-            <p className="text-xl font-bold text-blue-600 mb-1">24/7</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Always available</p>
-          </div>
+          <div className="ot-preview-foot"><FiCheck /><span>Review your details before every payment.</span></div>
         </div>
       </section>
-
-      {/* Popular Services */}
-      <section className="py-16 bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-2xl md:text-3xl font-bold mb-8 text-gray-900 dark:text-white">
-            Popular Services
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700 shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-5xl mb-4">📱</div>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Airtime Top-up</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Instant recharge for all networks</p>
-            </div>
-            <div className="p-6 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-800 dark:to-gray-700 shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-5xl mb-4">📊</div>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Data Bundles</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">High-speed data at best prices</p>
-            </div>
-            <div className="p-6 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-800 dark:to-gray-700 shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-5xl mb-4">📺</div>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">TV Subscriptions</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Watch your favorite shows</p>
-            </div>
-            <div className="p-6 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-gray-800 dark:to-gray-700 shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-5xl mb-4">⚡</div>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Electricity Bills</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Pay bills with ease</p>
-            </div>
-          </div>
-        </div>
+      <section className="ot-service-strip" aria-label="Services"><div className="ot-container">{services.map(s => <div key={s.name}><s.icon /><span>{s.name === 'Data' ? 'Mobile data' : s.name === 'TV' ? 'TV subscriptions' : s.name}</span></div>)}</div></section>
+      <section className="ot-container ot-explainer">
+        <div><p className="ot-eyebrow">LESS TO KEEP TRACK OF</p><h2>Your everyday payments.<br />One clear view.</h2><p>From a quick top-up to the monthly electricity bill, keep your payments and their details together.</p><Link className="ot-text-link" to="/create">Get started <FiArrowUpRight /></Link></div>
+        <div className="ot-feature-rows">{[
+          ['01', 'Know what you’re paying.', 'See your selected plan, recipient and cost before you confirm.'],
+          ['02', 'Follow every payment.', 'Find transaction details, payment status and electricity tokens in your account.'],
+          ['03', 'Get help with the details.', 'Raise a support request when you need help with a transaction.'],
+        ].map(([number, title, body]) => <div className="ot-feature-row" key={number}><span>{number}</span><div><h3>{title}</h3><p>{body}</p></div></div>)}</div>
       </section>
-      <Offer />
-      <AdditionalFeature />
-      <Partners />
-      <FAQ />
-      <Usecase />
-      <CTA />
-      <Rating />
-
-      {/* Newsletter Signup */}
-      <section className="py-16 bg-gray-900 text-white text-center">
-        <div className="container mx-auto px-4">
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">Stay Updated</h3>
-          <p className="text-lg mb-8 max-w-md mx-auto">
-            Get the latest news, updates, and exclusive offers delivered to your inbox.
-          </p>
-          <form onSubmit={formik.handleSubmit} className="flex flex-col md:flex-row justify-center max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              {...formik.getFieldProps('email')}
-              className={`px-4 py-3 rounded-l-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto ${formik.touched.email && formik.errors.email ? 'border-red-500' : ''}`}
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-r-lg font-semibold transition mt-2 md:mt-0 md:ml-2 disabled:opacity-50"
-              disabled={mutation.isPending || !formik.isValid || !formik.dirty}
-            >
-              {mutation.isPending ? 'Subscribing...' : 'Subscribe'}
-            </button>
-          </form>
-          {formik.touched.email && formik.errors.email ? (
-            <div className="text-red-500 mt-2">{formik.errors.email}</div>
-          ) : null}
-          <p className="text-sm text-gray-400 mt-4">
-            We respect your privacy. <a href="/unsubscribe" className="underline hover:text-white">Unsubscribe</a> at any time.
-          </p>
-        </div>
-      </section>
-
-      <Footer />
-    </div>
-  );
-};
-
-export default HomePage;
+      <section className="ot-get-started"><div className="ot-container"><div><p className="ot-eyebrow">A SIMPLER ROUTINE STARTS HERE</p><h2>One less thing on your list.</h2></div><Link to="/create" className="ot-button ot-button-light">Create an account <FiArrowRight /></Link></div></section>
+      <section className="ot-container ot-faq"><div><p className="ot-eyebrow">GOOD TO KNOW</p><h2>A few useful answers.</h2><Link to="/tutorials" className="ot-text-link">Visit the help centre <FiArrowUpRight /></Link></div><div>{questions.map(([q, a]) => <details key={q}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
+    </main><Footer />
+  </div>;
+}

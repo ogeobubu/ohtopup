@@ -80,8 +80,8 @@ const Reset = ({ darkMode }) => {
 
   return (
     <div className={`flex md:flex-row justify-between ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      <div className="w-full py-0 md:py-4">
-        <div className="max-w-md flex justify-center flex-col w-auto m-auto space-y-6">
+      <div className="ot-auth-form">
+        <div className="ot-auth-inner">
           <Logo className="mx-auto w-auto" darkMode={darkMode} href="/" />
           <div className="flex justify-center flex-col gap-3 px-2 md:px-12">
             <h3 className="text-lg md:text-xl font-semibold">
@@ -195,11 +195,7 @@ const Reset = ({ darkMode }) => {
         </div>
       </div>
 
-      <div className="hidden md:flex bg-gradient-to-r from-blue-400 to-blue-600 rounded-tl-lg rounded-bl-lg shadow-lg min-h-screen w-full flex items-center justify-center">
-        <p className="p-8 text-white text-4xl md:text-5xl font-semibold text-center">
-          Purchase Utility Bills at Competitive Prices!
-        </p>
-      </div>
+      <aside className="ot-auth-aside"><span className="ot-eyebrow">EVERYDAY ESSENTIALS</span><h2>A little less admin.<br />A lot more life.</h2><p>Data, airtime and household bills. Take care of the everyday, all in one place.</p><small>OhTopUp · Made for everyday life in Nigeria.</small></aside>
     </div>
   );
 };

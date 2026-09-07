@@ -20,6 +20,7 @@ const App = () => {
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["user"],
     queryFn: getUser,
+    enabled: !!localStorage.getItem("ohtopup-token"),
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     staleTime: 5 * 60 * 1000, // 5 minutes

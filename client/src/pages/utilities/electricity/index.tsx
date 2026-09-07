@@ -216,26 +216,11 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
   const isLoading = isWalletLoading || isProvidersLoading || isUserLoading;
 
-  useEffect(() => {
-    setIsModalOpen(true);
-  }, []);
+
 
   return (
-    <div className="border border-solid border-gray-200 rounded-xl p-4 md:p-8 h-full flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50">
-      <div className="text-center">
-        <div className="w-16 h-16 md:w-20 md:h-20 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-lg">
-          <FaBolt className="text-white text-2xl md:text-3xl" />
-        </div>
-        <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Pay Electricity Bill</h3>
-        <p className="text-gray-600 text-sm md:text-base mb-4 md:mb-6">Pay your electricity bills instantly</p>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-6 md:py-4 md:px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 text-sm md:text-base"
-        >
-          Start Payment
-        </button>
-      </div>
-
+    <div className="ot-utility-intro">
+      <div><h3>Pay your electricity bill</h3><p>Choose your provider and have your meter number ready.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose provider</button></div>
       <Modal
         isDarkMode={isDarkMode}
         isOpen={isModalOpen}
