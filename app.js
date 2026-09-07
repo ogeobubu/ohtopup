@@ -113,12 +113,11 @@ app.use(
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
-      const normalizedOrigin = origin.replace(/\/+$/, '');
+      const o = origin.replace(/\/+$/, '').toLowerCase();
 
-      const allowedOrigins = [
+      const allowed = [
         process.env.CLIENT_URL,
         process.env.MOBILE_APP_URL,
         'https://ohtopup.pxxlspace.cv',
@@ -140,14 +139,11 @@ app.use(
         'http://192.168.1.1:19006',
       ]
         .filter(Boolean)
-        .map((o) => o.replace(/\/+$/, ''));
+        .map((a) => a.replace(/\/+$/, '').toLowerCase());
 
-      if (allowedOrigins.includes(normalizedOrigin)) {
-        return callback(null, true);
-      }
+      if (allowed.includes(o)) return callback(null, true);
 
-      console.log('CORS blocked origin:', origin);
-      console.log('Allowed origins:', allowedOrigins);
+      console.log('CORS blocked:', origin);
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
