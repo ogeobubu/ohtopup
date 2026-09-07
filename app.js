@@ -118,6 +118,7 @@ app.use(
       const allowedOrigins = [
         process.env.CLIENT_URL,
         process.env.MOBILE_APP_URL,
+        'https://ohtopup.pxxlspace.cv/',
         'https://ohtopup.name.ng',
         'https://www.ohtopup.name.ng',
         'https://ohtopup.onrender.com', // Render deployment URL

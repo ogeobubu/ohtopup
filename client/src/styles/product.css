@@ -211,4 +211,8 @@
 .ot-purchase-header p { color:var(--ot-muted); font-size:12px; margin:4px 0 0; }
 .ot-purchase-content h3 { font-size:21px; font-weight:550; letter-spacing:-.4px; }
 .ot-purchase-content button { box-shadow:none; }
-@media(max-width:639px) { .ot-purchase-header { padding:14px 16px; }.ot-purchase-content h3 { font-size:20px; } }
+.ot-wallet-actions { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:0 24px 24px; }
+.ot-wallet-settings { padding:0 24px 24px; }
+.ot-wallet-settings-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+.ot-wallet-settings-grid p { font-size:13px; }
+@media(max-width:639px) { .ot-purchase-header { padding:14px 16px; }.ot-purchase-content h3 { font-size:20px; }.ot-wallet-actions { grid-template-columns:1fr; padding:0 16px 16px; }.ot-wallet-settings { padding:0 16px 16px; } }
