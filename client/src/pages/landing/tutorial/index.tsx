@@ -1,25 +1,10 @@
 import { useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { FiArrowRight, FiArrowUpRight, FiClock, FiBook, FiPlay } from "react-icons/fi";
 import Navbar from "../navbar";
-import Hero from "../hero";
-import Partners from "../partners";
 import Footer from "../footer";
 import { getAllTutorials, getTutorialCategories } from "../../../api";
-import {
-  FaBook,
-  FaWallet,
-  FaGamepad,
-  FaHeadset,
-  FaCreditCard,
-  FaUser,
-  FaRocket,
-  FaClock,
-  FaPlay,
-  FaStar,
-  FaVideo,
-  FaSearch
-} from "react-icons/fa";
 
 const TutorialPage = () => {
   const navigate = useNavigate();
@@ -27,465 +12,111 @@ const TutorialPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sort, setSort] = useState('name');
 
-  const {
-    data: tutorialsData,
-    error: tutorialsError,
-    isLoading: tutorialsLoading,
-  } = useQuery({
-    queryKey: ["tutorials"],
-    queryFn: getAllTutorials,
-  });
-
-  const {
-    data: categoriesData,
-    error: categoriesError,
-    isLoading: categoriesLoading,
-  } = useQuery({
-    queryKey: ["tutorialCategories"],
-    queryFn: getTutorialCategories,
-  });
+  const { data: tutorialsData, error: tutorialsError, isLoading: tutorialsLoading } = useQuery({ queryKey: ["tutorials"], queryFn: getAllTutorials });
+  const { data: categoriesData, error: categoriesError, isLoading: categoriesLoading } = useQuery({ queryKey: ["tutorialCategories"], queryFn: getTutorialCategories });
 
   const tutorials = tutorialsData?.tutorials ?? [];
   const categories = categoriesData?.categories ?? [];
   const isLoading = tutorialsLoading || categoriesLoading;
   const error = tutorialsError || categoriesError;
 
-  // Function to get appropriate icon for category
-  const getCategoryIcon = (categoryId) => {
-    switch (categoryId) {
-      case 'getting-started':
-        return <FaRocket className="text-green-600" />;
-      case 'payments':
-        return <FaCreditCard className="text-purple-600" />;
-      case 'gaming':
-        return <FaGamepad className="text-yellow-600" />;
-      case 'account':
-        return <FaUser className="text-red-600" />;
-      case 'support':
-        return <FaHeadset className="text-blue-600" />;
-      default:
-        return <FaBook className="text-blue-600" />;
-    }
-  };
-
-  // Function to get icon for tutorial based on category
-  const getTutorialIcon = (category) => {
-    switch (category) {
-      case 'getting-started':
-        return <FaRocket className="text-green-600 text-3xl" />;
-      case 'payments':
-        return <FaCreditCard className="text-purple-600 text-3xl" />;
-      case 'gaming':
-        return <FaGamepad className="text-yellow-600 text-3xl" />;
-      case 'account':
-        return <FaWallet className="text-green-600 text-3xl" />;
-      case 'support':
-        return <FaHeadset className="text-blue-600 text-3xl" />;
-      default:
-        return <FaBook className="text-blue-600 text-3xl" />;
-    }
-  };
-
-  // Create category objects with icons
-  const tutorialCategories = categories.map(category => ({
-    ...category,
-    icon: getCategoryIcon(category.id)
-  }));
-
-  // Filter and sort tutorials
   const filteredTutorials = useMemo(() => {
-    const byCategory = activeCategory === 'all' ? tutorials : tutorials.filter(tutorial => tutorial.category === activeCategory);
-    const bySearch = searchTerm
-      ? byCategory.filter(tutorial =>
-          tutorial.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tutorial.description.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : byCategory;
-    const sorted = [...bySearch].sort((a, b) => {
-      if (sort === "name") return a.title.localeCompare(b.title);
-      if (sort === "duration") {
-        // Simple duration comparison (assuming format like "5 min", "10 min", etc.)
-        const aDuration = parseInt(a.duration) || 0;
-        const bDuration = parseInt(b.duration) || 0;
-        return aDuration - bDuration;
-      }
-      return 0;
-    });
-    return sorted;
+    const byCategory = activeCategory === 'all' ? tutorials : tutorials.filter(t => t.category === activeCategory);
+    const bySearch = searchTerm ? byCategory.filter(t => t.title.toLowerCase().includes(searchTerm.toLowerCase()) || t.description.toLowerCase().includes(searchTerm.toLowerCase())) : byCategory;
+    return [...bySearch].sort((a, b) => sort === "duration" ? (parseInt(a.duration) || 0) - (parseInt(b.duration) || 0) : a.title.localeCompare(b.title));
   }, [tutorials, activeCategory, searchTerm, sort]);
 
   return (
-    <>
+    <div className="ot-public">
       <Navbar />
-
-      <Hero
-        heading="Master OhTopUp with Our Tutorials"
-        subheading="Step-by-step guides to help you make the most of our platform"
-        buttonText="Get Started Now"
-        secondButtonText="Browse Tutorials"
-        href="/register"
-      />
-
-      <div className="container mx-auto py-20 px-4">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-blue-200 border-t-4 border-t-blue-600 rounded-full animate-spin"></div>
-              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-4 border-t-purple-600 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-            </div>
-            <p className="mt-6 text-lg text-gray-600 dark:text-gray-400 font-medium">
-              Loading tutorials...
-            </p>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">
-              Please wait while we fetch the latest content
-            </p>
+      <main id="main-content">
+        <section className="ot-container ot-hero">
+          <div className="ot-hero-copy">
+            <p className="ot-eyebrow"><span className="ot-small-line" /> HELP CENTRE</p>
+            <h1>Learn how<br />OhTopUp works.</h1>
+            <p className="ot-hero-description">Step-by-step guides to help you make the most of our platform.</p>
+            <div className="ot-hero-actions"><Link to="/create" className="ot-button ot-button-primary">Create your account <FiArrowRight /></Link><Link to="/pricing" className="ot-text-link">Browse data plans <FiArrowUpRight /></Link></div>
           </div>
-        ) : error ? (
-          <div className="text-center py-16">
-            <div className="max-w-md mx-auto">
-              <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FaBook className="text-3xl text-red-500" />
+        </section>
+
+        <section className="ot-container" style={{ paddingBottom: 98 }}>
+          {isLoading ? (
+            <div className="ot-empty" role="status"><p>Loading tutorials…</p></div>
+          ) : error ? (
+            <div className="ot-empty"><h3>We couldn't load tutorials.</h3><p>{error.message || 'Please try again later.'}</p><button className="ot-button ot-button-secondary" onClick={() => window.location.reload()}>Try again</button></div>
+          ) : (
+            <>
+              {/* Filters */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 32, alignItems: 'center' }}>
+                <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search tutorials…" className="ot-field" style={{ flex: '1 1 200px', maxWidth: 320 }} />
+                <select value={activeCategory} onChange={(e) => setActiveCategory(e.target.value)} className="ot-field" style={{ flex: '0 1 180px' }}>
+                  <option value="all">All Categories</option>
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                <select value={sort} onChange={(e) => setSort(e.target.value)} className="ot-field" style={{ flex: '0 1 160px' }}>
+                  <option value="name">Sort by Name</option>
+                  <option value="duration">Sort by Duration</option>
+                </select>
+                <span style={{ fontSize: 12, color: 'var(--ot-muted)' }}>{filteredTutorials.length} found</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                Unable to load tutorials
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                {error.message || 'Something went wrong while fetching tutorials. Please try again.'}
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Page Header */}
-            <div className="text-center mb-6 md:mb-8 px-4">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3">
-                Master OhTopUp with Our Tutorials
-              </h1>
-              <p className="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                Step-by-step guides to help you make the most of our platform
-              </p>
-            </div>
 
-            {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 md:p-4 mb-4 md:mb-6">
-              <div className="flex flex-col gap-3 md:gap-4">
-                {/* Search Bar */}
-                <div className="relative w-full">
-                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
-                  <input
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search tutorials..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm"
-                  />
+              {/* Category chips */}
+              {categories.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
+                  <button onClick={() => setActiveCategory('all')} className={`ot-button ${activeCategory === 'all' ? 'ot-button-primary' : 'ot-button-secondary'}`} style={{ fontSize: 12, padding: '8px 14px', minHeight: 'auto' }}>All</button>
+                  {categories.map(c => (
+                    <button key={c.id} onClick={() => setActiveCategory(c.id)} className={`ot-button ${activeCategory === c.id ? 'ot-button-primary' : 'ot-button-secondary'}`} style={{ fontSize: 12, padding: '8px 14px', minHeight: 'auto' }}>{c.name}</button>
+                  ))}
                 </div>
+              )}
 
-                {/* Filters Row */}
-                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-1">
-                    {/* Category Filter */}
-                    <select
-                      value={activeCategory}
-                      onChange={(e) => setActiveCategory(e.target.value)}
-                      className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm min-w-0"
-                    >
-                      <option value="all">All Categories</option>
-                      {tutorialCategories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Sort Filter */}
-                    <select
-                      value={sort}
-                      onChange={(e) => setSort(e.target.value)}
-                      className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm min-w-0"
-                    >
-                      <option value="name">Sort by Name</option>
-                      <option value="duration">Sort by Duration</option>
-                    </select>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="text-xs md:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                    <span className="font-medium text-gray-900 dark:text-white">{filteredTutorials.length}</span> found
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-              {filteredTutorials.map((tutorial) => {
-                const categoryIcon = getTutorialIcon(tutorial.category);
-
-                return (
-                  <div
-                    key={tutorial.id || tutorial._id}
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden"
-                  >
-                    {/* Header */}
-                    <div className="bg-gray-50 dark:bg-gray-700 p-3 md:p-4 border-b border-gray-200 dark:border-gray-600">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="text-lg md:text-xl">
-                            {categoryIcon}
-                          </div>
-                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
-                            tutorial.difficulty === 'Beginner' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                            tutorial.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                          }`}>
-                            {tutorial.difficulty}
-                          </span>
+              {/* Tutorial grid */}
+              {filteredTutorials.length === 0 ? (
+                <div className="ot-empty"><h3>No tutorials found.</h3><p>Try adjusting your search or browse all categories.</p><button className="ot-button ot-button-secondary" onClick={() => { setActiveCategory('all'); setSearchTerm(''); }}>View all</button></div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+                  {filteredTutorials.map((tutorial) => (
+                    <div key={tutorial.id || tutorial._id} className="ot-panel" style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div className="ot-panel-heading" style={{ borderBottom: '1px solid var(--ot-line)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: 'var(--ot-tint)', color: 'var(--ot-accent)', fontWeight: 600 }}>{tutorial.difficulty || 'Beginner'}</span>
+                          {tutorial.popular && <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 4, background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>Popular</span>}
                         </div>
-                        {tutorial.popular && (
-                          <div className="flex items-center space-x-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-0.5 rounded text-xs font-medium">
-                            <FaStar className="text-xs" />
-                            <span className="hidden sm:inline">Popular</span>
-                          </div>
-                        )}
+                      </div>
+                      <div style={{ padding: '16px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>{tutorial.title}</h3>
+                        <p style={{ fontSize: 13, color: 'var(--ot-muted)', lineHeight: 1.6, marginBottom: 16, flex: 1 }}>{tutorial.description}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12, color: 'var(--ot-muted)', marginBottom: 16 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><FiClock /> {tutorial.duration}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><FiBook /> {tutorial.type || 'article'}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => navigate(`/tutorial/${tutorial.id || tutorial._id}`)} className="ot-button ot-button-primary" style={{ flex: 1, fontSize: 12, padding: '8px 16px', minHeight: 'auto' }}><FiPlay /> Start</button>
+                          <button onClick={() => navigate(`/tutorial/${tutorial.id || tutorial._id}`)} className="ot-button ot-button-secondary" style={{ fontSize: 12, padding: '8px 16px', minHeight: 'auto' }}>Details</button>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Content */}
-                    <div className="p-3 md:p-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm md:text-base leading-tight">
-                        {tutorial.title}
-                      </h3>
-
-                      <p className="text-gray-600 dark:text-gray-300 mb-3 text-xs md:text-sm leading-relaxed line-clamp-2">
-                        {tutorial.description}
-                      </p>
-
-                      <div className="flex items-center space-x-2 md:space-x-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
-                        <div className="flex items-center space-x-1">
-                          <FaClock className="text-xs" />
-                          <span>{tutorial.duration}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          {tutorial.type === 'video' ? <FaVideo className="text-xs" /> : <FaBook className="text-xs" />}
-                          <span className="capitalize hidden sm:inline">{tutorial.type}</span>
-                        </div>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => navigate(`/tutorial/${tutorial.id || tutorial._id}`)}
-                          className="flex-1 bg-blue-600 text-white py-2 px-2 md:px-3 rounded text-xs md:text-sm hover:bg-blue-700 transition-colors font-medium flex items-center justify-center space-x-1"
-                        >
-                          <FaPlay className="text-xs" />
-                          <span className="hidden sm:inline">Start</span>
-                        </button>
-                        <button
-                          onClick={() => navigate(`/tutorial/${tutorial.id || tutorial._id}`)}
-                          className="px-2 md:px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs md:text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        >
-                          Details
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* No results state */}
-            {filteredTutorials.length === 0 && !isLoading && (
-              <div className="text-center py-16">
-                <div className="max-w-md mx-auto">
-                  <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <FaSearch className="text-3xl text-gray-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    No tutorials found
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    Try adjusting your search terms or browse all categories
-                  </p>
-                  <button
-                    onClick={() => {
-                      setActiveCategory('all');
-                      setSearchTerm('');
-                    }}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    View All Tutorials
-                  </button>
+                  ))}
                 </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+              )}
+            </>
+          )}
+        </section>
 
-      {/* Stats Section */}
-      <section className="py-12 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
-                {tutorials.length}+
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Tutorials Available
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-green-600 mb-2">
-                {tutorialCategories.length}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Categories
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-purple-600 mb-2">
-                24/7
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Access Anytime
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-orange-600 mb-2">
-                Free
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                No Cost to Learn
-              </div>
-            </div>
+        <section className="ot-container" style={{ paddingBottom: 98 }}>
+          <p className="ot-eyebrow">NEED HELP?</p>
+          <h2 style={{ fontSize: 36, fontWeight: 500, letterSpacing: '-1.3px', lineHeight: 1.2, marginBottom: 22 }}>Still have questions?</h2>
+          <p style={{ color: 'var(--ot-muted)', fontSize: 14, lineHeight: 1.8, maxWidth: 425, marginBottom: 25 }}>Our tutorials are designed to be beginner-friendly. Start with the getting-started guides and work your way through.</p>
+          <div style={{ display: 'flex', gap: 20 }}>
+            <Link to="/create" className="ot-button ot-button-primary">Create an account <FiArrowRight /></Link>
+            <Link to="/about" className="ot-text-link">Learn about us <FiArrowUpRight /></Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Categories Overview */}
-      <section className="py-12 bg-white dark:bg-gray-800">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-              Explore by Category
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-xl mx-auto">
-              Find tutorials tailored to your specific needs and interests
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {tutorialCategories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setActiveCategory(category.id)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 text-center group ${
-                  activeCategory === category.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
-                }`}
-              >
-                <div className="mb-2 flex justify-center">
-                  {category.icon}
-                </div>
-                <div className={`text-sm font-medium ${
-                  activeCategory === category.id
-                    ? 'text-blue-700 dark:text-blue-300'
-                    : 'text-gray-700 dark:text-gray-300 group-hover:text-blue-600'
-                }`}>
-                  {category.name}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {tutorials.filter(t => t.category === category.id).length} tutorials
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Help Section */}
-      <section className="py-12 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                Need Help Getting Started?
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Our tutorials are designed to be beginner-friendly with step-by-step instructions
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-                  Quick Tips for Success
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                  <li>• Start with "Getting Started" tutorials</li>
-                  <li>• Follow tutorials in the recommended order</li>
-                  <li>• Practice each step before moving to the next</li>
-                  <li>• Use the search to find specific topics</li>
-                </ul>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-                  Still Need Help?
-                </h3>
-                <div className="space-y-3">
-                  <a
-                    href="/support"
-                    className="block text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                  >
-                    Visit our Support Center →
-                  </a>
-                  <a
-                    href="/contact"
-                    className="block text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                  >
-                    Contact our Team →
-                  </a>
-                  <a
-                    href="/register"
-                    className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Create Account to Start Learning
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-8 bg-blue-600">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-3">
-            Ready to Start Learning?
-          </h2>
-          <p className="text-blue-100 mb-6 max-w-md mx-auto">
-            Create your free account and unlock access to all our tutorials and features
-          </p>
-          <a
-            href="/register"
-            className="inline-block px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            Create Free Account
-          </a>
-        </div>
-      </section>
-
-      <Partners />
+        <section className="ot-get-started"><div className="ot-container"><div><p className="ot-eyebrow">READY TO START?</p><h2>One less thing on your list.</h2></div><Link to="/create" className="ot-button ot-button-light">Create an account <FiArrowRight /></Link></div></section>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 };
 

@@ -1,97 +1,32 @@
-import React from "react";
 import { FaEnvelope, FaFacebook, FaTwitter, FaWhatsapp } from "react-icons/fa";
-import { useSelector } from "react-redux";
+
+const channels = [
+  { label: "Email Address", detail: "ohtopup@gmail.com", href: "mailto:ohtopup@gmail.com", icon: FaEnvelope, color: "var(--ot-accent)" },
+  { label: "Social Media", detail: "Facebook", href: "https://www.facebook.com", icon: FaFacebook, color: "#1877f2" },
+  { label: "Social Media", detail: "X (formerly Twitter)", href: "https://www.x.com", icon: FaTwitter, color: "#1da1f2" },
+  { label: "Chat with Us", detail: "WhatsApp", href: "https://wa.me/+2348154212889", icon: FaWhatsapp, color: "#25d366" },
+];
 
 const Contact = () => {
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
-
   return (
-    <div className={`border border-solid rounded-md p-4 md:p-6 w-full ${isDarkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
-      <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4">Contact Us</h2>
-      <p className="my-2 md:my-3 text-gray-500 text-base md:text-lg lg:text-xl">
-        You can reach us via the following channels:
-      </p>
-
-      <a
-        href="mailto:ohtopup@gmail.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
-      >
-        <div className="flex items-center">
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
-            <FaEnvelope size={16} className="text-blue-500 md:w-5 md:h-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm md:text-base dark:text-white">Email Address</span>
-            <span className="text-gray-600 text-xs md:text-sm dark:text-white">ohtopup@gmail.com</span>
-          </div>
-        </div>
-        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
-          ➔
-        </span>
-      </a>
-
-      <a
-        href="https://www.facebook.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
-      >
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
-            <FaFacebook size={16} className="text-blue-600" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm md:text-base dark:text-white">Social Media</span>
-            <span className="text-gray-600 text-xs md:text-sm dark:text-white">Facebook</span>
-          </div>
-        </div>
-        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
-          ➔
-        </span>
-      </a>
-
-      <a
-        href="https://www.x.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
-      >
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
-            <FaTwitter size={16} className="text-blue-400" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm md:text-base dark:text-white">Social Media</span>
-            <span className="text-gray-600 text-xs md:text-sm dark:text-white">X (formerly Twitter)</span>
-          </div>
-        </div>
-        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
-          ➔
-        </span>
-      </a>
-
-      <a
-        href="https://wa.me/+2348154212889"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`mb-3 md:mb-4 p-3 md:p-4 rounded-lg flex items-center justify-between transition duration-300 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
-      >
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex justify-center items-center mr-3 md:mr-4">
-            <FaWhatsapp size={16} className="text-green-500" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm md:text-base dark:text-white">Chat with Us</span>
-            <span className="text-gray-600 text-xs md:text-sm dark:text-white">WhatsApp</span>
-          </div>
-        </div>
-        <span className="text-blue-500 cursor-pointer transition-all transform hover:translate-x-2 text-sm md:text-base">
-          ➔
-        </span>
-      </a>
-
+    <div>
+      <p style={{ fontSize: 13, color: 'var(--ot-muted)', marginBottom: 20 }}>You can reach us via the following channels:</p>
+      <div style={{ display: 'grid', gap: 10 }}>
+        {channels.map((ch) => (
+          <a key={ch.detail} href={ch.href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--ot-tint)', borderRadius: 6, textDecoration: 'none', color: 'var(--ot-ink)', fontSize: 13, transition: 'background 0.15s' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--ot-paper)', border: '1px solid var(--ot-line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ch.icon size={16} style={{ color: ch.color }} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 500 }}>{ch.label}</div>
+                <div style={{ fontSize: 12, color: 'var(--ot-muted)' }}>{ch.detail}</div>
+              </div>
+            </div>
+            <span style={{ color: 'var(--ot-muted)', fontSize: 14 }}>→</span>
+          </a>
+        ))}
+      </div>
     </div>
   );
 };

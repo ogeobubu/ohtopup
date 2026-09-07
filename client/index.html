@@ -5,7 +5,7 @@
     <link id="favicon" rel="icon" type="image/png" href="/fav-black.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+<script nonce="<%= nonce %>">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -70,18 +70,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <meta name="HandheldFriendly" content="true" />
     <meta name="format-detection" content="telephone=no" />
 
-    <!-- Security Headers -->
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="DENY" />
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-    <meta http-equiv="Referrer-Policy" content="no-referrer-when-downgrade" />
+    <!-- Security Headers (set via HTTP headers in helmet middleware) -->
 
     <!-- Performance Hints -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="dns-prefetch" href="//fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" href="/src/main.tsx" as="script" />
     <link rel="preload" href="/ohtopup-high-resolution-logo-white.png" as="image" />
 
     <!-- Structured Data - Organization -->
@@ -330,7 +325,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <!-- Google Analytics (if needed) -->
     <!-- Google Analytics -->
-    <script>
+    <script nonce="<%= nonce %>">
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -338,7 +333,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </script>
 
     <!-- Microsoft Clarity -->
-    <script type="text/javascript">
+    <script nonce="<%= nonce %>" type="text/javascript">
       (function(c,l,a,r,i,t,y){
           c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
           t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
@@ -358,55 +353,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <!-- Main script -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Additional SEO and Performance Scripts -->
+    <!-- Additional Performance Scripts -->
     <script nonce="<%= nonce %>">
-      // Service Worker Registration for PWA capabilities
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-
-      // Core Web Vitals tracking
-      if ('web-vitals' in window) {
-        import('https://unpkg.com/web-vitals@3?module')
-          .then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-            getCLS(console.log);
-            getFID(console.log);
-            getFCP(console.log);
-            getLCP(console.log);
-            getTTFB(console.log);
-          });
-      }
-
-      // Preload critical resources
-      const linkPreload = document.createElement('link');
-      linkPreload.rel = 'preload';
-      linkPreload.href = '/src/main.tsx';
-      linkPreload.as = 'script';
-      document.head.appendChild(linkPreload);
-
-      // Add structured data for performance
-      const performanceObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          // Could send performance metrics to analytics
-          if (entry.entryType === 'largest-contentful-paint') {
-            console.log('LCP:', entry.startTime);
-          }
-        }
-      });
-
+      // Performance Observer for Core Web Vitals
       try {
-        performanceObserver.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
-      } catch (e) {
-        console.log('Performance observer not supported');
-      }
+        const po = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.entryType === 'largest-contentful-paint') console.log('LCP:', entry.startTime);
+          }
+        });
+        po.observe({ entryTypes: ['largest-contentful-paint'] });
+      } catch (e) {}
     </script>
 
     <!-- Schema markup for additional services -->

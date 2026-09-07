@@ -1,69 +1,56 @@
-import React from "react";
+import { Link } from "react-router-dom";
+import { FiArrowRight, FiArrowUpRight } from "react-icons/fi";
 import Navbar from "../navbar";
-import Hero from "../hero";
-import Partners from "../partners";
 import Footer from "../footer";
 
 const AboutUs = () => {
   return (
-    <>
+    <div className="ot-public">
       <Navbar />
-      <Hero
-        heading="About OhTopUp"
-        subheading="A simpler, faster way to buy airtime, data, TV and electricity — built for everyone."
-        buttonText="Browse Plans"
-        href="/pricing"
-      />
-      <div className="container mx-auto py-16 md:py-20 px-4">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 md:mb-12 text-gray-900 dark:text-white">
-          Our Mission & Story
-        </h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-          <div>
-            <p className="text-base md:text-lg text-gray-700 dark:text-gray-300 mb-4 md:mb-6">
-              We started OhTopUp in 2024 with a simple idea: make utility top‑ups effortless and affordable for everyone. 
-              From airtime and data to TV and electricity, our platform delivers instant value at transparent prices.
-            </p>
-            <p className="text-base md:text-lg text-gray-700 dark:text-gray-300 mb-4 md:mb-6">
-              Today, thousands of customers trust OhTopUp for fast delivery, bank‑grade security, and a delightful wallet experience. 
-              We focus on reliability so you can focus on what matters: staying connected.
-            </p>
-            <p className="text-base md:text-lg text-gray-700 dark:text-gray-300 mb-4 md:mb-6">
-              Our team is customer‑obsessed. We listen, ship improvements quickly, and provide 24/7 support when you need it.
-            </p>
+      <main id="main-content">
+        <section className="ot-container ot-hero">
+          <div className="ot-hero-copy">
+            <p className="ot-eyebrow"><span className="ot-small-line" /> ABOUT US</p>
+            <h1>A simpler way to<br />take care of the essentials.</h1>
+            <p className="ot-hero-description">We started OhTopUp in 2024 with a simple idea: make utility top-ups effortless and affordable for everyone.</p>
+            <div className="ot-hero-actions"><Link to="/create" className="ot-button ot-button-primary">Create your account <FiArrowRight /></Link><Link to="/pricing" className="ot-text-link">Explore data plans <FiArrowUpRight /></Link></div>
           </div>
+        </section>
 
-          <div className="space-y-4">
-            <div className="rounded-lg p-6 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
-              <h2 className="text-xl md:text-2xl font-semibold mb-2">Why choose OhTopUp?</h2>
-              <ul className="list-none space-y-2 text-sm md:text-base">
-                <li><span aria-hidden>⚡</span> Instant top‑ups across major networks</li>
-                <li><span aria-hidden>💸</span> Competitive, transparent pricing</li>
-                <li><span aria-hidden>🔒</span> Bank‑grade security and encrypted payments</li>
-                <li><span aria-hidden>🕑</span> 24/7 human support</li>
-              </ul>
+        <section className="ot-container" style={{ paddingBottom: 98 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 100 }}>
+            <div>
+              <p className="ot-eyebrow">OUR STORY</p>
+              <h2 style={{ fontSize: 36, fontWeight: 500, letterSpacing: '-1.3px', lineHeight: 1.2, marginBottom: 22 }}>Built for everyday life in Nigeria.</h2>
+              <p style={{ color: 'var(--ot-muted)', fontSize: 14, lineHeight: 1.8, marginBottom: 20 }}>From airtime and data to TV and electricity, our platform delivers instant value at transparent prices. Today, thousands of customers trust OhTopUp for fast delivery, bank-grade security, and a delightful wallet experience.</p>
+              <p style={{ color: 'var(--ot-muted)', fontSize: 14, lineHeight: 1.8 }}>We focus on reliability so you can focus on what matters: staying connected. Our team is customer-obsessed — we listen, ship improvements quickly, and provide 24/7 support when you need it.</p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[{k:'Users',v:'10k+'},{k:'Delivery',v:'Instant'},{k:'Support',v:'24/7'}].map(s => (
-                <div key={s.k} className="rounded-lg p-4 text-center bg-white dark:bg-gray-900 shadow">
-                  <div className="text-xl md:text-2xl font-bold text-blue-600">{s.v}</div>
-                  <div className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{s.k}</div>
+            <div>
+              <div className="ot-panel" style={{ marginBottom: 16 }}>
+                <div className="ot-panel-heading"><h2>Why choose OhTopUp?</h2></div>
+                <div style={{ padding: '0 24px 24px' }}>
+                  <div className="ot-feature-row" style={{ borderTop: 'none', paddingTop: 0 }}><span>⚡</span><div><h3>Instant top-ups</h3><p>Across all major Nigerian networks.</p></div></div>
+                  <div className="ot-feature-row"><span>💸</span><div><h3>Transparent pricing</h3><p>Competitive rates with no hidden fees.</p></div></div>
+                  <div className="ot-feature-row"><span>🔒</span><div><h3>Bank-grade security</h3><p>Encrypted payments and secure transactions.</p></div></div>
+                  <div className="ot-feature-row"><span>🕑</span><div><h3>24/7 human support</h3><p>Real people, real help, whenever you need it.</p></div></div>
                 </div>
-              ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                {[{ k: 'Users', v: '10k+' }, { k: 'Delivery', v: 'Instant' }, { k: 'Support', v: '24/7' }].map(s => (
+                  <div key={s.k} className="ot-panel" style={{ padding: 20, textAlign: 'center' }}>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ot-accent)' }}>{s.v}</div>
+                    <div style={{ fontSize: 11, color: 'var(--ot-muted)', marginTop: 4 }}>{s.k}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-10 md:mt-14 text-center">
-          <a href="/create" className="inline-block px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">
-            Create a free account
-          </a>
-        </div>
-      </div>
-      <Partners />
+        <section className="ot-get-started"><div className="ot-container"><div><p className="ot-eyebrow">GET STARTED</p><h2>One less thing on your list.</h2></div><Link to="/create" className="ot-button ot-button-light">Create an account <FiArrowRight /></Link></div></section>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 };
 

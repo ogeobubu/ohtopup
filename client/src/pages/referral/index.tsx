@@ -1,335 +1,130 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { getReferrals as getReferralsApi } from "../../api";
 import { FaShareAlt } from "react-icons/fa";
-import gift from "../../assets/gift.svg";
-import noData from "../../assets/no-data.svg";
-import Pagination from "../../admin/components/pagination";
 
 const Referral = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit] = useState(10);
+  const limit = 10;
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
   const user = useSelector((state: any) => state.user?.user);
-  const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
 
-  const {
-    data: referrals,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: [
-      "referrals",
-      { page: currentPage, limit, search: debouncedSearchTerm },
-    ],
+  const { data: referrals, isLoading, isError, error } = useQuery({
+    queryKey: ["referrals", { page: currentPage, limit, search: debouncedSearchTerm }],
     queryFn: () => getReferralsApi(currentPage, limit, debouncedSearchTerm),
   });
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    const handler = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    return () => clearTimeout(handler);
   }, [searchTerm]);
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: "Join me on this platform!",
-          text: `Use my referral code: ${user?.referralCode}`,
-          url: `https://ohtopup.name.ng/create?code=${user?.referralCode}`,
-        });
+        await navigator.share({ title: "Join me on OhTopUp!", text: `Use my referral code: ${user?.referralCode}`, url: `https://ohtopup.name.ng/create?code=${user?.referralCode}` });
         toast.success("Referral link shared successfully!");
-      } catch {
-        toast.error("Failed to share the referral link.");
-      }
+      } catch { toast.error("Failed to share the referral link."); }
     } else {
       navigator.clipboard.writeText(user?.referralCode);
       toast.success("Referral code copied to clipboard!");
     }
   };
 
-  const handleClearSearch = () => {
-    setSearchTerm("");
-    setDebouncedSearchTerm("");
-  };
+  const totalPages = referrals?.totalPages ?? 1;
+  const refList = referrals?.users ?? [];
 
   return (
-    <>
-      <div className="mb-6 md:mb-8">
-        <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-          Referral Program
-        </h1>
-        <p className={`text-sm md:text-base ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-          Invite friends and earn rewards when they join and make their first deposit
-        </p>
-      </div>
+    <div className="ot-dashboard">
+      <div className="ot-dashboard-heading"><div><h1>Referral Program</h1><p>Invite friends and earn rewards when they join and make their first deposit</p></div></div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8 mb-6 lg:mb-8">
-        {/* Main Referral Card */}
-        <div className={`xl:col-span-2 rounded-xl shadow-lg p-6 lg:p-8 ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
-          <div className="text-center mb-6 lg:mb-8">
-            <div className={`inline-flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full mb-4 lg:mb-6 ${
-              isDarkMode ? 'bg-green-600' : 'bg-green-100'
-            }`}>
-              <img className="w-8 h-8 lg:w-10 lg:h-10 object-contain" src={gift} alt="gift" />
-            </div>
-            <h2 className={`text-xl lg:text-2xl font-bold mb-3 lg:mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-              Earn ₦500 for Every Referral
-            </h2>
-            <p className={`text-base lg:text-lg mb-4 lg:mb-6 max-w-2xl mx-auto leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-              Share your referral code and get rewarded when your friends make their first ₦1,000 deposit
-            </p>
-          </div>
-
-          {/* How it works */}
-          <div className="mb-6 lg:mb-8">
-            <h3 className={`text-lg lg:text-xl font-bold mb-4 lg:mb-6 text-center ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-              How It Works
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
-              {[
-                {
-                  step: '1',
-                  title: 'Share Your Code',
-                  description: 'Send your unique referral code to friends and family',
-                  icon: '📤'
-                },
-                {
-                  step: '2',
-                  title: 'They Sign Up',
-                  description: 'Friends register using your referral code',
-                  icon: '👥'
-                },
-                {
-                  step: '3',
-                  title: 'First Deposit',
-                  description: 'They make their first ₦1,000+ deposit',
-                  icon: '💰'
-                },
-                {
-                  step: '4',
-                  title: 'You Earn ₦500',
-                  description: 'Points are credited to your account instantly',
-                  icon: '🎉'
-                }
-              ].map((item, index) => (
-                <div key={item.step} className={`text-center p-4 lg:p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${
-                  isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-50'
-                }`}>
-                  <div className="text-2xl lg:text-3xl mb-3 lg:mb-4">{item.icon}</div>
-                  <div className={`inline-flex items-center justify-center w-6 h-6 lg:w-8 lg:h-8 rounded-full mb-3 lg:mb-4 text-xs lg:text-sm font-bold ${
-                    isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-600 text-white'
-                  }`}>
-                    {item.step}
-                  </div>
-                  <h4 className={`font-semibold mb-2 lg:mb-3 text-sm lg:text-base ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                    {item.title}
-                  </h4>
-                  <p className={`text-xs lg:text-sm leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                    {item.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Referral Code Section */}
-          <div className={`p-4 md:p-6 rounded-lg border-2 border-dashed ${
-            isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'
-          }`}>
-            <h3 className={`text-base md:text-lg font-semibold mb-3 md:mb-4 text-center ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-              Your Referral Code
-            </h3>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
-              <div className={`px-4 md:px-6 py-2 md:py-3 rounded-lg font-mono text-sm md:text-lg font-bold text-center break-all ${
-                isDarkMode ? 'bg-gray-800 text-white border border-gray-600' : 'bg-white text-gray-900 border border-gray-300'
-              }`}>
+      <div className="ot-overview">
+        {/* Referral code card */}
+        <section className="ot-panel">
+          <div className="ot-panel-heading"><div><h2>Your Referral Code</h2><p>Share this code with friends to earn rewards.</p></div></div>
+          <div style={{ padding: '0 24px 24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+              <div style={{ flex: 1, padding: '12px 16px', background: 'var(--ot-tint)', border: '1px solid var(--ot-line)', borderRadius: 6, fontFamily: 'monospace', fontSize: 16, fontWeight: 600, textAlign: 'center', letterSpacing: '1px' }}>
                 {user?.referralCode}
               </div>
-              <button
-                onClick={handleShare}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-colors w-full sm:w-auto text-sm md:text-base"
-              >
-                <FaShareAlt className="text-sm md:text-base" />
-                Share Code
-              </button>
+              <button onClick={handleShare} className="ot-button ot-button-primary" style={{ whiteSpace: 'nowrap' }}><FaShareAlt /> Share Code</button>
             </div>
-          </div>
-        </div>
 
-        {/* Stats Card */}
-        <div className={`rounded-xl shadow-lg p-4 lg:p-6 ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
-          <h3 className={`text-lg lg:text-xl font-bold mb-3 lg:mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-            Your Stats
-          </h3>
-          <div className="space-y-3 lg:space-y-4">
-            <div className={`p-3 lg:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  Total Referrals
-                </span>
-                <span className={`text-xl lg:text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                  {referrals?.totalUsers || 0}
-                </span>
-              </div>
-            </div>
-            <div className={`p-3 lg:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  Points Earned
-                </span>
-                <span className={`text-xl lg:text-2xl font-bold text-green-600`}>
-                  {user?.points || 0}
-                </span>
-              </div>
-            </div>
-            <div className={`p-3 lg:p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  Potential Earnings
-                </span>
-                <span className={`text-xl lg:text-2xl font-bold text-blue-600`}>
-                  ₦{(referrals?.totalUsers || 0) * 500}
-                </span>
-              </div>
-            </div>
+            <p className="ot-field-label" style={{ marginBottom: 12 }}>How it works</p>
+            <div className="ot-feature-row" style={{ borderTop: 'none', paddingTop: 0 }}><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>01</span><div><h3>Share your code</h3><p>Send your unique referral code to friends.</p></div></div>
+            <div className="ot-feature-row"><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>02</span><div><h3>They sign up</h3><p>Friends register using your referral code.</p></div></div>
+            <div className="ot-feature-row"><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>03</span><div><h3>First deposit</h3><p>They make their first ₦1,000+ deposit.</p></div></div>
+            <div className="ot-feature-row"><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>04</span><div><h3>You earn ₦500</h3><p>Points are credited to your account instantly.</p></div></div>
           </div>
-        </div>
+        </section>
+
+        {/* Stats */}
+        <section className="ot-panel">
+          <div className="ot-panel-heading"><div><h2>Your Stats</h2><p>Referral performance at a glance.</p></div></div>
+          <div style={{ padding: '0 24px 24px', display: 'grid', gap: 12 }}>
+            {[{ label: 'Total Referrals', value: referrals?.totalUsers || 0 }, { label: 'Points Earned', value: user?.points || 0, color: '#27805d' }, { label: 'Potential Earnings', value: `₦${((referrals?.totalUsers || 0) * 500).toLocaleString()}`, color: 'var(--ot-accent)' }].map(s => (
+              <div key={s.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--ot-tint)', borderRadius: 6 }}>
+                <span style={{ fontSize: 13, color: 'var(--ot-muted)' }}>{s.label}</span>
+                <span style={{ fontSize: 20, fontWeight: 600, color: s.color || 'var(--ot-ink)', fontVariantNumeric: 'tabular-nums' }}>{s.value}</span>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
 
-      {/* Referrals List */}
-      <div className={`rounded-xl shadow-lg p-4 lg:p-6 ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4 lg:mb-6">
-          <h2 className={`text-lg lg:text-xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-            Your Referrals
-          </h2>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 md:mt-0 w-full sm:w-auto">
-            <input
-              type="search"
-              placeholder="Search by username or email"
-              className={`border rounded-lg px-3 md:px-4 py-2 text-sm md:text-base w-full sm:w-64 ${
-                isDarkMode
-                  ? "border-gray-600 bg-gray-700 text-white placeholder-gray-400"
-                  : "border-gray-300 bg-white text-gray-900"
-              }`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button
-              className="px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm md:text-base font-medium"
-              onClick={handleClearSearch}
-            >
-              Clear
-            </button>
-          </div>
+      {/* Referrals list */}
+      <section className="ot-panel" aria-label="Referrals list">
+        <div className="ot-panel-heading"><div><h2>Your Referrals</h2><p>People who joined using your code.</p></div></div>
+        <div style={{ padding: '0 24px 16px', display: 'flex', gap: 10, alignItems: 'center' }}>
+          <input type="search" placeholder="Search by username or email…" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="ot-field" style={{ flex: '1 1 200px', maxWidth: 320 }} />
+          {searchTerm && <button onClick={() => { setSearchTerm(""); setDebouncedSearchTerm(""); }} className="ot-button ot-button-secondary" style={{ fontSize: 12, padding: '6px 12px', minHeight: 'auto' }}>Clear</button>}
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className={`ml-3 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-              Loading referrals...
-            </span>
-          </div>
+          <div className="ot-empty" role="status"><p>Loading referrals…</p></div>
         ) : isError ? (
-          <div className={`text-center py-12 px-6 rounded-lg ${
-            isDarkMode ? 'bg-red-900/20' : 'bg-red-50'
-          }`}>
-            <div className="text-red-500 text-5xl mb-4">⚠️</div>
-            <p className="text-red-600 font-semibold mb-2">Error loading referrals</p>
-            <p className={`text-sm ${isDarkMode ? "text-red-300" : "text-red-500"}`}>
-              {error?.message || "Something went wrong. Please try again."}
-            </p>
-          </div>
-        ) : referrals?.users?.length > 0 ? (
+          <div className="ot-empty"><h3>We couldn't load your referrals.</h3><p>{error?.message || 'Please try again.'}</p><button className="ot-button ot-button-secondary" onClick={() => window.location.reload()}>Try again</button></div>
+        ) : refList.length === 0 ? (
+          <div className="ot-empty"><h3>No referrals yet.</h3><p>Share your code and earn ₦500 for every friend who joins.</p><button onClick={handleShare} className="ot-button ot-button-primary"><FaShareAlt /> Share Your Code</button></div>
+        ) : (
           <>
-            <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-600">
-              <table className={`w-full ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>
-                <thead className={`${isDarkMode ? "bg-gradient-to-r from-gray-700 to-gray-600" : "bg-gradient-to-r from-gray-100 to-gray-200"}`}>
-                  <tr>
-                    <th className="py-4 lg:py-6 px-4 lg:px-8 text-left font-bold text-sm lg:text-base text-gray-700 dark:text-gray-300">Username</th>
-                    <th className="py-4 lg:py-6 px-4 lg:px-8 text-left font-bold text-sm lg:text-base text-gray-700 dark:text-gray-300">Email</th>
-                    <th className="py-4 lg:py-6 px-4 lg:px-8 text-left font-bold text-sm lg:text-base text-gray-700 dark:text-gray-300">Joined Date</th>
-                    <th className="py-4 lg:py-6 px-4 lg:px-8 text-left font-bold text-sm lg:text-base text-gray-700 dark:text-gray-300">Status</th>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--ot-line)' }}>
+                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Username</th>
+                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</th>
+                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Joined</th>
+                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-                  {referrals.users.map((u) => (
-                    <tr key={u._id} className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20 transition-all duration-300 transform hover:scale-[1.01]`}>
-                      <td className="py-4 lg:py-6 px-4 lg:px-8">
-                        <div className="flex items-center">
-                          <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-sm lg:text-base font-bold shadow-md ${
-                            isDarkMode ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white' : 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700'
-                          }`}>
-                            {u.username?.charAt(0).toUpperCase()}
-                          </div>
-                          <span className="ml-3 lg:ml-4 font-semibold text-sm lg:text-base text-gray-900 dark:text-white">{u.username}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 lg:py-6 px-4 lg:px-8 text-gray-600 dark:text-gray-400 text-sm lg:text-base font-medium">{u.email}</td>
-                      <td className="py-4 lg:py-6 px-4 lg:px-8 text-gray-600 dark:text-gray-400 text-sm lg:text-base font-medium">
-                        {new Date(u.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </td>
-                      <td className="py-4 lg:py-6 px-4 lg:px-8">
-                        <span className={`inline-flex items-center px-3 py-2 text-xs lg:text-sm font-bold rounded-full shadow-sm ${
-                          u.points > 0
-                            ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 dark:from-green-900 dark:to-green-800 dark:text-green-200'
-                            : 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 dark:from-yellow-900 dark:to-yellow-800 dark:text-yellow-200'
-                        }`}>
-                          {u.points > 0 ? '✓ Rewarded' : '⏳ Pending'}
-                        </span>
-                      </td>
+                <tbody>
+                  {refList.map((u) => (
+                    <tr key={u._id} style={{ borderBottom: '1px solid var(--ot-line)' }}>
+                      <td style={{ padding: '12px 24px', fontWeight: 500 }}>{u.username}</td>
+                      <td style={{ padding: '12px 24px', color: 'var(--ot-muted)' }}>{u.email}</td>
+                      <td style={{ padding: '12px 24px', color: 'var(--ot-muted)' }}>{new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                      <td style={{ padding: '12px 24px' }}><span style={{ fontSize: 12, color: u.points > 0 ? '#27805d' : '#9a6818', fontWeight: 500 }}>{u.points > 0 ? 'Rewarded' : 'Pending'}</span></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
-            <div className="mt-6 flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={referrals.totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, padding: '16px 24px' }}>
+                <button className="ot-button ot-button-secondary" disabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)}>← Prev</button>
+                <span style={{ fontSize: 12, color: 'var(--ot-muted)' }}>Page {currentPage} of {totalPages}</span>
+                <button className="ot-button ot-button-secondary" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(currentPage + 1)}>Next →</button>
+              </div>
+            )}
           </>
-        ) : (
-          <div className={`text-center py-12 md:py-16 px-4 md:px-6 rounded-lg ${
-            isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
-          }`}>
-            <img className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 opacity-50" src={noData} alt="No referrals" />
-            <h3 className={`text-lg lg:text-xl font-bold mb-3 lg:mb-4 ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>
-              Start Your Referral Journey
-            </h3>
-            <p className={`text-sm lg:text-base mb-6 lg:mb-8 max-w-2xl mx-auto leading-relaxed ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-              Share your unique referral code and earn ₦500 for every friend who joins and makes their first deposit.
-              The more you share, the more you earn!
-            </p>
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-lg font-semibold transition-colors text-base lg:text-lg w-full lg:w-auto"
-            >
-              <FaShareAlt className="text-lg lg:text-xl" />
-              Share Your Code
-            </button>
-          </div>
         )}
-      </div>
-    </>
+      </section>
+    </div>
   );
 };
 
