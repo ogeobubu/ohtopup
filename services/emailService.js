@@ -582,7 +582,7 @@ class EmailService {
       } finally {
         this.isProcessing = false;
       }
-    }, 2000); // Process every 2 seconds
+    }, 2000).unref(); // Process every 2 seconds
   }
 
   // Start retry processor
@@ -604,7 +604,7 @@ class EmailService {
         this.queue.push(job);
         console.log(`🔄 Retrying email after delay: ${job.options.subject} (attempt ${job.retries + 1}/${job.maxRetries})`);
       }
-    }, 30000); // Check every 30 seconds
+    }, 30000).unref(); // Check every 30 seconds
   }
 
   // Direct email sending without retry logic (for queue processing)

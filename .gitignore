@@ -33,3 +33,6 @@ dist-ssr
 **/*.spec.ts
 
 sendgrid.env
+
+# Keep the payment regression suite in version control.
+!tests/*.test.js

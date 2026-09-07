@@ -94,9 +94,10 @@ app.use((req, res, next) => {
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your_default_secret",
+    secret: process.env.SESSION_SECRET || (process.env.NODE_ENV !== "production" ? crypto.randomBytes(32).toString("hex") : (() => { throw new Error("SESSION_SECRET is required"); })()),
+    store: new (require("./services/sessionStore"))(),
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // HTTPS required for SameSite=None
@@ -138,8 +139,7 @@ app.use(
 
       // In production, allow all origins from your domain
       if (process.env.NODE_ENV === 'production' && origin && (
-        origin.includes('ohtopup.name.ng') ||
-        origin.includes('ohtopup.onrender.com')
+        ['https://ohtopup.name.ng', 'https://www.ohtopup.name.ng', 'https://ohtopup.onrender.com'].includes(origin)
       )) {
         return callback(null, true);
       }
@@ -154,7 +154,7 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'x-mobile-app'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'x-mobile-app', 'Idempotency-Key'],
   })
 );
 
@@ -170,14 +170,16 @@ app.use((req, res, next) => {
 
   // Additional headers for mobile app compatibility
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, x-mobile-app');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, x-mobile-app, Idempotency-Key');
 
   next();
 });
 
 app.set('trust proxy', 1);
 
-app.use(express.json());
+app.use(express.json({ limit: '256kb', verify: (req, res, buffer) => {
+  if (req.path === '/api/users/wallet/deposit/paystack/webhook') req.rawBody = Buffer.from(buffer);
+} }));
 
 // Database connection check middleware
 app.use((req, res, next) => {
@@ -237,6 +239,11 @@ const PORT = process.env.PORT || 5001;
 
 const connectToDatabase = async () => {
   try {
+    if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is required');
+    if (process.env.NODE_ENV === 'production') {
+      const clientUrl = new URL(process.env.CLIENT_URL);
+      if (clientUrl.protocol !== 'https:') throw new Error('CLIENT_URL must be an HTTPS URL');
+    }
     const mongoUri = process.env.MONGODB_URI;
 
     if (!mongoUri) {
@@ -291,6 +298,17 @@ const startServer = async () => {
     app.use("/api/users/admin/x", xRoutes);
     app.use("/api/users", airtimeRoutes);
 
+    // Unique accounting keys must exist before serving money-moving requests.
+    await Promise.all([
+      require('./model/Wallet').init(), require('./model/Transaction').init(), require('./model/Utility').init(),
+      require('./model/WalletEntry').init(), require('./model/PaymentEvent').init(),
+      mongoose.model('Session').init(),
+    ]);
+    const topology = await mongoose.connection.db.admin().command({ hello: 1 });
+    if (!topology.setName && topology.msg !== 'isdbgrid') {
+      throw new Error('Wallet accounting requires a MongoDB replica set or sharded cluster');
+    }
+    require('./services/paymentWorker').start();
     xController.startRepostJob();
 
     const frontendBuildPath = path.join(__dirname, "client/dist");

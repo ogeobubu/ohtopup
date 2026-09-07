@@ -66,7 +66,7 @@ const Security = () => {
             <div className="flex flex-col gap-1">
               <span className="text-gray-500 text-sm md:text-base">Transaction Pin</span>
               <span className="text-blue-900 text-sm md:text-base">
-                {user?.transactionPin ? "****" : "Not Set"}
+                {user?.hasTransactionPin ? "****" : "Not Set"}
               </span>
             </div>
             <button
@@ -74,7 +74,7 @@ const Security = () => {
               className="text-blue-400 font-semibold hover:text-blue-600 text-sm md:text-base self-start sm:self-auto"
               aria-label="Set Transaction PIN"
             >
-              {user?.transactionPin ? "Change PIN" : "Set PIN"}
+              {user?.hasTransactionPin ? "Change PIN" : "Set PIN"}
             </button>
           </div>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
@@ -189,7 +189,7 @@ const Security = () => {
               <FaTimes className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
-              {user?.transactionPin ? "Change Transaction PIN" : "Set Transaction PIN"}
+              {user?.hasTransactionPin ? "Change Transaction PIN" : "Set Transaction PIN"}
             </h2>
             <Formik
               initialValues={{
@@ -198,7 +198,7 @@ const Security = () => {
                 confirmPin: '',
               }}
               validationSchema={Yup.object({
-                currentPin: user?.transactionPin ? Yup.string()
+                currentPin: user?.hasTransactionPin ? Yup.string()
                   .required("Current PIN is required")
                   .matches(/^\d{4,6}$/, "PIN must be 4-6 digits") : Yup.string(),
                 newPin: Yup.string()
@@ -211,7 +211,7 @@ const Security = () => {
               onSubmit={(values, { setSubmitting }) => {
                 const updateData = {
                   transactionPin: values.newPin,
-                  ...(user?.transactionPin && { currentTransactionPin: values.currentPin })
+                  ...(user?.hasTransactionPin && { currentTransactionPin: values.currentPin })
                 };
                 mutation.mutate(updateData);
                 setSubmitting(false);
@@ -219,7 +219,7 @@ const Security = () => {
             >
               {({ isSubmitting }) => (
                 <Form>
-                  {user?.transactionPin && (
+                  {user?.hasTransactionPin && (
                     <div className="mb-2">
                       <Field name="currentPin">
                         {({ field, meta }) => (
@@ -262,7 +262,7 @@ const Security = () => {
                   </div>
                   <div className="my-6">
                     <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Setting PIN..." : (user?.transactionPin ? "Change PIN" : "Set PIN")}
+                      {isSubmitting ? "Setting PIN..." : (user?.hasTransactionPin ? "Change PIN" : "Set PIN")}
                     </Button>
                   </div>
                 </Form>

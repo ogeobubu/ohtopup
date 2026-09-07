@@ -97,10 +97,6 @@ const playDiceGame = async (req, res) => {
     const winnings = isWin ? winAmount : 0;
     const gameResult = isWin ? "win" : "lose";
 
-    // Deduct entry fee from user wallet
-    wallet.balance -= entryFee;
-    await wallet.save();
-
     // Create game record first
     const game = new DiceGame({
       user: userId,
@@ -112,7 +108,19 @@ const playDiceGame = async (req, res) => {
       gameResult,
     });
 
-    await game.save();
+    const accounting = require('../services/accountingService');
+    const { toKobo } = require('../utils/money');
+    const updatedWallet = await accounting.transact(async session => {
+      await accounting.move({ walletId: wallet._id, deltaKobo: -toKobo(entryFee),
+        key: `game:${game._id}:entry`, reason: 'Game entry', session });
+      await DiceGame.create([game.toObject()], { session });
+      return Wallet.findById(wallet._id).session(session);
+    });
+    wallet.balance = updatedWallet.balance;
+    wallet.balanceKobo = updatedWallet.balanceKobo;
+    wallet.unmarkModified('balance');
+    wallet.unmarkModified('balanceKobo');
+
 
     // If user wins, award points only (no Naira added to wallet)
     if (isWin) {

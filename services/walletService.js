@@ -9,6 +9,7 @@ require("dotenv").config();
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 
 const checkWalletForDebit = (wallet, amount) => {
+    toKobo(amount, { allowZero: true });
     if (!wallet) {
          throw { status: 404, message: "Wallet not found." };
     }
@@ -22,23 +23,25 @@ const checkWalletForDebit = (wallet, amount) => {
     return true;
 };
 
-const debitWallet = async (wallet, amount) => {
-    if (!wallet) {
-         throw new Error("Wallet object is null or undefined for debit.");
-    }
-    wallet.balance -= amount;
-    await wallet.save();
-    return wallet;
-};
+const { toKobo } = require('../utils/money');
+const accounting = require('./accountingService');
+const { randomUUID } = require('crypto');
 
-const creditWallet = async (wallet, amount) => {
-  if (!wallet) {
-    throw new Error("Wallet object is null or undefined for credit.");
-  }
-  wallet.balance += amount;
-  await wallet.save();
-  return wallet;
+const changeWallet = async (wallet, amount, direction, options = {}) => {
+  const deltaKobo = direction * toKobo(amount);
+  const key = options.key || randomUUID();
+  const work = session => accounting.move({ walletId: wallet._id, deltaKobo,
+    key, reason: options.reason || (direction > 0 ? 'credit' : 'debit'), session });
+  const updated = options.session ? await work(options.session) : await accounting.transact(work);
+  // Keep old callers' document usable without a later save overwriting this balance.
+  wallet.balance = updated.balance;
+  wallet.balanceKobo = updated.balanceKobo;
+  wallet.unmarkModified('balance');
+  wallet.unmarkModified('balanceKobo');
+  return updated;
 };
+const debitWallet = (wallet, amount, options) => changeWallet(wallet, amount, -1, options);
+const creditWallet = (wallet, amount, options) => changeWallet(wallet, amount, 1, options);
 
 const recordTransaction = async (
   walletId,

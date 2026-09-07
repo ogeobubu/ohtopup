@@ -80,7 +80,6 @@ const {
   verifyMonnifyTransaction,
   withdrawMonnifyWallet,
   depositPaystackWallet,
-  testWebhookWithTransaction
 } = require("../controllers/walletController");
 
 const { buyAirtime } = require("../controllers/airtimeController")
@@ -144,6 +143,9 @@ const {
 } = require("../controllers/newsletterController");
 
 const auth = require("../middleware/authMiddleware");
+const admin = require("../middleware/adminMiddleware");
+const subject = require("../middleware/walletSubject");
+const financialLimit = require("../middleware/financialRateLimit");
 const router = express.Router();
 
 router.post("/create", createUser);
@@ -155,8 +157,8 @@ router.post("/forgot", forgotPassword);
 router.post("/reset", verifyOtpAndResetPassword);
 router.post("/resend-otp", resendOtp);
 router.get("/", auth, getUser);
-router.patch("/", auth, updateUser);
-router.patch("/change-pin", auth, changePin);
+router.patch("/", auth, financialLimit, updateUser);
+router.patch("/change-pin", auth, financialLimit, changePin);
 router.delete("/", auth, softDeleteUser);
 
 
@@ -169,32 +171,31 @@ router.get("/transactions", auth, getTransactionsByUser);
 router.get("/transactions/:requestId", auth, getTransactionDetails);
 router.get("/banks", auth, getBanks);
 router.post("/bank", auth, deleteBankAccount);
-router.post("/withdraw", auth, withdrawMonnifyWallet);
-router.post("/withdraw/authorize", auth, withdrawMonnifyWalletOTP);
-router.post("/deposit", auth, depositPaystackWallet);
+router.post("/withdraw", auth, financialLimit, subject, withdrawMonnifyWallet);
+router.post("/withdraw/authorize", auth, financialLimit, subject, withdrawMonnifyWalletOTP);
+router.post("/deposit", auth, financialLimit, subject, depositPaystackWallet);
 router.get("/verify-payment/:ref", auth, verifyPaystackTransaction);
 router.post("/verify-account", auth, verifyBankAccount);
 
 // Test webhook with existing transaction (for testing purposes)
-router.post("/test-webhook", auth, testWebhookWithTransaction);
 
-router.post("/airtime", auth, buyAirtime);
+router.post("/airtime", auth, financialLimit, buyAirtime);
 router.get("/airtime-providers", auth, getActiveAirtimeNetworkProviders);
 // router.get("/data", auth, variationCodes);
 router.get("/data", auth, getVariations);
-router.post("/data", auth, buyData);
+router.post("/data", auth, financialLimit, buyData);
 router.get("/data-variations", auth, getDataVariations);
 router.get("/data/settings", auth, getDataSettings);
 router.get("/data/stats", auth, getDataStats);
 router.get("/service-id", getServiceID);
 router.get("/cable", auth, variationTVCodes);
 router.post("/cable/verify", auth, verifySmartcard);
-router.post("/cable", auth, purchaseCable);
+router.post("/cable", auth, financialLimit, purchaseCable);
 router.post("/electricity/verify", auth, verifyElecticity);
-router.post("/electricity", auth, purchaseElectricity);
+router.post("/electricity", auth, financialLimit, purchaseElectricity);
 router.post("/electricity/requery", auth, requeryTransactionHandler);
 router.get("/electricity/settings", auth, getElectricitySettings);
-router.put("/electricity/settings", auth, updateElectricitySettings);
+router.put("/electricity/settings", auth, admin, updateElectricitySettings);
 router.get("/electricity/commission/:disco?", auth, getCommissionRate);
 router.get("/electricity/discos", auth, getAvailableDiscos);
 router.get("/electricity/limits/:disco?", auth, (req, res) => {
@@ -224,7 +225,7 @@ router.get("/electricity/limits/:disco?", auth, (req, res) => {
 router.get("/utility-transactions", auth, getAllUtilityTransactions);
 router.get("/pricing", getSavedVariationsForPricing);
 
-router.post("/redeem-points", auth, redeemPoints);
+router.post("/redeem-points", auth, financialLimit, redeemPoints);
 
 // User reward routes
 router.get("/rewards", auth, getUserRewards);
@@ -233,9 +234,9 @@ router.post("/rewards/:rewardId/redeem", auth, redeemReward);
 router.post("/waitlist", createWaitlist);
 
 router.post("/rankings", usersRank);
-router.post("/reset-rankings", resetRankings);
-router.post("/admin/manual-reset-rankings", auth, manualResetRankings);
-router.get("/admin/export-rankings-csv", auth, exportRankingsToCSV);
+router.post("/reset-rankings", auth, admin, resetRankings);
+router.post("/admin/manual-reset-rankings", auth, admin, manualResetRankings);
+router.get("/admin/export-rankings-csv", auth, admin, exportRankingsToCSV);
 router.get("/achievements", auth, getUserAchievements);
 
 router.get("/notifications", auth, getNotifications);
@@ -269,28 +270,28 @@ router.get("/rates", auth, getRates);
 // Newsletter routes (public - no CSRF required for subscription)
 router.post("/newsletter/subscribe", subscribeNewsletter);
 router.post("/newsletter/unsubscribe", unsubscribeNewsletter);
-router.get("/newsletter/subscribers", auth, getNewsletterSubscribers);
+router.get("/newsletter/subscribers", auth, admin, getNewsletterSubscribers);
 
 // Reward management routes (admin only)
 // Note: More specific routes must come before parameterized routes
-router.get("/admin/rewards", auth, getAllRewards);
-router.get("/admin/rewards/analytics", auth, getRewardAnalytics);
+router.get("/admin/rewards", auth, admin, getAllRewards);
+router.get("/admin/rewards/analytics", auth, admin, getRewardAnalytics);
 
 // Reward settings routes (must come before parameterized routes)
-router.get("/admin/rewards/settings", auth, getRewardSettings);
-router.put("/admin/rewards/settings", auth, updateRewardSettings);
-router.post("/admin/rewards/settings/reset", auth, resetRewardSettings);
-router.get("/admin/rewards/stats", auth, getRewardSystemStats);
-router.post("/admin/rewards/bulk-update", auth, bulkUpdateRewardStatus);
+router.get("/admin/rewards/settings", auth, admin, getRewardSettings);
+router.put("/admin/rewards/settings", auth, admin, updateRewardSettings);
+router.post("/admin/rewards/settings/reset", auth, admin, resetRewardSettings);
+router.get("/admin/rewards/stats", auth, admin, getRewardSystemStats);
+router.post("/admin/rewards/bulk-update", auth, admin, bulkUpdateRewardStatus);
 
 // Parameterized routes (must come after specific routes)
-router.get("/admin/rewards/user/:userId", auth, getUserRewards);
-router.get("/admin/rewards/:id", auth, getRewardById);
-router.post("/admin/rewards", auth, createReward);
-router.put("/admin/rewards/:id", auth, updateReward);
-router.delete("/admin/rewards/:id", auth, deleteReward);
-router.post("/admin/rewards/assign", auth, assignRewardToUser);
-router.post("/admin/rewards/:rewardId/redeem", auth, redeemReward);
+router.get("/admin/rewards/user/:userId", auth, admin, getUserRewards);
+router.get("/admin/rewards/:id", auth, admin, getRewardById);
+router.post("/admin/rewards", auth, admin, createReward);
+router.put("/admin/rewards/:id", auth, admin, updateReward);
+router.delete("/admin/rewards/:id", auth, admin, deleteReward);
+router.post("/admin/rewards/assign", auth, admin, assignRewardToUser);
+router.post("/admin/rewards/:rewardId/redeem", auth, admin, redeemReward);
 
 // Dice Game Routes
 router.post("/dice/play", auth, playDiceGame);
@@ -303,29 +304,29 @@ router.get("/bet-dice/history", auth, getBetDiceHistory);
 router.get("/bet-dice/stats", auth, getBetDiceStats);
 
 // Admin dice game settings routes
-router.get("/admin/dice/settings", auth, getDiceGameSettings);
-router.put("/admin/dice/settings", auth, updateDiceGameSettings);
-router.post("/admin/dice/settings/reset", auth, resetDiceGameSettings);
+router.get("/admin/dice/settings", auth, admin, getDiceGameSettings);
+router.put("/admin/dice/settings", auth, admin, updateDiceGameSettings);
+router.post("/admin/dice/settings/reset", auth, admin, resetDiceGameSettings);
 
 // Admin Bet Dice Game Settings Routes
-router.get("/admin/bet-dice/settings", auth, getBetDiceSettings);
-router.put("/admin/bet-dice/settings", auth, updateBetDiceSettings);
-router.post("/admin/bet-dice/settings/reset", auth, resetBetDiceSettings);
-router.post("/admin/bet-dice/settings/force-reset", auth, forceResetBetDiceSettings);
+router.get("/admin/bet-dice/settings", auth, admin, getBetDiceSettings);
+router.put("/admin/bet-dice/settings", auth, admin, updateBetDiceSettings);
+router.post("/admin/bet-dice/settings/reset", auth, admin, resetBetDiceSettings);
+router.post("/admin/bet-dice/settings/force-reset", auth, admin, forceResetBetDiceSettings);
 
 // Admin Dice Game Routes
-router.get("/admin/dice/games", auth, getAllGames);
-router.get("/admin/dice/stats", auth, getGameStats);
-router.get("/admin/dice/wallet", auth, getManagementWallet);
-router.post("/admin/dice/withdraw", auth, withdrawManagementFunds);
+router.get("/admin/dice/games", auth, admin, getAllGames);
+router.get("/admin/dice/stats", auth, admin, getGameStats);
+router.get("/admin/dice/wallet", auth, admin, getManagementWallet);
+router.post("/admin/dice/withdraw", auth, admin, withdrawManagementFunds);
 
 // Admin Bet Dice Game Routes
-router.get("/admin/bet-dice/games", auth, getAllBetDiceGames);
-router.get("/admin/bet-dice/stats", auth, getAdminBetDiceStats);
+router.get("/admin/bet-dice/games", auth, admin, getAllBetDiceGames);
+router.get("/admin/bet-dice/stats", auth, admin, getAdminBetDiceStats);
 
 // Admin Email Management Routes
-router.get("/admin/stored-emails", auth, getStoredEmails);
-router.post("/admin/verify-bank-account", auth, (req, res) => {
+router.get("/admin/stored-emails", auth, admin, getStoredEmails);
+router.post("/admin/verify-bank-account", auth, admin, (req, res) => {
   // Import wallet service for bank verification
   const walletService = require("../services/walletService");
   const { accountNumber, bankCode } = req.body;

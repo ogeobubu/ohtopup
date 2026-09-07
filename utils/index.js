@@ -17,14 +17,9 @@ function generateRequestId() {
     minute: "2-digit",
     hour12: false,
   };
-  const now = new Intl.DateTimeFormat("en-GB", options).format(new Date());
-
-  const [day, month, year, hour, minute] = now.replace(/\/|,|:/g, " ").split(" ");
-  const dateStr = `${year}${month}${day}${hour}${minute}`;
-
-  const randomStr = Math.random().toString(36).substring(2, 10);
-
-  const requestId = dateStr + randomStr;
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', options).formatToParts(new Date()).map(p => [p.type, p.value]));
+  const dateStr = `${parts.year}${parts.month}${parts.day}${parts.hour}${parts.minute}`;
+  const requestId = dateStr + require('crypto').randomBytes(8).toString('hex');
 
   return requestId;
 }

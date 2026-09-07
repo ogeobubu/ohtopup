@@ -50,8 +50,10 @@ const Withdraw = ({
     initialValues: {
       selectedBank: null,
       amount: "",
+      transactionPin: "",
     },
     validationSchema: Yup.object({
+      transactionPin: Yup.string().matches(/^\d{4,6}$/, "Enter your 4–6 digit transaction PIN").required("Transaction PIN is required"),
       selectedBank: Yup.object().required("Bank account is required"),
       amount: Yup.string()
         .required("Amount is required")
@@ -92,6 +94,7 @@ const Withdraw = ({
         const response = await withdrawFunds({
           name: user?.username,
           amount: withdrawalAmount,
+          transactionPin: values.transactionPin,
           bankName: selectedBank.label.split(" - ")[0],
           accountNumber: selectedBank.value,
           bankCode: selectedBank.code,
@@ -371,6 +374,17 @@ const Withdraw = ({
       )}
 
       {/* Fee Deduction Method Selection */}
+      <label className="block mb-4">
+        Transaction PIN
+        <input type="password" inputMode="numeric" maxLength={6} autoComplete="off"
+          name="transactionPin" value={formik.values.transactionPin}
+          onChange={formik.handleChange} onBlur={formik.handleBlur}
+          className="block w-full border rounded p-2 text-gray-900" />
+        {formik.touched.transactionPin && formik.errors.transactionPin && (
+          <span className="text-red-500 text-sm">{formik.errors.transactionPin}</span>
+        )}
+      </label>
+
       {withdrawalFee > 0 && (
         <div className={`p-4 rounded-lg border ${
           isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-50 border-gray-200'

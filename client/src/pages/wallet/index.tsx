@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PaystackButton } from "react-paystack";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Card from "./card";
 import { FaBuilding, FaExclamationCircle, FaCopy, FaWallet, FaCreditCard, FaHistory, FaPlus, FaMinus, FaUniversity } from "react-icons/fa";
@@ -133,56 +133,18 @@ const Wallet = () => {
   const closeWithdrawModal = () => setIsWithdrawModalOpen(false);
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const refParam = queryParams.get("ref");
-    const successParam = queryParams.get("success");
-    const errorParam = queryParams.get("error");
-    const statusParam = queryParams.get("status");
-    const referenceParam = queryParams.get("reference");
-
-    if (refParam) {
-      setRef(refParam);
-    }
-
-    // Handle Paystack callback responses
-    if (successParam === "true") {
-      toast.success("Payment successful! Your wallet has been credited.");
-      // Clear URL parameters
+    if (!user?._id) return;
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get('reference') || params.get('trxref');
+    if (!reference) return;
+    verifyPaystackDeposit(reference, user._id).then(result => {
+      if (result.status === 'completed') toast.success('Payment verified. Your wallet has been credited.');
+      else toast.info('Payment has not completed yet. Check your transaction history.');
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (errorParam) {
-      let errorMessage = "Payment failed. Please try again.";
-      switch (errorParam) {
-        case "payment_failed":
-          errorMessage = "Payment was declined. Please check your card details and try again.";
-          break;
-        case "verification_failed":
-          errorMessage = "Payment verification failed. Please contact support.";
-          break;
-        case "verification_error":
-          errorMessage = "There was an error verifying your payment. Please contact support.";
-          break;
-        case "callback_error":
-          errorMessage = "Payment processing error. Please contact support.";
-          break;
-        case "missing_reference":
-          errorMessage = "Payment reference missing. Please try again.";
-          break;
-      }
-      toast.error(errorMessage);
-      // Clear URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (statusParam === "pending") {
-      toast.info("Payment is being processed. Please wait a few minutes.");
-      // Clear URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    // Refresh wallet data if we have a reference (successful payment)
-    if (referenceParam && successParam === "true") {
-      queryClient.invalidateQueries({ queryKey: ["wallet"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-    }
-  }, [queryClient]);
+    }).catch(error => toast.error(error.message || 'Unable to verify payment.'));
+  }, [user?._id, queryClient]);
 
   const handleSearchChange = (e) => {
     setReference(e.target.value);
@@ -239,34 +201,7 @@ const Wallet = () => {
     }
   }, [walletSettingsData]);
 
-  // Validate Paystack configuration
-  const getPaystackConfig = () => {
-    if (!user?.email) {
-      console.error('Paystack config error: User email is missing');
-      return null;
-    }
-    if (!user?._id) {
-      console.error('Paystack config error: User ID is missing');
-      return null;
-    }
-    if (!totalAmount || totalAmount <= 0) {
-      console.error('Paystack config error: Invalid amount', totalAmount);
-      return null;
-    }
-    if (!import.meta.env.VITE_PAYSTACK_PUBLIC_KEY) {
-      console.error('Paystack config error: Public key is missing');
-      return null;
-    }
-
-    return {
-      reference: `txn_${Date.now()}_${user._id}`,
-      email: user.email,
-      amount: Math.round(totalAmount * 100),
-      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-    };
-  };
-
-  const config = getPaystackConfig();
+  const [checkoutQuote, setCheckoutQuote] = useState(null);
 
   useEffect(() => {
     if (bankData) {
@@ -280,82 +215,27 @@ const Wallet = () => {
   }, [bankData]);
 
   const handleAmountChange = (e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-
-    if (value === "" || !isNaN(value)) {
-      setAmount(value);
-
-      if (value === "") {
-        setTotalAmount(0);
-      } else {
-        const parsedValue = parseFloat(value);
-        if (!isNaN(parsedValue)) {
-          // Calculate fee based on wallet settings
-          let fee = 0;
-          if (walletSettingsData?.paystackFee) {
-            const { percentage, fixedFee, cap } = walletSettingsData.paystackFee;
-            fee = Math.min(cap || 2000, (parsedValue * (percentage || 1.5) / 100) + (fixedFee || 100));
-          } else {
-            // Fallback to old calculation
-            fee = parsedValue * (rates?.depositRate / 100);
-          }
-          setTotalAmount(parsedValue + fee);
-        } else {
-          setTotalAmount(0);
-        }
-      }
-    }
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setAmount(value);
+    setTotalAmount(Number(value) || 0);
+    setCheckoutQuote(null);
   };
 
   const formattedAmount = amount ? amount.toString() : "";
 
-  const handlePaystackSuccessAction = async (reference) => {
-    console.log('Paystack success callback:', reference);
-    setLoading(true);
-
-    try {
-      // The reference object from react-paystack contains the transaction reference
-      const transactionRef = reference.reference || reference.trxref;
-
-      if (!transactionRef) {
-        console.error('No transaction reference in Paystack response');
-        toast.error("Payment reference missing. Please contact support.");
-        setLoading(false);
-        return;
-      }
-
-      // Verify the payment with our backend
-      const verifyResponse = await verifyPaystackDeposit(transactionRef, user?._id);
-
-      if (verifyResponse) {
-        toast.success("Payment successful! Funds have been added to your wallet.");
-        setIsDepositModalOpen(false);
-        setAmount(0);
-        setTotalAmount(0);
-        queryClient.invalidateQueries({ queryKey: ["wallet"] });
-        queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      }
-    } catch (error) {
-      console.error("Error during Paystack verification:", error);
-      toast.error("Payment verification failed. Please contact support if amount was debited.");
-    } finally {
-      setLoading(false);
+  const handleCheckout = async () => {
+    if (checkoutQuote) {
+      window.location.assign(checkoutQuote.url);
+      return;
     }
+    setLoading(true);
+    try {
+      const quote = await initiatePaystackDeposit({ amount: Number(amount) });
+      setCheckoutQuote(quote);
+    } catch (error) {
+      toast.error(error.message || 'Unable to initialize payment.');
+    } finally { setLoading(false); }
   };
-
-  const handlePaystackCloseAction = () => {
-    console.log("closed");
-  };
-
-  const componentProps = config ? {
-    ...config,
-    text: loading ? "Processing..." : "Pay Now",
-    onSuccess: (reference) => handlePaystackSuccessAction(reference),
-    onClose: () => {
-      console.log('Paystack payment modal closed');
-      setLoading(false);
-    },
-  } : {};
 
   const handleShowBanks = () => {
     setShowBanks(!showBanks);
@@ -1022,7 +902,7 @@ const Wallet = () => {
                             <span className={`font-medium ${
                               isDarkMode ? 'text-white' : 'text-gray-900'
                             }`}>
-                              {formatNairaAmount(totalAmount - amount)}
+                              {checkoutQuote ? formatNairaAmount(checkoutQuote.processingFee) : 'Shown before payment'}
                             </span>
                           </div>
                           <div className={`border-t pt-2 ${
@@ -1030,7 +910,7 @@ const Wallet = () => {
                           }`}>
                             <div className="flex justify-between font-semibold">
                               <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>
-                                Total Amount:
+                                Total payment:
                               </span>
                               <span className={`text-lg ${
                                 isDarkMode ? 'text-white' : 'text-gray-900'
@@ -1042,6 +922,8 @@ const Wallet = () => {
                         </div>
                       </div>
                     )}
+
+                    {checkoutQuote && <p className="text-sm">Your wallet will receive {formatNairaAmount(checkoutQuote.creditedAmount)} after the processing fee.</p>}
 
                     {/* Minimum Amount Notice */}
                     <div className={`p-3 rounded-lg text-sm ${
@@ -1059,33 +941,11 @@ const Wallet = () => {
 
                     {/* Payment Button */}
                     <div className="pt-4">
-                      {config ? (
-                        <PaystackButton
-                          publicKey={config.publicKey}
-                          email={config.email}
-                          amount={config.amount}
-                          reference={config.reference}
-                          text={loading ? "Processing..." : "Pay Now"}
-                          onSuccess={(reference) => handlePaystackSuccessAction(reference)}
-                          onClose={() => {
-                            console.log('Paystack payment modal closed');
-                            setLoading(false);
-                          }}
-                          disabled={amount < (walletSettingsData?.minDepositAmount || 100) || loading}
-                          className={`w-full py-3 text-lg font-semibold rounded-lg transition-colors ${
-                            amount >= (walletSettingsData?.minDepositAmount || 100) && !loading
-                              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          }`}
-                        />
-                      ) : (
-                        <button
-                          disabled
-                          className="w-full py-3 text-lg font-semibold rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed"
-                        >
-                          Loading payment details...
-                        </button>
-                      )}
+                      <button type="button" onClick={handleCheckout}
+                        disabled={loading || Number(amount) < (walletSettingsData?.minDepositAmount || 100)}
+                        className="w-full py-3 text-lg font-semibold rounded-lg bg-blue-600 text-white disabled:opacity-50">
+                        {loading ? 'Preparing checkout…' : checkoutQuote ? 'Pay now' : 'Review payment'}
+                      </button>
                     </div>
                   </div>
                 </>

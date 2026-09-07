@@ -194,7 +194,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    transactionPinHash: { type: String, select: false },
     transactionPin: {
+      select: false,
       type: String,
       default: null,
       validate: {
@@ -216,6 +218,13 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Do not serialize authentication material in profile/admin responses.
+userSchema.set('toJSON', { transform(doc, ret) {
+  ret.hasTransactionPin = Boolean(doc.transactionPinHash || doc.transactionPin);
+  for (const key of ['password', 'transactionPin', 'transactionPinHash', 'refreshToken', 'confirmationCode', 'resetPasswordOTP', 'resetPasswordToken']) delete ret[key];
+  return ret;
+} });
 
 // Indexes are automatically created for unique fields
 

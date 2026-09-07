@@ -14,7 +14,9 @@
     "postinstall": "cd client && npm install",
     "dev:all": "concurrently \"yarn dev\" \"yarn client\"",
     "prod": "concurrently \"cd client\" \"yarn build\" \"nodemon app.js\"",
-    "build-all": "cd client && npx vite build && cd .. && yarn install"
+    "build-all": "cd client && npx vite build && cd .. && yarn install",
+    "test": "node --test tests/*.test.js",
+    "payment:preflight": "node scripts/payment-preflight.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -40,6 +42,7 @@
   },
   "devDependencies": {
     "concurrently": "^7.0.0",
+    "mongodb-memory-server": "^11.2.0",
     "nodemon": "^3.1.14"
   },
   "overrides": {

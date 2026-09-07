@@ -41,6 +41,14 @@ const instance = axios.create({
   withCredentials: true, // Ensure cookies are sent
 });
 
+// Preserve this key if Axios retries a request after a transport failure.
+instance.interceptors.request.use(config => {
+  if (['post', 'put', 'patch'].includes(config.method)) {
+    config.headers['Idempotency-Key'] ||= crypto.randomUUID();
+  }
+  return config;
+});
+
 const getToken = () => {
   try {
     // Check if user is authenticated in Redux state

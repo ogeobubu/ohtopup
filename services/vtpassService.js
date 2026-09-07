@@ -34,7 +34,7 @@ class VTPassService {
       };
 
       console.log("VTPass balance check - URL:", `${this.baseUrl}/api/balance`);
-      console.log("VTPass balance check - Headers:", { ...headers, "public-key": "[HIDDEN]" });
+      console.log("VTPass balance check - Credentials configured:", Boolean(this.apiKey));
 
       // Balance check is a GET request with public-key
       const response = await axios.get(
@@ -218,7 +218,7 @@ class VTPassService {
         };
       }
     } catch (error) {
-      console.log(error)
+      console.error("VTPass request failed:", error.message)
       const responseTime = Date.now() - startTime;
       await this.updateProviderMetrics(responseTime, false);
 
@@ -280,16 +280,13 @@ class VTPassService {
       // Update provider health metrics
       await this.updateProviderMetrics(responseTime, true);
 
-      if (response.data.code === "000") {
-        return {
-          success: true,
-          transaction: response.data.content.transactions,
-          responseTime,
-          rawResponse: response.data,
-        };
-      } else {
-        throw new Error(response.data.response_description);
-      }
+      // Preserve confirmed failures and pending results for wallet reconciliation too.
+      return {
+        success: response.data.code === '000',
+        transaction: response.data.content?.transactions,
+        responseTime,
+        rawResponse: response.data,
+      };
     } catch (error) {
       const responseTime = Date.now() - startTime;
       await this.updateProviderMetrics(responseTime, false);

@@ -16,13 +16,7 @@ services:
       - key: SESSION_SECRET
         sync: false # Set this in Render dashboard
       - key: CLIENT_URL
-        fromService:
-          type: web
-          name: ohtopup
-          property: host
+        sync: false # Full HTTPS URL, e.g. https://ohtopup.name.ng
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: ohtopup
-          property: host
+        sync: false # Full HTTPS URL
       # Add other required env vars from .env.example as needed

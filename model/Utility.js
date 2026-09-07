@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const utilitySchema = new mongoose.Schema(
   {
+    operationKey: { type: String, unique: true, sparse: true },
+    fingerprint: String,
+    walletId: { type: mongoose.Schema.Types.ObjectId, ref: 'Wallet' },
+    debitKobo: Number,
+    providerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Provider' },
+    nextCheckAt: Date,
+    reconciliationAttempts: { type: Number, default: 0 },
     requestId: {
       type: String,
       required: true,

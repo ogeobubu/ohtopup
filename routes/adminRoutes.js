@@ -147,6 +147,11 @@ const authAdmin = require("../middleware/adminMiddleware");
 const router = express.Router();
 
 router.post("/login", loginAdmin);
+// These catalog aliases are consumed by the customer application.
+router.get('/data-providers', authUser, getActiveNetworkProviders);
+router.get('/user/selected-data-plans', authUser, getSelectedPlansForUsers);
+// All remaining routes in this router require a current administrator.
+router.use(authUser, authAdmin);
 router.get("/referrals", getAdminReferrals);
 router.get("/", authUser, authAdmin, getAdmin);
 router.patch("/", authUser, authAdmin, updateAdmin);

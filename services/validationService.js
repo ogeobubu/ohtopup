@@ -1,3 +1,4 @@
+const { toKobo } = require('../utils/money');
 const validateAirtimePurchaseInput = (req) => {
    const { serviceID, amount: amountStr, phone, provider, transactionPin } = req.body;
 
@@ -9,7 +10,7 @@ const validateAirtimePurchaseInput = (req) => {
      throw { status: 400, message: "Transaction PIN is required." };
    }
 
-   const amount = parseFloat(amountStr);
+   const amount = toKobo(amountStr) / 100;
 
    if (isNaN(amount) || amount <= 0) {
      throw { status: 400, message: "Invalid amount specified." };
@@ -29,7 +30,7 @@ const validateDataPurchaseInput = (req) => {
         throw { status: 400, message: "Transaction PIN is required." };
     }
 
-    const amount = parseFloat(amountStr);
+    const amount = toKobo(amountStr) / 100;
 
     if (isNaN(amount) || amount <= 0) {
         throw { status: 400, message: "Invalid amount specified." };
@@ -49,7 +50,7 @@ const validateElectricityPurchaseInput = (req) => {
          throw { status: 400, message: "Transaction PIN is required." };
      }
 
-      const amount = parseFloat(amountStr);
+      const amount = toKobo(amountStr) / 100;
 
      if (isNaN(amount) || amount <= 0) {
          throw { status: 400, message: "Invalid amount specified." };
@@ -62,7 +63,7 @@ const validateCablePurchaseInput = (req) => {
    const { serviceID, billersCode, variation_code, amount: amountStr, phone, subscription_type, provider, transactionPin } = req.body;
 
 
-    if (!serviceID || !billersCode || !variation_code || !amountStr || !phone || !subscription_type) {
+    if (!serviceID || !billersCode || (subscription_type === "change" && !variation_code) || !amountStr || !phone || !["renew", "change"].includes(subscription_type)) {
        throw { status: 400, message: "Service ID, billersCode, variation_code, amount, phone, and subscription_type are required." };
    }
 
@@ -70,7 +71,7 @@ const validateCablePurchaseInput = (req) => {
        throw { status: 400, message: "Transaction PIN is required." };
    }
 
-    const amount = parseFloat(amountStr);
+    const amount = toKobo(amountStr) / 100;
 
    if (isNaN(amount) || amount <= 0) {
        throw { status: 400, message: "Invalid amount specified." };

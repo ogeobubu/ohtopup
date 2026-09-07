@@ -129,8 +129,9 @@ const Cable = ({ user, isDarkMode }) => {
 
   const mutation = useMutation({
     mutationFn: purchaseCable,
-    onSuccess: () => {
-      toast.success("Transaction successful!");
+    onSuccess: (response) => {
+      if (response.transaction?.status === 'delivered') toast.success(response.message);
+      else toast.info(response.message || 'Purchase is being checked. Please do not buy again yet.');
       closeModal();
     },
     onError: (error) => {
@@ -182,7 +183,7 @@ const Cable = ({ user, isDarkMode }) => {
         subscription_type: "change",
       };
     }
-    mutation.mutate(data);
+    mutation.mutate({ ...data, transactionPin: values.transactionPin });
   };
 
   return (

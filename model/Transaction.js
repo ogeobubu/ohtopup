@@ -50,6 +50,7 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       enum: [
         "paystack",
+        "monnify",
         "bank_transfer",
         "card_payment",
         "naira_wallet",
@@ -58,6 +59,16 @@ const transactionSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    nextCheckAt: { type: Date, default: () => new Date(Date.now() + 120000) },
+    originalAmount: Number,
+    processingFee: Number,
+    amountKobo: Number,
+    creditKobo: Number,
+    totalDebited: Number,
+    feeAmount: Number,
+    feeDeductionMethod: String,
+    gatewayResponse: mongoose.Schema.Types.Mixed,
+    refundedAt: Date,
     // Additional fields for withdrawal tracking
     adminId: {
       type: mongoose.Schema.Types.ObjectId,

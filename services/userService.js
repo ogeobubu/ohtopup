@@ -196,11 +196,14 @@ const getReferralsData = async (page = 1, limit = 10, search = "") => {
 
 
 const getUserProfile = async (userId) => {
-  return findUserById(userId);
+  return User.findById(userId).select('+transactionPin +transactionPinHash');
 };
 
 const updateUserProfile = async (userId, updateData) => {
-  const user = await findUserById(userId);
+  const user = await User.findById(userId).select('+transactionPin +transactionPinHash');
+  if (!user) throw { status: 404, message: 'User not found' };
+  const pinService = require('./pinService');
+  const updateFilter = { _id: userId };
 
   const updates = {};
 
@@ -235,25 +238,14 @@ const updateUserProfile = async (userId, updateData) => {
   }
 
   if (updateData.transactionPin !== undefined) {
-    // Validate transaction PIN format
-    if (updateData.transactionPin && !/^\d{4,6}$/.test(updateData.transactionPin)) {
-      throw {
-        status: 400,
-        message: "Transaction PIN must be 4-6 digits",
-      };
+    if (!pinService.valid(updateData.transactionPin)) throw { status: 400, message: 'Transaction PIN must be 4–6 digits' };
+    if ((user.transactionPinHash || user.transactionPin) && !await pinService.matches(user, updateData.currentTransactionPin)) {
+      throw { status: 400, message: 'Current transaction PIN is required and must be correct' };
     }
-
-    // If user already has a PIN and is changing it, verify current PIN
-    if (user.transactionPin && updateData.currentTransactionPin) {
-      if (user.transactionPin !== updateData.currentTransactionPin) {
-        throw {
-          status: 400,
-          message: "Current transaction PIN is incorrect",
-        };
-      }
-    }
-
-    updates.transactionPin = updateData.transactionPin;
+    updateFilter.transactionPinHash = user.transactionPinHash || null;
+    updateFilter.transactionPin = user.transactionPin || null;
+    updates.transactionPinHash = await bcrypt.hash(updateData.transactionPin, 12);
+    updates.transactionPin = null;
   }
 
   if (updateData.bankAccount) {
@@ -312,12 +304,13 @@ const updateUserProfile = async (userId, updateData) => {
     throw { status: 400, message: "No valid fields to update" };
   }
 
-  const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+  const updatedUser = await User.findOneAndUpdate(updateFilter, updates, {
     new: true,
     runValidators: true,
   }).exec();
 
-  return updatedUser;
+  if (!updatedUser) throw { status: 409, message: 'Profile changed; refresh and try again' };
+  return User.findById(userId).select('+transactionPin +transactionPinHash');
 };
 
 const deleteUserBankAccount = async (userId, accountNumber) => {
@@ -363,35 +356,21 @@ const softDeleteUser = async (userId) => {
 };
 
 const redeemPoints = async (userId, pointsToRedeem) => {
-  if (typeof pointsToRedeem !== "number" || pointsToRedeem <= 0) {
-    throw { status: 400, message: "Invalid number of points to redeem" };
+  if (!Number.isSafeInteger(pointsToRedeem) || pointsToRedeem < 10) {
+    throw { status: 400, message: 'Redeem at least 10 whole points' };
   }
-
-  const user = await findUserById(userId);
-
-  if (user.points < pointsToRedeem) {
-    throw { status: 400, message: "Insufficient points" };
-  }
-
-  const nairaToAdd = Math.floor(pointsToRedeem / 10);
-
-  const wallet = await dbService.findWalletByUserId(userId);
-
-  const [updatedWallet, updatedUser] = await Promise.all([
-    walletService.creditWallet(wallet, nairaToAdd),
-    User.findByIdAndUpdate(
-      userId,
-      { $inc: { points: -pointsToRedeem } },
-      { new: true }
-    ).exec(),
-  ]);
-
-
-  return {
-    message: "Points redeemed successfully",
-    balance: updatedWallet.balance,
-    remainingPoints: updatedUser.points,
-  };
+  const accounting = require('./accountingService');
+  const key = require('crypto').randomUUID();
+  return accounting.transact(async session => {
+    const user = await User.findOneAndUpdate({ _id: userId, points: { $gte: pointsToRedeem } },
+      { $inc: { points: -pointsToRedeem } }, { new: true, session });
+    if (!user) throw { status: 400, message: 'Insufficient points' };
+    const wallet = await Wallet.findOne({ userId }).session(session);
+    if (!wallet) throw { status: 404, message: 'Wallet not found' };
+    const updated = await accounting.move({ walletId: wallet._id, deltaKobo: Math.floor(pointsToRedeem / 10) * 100,
+      key: `points:${key}`, reason: 'Points redemption', session });
+    return { message: 'Points redeemed successfully', balance: updated.balance, remainingPoints: user.points };
+  });
 };
 
 const getUserReferrals = async (userId, page = 1, limit = 10, search = "") => {
@@ -434,49 +413,10 @@ const getUserReferrals = async (userId, page = 1, limit = 10, search = "") => {
 };
 
 const changePin = async (userId, currentPin, newPin) => {
-  const user = await findUserById(userId);
-
-  // Check if user has a PIN set
-  if (!user.transactionPin) {
-    throw {
-      status: 400,
-      message: "No transaction PIN set. Please set a PIN first."
-    };
-  }
-
-  // Verify current PIN
-  if (user.transactionPin !== currentPin) {
-    throw {
-      status: 400,
-      message: "Current PIN is incorrect"
-    };
-  }
-
-  // Check if new PIN is different from current
-  if (currentPin === newPin) {
-    throw {
-      status: 400,
-      message: "New PIN must be different from current PIN"
-    };
-  }
-
-  // Update PIN
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { transactionPin: newPin },
-    { new: true, runValidators: true }
-  ).exec();
-
-  return {
-    message: "Transaction PIN updated successfully",
-    user: {
-      id: updatedUser._id,
-      username: updatedUser.username,
-      email: updatedUser.email
-    }
-  };
+  if (!currentPin || currentPin === newPin) throw { status: 400, message: 'Provide your current PIN and a different new PIN' };
+  const user = await updateUserProfile(userId, { transactionPin: newPin, currentTransactionPin: currentPin });
+  return { message: 'Transaction PIN updated successfully', user: { id: user._id, username: user.username } };
 };
-
 
 module.exports = {
   findUserById,

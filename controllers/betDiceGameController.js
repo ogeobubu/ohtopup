@@ -215,10 +215,6 @@ const playBetDiceGame = async (req, res) => {
     const expectedValue = calculateExpectedValue(betAmount, odds, level.probability);
     const houseEdge = ((betAmount - expectedValue) / betAmount) * 100;
 
-    // Deduct bet amount from wallet
-    wallet.balance -= totalCost;
-    await wallet.save();
-
     // Create game record
     const game = new BetDiceGame({
       user: userId,
@@ -236,12 +232,25 @@ const playBetDiceGame = async (req, res) => {
       houseEdge,
     });
 
-    await game.save();
+    const accounting = require('../services/accountingService');
+    const { toKobo } = require('../utils/money');
+    const updatedWallet = await accounting.transact(async session => {
+      await accounting.move({ walletId: wallet._id, deltaKobo: -toKobo(totalCost),
+        key: `game:${game._id}:entry`, reason: 'Game entry', session });
+      if (isWin && winnings > 0) await accounting.move({ walletId: wallet._id, deltaKobo: toKobo(winnings),
+        key: `game:${game._id}:win`, reason: 'Game winnings', session });
+      await BetDiceGame.create([game.toObject()], { session });
+      return Wallet.findById(wallet._id).session(session);
+    });
+    wallet.balance = updatedWallet.balance;
+    wallet.balanceKobo = updatedWallet.balanceKobo;
+    wallet.unmarkModified('balance');
+    wallet.unmarkModified('balanceKobo');
+
 
     // If user wins, add winnings to wallet
     if (isWin) {
-      wallet.balance += winnings;
-      await wallet.save();
+
 
       // Note: Points are not awarded for winning bet games as per requirements
       console.log(`User ${user.username} won ₦${winnings} in bet dice game (no points awarded)`);

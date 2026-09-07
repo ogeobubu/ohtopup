@@ -968,10 +968,10 @@ const ElectricityPurchase = ({ isDarkMode }) => {
         >
           <div className="p-6 text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FaCheck className="text-green-600 text-2xl" />
+              {purchaseResult.transaction?.status === 'delivered' ? <FaCheck className="text-green-600 text-2xl" /> : <span className="text-2xl">…</span>}
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Purchase Successful!</h3>
-            <p className="text-gray-600 mb-4">Your electricity purchase has been completed successfully.</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{purchaseResult.transaction?.status === 'delivered' ? 'Purchase successful' : 'Purchase being checked'}</h3>
+            <p className="text-gray-600 mb-4">{purchaseResult.message}</p>
 
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <div className="space-y-2 text-left">
@@ -994,7 +994,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       {purchaseResult.transaction.token}
                     </div>
                     <div className="text-xs text-yellow-700 mt-1">
-                      Please save this token. It will also be sent to your email and phone.
+                      Please save this token. You can also find it in your transaction history.
                     </div>
                   </div>
                 )}

@@ -22,15 +22,6 @@ const setStoredTokens = (accessToken, accessSecret) => {
 
 const router = express.Router();
 
-router.use(
-  session({
-    secret: process.env.SESSION_SECRET || "your_secret_key",
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true },
-  })
-);
-
 router.get("/x", async (req, res) => {
   try {
     if (!appKey || !appSecret) {
@@ -61,7 +52,7 @@ router.get("/x/callback", async (req, res) => {
   const oauth_token_secret = req.session.oauth_token_secret;
 
   console.log("OAuth Callback Params:", req.query);
-  console.log("OAuth Token Secret:", oauth_token_secret);
+
 
   delete req.session.oauth_token_secret;
 

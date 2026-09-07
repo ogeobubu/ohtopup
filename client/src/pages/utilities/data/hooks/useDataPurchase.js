@@ -5,16 +5,14 @@ import { toast } from 'react-toastify';
 const useDataPurchase = (onSuccess) => {
     return useMutation({
         mutationFn: purchaseData,
-        onSuccess: (data) => {
-            if (data.message === "Transaction pending!") {
-                toast.info(`Transaction pending! Request ID: ${data.transaction.requestId}`);
-            } else {
-                toast.success("Data purchase successful!");
-                onSuccess?.();
-            }
-        },
+    onSuccess: (data) => {
+      if (data.transaction?.status === 'delivered') toast.success(data.message || 'Purchase successful');
+      else toast.info(data.message || 'Purchase is being checked. Please do not buy again yet.');
+      onSuccess?.();
+    },
+
         onError: (error) => {
-            toast.error(error.message || "Transaction failed. Please try again.");
+            toast.error(error.message || "Unable to confirm the purchase. Check your transaction history before trying again.");
         }
     });
 };

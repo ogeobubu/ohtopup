@@ -1277,59 +1277,19 @@ const exportRankingsToCSV = async (req, res) => {
 // Requery transaction handler
 const requeryTransactionHandler = async (req, res, next) => {
   try {
-    const { request_id } = req.body;
-    if (!request_id) {
-      return res.status(400).json({ message: "Request ID is required." });
-    }
-
-    // Log the requery action
-    await createLog(
-      'info',
-      `Transaction requery requested for request ID: ${request_id}`,
-      'transaction',
-      req.user?.id,
-      req.user?.email,
-      {
-        requestId: request_id,
-        action: 'requery',
-        timestamp: new Date()
-      },
-      req
-    );
-
-    // Get active provider for requery
-    const provider = await Provider.findOne({
-      isActive: true,
-      supportedServices: { $in: ["data", "airtime", "cable", "electricity"] }
-    });
-
-    if (!provider) {
-      return res.status(503).json({ message: "No active provider available for requery." });
-    }
-
-    vtpassService.setProvider(provider);
-
-    const transactionData = await vtpassService.requeryTransaction(request_id);
-
-    const updatedTransaction = await Utility.findOneAndUpdate(
-      { requestId: request_id },
-      {
-        status: transactionData.status,
-      },
-      { new: true }
-    );
-
-    if (!updatedTransaction) {
-      return res.status(404).json({ message: "Transaction not found." });
-    }
-
-    res.status(200).json({
-      message: "Transaction requery successful.",
-      transaction: updatedTransaction,
-    });
-  } catch (err) {
-    next(err);
-  }
+    const query = { requestId: req.body.request_id };
+    if (typeof query.requestId !== 'string') return res.status(400).json({ message: 'Request ID required' });
+    if (req.user.role !== 'admin') query.user = req.user.id;
+    const tx = await Utility.findOne(query);
+    if (!tx) return res.status(404).json({ message: 'Transaction not found' });
+    if (!tx.debitKobo) return res.status(409).json({ message: 'Legacy transaction requires support review' });
+    const provider = await Provider.findById(tx.providerId);
+    if (!provider) return res.status(503).json({ message: 'Provider unavailable' });
+    const adapter = require('./purchaseController').makeAdapter(provider);
+    const result = provider.name === 'vtpass' ? await adapter.requeryTransaction(tx.requestId) : await adapter.queryTransaction(null, tx.requestId);
+    const updated = await require('../services/purchaseService').finish(tx.requestId, result);
+    return res.json({ message: 'Transaction checked', transaction: { requestId: updated.requestId, status: updated.status, token: updated.token, units: updated.units } });
+  } catch (error) { next(error); }
 };
 
 // Schedule weekly reset every Sunday at midnight
