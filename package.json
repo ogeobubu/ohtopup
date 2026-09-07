@@ -11,6 +11,7 @@
     "client": "cd client && yarn vite",
     "serve-client": "cd client && yarn serve",
     "build": "cd client && npm install && npm run build",
+    "postinstall": "npm run build",
     "dev:all": "concurrently \"yarn dev\" \"yarn client\"",
     "test": "node --test tests/*.test.js",
     "payment:preflight": "node scripts/payment-preflight.js"
