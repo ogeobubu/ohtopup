@@ -85,23 +85,23 @@ const AssignRewardModal = ({ reward, rankingData, onAssign, onCancel }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div className="ot-admin-paper p-6 rounded-lg max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold ot-admin-ink ">
             Assign Reward to User
           </h3>
           <button
             onClick={onCancel}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="ot-admin-control p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <FaTimes className="text-sm" />
           </button>
         </div>
 
         {reward && (
-          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-white">{reward.name}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="mb-4 p-3 ot-admin-soft rounded-lg">
+            <h4 className="font-medium ot-admin-ink ">{reward.name}</h4>
+            <p className="text-sm ot-admin-muted ">
               {reward.type} • {reward.type === 'discount' ? `${reward.value}%` : `₦${reward.value}`}
             </p>
           </div>
@@ -109,7 +109,7 @@ const AssignRewardModal = ({ reward, rankingData, onAssign, onCancel }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium ot-admin-ink mb-1">
               Select User from Rankings *
             </label>
             <select
@@ -119,7 +119,7 @@ const AssignRewardModal = ({ reward, rankingData, onAssign, onCancel }) => {
                 console.log('Selected user text:', e.target.selectedOptions[0]?.text);
                 setSelectedUser(e.target.value);
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
               required
             >
               <option value="">Choose a user from rankings...</option>
@@ -130,18 +130,18 @@ const AssignRewardModal = ({ reward, rankingData, onAssign, onCancel }) => {
               )) || []}
             </select>
             {rankingData?.rankings?.length === 0 && (
-              <p className="text-sm text-gray-500 mt-1">No users in rankings</p>
+              <p className="text-sm ot-admin-muted mt-1">No users in rankings</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium ot-admin-ink mb-1">
               Notes (Optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
               rows={3}
               placeholder="Add any notes about this reward assignment..."
             />
@@ -151,14 +151,14 @@ const AssignRewardModal = ({ reward, rankingData, onAssign, onCancel }) => {
             <button
               type="submit"
               disabled={!selectedUser}
-              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="ot-admin-control flex-1 px-4 py-2 ot-admin-action text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               Assign Reward
             </button>
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="ot-admin-control px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
               Cancel
             </button>
@@ -185,14 +185,14 @@ const AddPointsModal = ({ rankingData, onSubmit, onCancel }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div className="ot-admin-paper p-6 rounded-lg max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold ot-admin-ink ">
             Add Points to User
           </h3>
           <button
             onClick={onCancel}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className="ot-admin-control p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <FaTimes className="text-sm" />
           </button>
@@ -200,13 +200,13 @@ const AddPointsModal = ({ rankingData, onSubmit, onCancel }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium ot-admin-ink mb-1">
               Select User *
             </label>
             <select
               value={selectedUser}
               onChange={(e) => setSelectedUser(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
               required
             >
               <option value="">Choose a user...</option>
@@ -219,7 +219,7 @@ const AddPointsModal = ({ rankingData, onSubmit, onCancel }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium ot-admin-ink mb-1">
               Points to Add *
             </label>
             <input
@@ -227,7 +227,7 @@ const AddPointsModal = ({ rankingData, onSubmit, onCancel }) => {
               min="1"
               value={points}
               onChange={(e) => setPoints(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
               placeholder="Enter number of points"
               required
             />
@@ -237,14 +237,14 @@ const AddPointsModal = ({ rankingData, onSubmit, onCancel }) => {
             <button
               type="submit"
               disabled={!selectedUser || !points}
-              className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="ot-admin-control flex-1 px-4 py-2 ot-admin-action text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               Add Points
             </button>
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="ot-admin-control px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
               Cancel
             </button>
@@ -305,21 +305,21 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium ot-admin-ink mb-1">
             Reward Name *
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
             placeholder="Enter reward name"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium ot-admin-ink mb-1">
             Rank *
           </label>
           <input
@@ -327,7 +327,7 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
             min="1"
             value={formData.rank}
             onChange={(e) => handleChange('rank', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
             placeholder="Enter rank number"
             required
           />
@@ -335,13 +335,13 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium ot-admin-ink mb-1">
           Description
         </label>
         <textarea
           value={formData.description}
           onChange={(e) => handleChange('description', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
           rows={3}
           placeholder="Describe the reward..."
         />
@@ -349,13 +349,13 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium ot-admin-ink mb-1">
             Type *
           </label>
           <select
             value={formData.type}
             onChange={(e) => handleChange('type', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
           >
             <option value="discount">Discount</option>
             <option value="bonus">Bonus</option>
@@ -366,7 +366,7 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium ot-admin-ink mb-1">
             Value *
           </label>
           <input
@@ -374,20 +374,20 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
             step="0.01"
             value={formData.value}
             onChange={(e) => handleChange('value', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
             placeholder="Enter value"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium ot-admin-ink mb-1">
             Unit
           </label>
           <select
             value={formData.unit}
             onChange={(e) => handleChange('unit', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
           >
             <option value="percentage">Percentage</option>
             <option value="amount">Amount</option>
@@ -399,7 +399,7 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium ot-admin-ink mb-1">
             Max Redemptions
           </label>
           <input
@@ -407,20 +407,20 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
             min="1"
             value={formData.maxRedemptions}
             onChange={(e) => handleChange('maxRedemptions', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
             placeholder="Leave empty for unlimited"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium ot-admin-ink mb-1">
             Valid Until
           </label>
           <input
             type="date"
             value={formData.validUntil}
             onChange={(e) => handleChange('validUntil', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
           />
         </div>
       </div>
@@ -431,9 +431,9 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
             type="checkbox"
             checked={formData.isActive}
             onChange={(e) => handleChange('isActive', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
           />
-          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Active</span>
+          <span className="ml-2 text-sm ot-admin-ink ">Active</span>
         </label>
 
         <label className="flex items-center">
@@ -441,23 +441,23 @@ const RewardForm = ({ reward, onSubmit, onCancel }) => {
             type="checkbox"
             checked={formData.autoAssign}
             onChange={(e) => handleChange('autoAssign', e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
           />
-          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Auto-assign</span>
+          <span className="ml-2 text-sm ot-admin-ink ">Auto-assign</span>
         </label>
       </div>
 
       <div className="flex gap-3 pt-4">
         <button
           type="submit"
-          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="ot-admin-control flex-1 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
         >
           {reward ? 'Update Reward' : 'Create Reward'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          className="ot-admin-control px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
         >
           Cancel
         </button>
@@ -650,11 +650,11 @@ const AdminRanking = () => {
       case 1:
         return <FaCrown className="text-yellow-500 text-xl" />;
       case 2:
-        return <FaMedal className="text-gray-400 text-xl" />;
+        return <FaMedal className="ot-admin-muted text-xl" />;
       case 3:
         return <FaMedal className="text-amber-600 text-xl" />;
       default:
-        return <span className="text-lg font-bold text-gray-500">#{rank}</span>;
+        return <span className="text-lg font-bold ot-admin-muted">#{rank}</span>;
     }
   };
 
@@ -672,11 +672,11 @@ const AdminRanking = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 md:gap-3">
+          <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink flex items-center gap-2 md:gap-3">
             <FaTrophy className="text-yellow-500 text-lg md:text-xl" />
             Ranking Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
+          <p className="ot-admin-muted mt-1 text-sm md:text-base">
             Manage user rankings, rewards, and competition settings
           </p>
         </div>
@@ -684,21 +684,21 @@ const AdminRanking = () => {
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => refetch()}
-            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs md:text-sm"
+            className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm"
           >
             <FaSync className="text-xs md:text-sm" />
             <span className="hidden sm:inline">Refresh</span>
           </button>
           <button
             onClick={handleExportRankings}
-            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs md:text-sm"
+            className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm"
           >
             <FaDownload className="text-xs md:text-sm" />
             <span className="hidden sm:inline">Export CSV</span>
           </button>
           <button
             onClick={() => setShowAddPoints(true)}
-            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs md:text-sm"
+            className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm"
           >
             <FaPlus className="text-xs md:text-sm" />
             <span className="hidden sm:inline">Add Points</span>
@@ -709,13 +709,13 @@ const AdminRanking = () => {
       {/* Period Selector */}
       <div className="flex flex-wrap gap-2 md:gap-4">
         {["weekly", "monthly", "all-time"].map((period) => (
-          <button
+          <button aria-pressed={selectedPeriod === period}
             key={period}
             onClick={() => setSelectedPeriod(period)}
-            className={`px-3 md:px-4 py-2 rounded-lg font-medium transition-colors text-xs md:text-sm ${
+            className={`ot-admin-control px-3 md:px-4 py-2 rounded-lg font-medium transition-colors text-xs md:text-sm ${
               selectedPeriod === period
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                ? "ot-admin-action text-white"
+                : "ot-admin-soft ot-admin-ink hover:bg-gray-200 dark:hover:bg-gray-600"
             }`}
           >
             {period.charAt(0).toUpperCase() + period.slice(1).replace("-", " ")}
@@ -724,16 +724,16 @@ const AdminRanking = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="border-b ot-admin-border overflow-x-auto">
         <nav className="flex space-x-4 md:space-x-8 min-w-max">
           {tabs.map((tab) => (
-            <button
+            <button aria-pressed={activeTab === tab.id}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
+              className={`ot-admin-control flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  : "border-transparent ot-admin-muted hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               <tab.icon className="text-xs md:text-sm" />
@@ -749,11 +749,11 @@ const AdminRanking = () => {
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {/* Stats Cards */}
-            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Participants</p>
-                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">Total Participants</p>
+                  <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
                     {rankingData?.rankings?.length || 0}
                   </p>
                 </div>
@@ -761,11 +761,11 @@ const AdminRanking = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Top Performer</p>
-                  <p className="text-sm md:text-lg font-bold text-gray-900 dark:text-white truncate">
+                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">Top Performer</p>
+                  <p className="text-sm md:text-lg font-bold ot-admin-ink truncate">
                     {rankingData?.rankings?.[0]?.username || "N/A"}
                   </p>
                 </div>
@@ -773,11 +773,11 @@ const AdminRanking = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Transactions</p>
-                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">Total Transactions</p>
+                  <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
                     {rankingData?.rankings?.reduce((sum, user) => sum + user.transactionCount, 0) || 0}
                   </p>
                 </div>
@@ -785,11 +785,11 @@ const AdminRanking = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Next Reset</p>
-                  <p className="text-lg md:text-lg font-bold text-gray-900 dark:text-white">
+                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">Next Reset</p>
+                  <p className="text-lg md:text-lg font-bold ot-admin-ink ">
                     {rankingData?.countdown ? Math.floor(rankingData.countdown / 86400) + "d" : "N/A"}
                   </p>
                 </div>
@@ -800,33 +800,33 @@ const AdminRanking = () => {
         )}
 
         {activeTab === "leaderboard" && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Current Leaderboard</h3>
+          <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden">
+            <div className="p-4 md:p-6 border-b ot-admin-border ">
+              <h3 className="text-base md:text-lg font-semibold ot-admin-ink ">Current Leaderboard</h3>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+              <table className="ot-admin-data-table w-full">
+                <thead className="ot-admin-soft ">
                   <tr>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Rank
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Transactions
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Reward Tier
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Bonus
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                   {rankingData?.rankings?.map((user, index) => {
                     const rank = index + 1;
                     const reward = getRewardTier(rank);
@@ -835,18 +835,18 @@ const AdminRanking = () => {
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             {getRankIcon(rank)}
-                            <span className="ml-1 md:ml-2 text-xs md:text-sm font-medium text-gray-900 dark:text-white">
+                            <span className="ml-1 md:ml-2 text-xs md:text-sm font-medium ot-admin-ink ">
                               #{rank}
                             </span>
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate max-w-20 md:max-w-none">
+                          <div className="text-xs md:text-sm font-medium ot-admin-ink truncate max-w-20 md:max-w-none">
                             {user.username}
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
+                          <div className="text-xs md:text-sm ot-admin-ink ">
                             {user.transactionCount}
                           </div>
                         </td>
@@ -856,7 +856,7 @@ const AdminRanking = () => {
                           </span>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
+                          <div className="text-xs md:text-sm ot-admin-ink ">
                             {reward.bonus > 0 ? `₦${reward.bonus}` : "N/A"}
                           </div>
                         </td>
@@ -873,12 +873,12 @@ const AdminRanking = () => {
           <div className="space-y-6">
             {/* Reward Management Header */}
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold ot-admin-ink ">
                 Reward Management
               </h3>
               <button
                 onClick={() => setShowCreateReward(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
               >
                 <FaPlus className="text-sm" />
                 Create Reward
@@ -889,25 +889,25 @@ const AdminRanking = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {rewardsLoading ? (
                 <div className="col-span-full text-center py-8">
-                  <div className="text-gray-500 dark:text-gray-400">Loading rewards...</div>
+                  <div className="ot-admin-muted ">Loading rewards...</div>
                 </div>
               ) : rewardsData?.rewards?.length > 0 ? (
                 rewardsData.rewards.map((reward) => (
-                  <div key={reward._id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                  <div key={reward._id} className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         {getRankIcon(reward.rank)}
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          <h3 className="text-lg font-semibold ot-admin-ink ">
                             {reward.name}
                           </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Rank #{reward.rank}</p>
+                          <p className="text-sm ot-admin-muted ">Rank #{reward.rank}</p>
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setEditingReward(reward)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
+                          className="ot-admin-control p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
                         >
                           <FaEdit className="text-sm" />
                         </button>
@@ -924,7 +924,7 @@ const AdminRanking = () => {
                               }
                             }
                           }}
-                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors"
+                          className="ot-admin-control p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors"
                         >
                           <FaTrash className="text-sm" />
                         </button>
@@ -933,11 +933,11 @@ const AdminRanking = () => {
 
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Type</span>
+                        <span className="text-sm ot-admin-muted ">Type</span>
                         <span className="font-semibold text-blue-600 capitalize">{reward.type}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Value</span>
+                        <span className="text-sm ot-admin-muted ">Value</span>
                         <span className="font-semibold text-purple-600">
                           {reward.type === 'discount' ? `${reward.value}%` :
                            reward.type === 'bonus' ? `₦${reward.value}` :
@@ -945,7 +945,7 @@ const AdminRanking = () => {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Status</span>
+                        <span className="text-sm ot-admin-muted ">Status</span>
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           reward.isActive
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
@@ -956,17 +956,17 @@ const AdminRanking = () => {
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <div className="mt-4 pt-4 border-t ot-admin-border ">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAssignReward(reward)}
-                          className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                          className="ot-admin-control flex-1 px-3 py-2 ot-admin-action text-white text-sm rounded-lg transition-colors"
                         >
                           Assign to User
                         </button>
                         <button
                           onClick={() => handleViewReward(reward)}
-                          className="px-3 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
+                          className="ot-admin-control px-3 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors"
                         >
                           <FaEye className="text-sm" />
                         </button>
@@ -976,10 +976,10 @@ const AdminRanking = () => {
                 ))
               ) : (
                 <div className="col-span-full text-center py-8">
-                  <div className="text-gray-500 dark:text-gray-400 mb-4">No rewards found</div>
+                  <div className="ot-admin-muted mb-4">No rewards found</div>
                   <button
                     onClick={() => setShowCreateReward(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="ot-admin-control px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
                   >
                     Create First Reward
                   </button>
@@ -990,9 +990,9 @@ const AdminRanking = () => {
             {/* Create/Edit Reward Modal */}
             {(showCreateReward || editingReward) && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div className="ot-admin-paper p-6 rounded-lg max-w-md w-full mx-4">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold ot-admin-ink ">
                       {editingReward ? 'Edit Reward' : 'Create New Reward'}
                     </h3>
                     <button
@@ -1000,7 +1000,7 @@ const AdminRanking = () => {
                         setShowCreateReward(false);
                         setEditingReward(null);
                       }}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      className="ot-admin-control p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     >
                       <FaTimes className="text-sm" />
                     </button>
@@ -1037,56 +1037,56 @@ const AdminRanking = () => {
         {activeTab === "assignments" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-xl font-semibold ot-admin-ink ">
                 Reward Assignments
               </h3>
               <button
                 onClick={() => setShowAssignReward(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
               >
                 <FaUserPlus className="text-sm" />
                 Assign Reward
               </button>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden">
+              <div className="p-6 border-b ot-admin-border ">
+                <h4 className="text-lg font-semibold ot-admin-ink ">
                   Recent Assignments
                 </h4>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="ot-admin-data-table w-full">
+                  <thead className="ot-admin-soft ">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         User
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Reward
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Assigned Date
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                     {rankingData?.rankings?.slice(0, 5).map((user, index) => (
                       <tr key={index}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium ot-admin-ink ">
                             {user.username}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">
+                          <div className="text-sm ot-admin-ink ">
                             Rank {user.rank} Reward
                           </div>
                         </td>
@@ -1096,7 +1096,7 @@ const AdminRanking = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">
+                          <div className="text-sm ot-admin-ink ">
                             Auto-assigned
                           </div>
                         </td>
@@ -1104,13 +1104,13 @@ const AdminRanking = () => {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleAssignReward(rewardsData?.rewards?.[0] || { _id: 'sample-reward-id', name: `Rank ${user.rank} Reward`, type: 'discount', value: 10, rank: user.rank })}
-                              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                              className="ot-admin-control px-3 py-1 ot-admin-action text-white text-sm rounded transition-colors"
                             >
                               Assign
                             </button>
                             <button
                               onClick={() => handleViewReward({ name: `Rank ${user.rank} Reward`, type: 'discount', value: 10, rank: user.rank, isActive: true })}
-                              className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
+                              className="ot-admin-control px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
                             >
                               View
                             </button>
@@ -1119,7 +1119,7 @@ const AdminRanking = () => {
                       </tr>
                     )) || (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                        <td colSpan={5} className="px-6 py-4 text-center ot-admin-muted ">
                           No users available for reward assignment
                         </td>
                       </tr>
@@ -1135,48 +1135,48 @@ const AdminRanking = () => {
           <div className="space-y-6">
             {/* Analytics Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaTrophy className="text-yellow-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Rewards</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Rewards</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {analyticsLoading ? '...' : (analyticsData?.overview?.totalRewards || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaUsers className="text-blue-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Active Rewards</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Active Rewards</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {analyticsLoading ? '...' : (analyticsData?.overview?.activeRewards || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaCheck className="text-green-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Redemptions</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Redemptions</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {analyticsLoading ? '...' : (analyticsData?.overview?.totalRedemptions || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaGift className="text-purple-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Pending Redemptions</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Pending Redemptions</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {analyticsLoading ? '...' : (analyticsData?.overview?.pendingRedemptions || 0)}
                     </p>
                   </div>
@@ -1186,27 +1186,27 @@ const AdminRanking = () => {
 
             {/* Detailed Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+                <h3 className="text-lg font-semibold ot-admin-ink mb-4">
                   Reward Type Distribution
                 </h3>
                 {analyticsLoading ? (
-                  <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                  <div className="h-64 flex items-center justify-center ot-admin-muted ">
                     Loading analytics...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {analyticsData?.rewardTypeStats?.map((stat, index) => (
                       <div key={index} className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                        <span className="text-sm ot-admin-muted capitalize">
                           {stat._id}
                         </span>
-                        <span className="font-semibold text-gray-900 dark:text-white">
+                        <span className="font-semibold ot-admin-ink ">
                           {stat.count}
                         </span>
                       </div>
                     )) || (
-                      <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      <div className="text-center ot-admin-muted py-8">
                         No reward type data available
                       </div>
                     )}
@@ -1214,27 +1214,27 @@ const AdminRanking = () => {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+                <h3 className="text-lg font-semibold ot-admin-ink mb-4">
                   Monthly Redemptions
                 </h3>
                 {analyticsLoading ? (
-                  <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                  <div className="h-64 flex items-center justify-center ot-admin-muted ">
                     Loading analytics...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {analyticsData?.monthlyRedemptions?.slice(0, 6).map((month, index) => (
                       <div key={index} className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <span className="text-sm ot-admin-muted ">
                           {month._id}
                         </span>
-                        <span className="font-semibold text-gray-900 dark:text-white">
+                        <span className="font-semibold ot-admin-ink ">
                           {month.count}
                         </span>
                       </div>
                     )) || (
-                      <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      <div className="text-center ot-admin-muted py-8">
                         No monthly data available
                       </div>
                     )}
@@ -1249,48 +1249,48 @@ const AdminRanking = () => {
           <div className="space-y-6">
             {/* System Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaUsers className="text-blue-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Users</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Users</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {systemStatsLoading ? '...' : (systemStatsData?.stats?.totalUsers || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaGift className="text-purple-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Rewards</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Rewards</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {systemStatsLoading ? '...' : (systemStatsData?.stats?.totalRewards || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaCheck className="text-green-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Redemptions</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Redemptions</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {systemStatsLoading ? '...' : (systemStatsData?.stats?.redeemedRewards || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaChartLine className="text-orange-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Redemption Rate</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Redemption Rate</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {systemStatsLoading ? '...' : `${systemStatsData?.stats?.redemptionRate || 0}%`}
                     </p>
                   </div>
@@ -1298,25 +1298,25 @@ const AdminRanking = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 Reward System Settings
               </h3>
 
               {settingsLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="text-gray-500 dark:text-gray-400">Loading settings...</div>
+                  <div className="ot-admin-muted ">Loading settings...</div>
                 </div>
               ) : (
                 <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSaveSettings(settingsData?.settings || {}); }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium ot-admin-ink mb-2">
                       Reset Frequency
                     </label>
                     <select
                       defaultValue={settingsData?.settings?.ranking?.resetFrequency || 'weekly'}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     >
                       <option value="weekly">Weekly (Sunday)</option>
                       <option value="monthly">Monthly (1st)</option>
@@ -1325,7 +1325,7 @@ const AdminRanking = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium ot-admin-ink mb-2">
                       Maximum Leaderboard Size
                     </label>
                     <input
@@ -1333,73 +1333,73 @@ const AdminRanking = () => {
                       defaultValue="10"
                       min="1"
                       max="50"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium ot-admin-ink mb-2">
                       Points per Transaction
                     </label>
                     <input
                       type="number"
                       defaultValue={settingsData?.settings?.ranking?.pointsPerTransaction || 10}
                       min="1"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium ot-admin-ink mb-2">
                       Minimum Transactions for Ranking
                     </label>
                     <input
                       type="number"
                       defaultValue="1"
                       min="0"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     />
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
-                  <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
+                <div className="border-t ot-admin-border pt-6">
+                  <h4 className="text-md font-semibold ot-admin-ink mb-4">
                     Reward Settings
                   </h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium ot-admin-ink mb-2">
                         Auto-assign Rewards
                       </label>
                       <div className="flex items-center">
                         <input
                           type="checkbox"
                           defaultChecked={settingsData?.settings?.autoAssignment?.enabled ?? true}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
                         />
-                        <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="ml-2 text-sm ot-admin-muted ">
                           Automatically assign rewards when users reach ranks
                         </span>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium ot-admin-ink mb-2">
                         Reward Expiration (days)
                       </label>
                       <input
                         type="number"
                         defaultValue="30"
                         min="1"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
-                  <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
+                <div className="border-t ot-admin-border pt-6">
+                  <h4 className="text-md font-semibold ot-admin-ink mb-4">
                     Notification Settings
                   </h4>
 
@@ -1408,9 +1408,9 @@ const AdminRanking = () => {
                       <input
                         type="checkbox"
                         defaultChecked={settingsData?.settings?.notifications?.rewardAssigned ?? true}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
                       />
-                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span className="ml-2 text-sm ot-admin-muted ">
                         Notify users when they receive rewards
                       </span>
                     </div>
@@ -1419,28 +1419,28 @@ const AdminRanking = () => {
                       <input
                         type="checkbox"
                         defaultChecked={settingsData?.settings?.notifications?.milestoneReached ?? true}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
                       />
-                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span className="ml-2 text-sm ot-admin-muted ">
                         Send weekly ranking summary emails
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex justify-end gap-3 pt-6 border-t ot-admin-border ">
                   <button
                     type="button"
                     onClick={handleResetSettings}
                     disabled={isResettingSettings}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    className="ot-admin-control px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                   >
                     {isResettingSettings ? 'Resetting...' : 'Reset to Defaults'}
                   </button>
                   <button
                     type="submit"
                     disabled={isSavingSettings}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+                    className="ot-admin-control px-4 py-2 ot-admin-action text-white rounded-lg disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
                   >
                     {isSavingSettings ? 'Saving...' : 'Save Settings'}
                   </button>
@@ -1449,8 +1449,8 @@ const AdminRanking = () => {
             )}
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 System Actions
               </h3>
 
@@ -1458,28 +1458,28 @@ const AdminRanking = () => {
                 <button
                   onClick={handleManualResetRankings}
                   disabled={isManualResetting}
-                  className="p-4 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="ot-admin-control p-4 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="flex items-center gap-3">
                     <FaSync className={`text-red-500 text-xl ${isManualResetting ? 'animate-spin' : ''}`} />
                     <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white">
+                      <h4 className="font-semibold ot-admin-ink ">
                         {isManualResetting ? 'Resetting...' : 'Manual Reset Rankings'}
                       </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Reset all user rankings and points manually</p>
+                      <p className="text-sm ot-admin-muted ">Reset all user rankings and points manually</p>
                     </div>
                   </div>
                 </button>
 
                 <button
                   onClick={handleExportRankings}
-                  className="p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                  className="ot-admin-control p-4 border ot-admin-border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
                 >
                   <div className="flex items-center gap-3">
                     <FaDownload className="text-green-500 text-xl" />
                     <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white">Export Rankings</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Download current rankings as CSV</p>
+                      <h4 className="font-semibold ot-admin-ink ">Export Rankings</h4>
+                      <p className="text-sm ot-admin-muted ">Download current rankings as CSV</p>
                     </div>
                   </div>
                 </button>
@@ -1492,48 +1492,48 @@ const AdminRanking = () => {
           <div className="space-y-6">
             {/* Dice Game Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaGamepad className="text-purple-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Games</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Games</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {diceStatsLoading ? '...' : (diceStatsData?.stats?.totalGames || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaTrophy className="text-yellow-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Wins</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Wins</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {diceStatsLoading ? '...' : (diceStatsData?.stats?.totalWins || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaWallet className="text-green-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">House Revenue</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">House Revenue</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       ₦{managementWalletLoading ? '...' : (managementWalletData?.balance || 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaChartLine className="text-blue-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Win Rate</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Win Rate</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {diceStatsLoading ? '...' : `${diceStatsData?.stats?.winRate || 0}%`}
                     </p>
                   </div>
@@ -1542,36 +1542,36 @@ const AdminRanking = () => {
             </div>
 
             {/* Recent Games Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Games</h3>
+            <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden">
+              <div className="p-6 border-b ot-admin-border ">
+                <h3 className="text-lg font-semibold ot-admin-ink ">Recent Games</h3>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="ot-admin-data-table w-full">
+                  <thead className="ot-admin-soft ">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         User
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Dice Roll
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Result
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Winnings
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Date
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                     {diceGamesLoading ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                        <td colSpan={5} className="px-6 py-4 text-center ot-admin-muted ">
                           Loading games...
                         </td>
                       </tr>
@@ -1579,12 +1579,12 @@ const AdminRanking = () => {
                       diceGamesData.games.map((game) => (
                         <tr key={game._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            <div className="text-sm font-medium ot-admin-ink ">
                               {game.user?.username || 'Unknown'}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">
+                            <div className="text-sm ot-admin-ink ">
                               {game.dice1} + {game.dice2}
                             </div>
                           </td>
@@ -1598,12 +1598,12 @@ const AdminRanking = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">
+                            <div className="text-sm ot-admin-ink ">
                               {game.gameResult === 'win' ? `+₦${game.winnings}` : `-₦${game.entryFee}`}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">
+                            <div className="text-sm ot-admin-ink ">
                               {new Date(game.playedAt).toLocaleString()}
                             </div>
                           </td>
@@ -1611,7 +1611,7 @@ const AdminRanking = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                        <td colSpan={5} className="px-6 py-4 text-center ot-admin-muted ">
                           No games played yet
                         </td>
                       </tr>
@@ -1622,8 +1622,8 @@ const AdminRanking = () => {
             </div>
 
             {/* Management Wallet Section */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 Management Wallet
               </h3>
 
@@ -1632,34 +1632,34 @@ const AdminRanking = () => {
                   <div className="text-3xl font-bold text-green-600 mb-2">
                     ₦{managementWalletLoading ? '...' : (managementWalletData?.balance || 0).toLocaleString()}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Current Balance</p>
+                  <p className="text-sm ot-admin-muted ">Current Balance</p>
                 </div>
 
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-2">
                     ₦{managementWalletLoading ? '...' : (managementWalletData?.availableForWithdrawal || 0).toLocaleString()}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Available for Withdrawal</p>
+                  <p className="text-sm ot-admin-muted ">Available for Withdrawal</p>
                 </div>
 
                 <div className="text-center">
                   <div className="text-3xl font-bold text-purple-600 mb-2">
                     {managementWalletLoading ? '...' : (managementWalletData?.totalGames || 0)}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Games Played</p>
+                  <p className="text-sm ot-admin-muted ">Total Games Played</p>
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+              <div className="mt-6 pt-6 border-t ot-admin-border ">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">Withdraw Funds</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <h4 className="font-semibold ot-admin-ink ">Withdraw Funds</h4>
+                    <p className="text-sm ot-admin-muted ">
                       Transfer funds from management wallet to your account
                     </p>
                   </div>
                   <button
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="ot-admin-control px-6 py-2 ot-admin-action text-white rounded-lg transition-colors"
                     onClick={() => alert('Withdrawal functionality will be implemented soon!')}
                   >
                     Withdraw

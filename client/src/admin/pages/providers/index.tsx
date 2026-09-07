@@ -258,7 +258,7 @@ const ProviderManagement = () => {
       case "healthy": return <FaCheck className="text-green-600" />;
       case "degraded": return <FaStarHalfAlt className="text-yellow-600" />;
       case "down": return <FaTimes className="text-red-600" />;
-      default: return <FaRegStar className="text-gray-600" />;
+      default: return <FaRegStar className="ot-admin-muted" />;
     }
   };
 
@@ -274,42 +274,12 @@ const ProviderManagement = () => {
   ];
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} p-2 md:p-0`}>
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 md:py-8 px-3 md:px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-xl md:text-4xl font-bold mb-2 flex items-center justify-center gap-2 md:gap-3">
-            <FaNetworkWired className="text-yellow-300 text-lg md:text-xl" />
-            Provider Management
-            <FaNetworkWired className="text-yellow-300 text-lg md:text-xl" />
-          </h1>
-          <p className="text-blue-100 text-sm md:text-lg">
-            Manage API providers for data and airtime services
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8">
-        {/* Tab Navigation */}
-        <div className="mb-4 md:mb-6 flex justify-center">
-          <div className={`flex flex-wrap rounded-lg border ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'} p-1 gap-1`}>
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={`px-3 md:px-6 py-2 rounded-md font-medium transition-all duration-300 flex items-center gap-1 md:gap-2 text-xs md:text-sm ${
-                  activeTab === tab.id
-                    ? "bg-blue-600 text-white shadow-md"
-                    : `${isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} hover:bg-gray-100`
-                }`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <tab.icon className="text-xs md:text-sm" />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'ot-admin-soft ot-admin-ink'} p-2 md:p-0`}>
+      <div className="ot-dashboard-heading"><div><h1>Providers</h1><p>Manage API connections, service plans, and purchase settings.</p></div></div>
+      <div>
+        <nav className="ot-utility-tabs ot-admin-service-tabs" aria-label="Provider sections">
+          {tabs.map(tab => <button key={tab.id} aria-pressed={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}><tab.icon />{tab.label}</button>)}
+        </nav>
 
         {/* Data Plans Tab */}
         {activeTab === "data-plans" && (
@@ -318,7 +288,7 @@ const ProviderManagement = () => {
               <h2 className="text-lg md:text-2xl font-bold">Data Plans from All Providers</h2>
               <button
                 onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-data-plans"] })}
-                className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs md:text-sm"
+                className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm"
               >
                 <FaHeartbeat className="text-xs md:text-sm" />
                 <span className="hidden sm:inline">Refresh Data</span>
@@ -329,13 +299,13 @@ const ProviderManagement = () => {
             {dataPlansLoading ? (
               <div className="text-center py-6 md:py-8">
                 <div className="animate-spin rounded-full h-10 md:h-12 w-10 md:w-12 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm md:text-base">Loading data plans from all providers...</p>
+                <p className="mt-4 ot-admin-muted text-sm md:text-base">Loading data plans from all providers...</p>
               </div>
             ) : (
               <>
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
-                  <div className={`p-4 md:p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className={`p-4 md:p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                     <div className="flex items-center gap-2 md:gap-3">
                       <FaServer className="text-blue-500 text-lg md:text-2xl" />
                       <div>
@@ -345,7 +315,7 @@ const ProviderManagement = () => {
                     </div>
                   </div>
 
-                  <div className={`p-4 md:p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className={`p-4 md:p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                     <div className="flex items-center gap-2 md:gap-3">
                       <FaNetworkWired className="text-green-500 text-lg md:text-2xl" />
                       <div>
@@ -355,7 +325,7 @@ const ProviderManagement = () => {
                     </div>
                   </div>
 
-                  <div className={`p-4 md:p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className={`p-4 md:p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                     <div className="flex items-center gap-2 md:gap-3">
                       <FaCheck className="text-purple-500 text-lg md:text-2xl" />
                       <div>
@@ -374,10 +344,10 @@ const ProviderManagement = () => {
                   {dataPlansData?.data?.map((providerData) => (
                     <div
                       key={providerData.providerName}
-                      className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
+                      className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}
                     >
                       {/* Provider Header */}
-                      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <div className="p-6 border-b ot-admin-border ">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
@@ -409,65 +379,65 @@ const ProviderManagement = () => {
                       {/* Plans Table */}
                       {providerData.plans.length > 0 ? (
                         <div className="overflow-x-auto">
-                          <table className="w-full">
-                            <thead className="bg-gray-50 dark:bg-gray-700">
+                          <table className="ot-admin-data-table w-full">
+                            <thead className="ot-admin-soft ">
                               <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Plan Name
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Amount
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Data Amount
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Validity
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Network
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Type
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Status
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                                   Actions
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                               {providerData.plans.map((plan, index) => {
                                 const isSelected = isPlanSelected(plan.planId, providerData.providerName);
                                 return (
                                   <tr key={`${plan.planId}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    <div className="text-sm font-medium ot-admin-ink ">
                                       {plan.name}
                                     </div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <div className="text-sm ot-admin-muted ">
                                       {plan.planId}
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                    <span className="text-sm font-semibold ot-admin-ink ">
                                       ₦{plan.amount.toLocaleString()}
                                     </span>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-sm text-gray-900 dark:text-white">
+                                    <span className="text-sm ot-admin-ink ">
                                       {plan.dataAmount}
                                     </span>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-sm text-gray-900 dark:text-white">
+                                    <span className="text-sm ot-admin-ink ">
                                       {plan.validity}
                                     </span>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-sm text-gray-900 dark:text-white">
+                                    <span className="text-sm ot-admin-ink ">
                                       {plan.network}
                                     </span>
                                   </td>
@@ -475,7 +445,7 @@ const ProviderManagement = () => {
                                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                                       plan.type === 'SME' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' :
                                       plan.type === 'Regular' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200' :
-                                      'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-200'
+                                      'ot-admin-soft ot-admin-ink dark:bg-gray-900/20 '
                                     }`}>
                                       {plan.type}
                                     </span>
@@ -494,7 +464,7 @@ const ProviderManagement = () => {
                                         <button
                                           onClick={() => handleDeselectPlan(plan.planId, providerData.providerId)}
                                           disabled={deselectPlanMutation.isPending}
-                                          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
+                                          className="ot-admin-control px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50 transition-colors"
                                         >
                                           {deselectPlanMutation.isPending ? 'Removing...' : 'Deselect'}
                                         </button>
@@ -505,14 +475,14 @@ const ProviderManagement = () => {
                                             providerName: providerData.providerName
                                           })}
                                           disabled={selectPlanMutation.isPending}
-                                          className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                          className="ot-admin-control px-3 py-1 ot-admin-action text-white text-xs rounded disabled:opacity-50 transition-colors"
                                         >
                                           {selectPlanMutation.isPending ? 'Adding...' : 'Select'}
                                         </button>
                                       )}
                                       <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                                         isSelected ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200' :
-                                        'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-200'
+                                        'ot-admin-soft ot-admin-ink dark:bg-gray-900/20 '
                                       }`}>
                                         {isSelected ? 'Selected' : 'Available'}
                                       </span>
@@ -527,7 +497,7 @@ const ProviderManagement = () => {
                       ) : (
                         <div className="p-6 text-center">
                           <FaNetworkWired className="text-4xl mx-auto mb-4 opacity-50" />
-                          <p className="text-gray-600 dark:text-gray-400">
+                          <p className="ot-admin-muted ">
                             {providerData.error ? `Error: ${providerData.error}` : 'No data plans available from this provider'}
                           </p>
                         </div>
@@ -540,7 +510,7 @@ const ProviderManagement = () => {
                   <div className="text-center py-12">
                     <FaNetworkWired className="text-6xl mx-auto mb-4 opacity-50" />
                     <h3 className="text-xl font-bold mb-2">No Data Plans Found</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    <p className="ot-admin-muted mb-4">
                       No active providers with data plans were found
                     </p>
                   </div>
@@ -558,7 +528,7 @@ const ProviderManagement = () => {
               <h2 className="text-lg md:text-2xl font-bold">3rd Party API Providers</h2>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs md:text-sm w-full sm:w-auto justify-center"
+                className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm w-full sm:w-auto justify-center"
               >
                 <FaPlus className="text-xs md:text-sm" />
                 Add Provider
@@ -569,15 +539,15 @@ const ProviderManagement = () => {
             {providersLoading ? (
               <div className="text-center py-6 md:py-8">
                 <div className="animate-spin rounded-full h-10 md:h-12 w-10 md:w-12 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm md:text-base">Loading providers...</p>
+                <p className="mt-4 ot-admin-muted text-sm md:text-base">Loading providers...</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {providersData?.providers?.map((provider) => (
                   <div
                     key={provider._id}
-                    className={`rounded-xl shadow-lg p-4 md:p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${
-                      provider.isActive ? 'border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-gray-200 dark:border-gray-700'
+                    className={`rounded-lg p-4 md:p-6 ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'} border ${
+                      provider.isActive ? 'border-green-500 bg-green-50 dark:bg-green-900/10' : 'ot-admin-border '
                     }`}
                   >
                     {/* Provider Header */}
@@ -649,7 +619,7 @@ const ProviderManagement = () => {
                       <button
                         onClick={() => handleTestConnection(provider._id)}
                         disabled={testingConnection === provider._id}
-                        className="flex-1 px-2 md:px-3 py-1.5 md:py-2 bg-green-600 text-white text-xs md:text-sm rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        className="ot-admin-control flex-1 px-2 md:px-3 py-1.5 md:py-2 ot-admin-action text-white text-xs md:text-sm rounded disabled:opacity-50 transition-colors"
                       >
                         {testingConnection === provider._id ? (
                           <div className="flex items-center justify-center gap-1">
@@ -668,7 +638,7 @@ const ProviderManagement = () => {
                       {!provider.isActive && (
                         <button
                           onClick={() => handleSetActive(provider._id)}
-                          className="px-2 md:px-3 py-1.5 md:py-2 bg-green-600 text-white text-xs md:text-sm rounded hover:bg-green-700 transition-colors"
+                          className="ot-admin-control px-2 md:px-3 py-1.5 md:py-2 ot-admin-action text-white text-xs md:text-sm rounded transition-colors"
                         >
                           <FaCheck className="text-xs" />
                         </button>
@@ -676,14 +646,14 @@ const ProviderManagement = () => {
 
                       <button
                         onClick={() => setEditingProvider(provider)}
-                        className="px-2 md:px-3 py-1.5 md:py-2 bg-blue-600 text-white text-xs md:text-sm rounded hover:bg-blue-700 transition-colors"
+                        className="ot-admin-control px-2 md:px-3 py-1.5 md:py-2 ot-admin-action text-white text-xs md:text-sm rounded transition-colors"
                       >
                         <FaEdit className="text-xs" />
                       </button>
 
                       <button
                         onClick={() => handleDeleteProvider(provider._id)}
-                        className="px-2 md:px-3 py-1.5 md:py-2 bg-red-600 text-white text-xs md:text-sm rounded hover:bg-red-700 transition-colors"
+                        className="ot-admin-control px-2 md:px-3 py-1.5 md:py-2 bg-red-600 text-white text-xs md:text-sm rounded hover:bg-red-700 transition-colors"
                       >
                         <FaTrash className="text-xs" />
                       </button>
@@ -697,12 +667,12 @@ const ProviderManagement = () => {
               <div className="text-center py-12">
                 <FaServer className="text-6xl mx-auto mb-4 opacity-50" />
                 <h3 className="text-xl font-bold mb-2">No Providers Found</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                <p className="ot-admin-muted mb-4">
                   Get started by adding your first API provider
                 </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="ot-admin-control px-6 py-3 ot-admin-action text-white rounded-lg transition-colors"
                 >
                   Add First Provider
                 </button>
@@ -728,7 +698,7 @@ const ProviderManagement = () => {
               <h2 className="text-2xl font-bold">Airtime Management</h2>
               <button
                 onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-providers"] })}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
               >
                 <FaHeartbeat className="text-sm" />
                 Refresh Data
@@ -737,7 +707,7 @@ const ProviderManagement = () => {
 
             {/* Airtime Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaServer className="text-green-500 text-2xl" />
                   <div>
@@ -749,7 +719,7 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaNetworkWired className="text-blue-500 text-2xl" />
                   <div>
@@ -759,7 +729,7 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaPercentage className="text-purple-500 text-2xl" />
                   <div>
@@ -772,7 +742,7 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaClock className="text-orange-500 text-2xl" />
                   <div>
@@ -787,37 +757,37 @@ const ProviderManagement = () => {
             </div>
 
             {/* Airtime Providers Table */}
-            <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+              <div className="p-6 border-b ot-admin-border ">
                 <h3 className="text-lg font-semibold">Airtime Providers</h3>
                 <p className="text-sm opacity-75 mt-1">Providers supporting airtime top-up services</p>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="ot-admin-data-table w-full">
+                  <thead className="ot-admin-soft ">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Provider
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Networks
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Success Rate
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Response Time
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                     {providersData?.providers?.filter(provider => provider.supportedServices?.includes('airtime')).map((provider) => (
                       <tr key={provider._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -832,10 +802,10 @@ const ProviderManagement = () => {
                               )}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              <div className="text-sm font-medium ot-admin-ink ">
                                 {provider.displayName}
                               </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                              <div className="text-sm ot-admin-muted ">
                                 {provider.name}
                               </div>
                             </div>
@@ -865,16 +835,16 @@ const ProviderManagement = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <FaPercentage className="text-gray-400" />
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <FaPercentage className="ot-admin-muted" />
+                            <span className="text-sm ot-admin-ink ">
                               {provider.successRate}%
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <FaClock className="text-gray-400" />
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <FaClock className="ot-admin-muted" />
+                            <span className="text-sm ot-admin-ink ">
                               {provider.responseTime}ms
                             </span>
                           </div>
@@ -884,13 +854,13 @@ const ProviderManagement = () => {
                             <button
                               onClick={() => handleTestConnection(provider._id)}
                               disabled={testingConnection === provider._id}
-                              className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
+                              className="ot-admin-control px-3 py-1 ot-admin-action text-white text-xs rounded disabled:opacity-50 transition-colors"
                             >
                               {testingConnection === provider._id ? 'Testing...' : 'Test'}
                             </button>
                             <button
                               onClick={() => setEditingProvider(provider)}
-                              className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                              className="ot-admin-control px-3 py-1 ot-admin-action text-white text-xs rounded transition-colors"
                             >
                               Edit
                             </button>
@@ -906,12 +876,12 @@ const ProviderManagement = () => {
                 <div className="p-6 text-center">
                   <FaNetworkWired className="text-4xl mx-auto mb-4 opacity-50" />
                   <h3 className="text-xl font-bold mb-2">No Airtime Providers</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="ot-admin-muted mb-4">
                     No providers are currently configured to support airtime services
                   </p>
                   <button
                     onClick={() => setShowCreateModal(true)}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="ot-admin-control px-6 py-3 ot-admin-action text-white rounded-lg transition-colors"
                   >
                     Add Airtime Provider
                   </button>
@@ -920,7 +890,7 @@ const ProviderManagement = () => {
             </div>
 
             {/* Airtime Settings */}
-            <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
               <h3 className="text-lg font-semibold mb-6">Airtime Purchase Settings</h3>
 
               {limitsLoading ? (
@@ -945,7 +915,7 @@ const ProviderManagement = () => {
               <h2 className="text-2xl font-bold">Electricity Management</h2>
               <button
                 onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-providers"] })}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
               >
                 <FaHeartbeat className="text-sm" />
                 Refresh Data
@@ -954,7 +924,7 @@ const ProviderManagement = () => {
 
             {/* Electricity Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaServer className="text-green-500 text-2xl" />
                   <div>
@@ -966,7 +936,7 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaBolt className="text-yellow-500 text-2xl" />
                   <div>
@@ -976,7 +946,7 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaPercentage className="text-purple-500 text-2xl" />
                   <div>
@@ -989,7 +959,7 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaClock className="text-orange-500 text-2xl" />
                   <div>
@@ -1004,37 +974,37 @@ const ProviderManagement = () => {
             </div>
 
             {/* Electricity Providers Table */}
-            <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+              <div className="p-6 border-b ot-admin-border ">
                 <h3 className="text-lg font-semibold">Electricity Providers</h3>
                 <p className="text-sm opacity-75 mt-1">Providers supporting electricity bill payment services</p>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="ot-admin-data-table w-full">
+                  <thead className="ot-admin-soft ">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Provider
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Discos Supported
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Success Rate
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Response Time
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                     {providersData?.providers?.filter(provider => provider.supportedServices?.includes('electricity')).map((provider) => (
                       <tr key={provider._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1049,10 +1019,10 @@ const ProviderManagement = () => {
                               )}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              <div className="text-sm font-medium ot-admin-ink ">
                                 {provider.displayName}
                               </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                              <div className="text-sm ot-admin-muted ">
                                 {provider.name}
                               </div>
                             </div>
@@ -1082,16 +1052,16 @@ const ProviderManagement = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <FaPercentage className="text-gray-400" />
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <FaPercentage className="ot-admin-muted" />
+                            <span className="text-sm ot-admin-ink ">
                               {provider.successRate}%
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <FaClock className="text-gray-400" />
-                            <span className="text-sm text-gray-900 dark:text-white">
+                            <FaClock className="ot-admin-muted" />
+                            <span className="text-sm ot-admin-ink ">
                               {provider.responseTime}ms
                             </span>
                           </div>
@@ -1101,13 +1071,13 @@ const ProviderManagement = () => {
                             <button
                               onClick={() => handleTestConnection(provider._id)}
                               disabled={testingConnection === provider._id}
-                              className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
+                              className="ot-admin-control px-3 py-1 ot-admin-action text-white text-xs rounded disabled:opacity-50 transition-colors"
                             >
                               {testingConnection === provider._id ? 'Testing...' : 'Test'}
                             </button>
                             <button
                               onClick={() => setEditingProvider(provider)}
-                              className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                              className="ot-admin-control px-3 py-1 ot-admin-action text-white text-xs rounded transition-colors"
                             >
                               Edit
                             </button>
@@ -1123,12 +1093,12 @@ const ProviderManagement = () => {
                 <div className="p-6 text-center">
                   <FaBolt className="text-4xl mx-auto mb-4 opacity-50" />
                   <h3 className="text-xl font-bold mb-2">No Electricity Providers</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="ot-admin-muted mb-4">
                     No providers are currently configured to support electricity services
                   </p>
                   <button
                     onClick={() => setShowCreateModal(true)}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="ot-admin-control px-6 py-3 ot-admin-action text-white rounded-lg transition-colors"
                   >
                     Add Electricity Provider
                   </button>
@@ -1137,9 +1107,9 @@ const ProviderManagement = () => {
             </div>
 
             {/* Electricity Commission Settings */}
-            <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
               <h3 className="text-lg font-semibold mb-6">Electricity Commission Settings</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-sm ot-admin-muted mb-6">
                 Set commission rates for each electricity distribution company (Disco).
                 These rates will be applied to electricity purchases to determine user pricing.
               </p>
@@ -1158,15 +1128,15 @@ const ProviderManagement = () => {
               <h2 className="text-2xl font-bold">Network Providers</h2>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
               >
                 <FaPlus className="text-sm" />
                 Add Network Provider
               </button>
             </div>
 
-            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border border-gray-200 dark:border-gray-700`}>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'} border ot-admin-border `}>
+              <p className="text-sm ot-admin-muted ">
                 Manage individual network providers (MTN, Airtel, etc.) for the active 3rd party API.
                 Only providers from the currently active API are shown to users.
               </p>
@@ -1175,7 +1145,7 @@ const ProviderManagement = () => {
             {/* Network Providers List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Placeholder for network providers - will be populated from API */}
-              <div className={`rounded-xl shadow-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border border-gray-200 dark:border-gray-700`}>
+              <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'} border ot-admin-border `}>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
                     <FaNetworkWired className="text-blue-600" />
@@ -1198,11 +1168,11 @@ const ProviderManagement = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">
+                  <button className="ot-admin-control flex-1 px-3 py-2 ot-admin-action text-white text-sm rounded transition-colors">
                     <FaEdit className="text-xs inline mr-1" />
                     Edit
                   </button>
-                  <button className="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">
+                  <button className="ot-admin-control px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">
                     <FaTimes className="text-xs" />
                   </button>
                 </div>
@@ -1219,7 +1189,7 @@ const ProviderManagement = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-providers"] })}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
                 >
                   <FaHeartbeat className="text-sm" />
                   Refresh
@@ -1227,8 +1197,8 @@ const ProviderManagement = () => {
                 <select
                   className={`px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   defaultValue="24h"
                 >
@@ -1242,7 +1212,7 @@ const ProviderManagement = () => {
 
             {/* Real-time Transaction Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaCheck className="text-green-500 text-2xl" />
                   <div>
@@ -1253,7 +1223,7 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaTimes className="text-red-500 text-2xl" />
                   <div>
@@ -1264,18 +1234,18 @@ const ProviderManagement = () => {
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaClock className="text-yellow-500 text-2xl" />
                   <div>
                     <p className="text-sm opacity-75">Pending</p>
                     <p className="text-2xl font-bold text-yellow-600">8</p>
-                    <p className="text-xs text-gray-500">Being processed</p>
+                    <p className="text-xs ot-admin-muted">Being processed</p>
                   </div>
                 </div>
               </div>
 
-              <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                 <div className="flex items-center gap-3">
                   <FaPercentage className="text-blue-500 text-2xl" />
                   <div>
@@ -1288,15 +1258,15 @@ const ProviderManagement = () => {
             </div>
 
             {/* Transaction Volume Chart Placeholder */}
-            <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
               <h3 className="text-lg font-semibold mb-4">Transaction Volume (Last 24 Hours)</h3>
-              <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+              <div className="h-64 flex items-center justify-center border-2 border-dashed ot-admin-border rounded-lg">
                 <div className="text-center">
                   <FaHeartbeat className="text-4xl mx-auto mb-2 opacity-50" />
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p className="ot-admin-muted ">
                     Transaction volume chart will be displayed here
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm ot-admin-muted mt-1">
                     Integration with charting library needed
                   </p>
                 </div>
@@ -1304,16 +1274,16 @@ const ProviderManagement = () => {
             </div>
 
             {/* Recent Transactions */}
-            <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+              <div className="p-6 border-b ot-admin-border ">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">Recent Transactions</h3>
                   <div className="flex gap-2">
                     <select
                       className={`px-3 py-1 text-sm border rounded ${
                         isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-gray-700 ot-admin-border text-white'
+                          : 'ot-admin-paper ot-admin-border'
                       }`}
                       defaultValue="all"
                     >
@@ -1326,8 +1296,8 @@ const ProviderManagement = () => {
                     <select
                       className={`px-3 py-1 text-sm border rounded ${
                         isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-gray-700 ot-admin-border text-white'
+                          : 'ot-admin-paper ot-admin-border'
                       }`}
                       defaultValue="all"
                     >
@@ -1341,36 +1311,36 @@ const ProviderManagement = () => {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                <table className="ot-admin-data-table w-full">
+                  <thead className="ot-admin-soft ">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Transaction ID
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Type
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Recipient
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Provider
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Time
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                     {/* Sample transaction data */}
                     {[
                       {
@@ -1421,7 +1391,7 @@ const ProviderManagement = () => {
                     ].map((transaction) => (
                       <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium ot-admin-ink ">
                             {transaction.id}
                           </div>
                         </td>
@@ -1430,23 +1400,23 @@ const ProviderManagement = () => {
                             transaction.type === 'Airtime' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200' :
                             transaction.type === 'Data' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200' :
                             transaction.type === 'Cable' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-200' :
-                            'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-200'
+                            'ot-admin-soft ot-admin-ink dark:bg-gray-900/20 '
                           }`}>
                             {transaction.type}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                          <span className="text-sm font-semibold ot-admin-ink ">
                             ₦{transaction.amount.toLocaleString()}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm text-gray-900 dark:text-white">
+                          <span className="text-sm ot-admin-ink ">
                             {transaction.recipient}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm text-gray-900 dark:text-white">
+                          <span className="text-sm ot-admin-ink ">
                             {transaction.provider}
                           </span>
                         </td>
@@ -1460,17 +1430,17 @@ const ProviderManagement = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="text-sm ot-admin-muted ">
                             {transaction.time}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <button className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">
+                            <button className="ot-admin-control px-3 py-1 ot-admin-action text-white text-xs rounded transition-colors">
                               View
                             </button>
                             {transaction.status === 'failed' && (
-                              <button className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors">
+                              <button className="ot-admin-control px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors">
                                 Retry
                               </button>
                             )}
@@ -1483,15 +1453,15 @@ const ProviderManagement = () => {
               </div>
 
               {/* Load More Button */}
-              <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-center">
-                <button className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+              <div className="p-4 border-t ot-admin-border text-center">
+                <button className="ot-admin-control px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
                   Load More Transactions
                 </button>
               </div>
             </div>
 
             {/* System Health Alerts */}
-            <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
               <h3 className="text-lg font-semibold mb-4">System Health Alerts</h3>
 
               <div className="space-y-3">
@@ -1529,13 +1499,13 @@ const ProviderManagement = () => {
             {analyticsLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading analytics...</p>
+                <p className="mt-4 ot-admin-muted ">Loading analytics...</p>
               </div>
             ) : (
               <>
                 {/* Overview Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                     <div className="flex items-center gap-3">
                       <FaServer className="text-blue-500 text-2xl" />
                       <div>
@@ -1545,7 +1515,7 @@ const ProviderManagement = () => {
                     </div>
                   </div>
 
-                  <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                     <div className="flex items-center gap-3">
                       <FaCheck className="text-green-500 text-2xl" />
                       <div>
@@ -1555,7 +1525,7 @@ const ProviderManagement = () => {
                     </div>
                   </div>
 
-                  <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                     <div className="flex items-center gap-3">
                       <FaStarHalfAlt className="text-yellow-500 text-2xl" />
                       <div>
@@ -1565,7 +1535,7 @@ const ProviderManagement = () => {
                     </div>
                   </div>
 
-                  <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
                     <div className="flex items-center gap-3">
                       <FaTimes className="text-red-500 text-2xl" />
                       <div>
@@ -1577,43 +1547,43 @@ const ProviderManagement = () => {
                 </div>
 
                 {/* Provider Performance Table */}
-                <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                  <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+                  <div className="p-6 border-b ot-admin-border ">
                     <h3 className="text-lg font-semibold">Provider Performance</h3>
                   </div>
 
                   <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 dark:bg-gray-700">
+                    <table className="ot-admin-data-table w-full">
+                      <thead className="ot-admin-soft ">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                             Provider
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                             Status
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                             Response Time
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                             Success Rate
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                             Total Requests
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                             Last Check
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                      <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                         {analyticsData?.analytics?.providers?.map((provider) => (
                           <tr key={provider.name} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              <div className="text-sm font-medium ot-admin-ink ">
                                 {provider.displayName}
                               </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                              <div className="text-sm ot-admin-muted ">
                                 {provider.name}
                               </div>
                             </td>
@@ -1625,27 +1595,27 @@ const ProviderManagement = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-2">
-                                <FaClock className="text-gray-400" />
-                                <span className="text-sm text-gray-900 dark:text-white">
+                                <FaClock className="ot-admin-muted" />
+                                <span className="text-sm ot-admin-ink ">
                                   {provider.responseTime}ms
                                 </span>
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-2">
-                                <FaPercentage className="text-gray-400" />
-                                <span className="text-sm text-gray-900 dark:text-white">
+                                <FaPercentage className="ot-admin-muted" />
+                                <span className="text-sm ot-admin-ink ">
                                   {provider.successRate}%
                                 </span>
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900 dark:text-white">
+                              <span className="text-sm ot-admin-ink ">
                                 {provider.totalRequests}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                              <span className="text-sm ot-admin-muted ">
                                 {provider.lastHealthCheck ? new Date(provider.lastHealthCheck).toLocaleString() : 'Never'}
                               </span>
                             </td>
@@ -1665,14 +1635,14 @@ const ProviderManagement = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold">Provider Settings</h2>
 
-            <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
               <h3 className="text-lg font-semibold mb-4">System Configuration</h3>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Auto Health Monitoring</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm ot-admin-muted ">
                       Automatically monitor provider health every 5 minutes
                     </p>
                   </div>
@@ -1680,7 +1650,7 @@ const ProviderManagement = () => {
                     <input
                       type="checkbox"
                       defaultChecked={true}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
                     />
                   </label>
                 </div>
@@ -1688,7 +1658,7 @@ const ProviderManagement = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Failover Protection</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm ot-admin-muted ">
                       Automatically switch to healthy provider when current fails
                     </p>
                   </div>
@@ -1696,7 +1666,7 @@ const ProviderManagement = () => {
                     <input
                       type="checkbox"
                       defaultChecked={true}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
                     />
                   </label>
                 </div>
@@ -1704,7 +1674,7 @@ const ProviderManagement = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Load Balancing</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm ot-admin-muted ">
                       Distribute requests across multiple healthy providers
                     </p>
                   </div>
@@ -1712,7 +1682,7 @@ const ProviderManagement = () => {
                     <input
                       type="checkbox"
                       defaultChecked={false}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
                     />
                   </label>
                 </div>
@@ -1856,24 +1826,24 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
   return (
     <>
       <div className="mb-6">
-        <div className="border-b border-gray-200 dark:border-gray-700">
+        <div className="border-b ot-admin-border ">
           <nav className="-mb-px flex space-x-8">
-            <button
+            <button aria-pressed={activeTab === 'global'}
               onClick={() => setActiveTab('global')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`ot-admin-control py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'global'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent ot-admin-muted hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               Global Rate
             </button>
-            <button
+            <button aria-pressed={activeTab === 'discos'}
               onClick={() => setActiveTab('discos')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`ot-admin-control py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'discos'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent ot-admin-muted hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               Disco-Specific Rates
@@ -1885,7 +1855,7 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         {activeTab === 'global' && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Global Electricity Commission Rate</h3>
+            <h3 className="text-lg font-semibold ot-admin-ink ">Global Electricity Commission Rate</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Textfield
                 label="Electricity Commission Rate (%)"
@@ -1928,7 +1898,7 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
                 helperText={formik.touched.global?.maxAmount && formik.errors.global?.maxAmount}
               />
               <div className="md:col-span-3">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm ot-admin-muted ">
                   Global settings applied to all electricity purchases. Disco-specific settings override these global values.
                   Commission rate determines discount percentage. Min/Max amounts set purchase limits.
                 </p>
@@ -1939,10 +1909,10 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
 
         {activeTab === 'discos' && (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Disco-Specific Commission Rates</h3>
+            <h3 className="text-lg font-semibold ot-admin-ink ">Disco-Specific Commission Rates</h3>
             {Object.entries(formik.values.discos).map(([discoKey, settings]) => (
-              <div key={discoKey} className={`border border-gray-200 dark:border-gray-700 rounded-lg p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <h4 className="text-md font-medium text-gray-800 dark:text-white mb-3">{settings.displayName}</h4>
+              <div key={discoKey} className={`border ot-admin-border rounded-lg p-4 ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+                <h4 className="text-md font-medium ot-admin-ink mb-3">{settings.displayName}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Textfield
                     label="Commission Rate (%)"
@@ -1985,7 +1955,7 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
                     helperText={formik.touched.discos?.[discoKey]?.maxAmount && formik.errors.discos?.[discoKey]?.maxAmount}
                   />
                   <div className="flex items-center">
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-sm ot-admin-muted ">
                       <strong>Service ID:</strong> {discoKey === 'ikeja' ? 'ikeja-electric' : `${discoKey}-electric`}
                     </div>
                   </div>
@@ -1995,7 +1965,7 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
           </div>
         )}
 
-        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end space-x-4 pt-6 border-t ot-admin-border ">
           <button
             type="button"
             onClick={() => {
@@ -2019,7 +1989,7 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
               console.log('Setting test data:', testData);
               formik.setValues(testData);
             }}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="ot-admin-control bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
           >
             Load Test Data
           </button>
@@ -2027,7 +1997,7 @@ const ElectricityCommissionForm = ({ isDarkMode }) => {
           <button
             type="submit"
             disabled={!formik.isValid}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            className="ot-admin-control ot-admin-action disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
           >
             Save Commission Settings
           </button>
@@ -2097,7 +2067,7 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
         <h2 className="text-2xl font-bold">VTPass API Configuration</h2>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['vtpass-credentials'] })}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
         >
           <FaHeartbeat className="text-sm" />
           Refresh Data
@@ -2105,7 +2075,7 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
       </div>
 
       {/* Status Card */}
-      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
         <div className="flex items-center gap-4">
           <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
             vtpassData?.isActive ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20'
@@ -2126,14 +2096,14 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
       </div>
 
       {/* Credentials Form */}
-      <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+        <div className="p-6 border-b ot-admin-border ">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">API Credentials</h3>
             <button
               type="button"
               onClick={() => setShowCredentials(!showCredentials)}
-              className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded"
+              className="ot-admin-control flex items-center gap-2 px-3 py-1 text-sm ot-admin-soft rounded"
             >
               {showCredentials ? <FaEyeSlash /> : <FaEye />}
               {showCredentials ? 'Hide' : 'Show'}
@@ -2147,7 +2117,7 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
         {vtpassLoading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading VTPass credentials...</p>
+            <p className="mt-4 ot-admin-muted ">Loading VTPass credentials...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -2162,8 +2132,8 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
                   onChange={(e) => handleChange('apiKey', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   placeholder="Enter VTPass API Key"
                   required
@@ -2180,8 +2150,8 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
                   onChange={(e) => handleChange('publicKey', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   placeholder="Enter VTPass Public Key"
                   required
@@ -2198,8 +2168,8 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
                   onChange={(e) => handleChange('secretKey', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   placeholder="Enter VTPass Secret Key"
                   required
@@ -2216,8 +2186,8 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
                   onChange={(e) => handleChange('baseUrl', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   placeholder="https://vtpass.com"
                   required
@@ -2225,11 +2195,11 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end space-x-4 pt-6 border-t ot-admin-border ">
               <button
                 type="submit"
                 disabled={updateCredentialsMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+                className="ot-admin-control ot-admin-action disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
               >
                 {updateCredentialsMutation.isPending ? (
                   <div className="flex items-center gap-2">
@@ -2246,7 +2216,7 @@ const VTPassCredentialsForm = ({ isDarkMode }) => {
       </div>
 
       {/* Information Card */}
-      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
         <h3 className="text-lg font-semibold mb-4">Important Notes</h3>
         <div className="space-y-3 text-sm opacity-75">
           <p>
@@ -2326,7 +2296,7 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
         <h2 className="text-2xl font-bold">ClubKonnect API Configuration</h2>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['clubkonnect-credentials'] })}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="ot-admin-control flex items-center gap-2 px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
         >
           <FaHeartbeat className="text-sm" />
           Refresh Data
@@ -2334,7 +2304,7 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
       </div>
 
       {/* Status Card */}
-      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
         <div className="flex items-center gap-4">
           <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
             clubkonnectData?.isActive ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20'
@@ -2355,14 +2325,14 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
       </div>
 
       {/* Credentials Form */}
-      <div className={`rounded-xl shadow-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+        <div className="p-6 border-b ot-admin-border ">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">API Credentials</h3>
             <button
               type="button"
               onClick={() => setShowCredentials(!showCredentials)}
-              className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded"
+              className="ot-admin-control flex items-center gap-2 px-3 py-1 text-sm ot-admin-soft rounded"
             >
               {showCredentials ? <FaEyeSlash /> : <FaEye />}
               {showCredentials ? 'Hide' : 'Show'}
@@ -2376,7 +2346,7 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
         {clubkonnectLoading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading ClubKonnect credentials...</p>
+            <p className="mt-4 ot-admin-muted ">Loading ClubKonnect credentials...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -2391,8 +2361,8 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
                   onChange={(e) => handleChange('userId', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   placeholder="Enter ClubKonnect User ID"
                   required
@@ -2409,8 +2379,8 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
                   onChange={(e) => handleChange('apiKey', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   placeholder="Enter ClubKonnect API Key"
                   required
@@ -2427,8 +2397,8 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
                   onChange={(e) => handleChange('baseUrl', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   placeholder="https://www.nellobytesystems.com"
                   required
@@ -2436,11 +2406,11 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end space-x-4 pt-6 border-t ot-admin-border ">
               <button
                 type="submit"
                 disabled={updateCredentialsMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+                className="ot-admin-control ot-admin-action disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
               >
                 {updateCredentialsMutation.isPending ? (
                   <div className="flex items-center gap-2">
@@ -2457,7 +2427,7 @@ const ClubKonnectCredentialsForm = ({ isDarkMode }) => {
       </div>
 
       {/* Information Card */}
-      <div className={`p-6 rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
         <h3 className="text-lg font-semibold mb-4">Important Notes</h3>
         <div className="space-y-3 text-sm opacity-75">
           <p>
@@ -2565,24 +2535,24 @@ const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => 
   return (
     <>
       <div className="mb-6">
-        <div className="border-b border-gray-200 dark:border-gray-700">
+        <div className="border-b ot-admin-border ">
           <nav className="-mb-px flex space-x-8">
-            <button
+            <button aria-pressed={activeTab === 'global'}
               onClick={() => setActiveTab('global')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`ot-admin-control py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'global'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent ot-admin-muted hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               Global Limits
             </button>
-            <button
+            <button aria-pressed={activeTab === 'networks'}
               onClick={() => setActiveTab('networks')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`ot-admin-control py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'networks'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent ot-admin-muted hover:text-gray-700 hover:border-gray-300'
               }`}
             >
               Network-Specific Limits
@@ -2594,7 +2564,7 @@ const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => 
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         {activeTab === 'global' && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Global Purchase Limits</h3>
+            <h3 className="text-lg font-semibold ot-admin-ink ">Global Purchase Limits</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Textfield
                 label="Minimum Amount (₦)"
@@ -2669,7 +2639,7 @@ const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => 
                 helperText={formik.touched.global?.dataCommissionRate && formik.errors.global?.dataCommissionRate}
               />
               <div className="md:col-span-2">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm ot-admin-muted ">
                   Commission rates applied to purchases. Users will pay less than the service amount.
                   Example: 5% commission on ₦100 service = user pays ₦95, saves ₦5.
                   Network-specific rates override global rates.
@@ -2681,10 +2651,10 @@ const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => 
 
         {activeTab === 'networks' && (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Network-Specific Limits</h3>
+            <h3 className="text-lg font-semibold ot-admin-ink ">Network-Specific Limits</h3>
             {Object.entries(formik.values.networks).map(([network, settings]) => (
-              <div key={network} className={`border border-gray-200 dark:border-gray-700 rounded-lg p-4 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                <h4 className="text-md font-medium text-gray-800 dark:text-white mb-3">{networkNames[network]}</h4>
+              <div key={network} className={`border ot-admin-border rounded-lg p-4 ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+                <h4 className="text-md font-medium ot-admin-ink mb-3">{networkNames[network]}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Textfield
                     label="Minimum Amount (₦)"
@@ -2740,7 +2710,7 @@ const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => 
           </div>
         )}
 
-        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end space-x-4 pt-6 border-t ot-admin-border ">
           {/* Test button to bypass validation */}
           <button
             type="button"
@@ -2765,7 +2735,7 @@ const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => 
               console.log('Sending test data:', testData);
               updateLimitsMutation.mutate(testData);
             }}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="ot-admin-control bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
           >
             Test API Call
           </button>
@@ -2788,7 +2758,7 @@ const AirtimeLimitsForm = ({ limitsData, updateLimitsMutation, isDarkMode }) => 
                 toast.error('Please fix the form errors before submitting');
               }
             }}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            className="ot-admin-control ot-admin-action disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-colors"
           >
             {updateLimitsMutation.isPending ? (
               <div className="flex items-center gap-2">
@@ -2912,15 +2882,15 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className={`rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-gray-800' : 'ot-admin-paper'}`}>
+        <div className="p-6 border-b ot-admin-border ">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">
               {provider ? 'Edit Provider' : 'Add New Provider'}
             </h2>
             <button
               onClick={onCancel}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="ot-admin-control p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               <FaTimes className="text-xl" />
             </button>
@@ -2939,8 +2909,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                 onChange={(e) => handleChange('name', e.target.value)}
                 className={`w-full px-3 py-2 border rounded-lg ${
                   isDarkMode
-                    ? 'bg-gray-700 border-gray-600 text-white'
-                    : 'bg-white border-gray-300'
+                    ? 'bg-gray-700 ot-admin-border text-white'
+                    : 'ot-admin-paper ot-admin-border'
                 }`}
                 required
               >
@@ -2961,8 +2931,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                 onChange={(e) => handleChange('displayName', e.target.value)}
                 className={`w-full px-3 py-2 border rounded-lg ${
                   isDarkMode
-                    ? 'bg-gray-700 border-gray-600 text-white'
-                    : 'bg-white border-gray-300'
+                    ? 'bg-gray-700 ot-admin-border text-white'
+                    : 'ot-admin-paper ot-admin-border'
                 }`}
                 placeholder="e.g., VTPass, Clubkonnect"
                 required
@@ -2979,8 +2949,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
               onChange={(e) => handleChange('description', e.target.value)}
               className={`w-full px-3 py-2 border rounded-lg ${
                 isDarkMode
-                  ? 'bg-gray-700 border-gray-600 text-white'
-                  : 'bg-white border-gray-300'
+                  ? 'bg-gray-700 ot-admin-border text-white'
+                  : 'ot-admin-paper ot-admin-border'
               }`}
               rows={3}
               placeholder="Brief description of the provider"
@@ -2988,13 +2958,13 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
           </div>
 
           {/* API Credentials */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <div className="border-t ot-admin-border pt-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">API Credentials</h3>
               <button
                 type="button"
                 onClick={() => setShowCredentials(!showCredentials)}
-                className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded"
+                className="ot-admin-control flex items-center gap-2 px-3 py-1 text-sm ot-admin-soft rounded"
               >
                 {showCredentials ? <FaEyeSlash /> : <FaEye />}
                 {showCredentials ? 'Hide' : 'Show'}
@@ -3018,8 +2988,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                       onChange={(e) => handleChange('credentials.apiKey', e.target.value)}
                       className={`w-full px-3 py-2 border rounded-lg ${
                         isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-gray-700 ot-admin-border text-white'
+                          : 'ot-admin-paper ot-admin-border'
                       }`}
                       placeholder="VTPass API Key"
                       required
@@ -3036,8 +3006,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                       onChange={(e) => handleChange('credentials.publicKey', e.target.value)}
                       className={`w-full px-3 py-2 border rounded-lg ${
                         isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-gray-700 ot-admin-border text-white'
+                          : 'ot-admin-paper ot-admin-border'
                       }`}
                       placeholder="VTPass Public Key"
                       required
@@ -3054,8 +3024,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                       onChange={(e) => handleChange('credentials.secretKey', e.target.value)}
                       className={`w-full px-3 py-2 border rounded-lg ${
                         isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-gray-700 ot-admin-border text-white'
+                          : 'ot-admin-paper ot-admin-border'
                       }`}
                       placeholder="VTPass Secret Key"
                       required
@@ -3072,8 +3042,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                       onChange={(e) => handleChange('baseUrl', e.target.value)}
                       className={`w-full px-3 py-2 border rounded-lg ${
                         isDarkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-gray-700 ot-admin-border text-white'
+                          : 'ot-admin-paper ot-admin-border'
                       }`}
                       placeholder="https://vtpass.com"
                       defaultValue="https://vtpass.com"
@@ -3100,8 +3070,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                     onChange={(e) => handleChange('credentials.userId', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg ${
                       isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300'
+                        ? 'bg-gray-700 ot-admin-border text-white'
+                        : 'ot-admin-paper ot-admin-border'
                     }`}
                     placeholder="API User ID"
                     required
@@ -3118,8 +3088,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                     onChange={(e) => handleChange('credentials.apiKey', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg ${
                       isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300'
+                        ? 'bg-gray-700 ot-admin-border text-white'
+                        : 'ot-admin-paper ot-admin-border'
                     }`}
                     placeholder="API Key"
                     required
@@ -3136,8 +3106,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                     onChange={(e) => handleChange('credentials.secretKey', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg ${
                       isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300'
+                        ? 'bg-gray-700 ot-admin-border text-white'
+                        : 'ot-admin-paper ot-admin-border'
                     }`}
                     placeholder="Secret Key (if required)"
                   />
@@ -3153,8 +3123,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                     onChange={(e) => handleChange('credentials.publicKey', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg ${
                       isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300'
+                        ? 'bg-gray-700 ot-admin-border text-white'
+                        : 'ot-admin-paper ot-admin-border'
                     }`}
                     placeholder="Public Key (if required)"
                   />
@@ -3170,8 +3140,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                     onChange={(e) => handleChange('baseUrl', e.target.value)}
                     className={`w-full px-3 py-2 border rounded-lg ${
                       isDarkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300'
+                        ? 'bg-gray-700 ot-admin-border text-white'
+                        : 'ot-admin-paper ot-admin-border'
                     }`}
                     placeholder="https://api.provider.com"
                   />
@@ -3181,7 +3151,7 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
           </div>
 
           {/* Supported Services */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <div className="border-t ot-admin-border pt-6">
             <h3 className="text-lg font-semibold mb-4">Supported Services</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {['data', 'airtime', 'cable', 'electricity'].map((service) => (
@@ -3199,7 +3169,7 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
           </div>
 
           {/* Rate Limits */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <div className="border-t ot-admin-border pt-6">
             <h3 className="text-lg font-semibold mb-4">Rate Limits</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -3212,8 +3182,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                   onChange={(e) => handleChange('rateLimits.requestsPerMinute', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   min="1"
                   max="1000"
@@ -3230,8 +3200,8 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
                   onChange={(e) => handleChange('rateLimits.requestsPerHour', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-gray-700 ot-admin-border text-white'
+                      : 'ot-admin-paper ot-admin-border'
                   }`}
                   min="1"
                   max="10000"
@@ -3241,7 +3211,7 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
           </div>
 
           {/* Settings */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <div className="border-t ot-admin-border pt-6">
             <h3 className="text-lg font-semibold mb-4">Settings</h3>
             <div className="space-y-3">
               <label className="flex items-center">
@@ -3267,17 +3237,17 @@ const ProviderModal = ({ provider, onSubmit, onCancel, isDarkMode }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end gap-3 pt-6 border-t ot-admin-border ">
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              className="ot-admin-control px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="ot-admin-control px-4 py-2 ot-admin-action text-white rounded-lg transition-colors"
             >
               {provider ? 'Update Provider' : 'Add Provider'}
             </button>

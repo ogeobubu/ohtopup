@@ -20,15 +20,15 @@ const Settings = () => {
   return (
     <div
       className={`min-h-screen p-2 md:p-6 ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-800"
+        isDarkMode ? "bg-gray-900 text-white" : "ot-admin-paper ot-admin-ink"
       }`}
     >
       {/* Header */}
       <div className="mb-4 md:mb-6">
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-center md:text-left">
+        <h1 className="ot-admin-page-title text-xl md:text-2xl lg:text-3xl font-bold text-center md:text-left">
           Help & Support
         </h1>
-        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 text-center md:text-left mt-2">
+        <p className="text-sm md:text-base ot-admin-muted text-center md:text-left mt-2">
           Get help and support for your admin needs
         </p>
       </div>

@@ -1,126 +1,66 @@
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "react-toastify";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup"; // For validation
-import Logo from "../../../components/ui/logo";
-import Textarea from "../../../components/ui/forms/input";
-import Button from "../../../components/ui/forms/button";
-import { loginAdmin } from "../../../admin/api";
+import { Formik, Form, Field, FieldProps } from "formik";
+import { FiArrowRight, FiEye, FiEyeOff, FiMoon, FiSun } from "react-icons/fi";
+import * as Yup from "yup";
+import { loginAdmin } from "../../api";
 
-const storeToken = (token) => {
-  localStorage.setItem('ohtopup-admin-token', token);
-};
+type LoginProps = { darkMode: boolean; toggleDarkMode: () => void };
+const validationSchema = Yup.object({
+  email: Yup.string().email("Enter a valid email address.").required("Enter your email address."),
+  password: Yup.string().required("Enter your password."),
+});
 
-const Login = ({ darkMode, toggleDarkMode }) => {
+export default function Login({ darkMode, toggleDarkMode }: LoginProps) {
   const navigate = useNavigate();
-
-  // Check if already logged in as admin and redirect to dashboard
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
   useEffect(() => {
-    const adminToken = localStorage.getItem('ohtopup-admin-token');
-    if (adminToken) {
-      navigate('/admin/dashboard', { replace: true });
-    }
+    if (localStorage.getItem('ohtopup-admin-token')) navigate('/admin/dashboard', { replace: true });
   }, [navigate]);
-  const mutation = useMutation({
-    mutationFn: loginAdmin,
-    onSuccess: (data) => {
-      if (data.token) {
-        storeToken(data.token);
-        toast.success("Login successful!");
-        navigate("/admin/dashboard");
-      } else {
-        toast.error("Login failed: No token received");
-      }
-    },
-    onError: (error) => {
-      toast.error("Login failed: " + error);
-    },
-  });
+  const mutation = useMutation({ mutationFn: loginAdmin });
 
-  const validationSchema = Yup.object({
-    email: Yup.string().email("Invalid email address").required("Required"),
-    password: Yup.string().required("Required"),
-  });
-
-  return (
-    <div className="flex md:flex-row justify-between">
-      <div className="w-full py-0 md:py-4 h-screen overflow-y-auto">
-        <div className="max-w-md flex justify-center flex-col w-auto m-auto w-full space-y-4">
-          <Logo className="mx-auto w-auto" darkMode={darkMode} href="/admin/login" />
-          <div className="flex justify-center w-auto flex-col gap-3 px-2 md:px-12">
-            <h3 className="text-lg font-semibold">Welcome Back Admin,</h3>
-            <p className="text-gray-600">
-            Log in to your admin dashboard to oversee transactions and provide customers with the best rates on utility bills.
-            </p>
-            <Formik
-              initialValues={{ email: "", password: "" }}
-              validationSchema={validationSchema}
-              onSubmit={(values, { resetForm }) => {
-                mutation.mutate(values, {
-                  onSettled: () => {
-                    resetForm();
-                  },
-                });
-              }}
-            >
-              {({ isSubmitting, isValid, dirty }) => (
-                <Form>
-                  <Field name="email">
-                    {({ field, meta }) => (
-                      <Textarea
-                        type="email"
-                        label="Email Address"
-                        {...field}
-                        error={
-                          meta.touched && meta.error ? meta.error : undefined
-                        }
-                      />
-                    )}
-                  </Field>
-                  <Field name="password">
-                    {({ field, meta }) => (
-                      <Textarea
-                        type="password"
-                        label="Password"
-                        {...field}
-                        error={
-                          meta.touched && meta.error ? meta.error : undefined
-                        }
-                      />
-                    )}
-                  </Field>
-                  <div className="my-3">
-                    <Button
-                      type="submit"
-                      onClick={() => {}}
-                      onSuccess={() => {}}
-                      disabled={
-                        !(isValid && dirty) ||
-                        isSubmitting ||
-                        mutation.isPending
-                      }
-                    >
-                      {isSubmitting || mutation.isPending
-                        ? "Logging in..."
-                        : "Login"}
-                    </Button>
-                  </div>
-                </Form>
-              )}
-            </Formik>
-          </div>
-        </div>
-      </div>
-
-      <div className="hidden md:flex bg-gradient-to-r from-blue-400 to-blue-600 rounded-tl-lg rounded-bl-lg shadow-lg min-h-screen w-full flex items-center justify-center">
-        <p className="p-8 text-white text-5xl font-semibold text-center ">
-        Manage Utility Bill Purchases Efficiently and Affordably
-        </p>
-      </div>
-    </div>
-  );
-};
-
-export default Login;
+  return <div className={`ot-admin ot-admin-login${darkMode ? ' dark' : ''}`}>
+    <header className="ot-admin-login-header">
+      <div className="ot-admin-brand"><Link to="/admin/login">ohtopup<span>ADMIN</span></Link></div>
+      <button className="ot-icon-button" onClick={toggleDarkMode} aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>{darkMode ? <FiSun /> : <FiMoon />}</button>
+    </header>
+    <main className="ot-admin-login-main">
+      <section className="ot-admin-login-card" aria-labelledby="admin-login-title">
+        <span className="ot-admin-login-eyebrow">OPERATIONS WORKSPACE</span>
+        <h1 id="admin-login-title">Admin sign in</h1>
+        <p>Sign in to manage your platform.</p>
+        <Formik initialValues={{ email: "", password: "" }} validationSchema={validationSchema}
+          onSubmit={async (values) => {
+            setLoginError("");
+            try {
+              const data = await mutation.mutateAsync(values);
+              if (!data.token) { setLoginError("Sign in failed. Please try again."); return; }
+              localStorage.setItem('ohtopup-admin-token', data.token);
+              navigate('/admin/dashboard', { replace: true });
+            } catch (error) {
+              setLoginError(error instanceof Error ? error.message : "Couldn’t sign in. Check your details and try again.");
+            }
+          }}>
+          {({ isSubmitting }) => <Form noValidate>
+            <Field name="email">{({ field, meta }: FieldProps) => <div className="ot-admin-login-field">
+              <label className="ot-field-label" htmlFor="admin-email">Email address</label>
+              <input {...field} id="admin-email" className="ot-field" type="email" autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="you@company.com" aria-invalid={Boolean(meta.touched && meta.error)} aria-describedby={meta.touched && meta.error ? 'admin-email-error' : undefined} />
+              {meta.touched && meta.error && <p className="ot-field-error" id="admin-email-error">{meta.error}</p>}
+            </div>}</Field>
+            <Field name="password">{({ field, meta }: FieldProps) => <div className="ot-admin-login-field">
+              <label className="ot-field-label" htmlFor="admin-password">Password</label>
+              <div className="ot-admin-password"><input {...field} id="admin-password" className="ot-field" type={showPassword ? 'text' : 'password'} autoComplete="current-password" aria-invalid={Boolean(meta.touched && meta.error)} aria-describedby={meta.touched && meta.error ? 'admin-password-error' : undefined} /><button type="button" className="ot-icon-button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <FiEyeOff /> : <FiEye />}</button></div>
+              {meta.touched && meta.error && <p className="ot-field-error" id="admin-password-error">{meta.error}</p>}
+            </div>}</Field>
+            {loginError && <p className="ot-field-error ot-admin-login-error" role="alert">{loginError}</p>}
+            <button className="ot-button ot-admin-login-submit" type="submit" disabled={isSubmitting || mutation.isPending}>{isSubmitting ? <span role="status">Signing in…</span> : <>Sign in <FiArrowRight /></>}</button>
+          </Form>}
+        </Formik>
+        <div className="ot-admin-login-customer">Looking for your personal account? <Link to="/login">Customer sign in <FiArrowRight /></Link></div>
+      </section>
+    </main>
+    <footer className="ot-admin-login-footer">OhTopUp · Administration</footer>
+  </div>;
+}

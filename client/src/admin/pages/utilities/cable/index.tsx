@@ -96,23 +96,23 @@ const Cable = () => {
   };
 
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-6 h-full">
-      <div className="mb-3 flex rounded-lg border border-solid max-w-xs border-gray-300 bg-[#F7F9FB] py-1 px-1">
-        <button
-          className={`py-1 px-1 font-medium transition-colors duration-300 ${
+    <div className="border border-solid ot-admin-border rounded-md p-6 h-full">
+      <div className="mb-3 flex rounded-lg border border-solid max-w-xs ot-admin-border bg-[#F7F9FB] py-1 px-1">
+        <button aria-pressed={activeTab === "Set"}
+          className={`ot-admin-control py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "Set"
-              ? "text-green-500 bg-white rounded-lg w-40"
-              : "text-gray-500 hover:text-gray-800 w-40"
+              ? "text-green-500 ot-admin-paper rounded-lg w-40"
+              : "ot-admin-muted hover:text-gray-800 w-40"
           }`}
           onClick={() => handleTabClick("Set")}
         >
           Set Variations
         </button>
-        <button
-          className={`py-1 px-1 font-medium transition-colors duration-300 ${
+        <button aria-pressed={activeTab === "Update"}
+          className={`ot-admin-control py-1 px-1 font-medium transition-colors duration-300 ${
             activeTab === "Update"
-              ? "text-green-500 bg-white rounded-lg w-40"
-              : "text-gray-500 hover:text-gray-800 w-40"
+              ? "text-green-500 ot-admin-paper rounded-lg w-40"
+              : "ot-admin-muted hover:text-gray-800 w-40"
           }`}
           onClick={() => handleTabClick("Update")}
         >
@@ -140,13 +140,13 @@ const Cable = () => {
                     <label className="text-[#6d7a98]" htmlFor="provider">
                       Select Network Provider
                     </label>
-                    <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2">
+                    <div className="flex justify-evenly space-x-4 border border-solid ot-admin-border py-2">
                       {identifiers?.map((provider) => (
                         <button
                           title={provider?.serviceID}
                           key={provider?.serviceID}
                           type="button"
-                          className={`flex justify-center items-center rounded-full h-9 w-9 ${
+                          className={`ot-admin-control flex justify-center items-center rounded-full h-9 w-9 ${
                             formik.values.provider === provider?.serviceID
                               ? "border-2 border-green-500"
                               : "border-0"
@@ -184,9 +184,9 @@ const Cable = () => {
                       variations.map((variation) => (
                         <div
                           key={variation.variation_code}
-                          className="flex justify-between items-center p-3 border-b border-gray-200 hover:bg-gray-100 transition duration-200"
+                          className="flex justify-between items-center p-3 border-b ot-admin-border hover:bg-gray-100 transition duration-200"
                         >
-                          <label className="flex-1 text-gray-700 font-medium">
+                          <label className="flex-1 ot-admin-ink font-medium">
                             {variation.name}
                           </label>
                           <input
@@ -201,7 +201,7 @@ const Cable = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="flex items-center justify-center p-4 text-gray-500">
+                      <div className="flex items-center justify-center p-4 ot-admin-muted">
                         <AiOutlineExclamationCircle className="mr-2 h-6 w-6" />
                         No variations available. Please select a provider.
                       </div>
@@ -242,13 +242,13 @@ const Cable = () => {
                     <label className="text-[#6d7a98]" htmlFor="provider">
                       Select Network Provider
                     </label>
-                    <div className="flex justify-evenly space-x-4 border border-solid border-gray-300 py-2">
+                    <div className="flex justify-evenly space-x-4 border border-solid ot-admin-border py-2">
                       {identifiers?.map((provider) => (
                         <button
                           title={provider?.serviceID}
                           key={provider?.serviceID}
                           type="button"
-                          className={`flex justify-center items-center rounded-full h-9 w-9 ${
+                          className={`ot-admin-control flex justify-center items-center rounded-full h-9 w-9 ${
                             formik.values.provider === provider?.serviceID
                               ? "border-2 border-green-500"
                               : "border-0"
@@ -286,9 +286,9 @@ const Cable = () => {
                       getVariations.map((variation) => (
                         <div
                           key={variation.variation_code}
-                          className="flex justify-between items-center p-3 border-b border-gray-200 hover:bg-gray-100 transition duration-200"
+                          className="flex justify-between items-center p-3 border-b ot-admin-border hover:bg-gray-100 transition duration-200"
                         >
-                          <label className="flex-1 text-gray-700 font-medium">
+                          <label className="flex-1 ot-admin-ink font-medium">
                             {variation.name}
                           </label>
                           <input
@@ -302,7 +302,7 @@ const Cable = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="flex items-center justify-center p-4 text-gray-500">
+                      <div className="flex items-center justify-center p-4 ot-admin-muted">
                         <AiOutlineExclamationCircle className="mr-2 h-6 w-6" />
                         No saved variations found. Please select a provider.
                       </div>

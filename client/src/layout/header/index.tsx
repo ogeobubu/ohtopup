@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
-import { FaBell, FaUserCircle, FaSignOutAlt, FaMoon, FaSun, FaCircle } from "react-icons/fa";
+import { FiBell, FiUser, FiLogOut, FiMoon, FiSun, FiCheck } from "react-icons/fi";
 import { clearUserData } from "../../actions/userActions";
 import { getNotifications, readNotification } from "../../api";
 import { toggleDarkMode } from "../../actions/themeActions";
@@ -27,8 +27,8 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
   
-  const notificationRef = useRef(null);
-  const dropdownRef = useRef(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.body.classList.toggle('dark', isDarkMode);
@@ -36,6 +36,7 @@ const Header = () => {
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+    setIsNotificationOpen(false);
   };
 
   const handleLogout = () => {
@@ -46,6 +47,7 @@ const Header = () => {
 
   const toggleNotification = () => {
     setIsNotificationOpen(!isNotificationOpen);
+    setIsDropdownOpen(false);
   };
 
   const { data: notificationsData = [], isLoading, error, refetch } = useQuery<NotificationItem[]>({
@@ -62,6 +64,7 @@ const Header = () => {
 
   const timeAgo = (dateInput: string | number | Date) => {
     const date = new Date(dateInput);
+    if (Number.isNaN(date.getTime())) return "";
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
     const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
     const intervals: [number, Intl.RelativeTimeFormatUnit][] = [
@@ -75,7 +78,7 @@ const Header = () => {
     ];
     let unit: Intl.RelativeTimeFormatUnit = 'second';
     let value = seconds;
-    let acc = 1;
+
     for (const [limit, nextUnit] of intervals) {
       if (value < limit) {
         unit = nextUnit;
@@ -105,16 +108,16 @@ const Header = () => {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setIsNotificationOpen(false);
       }
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
 
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsNotificationOpen(false);
         setIsDropdownOpen(false);
@@ -133,138 +136,57 @@ const Header = () => {
     <nav className="ot-app-header" aria-label="Account controls">
       <div className="ot-header-inner">
         <div className="ot-header-title">Your account <span>/ &nbsp; {pageTitle}</span></div>
-        <div className="flex items-center space-x-3">
-        <button
-          className="ot-icon-button"
-          onClick={() => dispatch(toggleDarkMode())}
-          aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          {isDarkMode ? (
-            <FaSun className="w-4 h-4 text-yellow-500" />
-          ) : (
-            <FaMoon className="w-4 h-4 text-gray-500 dark:text-gray-300" />
-          )}
-        </button>
-        <div ref={notificationRef}>
-          <button
-            className="ot-icon-button"
-            onClick={toggleNotification}
-            aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
-            aria-expanded={isNotificationOpen}
-            aria-haspopup="menu"
-          >
-            <FaBell className="w-4 h-4 text-gray-500 dark:text-gray-300 cursor-pointer" />
-            {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center" aria-label={`${unreadCount} unread notifications`}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
+        <div className="ot-account-controls">
+          <button className="ot-icon-button" onClick={() => dispatch(toggleDarkMode())} aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}>
+            {isDarkMode ? <FiSun /> : <FiMoon />}
           </button>
-
-          {isNotificationOpen && (
-            <div
-              className="absolute z-10 left-0 right-0 sm:right-0 sm:left-auto mt-2 w-full sm:w-80 md:w-96 bg-white dark:bg-gray-800 shadow-lg rounded-md p-3 max-h-96 overflow-hidden"
-              role="menu"
-              aria-label="Notifications menu"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-sm text-gray-800 dark:text-white">Notifications</h3>
-                <button
-                  onClick={markAllAsRead}
-                  className="text-xs text-blue-600 hover:underline disabled:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                  disabled={unreadCount === 0}
-                  aria-label="Mark all notifications as read"
-                >
-                  Mark all as read
-                </button>
-              </div>
-              {isLoading ? (
-                <div className="space-y-2">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse h-10 bg-gray-100 dark:bg-gray-700 rounded" />
-                  ))}
+          <div className="ot-dropdown-anchor" ref={notificationRef}>
+            <button className="ot-icon-button" onClick={toggleNotification}
+              aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
+              aria-expanded={isNotificationOpen} aria-controls="account-notifications">
+              <FiBell />
+              {unreadCount > 0 && <span className="ot-unread-dot" aria-hidden="true" />}
+            </button>
+            {isNotificationOpen && (
+              <section id="account-notifications" className="ot-dropdown ot-notifications" aria-label="Notifications">
+                <div className="ot-dropdown-heading">
+                  <h2>Notifications {unreadCount > 0 && <span>{unreadCount}</span>}</h2>
+                  <button className="ot-dropdown-text-button" onClick={markAllAsRead} disabled={unreadCount === 0}><FiCheck />Mark all read</button>
                 </div>
-              ) : error ? (
-                <p className="text-red-500 text-sm">Error loading notifications.</p>
-              ) : notificationsData.length === 0 ? (
-                <div className="text-sm text-gray-500">No notifications yet.</div>
-              ) : (
-                <ul className="max-h-72 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700" role="none">
-                  {notificationsData.map((notification) => (
-                    <li
-                      key={notification._id}
-                      onClick={() => handleNotificationClick(notification)}
-                      className={`flex items-start py-2 px-1 rounded ${!notification.read ? 'bg-blue-50 dark:bg-gray-700/40' : ''} cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      role="menuitem"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleNotificationClick(notification);
-                        }
-                      }}
-                    >
-                      <FaCircle className={`mt-1.5 w-1.5 h-1.5 mr-2 flex-shrink-0 ${!notification.read ? 'text-blue-500' : 'text-gray-400'}`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-xs text-gray-900 dark:text-white truncate" title={notification.title}>
-                            {notification.title}
-                          </span>
-                          <small className="text-xs text-gray-500 ml-2 flex-shrink-0">{timeAgo(notification.createdAt)}</small>
-                        </div>
-                        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mt-0.5" title={notification.message}>
-                          {notification.message}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
+                {isLoading ? (
+                  <div className="ot-dropdown-empty" role="status">Loading notifications…</div>
+                ) : error ? (
+                  <div className="ot-dropdown-empty" role="alert"><p>Couldn’t load notifications.</p><button className="ot-dropdown-text-button" onClick={() => refetch()}>Try again</button></div>
+                ) : notificationsData.length === 0 ? (
+                  <div className="ot-dropdown-empty"><FiBell /><p>No notifications yet</p><small>Your latest updates will appear here.</small></div>
+                ) : (
+                  <ul className="ot-notification-list">
+                    {notificationsData.map((notification) => (
+                      <li key={notification._id}>
+                        <button className="ot-notification-item" onClick={() => handleNotificationClick(notification)}>
+                          <span className={`ot-notification-dot${notification.read ? '' : ' is-unread'}`} aria-label={notification.read ? 'Read' : 'Unread'} />
+                          <span className="ot-notification-copy"><strong>{notification.title}</strong><span>{notification.message}</span><small>{timeAgo(notification.createdAt)}</small></span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
+          </div>
+          <div className="ot-dropdown-anchor" ref={dropdownRef}>
+            <button className="ot-icon-button" onClick={toggleDropdown} aria-label="Profile options" aria-expanded={isDropdownOpen} aria-controls="account-profile"><FiUser /></button>
+            {isDropdownOpen && (
+              <section id="account-profile" className="ot-dropdown ot-profile-dropdown" aria-label="Profile options">
+                <div className="ot-profile-summary"><strong>{user?.username || 'Your account'}</strong>{user?.email && <span>{user.email}</span>}</div>
+                <div className="ot-dropdown-actions">
+                  <button onClick={() => { navigate("/settings"); setIsDropdownOpen(false); }}><FiUser />My profile</button>
+                  <button onClick={handleLogout}><FiLogOut />Log out</button>
+                </div>
+              </section>
+            )}
+          </div>
         </div>
-
-        <div className="relative inline-block" ref={dropdownRef}>
-          <button
-            className="ot-icon-button"
-            onClick={toggleDropdown}
-            aria-label="User menu"
-            aria-expanded={isDropdownOpen}
-          >
-            <FaUserCircle className="text-gray-500 dark:text-gray-300 w-4 h-4" />
-          </button>
-
-          {isDropdownOpen && (
-            <div className="absolute z-10 right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-md rounded-md p-2">
-              <ul>
-                <li 
-                  onClick={() => {
-                    navigate("/settings");
-                    setIsDropdownOpen(false);
-                  }} 
-                  className="cursor-pointer py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                >
-                  <FaUserCircle className="text-blue-500 w-5 h-5 mr-2" />
-                  <div className="flex flex-col">
-                    <span className="text-sm dark:text-white">Profile</span>
-                    <small className="text-xs text-gray-400 dark:text-gray-300">View my profile</small>
-                  </div>
-                </li>
-                <li 
-                  className="py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  <FaSignOutAlt className="text-blue-500 w-5 h-5 mr-2" />
-                  <div className="flex flex-col">
-                    <span className="text-sm dark:text-white">Logout</span>
-                    <small className="text-xs text-gray-400 dark:text-gray-300">Logout of your account</small>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
       </div>
     </nav>
   );

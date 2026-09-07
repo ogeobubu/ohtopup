@@ -45,8 +45,8 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           key={index}
           className={`border border-solid rounded-md bg-[#F7F9FB] cursor-pointer transition-colors duration-200 ${
             activeTab === tab.name
-              ? "border-green-600 text-gray-600"
-              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+              ? "border-green-600 ot-admin-muted"
+              : "ot-admin-border ot-admin-muted hover:bg-gray-100"
           } flex w-64 items-center space-x-4 px-4 py-4`}
           onClick={() => handleTabClick(tab)}
         >

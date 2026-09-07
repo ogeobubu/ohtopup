@@ -16,7 +16,7 @@ const Utilities = () => {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-5">Utility Bills & Airtime</h1>
+      <h1 className="ot-admin-page-title text-2xl font-bold mb-5">Utility Bills & Airtime</h1>
       <div className="flex">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="flex-1 px-8">

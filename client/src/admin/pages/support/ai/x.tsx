@@ -99,20 +99,20 @@ const XPost = () => {
   };
 
   return (
-    <div className="border border-gray-200 rounded-md p-5 w-full max-w-6xl mx-auto shadow-lg bg-white">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">
+    <div className="border ot-admin-border rounded-md p-5 w-full max-w-6xl mx-auto ot-admin-paper">
+      <h2 className="text-3xl font-bold mb-6 ot-admin-ink text-center">
         X API Dashboard
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
-        <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
-          <h3 className="text-xl font-semibold mb-3 text-gray-700">X Account Connection</h3>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="border ot-admin-border rounded-md p-4 ot-admin-soft">
+          <h3 className="text-xl font-semibold mb-3 ot-admin-ink">X Account Connection</h3>
+          <p className="text-sm ot-admin-muted mb-4">
             Authorize your X account to enable posting and automatic reposting features.
           </p>
           <button
             onClick={handleInitiateAuth}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
+            className="ot-admin-control ot-admin-action text-white px-6 py-2 rounded-md transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
             disabled={postTweetMutation.isLoading || triggerRepostMutation.isLoading || fetchRandomContentMutation.isLoading}
           >
             {postTweetMutation.isLoading || triggerRepostMutation.isLoading || fetchRandomContentMutation.isLoading ? (
@@ -122,15 +122,15 @@ const XPost = () => {
           </button>
         </div>
   
-        <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
-          <h3 className="text-xl font-semibold mb-3 text-gray-700">Repost Telco Posts</h3>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="border ot-admin-border rounded-md p-4 ot-admin-soft">
+          <h3 className="text-xl font-semibold mb-3 ot-admin-ink">Repost Telco Posts</h3>
+          <p className="text-sm ot-admin-muted mb-4">
             Automatically repost the latest posts from official accounts.
           </p>
           <button
             type="button"
             onClick={handleTriggerRepost}
-            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
+            className="ot-admin-control ot-admin-action text-white px-6 py-2 rounded-md transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
             disabled={triggerRepostMutation.isLoading || postTweetMutation.isLoading || fetchRandomContentMutation.isLoading}
           >
             {triggerRepostMutation.isLoading ? (
@@ -142,12 +142,12 @@ const XPost = () => {
           </button>
         </div>
   
-        <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
-          <h3 className="text-xl font-semibold mb-3 text-gray-700">Fetch Random Content</h3>
+        <div className="border ot-admin-border rounded-md p-4 ot-admin-soft">
+          <h3 className="text-xl font-semibold mb-3 ot-admin-ink">Fetch Random Content</h3>
           <button
             type="button"
             onClick={handleFetchRandomContent}
-            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
+            className="ot-admin-control ot-admin-action text-white px-6 py-2 rounded-md transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
             disabled={fetchRandomContentMutation.isLoading || postTweetMutation.isLoading || triggerRepostMutation.isLoading}
           >
             {fetchRandomContentMutation.isLoading ? (
@@ -160,8 +160,8 @@ const XPost = () => {
         </div>
       </div>
   
-      <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
-        <h3 className="text-xl font-semibold mb-3 text-gray-700">
+      <div className="border ot-admin-border rounded-md p-4 ot-admin-soft">
+        <h3 className="text-xl font-semibold mb-3 ot-admin-ink">
           Create a New Post on Your X Account
         </h3>
         <form onSubmit={handlePostSubmit} className="flex flex-col space-y-4">
@@ -171,11 +171,11 @@ const XPost = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening on X? (Max 280 characters)"
             rows={4}
-            className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+            className="border ot-admin-border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out"
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
+            className="ot-admin-control ot-admin-action text-white px-6 py-2 rounded-md transition duration-150 ease-in-out flex items-center justify-center gap-2 disabled:opacity-50"
             disabled={postTweetMutation.isLoading || !postText.trim() || triggerRepostMutation.isLoading || fetchRandomContentMutation.isLoading}
           >
             {postTweetMutation.isLoading ? (
@@ -190,25 +190,25 @@ const XPost = () => {
   
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
-          <div className="relative p-5 border w-full max-w-xl shadow-lg rounded-md bg-white mx-4">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Generated Content</h3>
+          <div className="relative p-5 border w-full max-w-xl rounded-md ot-admin-paper mx-4">
+            <h3 className="text-xl font-semibold mb-4 ot-admin-ink">Generated Content</h3>
             <textarea
               readOnly
               value={randomContent}
-              className="w-full p-3 border border-gray-300 rounded-md mb-4 resize-none focus:outline-none focus:ring-blue-500"
+              className="w-full p-3 border ot-admin-border rounded-md mb-4 resize-none focus:outline-none focus:ring-blue-500"
               rows={10}
               onClick={(e) => e.target.select()}
             />
             <div className="flex justify-end space-x-3">
               <button
                 onClick={handleCopyContent}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-150 ease-in-out"
+                className="ot-admin-control ot-admin-action text-white px-4 py-2 rounded-md transition duration-150 ease-in-out"
               >
                 Copy Content
               </button>
               <button
                 onClick={handleCloseModal}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out"
+                className="ot-admin-control bg-gray-300 ot-admin-ink px-4 py-2 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out"
               >
                 Close
               </button>

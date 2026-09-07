@@ -1,7 +1,7 @@
-const nodemailer = require("nodemailer");
+const { createTransport } = require('../../services/emailTransport');
 
 const sendForgotPasswordEmail = async (email, user, fullName) => {
-  const transporter = nodemailer.createTransport({
+  const transporter = createTransport({
     service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,

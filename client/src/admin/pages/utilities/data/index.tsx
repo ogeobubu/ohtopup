@@ -117,24 +117,24 @@ const Data = () => {
   const isMobile = window.innerWidth < 768;
 
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-4 md:p-6 h-full overflow-y-auto">
+    <div className="border border-solid ot-admin-border rounded-md p-4 md:p-6 h-full overflow-y-auto">
       {/* Tabs - Mobile responsive */}
-      <div className="mb-4 flex rounded-lg border border-solid border-gray-300 bg-[#F7F9FB] overflow-hidden">
-        <button
-          className={`flex-1 py-2 px-1 font-medium transition-colors duration-300 text-sm md:text-base ${
+      <div className="mb-4 flex rounded-lg border border-solid ot-admin-border bg-[#F7F9FB] overflow-hidden">
+        <button aria-pressed={activeTab === "Set"}
+          className={`ot-admin-control flex-1 py-2 px-1 font-medium transition-colors duration-300 text-sm md:text-base ${
             activeTab === "Set"
-              ? "text-green-500 bg-white"
-              : "text-gray-500 hover:text-gray-800"
+              ? "text-green-500 ot-admin-paper"
+              : "ot-admin-muted hover:text-gray-800"
           }`}
           onClick={() => handleTabClick("Set")}
         >
           {isMobile ? 'Set' : 'Set Variations'}
         </button>
-        <button
-          className={`flex-1 py-2 px-1 font-medium transition-colors duration-300 text-sm md:text-base ${
+        <button aria-pressed={activeTab === "Update"}
+          className={`ot-admin-control flex-1 py-2 px-1 font-medium transition-colors duration-300 text-sm md:text-base ${
             activeTab === "Update"
-              ? "text-green-500 bg-white"
-              : "text-gray-500 hover:text-gray-800"
+              ? "text-green-500 ot-admin-paper"
+              : "ot-admin-muted hover:text-gray-800"
           }`}
           onClick={() => handleTabClick("Update")}
         >
@@ -166,12 +166,12 @@ const Data = () => {
                       <AiOutlineLoading3Quarters className="animate-spin h-6 w-6 text-green-500" />
                     </div>
                   ) : (
-                    <div className="flex flex-wrap justify-center gap-2 md:gap-4 border border-solid border-gray-300 py-2 px-1 rounded">
+                    <div className="flex flex-wrap justify-center gap-2 md:gap-4 border border-solid ot-admin-border py-2 px-1 rounded">
                       {identifiers?.map((provider) => (
                         <button
                           key={provider?.serviceID}
                           type="button"
-                          className={`flex flex-col items-center p-1 md:p-2 rounded-lg transition-all ${
+                          className={`ot-admin-control flex flex-col items-center p-1 md:p-2 rounded-lg transition-all ${
                             formik.values.provider === provider?.serviceID
                               ? "bg-green-50 border border-green-200"
                               : "hover:bg-gray-100"
@@ -193,7 +193,7 @@ const Data = () => {
                             alt={provider?.serviceID}
                             className="h-8 w-8 md:h-10 md:w-10 object-cover rounded-full"
                           />
-                          <span className="text-xs mt-1 text-gray-600 capitalize">
+                          <span className="text-xs mt-1 ot-admin-muted capitalize">
                             {provider?.serviceID}
                           </span>
                         </button>
@@ -219,9 +219,9 @@ const Data = () => {
                       {variations.data.map((variation) => (
                         <div
                           key={variation.variation_code}
-                          className="flex justify-between items-center p-2 md:p-3 border-b border-gray-200 hover:bg-gray-50 transition duration-200"
+                          className="flex justify-between items-center p-2 md:p-3 border-b ot-admin-border hover:bg-gray-50 transition duration-200"
                         >
-                          <label className="flex-1 text-gray-700 text-sm md:text-base">
+                          <label className="flex-1 ot-admin-ink text-sm md:text-base">
                             {variation.name}
                           </label>
                           <input
@@ -238,7 +238,7 @@ const Data = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-4 text-gray-500 text-center">
+                    <div className="flex flex-col items-center justify-center p-4 ot-admin-muted text-center">
                       <AiOutlineExclamationCircle className="h-8 w-8 mb-2" />
                       <p className="text-sm md:text-base">
                         {formik.values.provider 
@@ -250,7 +250,7 @@ const Data = () => {
                 </div>
 
                 <button
-                  className="bg-green-600 hover:bg-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed w-full py-3 px-4 rounded-md text-white font-semibold transition-colors duration-200 flex items-center justify-center"
+                  className="ot-admin-control ot-admin-action disabled:bg-gray-300 disabled:cursor-not-allowed w-full py-3 px-4 rounded-md text-white font-semibold transition-colors duration-200 flex items-center justify-center"
                   type="submit"
                   disabled={isSubmitting || !formik.values.provider || selectedVariations.length === 0}
                 >
@@ -292,12 +292,12 @@ const Data = () => {
                       <AiOutlineLoading3Quarters className="animate-spin h-6 w-6 text-green-500" />
                     </div>
                   ) : (
-                    <div className="flex flex-wrap justify-center gap-2 md:gap-4 border border-solid border-gray-300 py-2 px-1 rounded">
+                    <div className="flex flex-wrap justify-center gap-2 md:gap-4 border border-solid ot-admin-border py-2 px-1 rounded">
                       {identifiers?.map((provider) => (
                         <button
                           key={provider?.serviceID}
                           type="button"
-                          className={`flex flex-col items-center p-1 md:p-2 rounded-lg transition-all ${
+                          className={`ot-admin-control flex flex-col items-center p-1 md:p-2 rounded-lg transition-all ${
                             formik.values.provider === provider?.serviceID
                               ? "bg-green-50 border border-green-200"
                               : "hover:bg-gray-100"
@@ -319,7 +319,7 @@ const Data = () => {
                             alt={provider?.serviceID}
                             className="h-8 w-8 md:h-10 md:w-10 object-cover rounded-full"
                           />
-                          <span className="text-xs mt-1 text-gray-600 capitalize">
+                          <span className="text-xs mt-1 ot-admin-muted capitalize">
                             {provider?.serviceID}
                           </span>
                         </button>
@@ -340,21 +340,21 @@ const Data = () => {
                       {getVariations.data.map((variation) => (
                         <div
                           key={variation.variation_code}
-                          className="flex justify-between items-center p-2 md:p-3 border-b border-gray-200 hover:bg-gray-50 transition duration-200"
+                          className="flex justify-between items-center p-2 md:p-3 border-b ot-admin-border hover:bg-gray-50 transition duration-200"
                         >
-                          <label className="flex-1 text-gray-700 text-sm md:text-base">
+                          <label className="flex-1 ot-admin-ink text-sm md:text-base">
                             {variation.name}
                           </label>
                           <button
                             type="button"
                             onClick={() => toggleVariation(variation.variation_code, formik.values.provider)}
                             disabled={isToggling === variation.variation_code}
-                            className={`relative h-5 w-10 rounded-full transition-colors focus:outline-none ${
-                              variation.isActive ? 'bg-green-500' : 'bg-gray-300'
+                            className={`ot-admin-control relative h-5 w-10 rounded-full transition-colors focus:outline-none ${
+                              variation.isActive ? 'ot-admin-action' : 'bg-gray-300'
                             }`}
                           >
                             <span
-                              className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform ${
+                              className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full ot-admin-paper transition-transform ${
                                 variation.isActive ? 'translate-x-5' : ''
                               } flex items-center justify-center`}
                             >
@@ -363,7 +363,7 @@ const Data = () => {
                               ) : variation.isActive ? (
                                 <FiCheck className="h-3 w-3 text-green-500" />
                               ) : (
-                                <FiX className="h-3 w-3 text-gray-500" />
+                                <FiX className="h-3 w-3 ot-admin-muted" />
                               )}
                             </span>
                           </button>
@@ -371,7 +371,7 @@ const Data = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-4 text-gray-500 text-center">
+                    <div className="flex flex-col items-center justify-center p-4 ot-admin-muted text-center">
                       <AiOutlineExclamationCircle className="h-8 w-8 mb-2" />
                       <p className="text-sm md:text-base">
                         {formik.values.provider 

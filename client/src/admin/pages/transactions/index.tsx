@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { getAllUtilityTransactions, requeryTransaction } from "../../api";
-import TransactionTable from "../../../components/transactionTable";
-import ModernPagination from "../../../components/modernPagination";
+import TransactionTable from "../../components/transactionTable";
+import ModernPagination from "../../components/modernPagination";
 import { toast } from "react-toastify";
 
 const Transactions = () => {
@@ -54,11 +54,9 @@ const Transactions = () => {
   };
 
   return (
-    <div className="p-2 md:p-4 space-y-3 md:space-y-4">
-      <h1 className="text-lg md:text-2xl font-bold mb-3 md:mb-5 text-gray-800 dark:text-gray-200">
-        Transactions
-      </h1>
-      <div className="mb-3 flex flex-wrap rounded-lg border border-solid w-full max-w-sm md:max-w-none border-gray-300 dark:border-gray-600 bg-[#F7F9FB] dark:bg-gray-700 py-1 px-1">
+    <div>
+      <div className="ot-dashboard-heading"><div><h1>Transactions</h1><p>Review utility payments and follow up on their status.</p></div></div>
+      <div className="ot-utility-tabs" role="group" aria-label="Transaction services">
         {[
           "Data Services",
           "Airtime Recharge",
@@ -67,11 +65,7 @@ const Transactions = () => {
         ].map((tab) => (
           <button
             key={tab}
-            className={`py-2 px-2 flex-1 md:flex-none md:w-40 font-medium text-xs md:text-sm transition-colors duration-300 ${
-              activeTab === tab
-                ? "text-green-500 bg-white rounded-lg dark:bg-gray-600 dark:text-white"
-                : "text-gray-500 hover:text-gray-800 dark:text-gray-400 hover:dark:text-gray-200"
-            }`}
+            aria-pressed={activeTab === tab}
             onClick={() => handleTabClick(tab)}
           >
             {tab.split(" ")[0]}
@@ -90,10 +84,11 @@ const Transactions = () => {
             <div className="flex justify-start md:justify-end mb-3">
               <input
                 type="text"
-                placeholder="Search by RequestID..."
+                placeholder="Search by reference…"
+                aria-label="Search transactions by reference"
                 value={requestId}
                 onChange={handleSearchChange}
-                className="border border-gray-300 rounded-md px-3 py-2 w-full max-w-xs text-sm focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                className="ot-field max-w-xs"
               />
             </div>
             <TransactionTable

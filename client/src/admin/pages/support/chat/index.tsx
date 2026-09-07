@@ -30,11 +30,11 @@ const Chat = () => {
   };
 
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-6 w-full max-w-4xl mx-auto">
+    <div className="border border-solid ot-admin-border rounded-md p-6 w-full max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-center">Chat Us</h2>
       
       {/* Chat Messages */}
-      <div className="h-80 overflow-auto mb-4 p-4 bg-gray-100 rounded-lg space-y-4">
+      <div className="h-80 overflow-auto mb-4 p-4 ot-admin-soft rounded-lg space-y-4">
         {messages.map((msg, index) => (
           <div
             key={index}
@@ -48,7 +48,7 @@ const Chat = () => {
               {msg.sender === "admin" && (
                 <>
                   <div className="font-bold text-sm">{msg.name}</div>
-                  <div className="text-xs text-gray-500">{formatTime(msg.time)}</div>
+                  <div className="text-xs ot-admin-muted">{formatTime(msg.time)}</div>
                 </>
               )}
               {msg.content}
@@ -61,14 +61,14 @@ const Chat = () => {
       <div className="flex items-center space-x-4">
         <input
           type="text"
-          className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-grow p-3 border ot-admin-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Type your message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
         <button
           onClick={sendMessage}
-          className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          className="ot-admin-control p-3 ot-admin-action text-white rounded-lg transition"
         >
           <FaPaperPlane size={18} />
         </button>

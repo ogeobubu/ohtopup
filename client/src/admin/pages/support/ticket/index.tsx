@@ -112,7 +112,7 @@ const Ticket = ({ isDarkMode }) => {
   };
 
   return (
-    <div className="p-4 border border-solid rounded-md border-gray-200 w-full">
+    <div className="p-4 border border-solid rounded-md ot-admin-border w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Tickets</h2>
       </div>
@@ -152,8 +152,8 @@ const Ticket = ({ isDarkMode }) => {
         {selectedTicket && (
           <div>
             <h3 className="text-xl font-bold mb-2">{selectedTicket.title}</h3>
-            <p className="dark:text-white text-gray-700 mb-4">{selectedTicket.description}</p>
-            <div className="border-t border-gray-300 pt-4">
+            <p className=" ot-admin-ink mb-4">{selectedTicket.description}</p>
+            <div className="border-t ot-admin-border pt-4">
               <h4 className="text-lg font-semibold mb-2">Replies</h4>
               <div className="flex flex-col">
                 {selectedTicket.replies.length ? (
@@ -176,15 +176,15 @@ const Ticket = ({ isDarkMode }) => {
                         }}
                       >
                         <strong>{reply.role === "admin" ? "" : "User:"}</strong>
-                        <p className="text-gray-800">{reply.content}</p>
-                        <small className="text-gray-500">
+                        <p className="ot-admin-ink">{reply.content}</p>
+                        <small className="ot-admin-muted">
                           {new Date(reply.createdAt).toLocaleString()}
                         </small>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="dark:text-white text-gray-500">No replies yet.</p>
+                  <p className=" ot-admin-muted">No replies yet.</p>
                 )}
               </div>
             </div>

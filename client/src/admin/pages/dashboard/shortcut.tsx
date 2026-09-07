@@ -1,43 +1,10 @@
-import React from "react";
-import { FaWifi, FaTv } from "react-icons/fa";
+import { FiWifi, FiTv, FiUsers, FiArrowUpRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
-const Shortcut = () => {
-  return (
-    <div className="p-2 md:p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
-        <Link
-          to="/admin/utilities?id=data"
-          className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 md:p-6 flex flex-col items-center justify-center transition-transform transform hover:scale-105"
-        >
-          <div className="bg-green-500 rounded-full p-3 mb-2 md:mb-3">
-            <FaWifi className="text-white text-2xl md:text-4xl" />
-          </div>
-          <h3 className="text-base md:text-lg font-bold text-gray-800 dark:text-gray-200 text-center">
-            Buy Data
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm text-center">
-            Get more data for your device
-          </p>
-        </Link>
-
-        <Link
-          to="/admin/utilities?id=tv"
-          className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 md:p-6 flex flex-col items-center justify-center transition-transform transform hover:scale-105"
-        >
-          <div className="bg-green-500 rounded-full p-3 mb-2 md:mb-3">
-            <FaTv className="text-white text-2xl md:text-4xl" />
-          </div>
-          <h3 className="text-base md:text-lg font-bold text-gray-800 dark:text-gray-200 text-center">
-            Buy Cable
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm text-center">
-            Subscribe to your favorite channels
-          </p>
-        </Link>
-      </div>
-    </div>
-  );
-};
-
-export default Shortcut;
+export default function Shortcut() {
+  return <div className="ot-admin-shortcuts">{[
+    { to: '/admin/users', label: 'Manage users', Icon: FiUsers },
+    { to: '/admin/utilities?id=data', label: 'Buy data', Icon: FiWifi },
+    { to: '/admin/utilities?id=tv', label: 'Buy cable', Icon: FiTv },
+  ].map(({ to, label, Icon }) => <Link key={to} to={to}><Icon /><span>{label}</span><FiArrowUpRight /></Link>)}</div>;
+}

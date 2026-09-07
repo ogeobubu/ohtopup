@@ -67,7 +67,7 @@ const Referral = () => {
     {
       header: "Username",
       render: (item) => (
-        <div className="font-medium text-gray-900">
+        <div className="font-medium ot-admin-ink">
           {item.username}
         </div>
       )
@@ -75,7 +75,7 @@ const Referral = () => {
     {
       header: "Referral Code",
       render: (item) => (
-        <div className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+        <div className="font-mono text-sm ot-admin-soft px-2 py-1 rounded">
           {item.referralCode}
         </div>
       )
@@ -131,7 +131,7 @@ const Referral = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => handleEditUser(user)}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+            className="ot-admin-control ot-admin-action rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 transform "
             title="Add Points"
           >
             <FaPlus className="inline mr-1 h-3 w-3" />
@@ -171,13 +171,13 @@ const Referral = () => {
   return (
     <>
       <div className="mb-4 md:mb-6 p-2 md:p-0">
-        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2">Referral Management</h1>
-        <p className="text-gray-600 text-sm md:text-base">Monitor and manage user referral activities and rewards</p>
+        <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink mb-2">Referral Management</h1>
+        <p className="ot-admin-muted text-sm md:text-base">Monitor and manage user referral activities and rewards</p>
       </div>
 
       {/* Analytics Cards */}
       <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 px-2 md:px-0">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-xs md:text-sm font-medium">Total Referrers</p>
@@ -187,7 +187,7 @@ const Referral = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-xs md:text-sm font-medium">Total Referred Users</p>
@@ -197,7 +197,7 @@ const Referral = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-xs md:text-sm font-medium">Total Points Awarded</p>
@@ -207,7 +207,7 @@ const Referral = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-orange-100 text-xs md:text-sm font-medium">Avg Referrals/User</p>
@@ -221,13 +221,13 @@ const Referral = () => {
       <div className="flex flex-col md:flex-row">
         <div className="flex-1 min-h-[250px] flex flex-col justify-between">
           {isLoading ? (
-            <p className="text-gray-500">Loading referrals...</p>
+            <p className="ot-admin-muted">Loading referrals...</p>
           ) : isError ? (
             <p className="text-red-500">Error loading referrals: {error.message}</p>
           ) : referrals?.users.length > 0 ? (
             <div className="overflow-x-auto">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 px-2 md:px-0">
-                <div className="text-xs md:text-sm text-gray-600">
+                <div className="text-xs md:text-sm ot-admin-muted">
                   {referrals?.users?.length || 0} users found
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -235,22 +235,22 @@ const Referral = () => {
                     <input
                       type="search"
                       placeholder="Search by username or referral code"
-                      className="border border-gray-300 rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
+                      className="border ot-admin-border rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <FaUsers className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
+                    <FaUsers className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 ot-admin-muted" />
                   </div>
                   {searchTerm && (
                     <button
-                      className="bg-gray-500 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200 text-xs md:text-sm"
+                      className="ot-admin-control bg-gray-500 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200 text-xs md:text-sm"
                       onClick={handleClearSearch}
                     >
                       Clear
                     </button>
                   )}
                   <button
-                    className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 md:px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-xs md:text-sm"
+                    className="ot-admin-control ot-admin-action px-3 md:px-4 py-2 rounded-lg transition-all duration-200 transform text-xs md:text-sm"
                     onClick={() => toast.info("Export functionality coming soon!")}
                   >
                     <FaDownload className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
@@ -268,26 +268,26 @@ const Referral = () => {
               />
             </div>
           ) : (
-            <div className="border border-gray-200 rounded-xl p-4 md:p-8 flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-50 to-gray-100 mx-2 md:mx-0">
-              <div className="bg-white rounded-full p-4 md:p-6 mb-4 md:mb-6 shadow-lg">
-                <FaUsers className="w-8 h-8 md:w-12 md:h-12 text-gray-400" />
+            <div className="ot-admin-neutral-card border ot-admin-border rounded-lg p-4 md:p-8 flex flex-col items-center justify-center h-full mx-2 md:mx-0">
+              <div className="ot-admin-paper rounded-full p-4 md:p-6 mb-4 md:mb-6 ">
+                <FaUsers className="w-8 h-8 md:w-12 md:h-12 ot-admin-muted" />
               </div>
-              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">No Referral Data</h3>
-              <p className="text-gray-500 text-center text-sm md:text-base max-w-md px-2">
+              <h3 className="text-lg md:text-xl font-semibold ot-admin-ink mb-2">No Referral Data</h3>
+              <p className="ot-admin-muted text-center text-sm md:text-base max-w-md px-2">
                 There are no users with referral activity yet. Users will appear here once they start referring others and earning points.
               </p>
               <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 w-full max-w-lg">
-                <div className="bg-white rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div className="ot-admin-paper rounded-lg p-3 md:p-4 text-center ">
                   <FaUsers className="w-5 h-5 md:w-6 md:h-6 text-blue-500 mx-auto mb-2" />
-                  <p className="text-xs md:text-sm text-gray-600">Users will register</p>
+                  <p className="text-xs md:text-sm ot-admin-muted">Users will register</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div className="ot-admin-paper rounded-lg p-3 md:p-4 text-center ">
                   <FaChartLine className="w-5 h-5 md:w-6 md:h-6 text-green-500 mx-auto mb-2" />
-                  <p className="text-xs md:text-sm text-gray-600">Users refer others</p>
+                  <p className="text-xs md:text-sm ot-admin-muted">Users refer others</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 md:p-4 text-center shadow-sm">
+                <div className="ot-admin-paper rounded-lg p-3 md:p-4 text-center ">
                   <FaCoins className="w-5 h-5 md:w-6 md:h-6 text-purple-500 mx-auto mb-2" />
-                  <p className="text-xs md:text-sm text-gray-600">Points are earned</p>
+                  <p className="text-xs md:text-sm ot-admin-muted">Points are earned</p>
                 </div>
               </div>
             </div>
@@ -301,41 +301,41 @@ const Referral = () => {
           onClick={toggleModal}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            className="ot-admin-paper rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-700 dark:hover:scrollbar-thumb-gray-500 px-2 sm:px-0 pb-8">
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-100 to-green-200 rounded-full mb-4">
+              <div className="ot-admin-neutral-card inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
                 <FaCoins className="h-8 w-8 text-green-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">
+              <h3 className="text-2xl font-bold ot-admin-ink">
                 Add Referral Points
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm ot-admin-muted">
                 Reward {currentUser?.username} for successful referrals
               </p>
             </div>
 
             {/* User Details */}
-            <div className="mb-6 p-6 rounded-xl bg-gray-50">
+            <div className="mb-6 p-6 rounded-lg ot-admin-soft">
               <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="font-medium text-gray-600">Username</span>
-                  <span className="font-semibold text-lg text-gray-900">
+                <div className="flex justify-between items-center py-2 border-b ot-admin-border">
+                  <span className="font-medium ot-admin-muted">Username</span>
+                  <span className="font-semibold text-lg ot-admin-ink">
                     {currentUser?.username}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="font-medium text-gray-600">Current Points</span>
+                <div className="flex justify-between items-center py-2 border-b ot-admin-border">
+                  <span className="font-medium ot-admin-muted">Current Points</span>
                   <span className="font-semibold text-lg text-green-600">
                     {currentUser?.points || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="font-medium text-gray-600">Referred Users</span>
+                  <span className="font-medium ot-admin-muted">Referred Users</span>
                   <span className="font-semibold text-lg text-blue-600">
                     {currentUser?.referredUsers?.length || 0}
                   </span>
@@ -356,14 +356,14 @@ const Referral = () => {
               {({ errors, touched, setFieldValue }) => (
                 <Form className="space-y-6">
                   <div>
-                    <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="amount" className="block text-sm font-medium ot-admin-ink mb-2">
                       Points to Add:
                     </label>
                     <Field
                       name="amount"
                       as={Textfield}
                       placeholder="Enter points amount"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border ot-admin-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                     {errors.amount && touched.amount && (
                       <div className="text-red-600 text-sm mt-1">{errors.amount}</div>
@@ -376,14 +376,14 @@ const Referral = () => {
                       type="button"
                       onClick={toggleModal}
                       disabled={loading}
-                      className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
+                      className="ot-admin-control flex-1 px-6 py-3 bg-gray-200 ot-admin-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
+                      className="ot-admin-control flex-1 px-6 py-3 ot-admin-action rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
                     >
                       {loading ? (
                         <span className="flex items-center justify-center">

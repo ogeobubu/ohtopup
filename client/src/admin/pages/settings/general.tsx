@@ -11,9 +11,9 @@ const General = () => {
   };
 
   return (
-    <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
+    <div className="p-6 border border-solid rounded-md ot-admin-border w-full">
       <h2 className="text-2xl font-bold mb-4">General Settings</h2>
-      <p className="mb-4 text-gray-600">Toggle dark mode:</p>
+      <p className="mb-4 ot-admin-muted">Toggle dark mode:</p>
       <label className="flex items-center cursor-pointer">
         <div className="relative">
           <input
@@ -24,12 +24,12 @@ const General = () => {
           />
           <div className="block bg-gray-200 w-14 h-8 rounded-full"></div>
           <div
-            className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ease-in-out ${
+            className={`dot absolute left-1 top-1 ot-admin-paper w-6 h-6 rounded-full transition-transform duration-300 ease-in-out ${
               currentTheme === "dark" ? "translate-x-6 bg-blue-500" : ""
             }`}
           ></div>
         </div>
-        <span className="ml-3 text-gray-600">
+        <span className="ml-3 ot-admin-muted">
           {currentTheme === "dark" ? "Dark Mode" : "Light Mode"}
         </span>
       </label>

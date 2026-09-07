@@ -196,11 +196,11 @@ const AdminBetDiceGame = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 md:gap-3">
+          <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink flex items-center gap-2 md:gap-3">
             <FaBullseye className="text-indigo-500 text-lg md:text-xl" />
             Bet Dice Game Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
+          <p className="ot-admin-muted mt-1 text-sm md:text-base">
             Monitor strategic betting activity, revenue, and player statistics
           </p>
         </div>
@@ -208,7 +208,7 @@ const AdminBetDiceGame = () => {
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => refetchGames()}
-            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs md:text-sm"
+            className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm"
           >
             <FaSync className="text-xs md:text-sm" />
             <span className="hidden sm:inline">Refresh</span>
@@ -217,16 +217,16 @@ const AdminBetDiceGame = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="border-b ot-admin-border overflow-x-auto">
         <nav className="flex space-x-4 md:space-x-8 min-w-max">
           {tabs.map((tab) => (
-            <button
+            <button aria-pressed={activeTab === tab.id}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
+              className={`ot-admin-control flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
-                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  : "border-transparent ot-admin-muted hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               <tab.icon className="text-xs md:text-sm" />
@@ -242,11 +242,11 @@ const AdminBetDiceGame = () => {
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
            {/* Stats Cards */}
-           <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+           <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
              <div className="flex items-center justify-between">
                <div>
-                 <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Bets</p>
-                 <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+                 <p className="text-xs md:text-sm font-medium ot-admin-muted ">Total Bets</p>
+                 <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
                    {statsLoading ? '...' : (betDiceStats?.stats?.totalGames || 0)}
                  </p>
                </div>
@@ -254,11 +254,11 @@ const AdminBetDiceGame = () => {
              </div>
            </div>
 
-           <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+           <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
              <div className="flex items-center justify-between">
                <div>
-                 <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Total Wins</p>
-                 <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+                 <p className="text-xs md:text-sm font-medium ot-admin-muted ">Total Wins</p>
+                 <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
                    {statsLoading ? '...' : (betDiceStats?.stats?.totalWins || 0)}
                  </p>
                </div>
@@ -266,11 +266,11 @@ const AdminBetDiceGame = () => {
              </div>
            </div>
 
-           <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+           <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
              <div className="flex items-center justify-between">
                <div>
-                 <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">House Revenue</p>
-                 <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+                 <p className="text-xs md:text-sm font-medium ot-admin-muted ">House Revenue</p>
+                 <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
                    ₦{statsLoading ? '...' : (betDiceStats?.stats?.totalRevenue || 0).toLocaleString()}
                  </p>
                </div>
@@ -278,11 +278,11 @@ const AdminBetDiceGame = () => {
              </div>
            </div>
 
-           <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+           <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
              <div className="flex items-center justify-between">
                <div>
-                 <p className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400">Avg Bet Size</p>
-                 <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+                 <p className="text-xs md:text-sm font-medium ot-admin-muted ">Avg Bet Size</p>
+                 <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
                    ₦{statsLoading ? '...' : (betDiceStats?.stats?.averageBetSize || 0).toLocaleString()}
                  </p>
                </div>
@@ -293,36 +293,36 @@ const AdminBetDiceGame = () => {
         )}
 
         {activeTab === "games" && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">Recent Bet Games</h3>
+          <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden">
+            <div className="p-4 md:p-6 border-b ot-admin-border ">
+              <h3 className="text-base md:text-lg font-semibold ot-admin-ink ">Recent Bet Games</h3>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+              <table className="ot-admin-data-table w-full">
+                <thead className="ot-admin-soft ">
                   <tr>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Bet Details
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Result
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Payout
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
                       Date
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
                   {gamesLoading ? (
                     <tr>
-                      <td colSpan={5} className="px-3 md:px-6 py-3 md:py-4 text-center text-gray-500 dark:text-gray-400">
+                      <td colSpan={5} className="px-3 md:px-6 py-3 md:py-4 text-center ot-admin-muted ">
                         Loading games...
                       </td>
                     </tr>
@@ -330,12 +330,12 @@ const AdminBetDiceGame = () => {
                     betDiceGames.games.map((game) => (
                       <tr key={game._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate max-w-20 md:max-w-none">
+                          <div className="text-xs md:text-sm font-medium ot-admin-ink truncate max-w-20 md:max-w-none">
                             {game.user?.username || 'Unknown'}
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
+                          <div className="text-xs md:text-sm ot-admin-ink ">
                             ₦{game.betAmount} • {game.odds}x • {game.difficulty}
                           </div>
                         </td>
@@ -349,12 +349,12 @@ const AdminBetDiceGame = () => {
                           </span>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
+                          <div className="text-xs md:text-sm ot-admin-ink ">
                             {game.gameResult === 'win' ? `+₦${game.winnings}` : `-₦${game.betAmount}`}
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm text-gray-900 dark:text-white">
+                          <div className="text-xs md:text-sm ot-admin-ink ">
                             {new Date(game.playedAt).toLocaleString()}
                           </div>
                         </td>
@@ -362,7 +362,7 @@ const AdminBetDiceGame = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-3 md:px-6 py-3 md:py-4 text-center text-gray-500 dark:text-gray-400">
+                      <td colSpan={5} className="px-3 md:px-6 py-3 md:py-4 text-center ot-admin-muted ">
                         No bet games played yet
                       </td>
                     </tr>
@@ -377,48 +377,48 @@ const AdminBetDiceGame = () => {
           <div className="space-y-6">
             {/* Analytics Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaGamepad className="text-indigo-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Bets</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Bets</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {statsLoading ? '...' : (betDiceStats?.stats?.totalGames || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaUsers className="text-blue-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Active Bettors</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Active Bettors</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {statsLoading ? '...' : (betDiceStats?.stats?.activePlayers || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaTrophy className="text-green-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Payouts</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">Total Payouts</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       ₦{statsLoading ? '...' : (betDiceStats?.stats?.totalWinnings || 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
                 <div className="flex items-center gap-3">
                   <FaCalculator className="text-orange-500 text-2xl" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">House Edge</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm ot-admin-muted ">House Edge</p>
+                    <p className="text-2xl font-bold ot-admin-ink ">
                       {statsLoading ? '...' : `${betDiceStats?.stats?.houseEdge || 0}%`}
                     </p>
                   </div>
@@ -428,30 +428,30 @@ const AdminBetDiceGame = () => {
 
             {/* Detailed Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+                <h3 className="text-lg font-semibold ot-admin-ink mb-4">
                   Betting Patterns
                 </h3>
                 {statsLoading ? (
-                  <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                  <div className="h-64 flex items-center justify-center ot-admin-muted ">
                     Loading analytics...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Most Popular Difficulty</span>
+                      <span className="text-sm ot-admin-muted ">Most Popular Difficulty</span>
                       <span className="font-semibold text-indigo-600">
                         {betDiceStats?.stats?.mostPopularDifficulty || 'N/A'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Average Odds Taken</span>
+                      <span className="text-sm ot-admin-muted ">Average Odds Taken</span>
                       <span className="font-semibold text-blue-600">
                         {(betDiceStats?.stats?.averageOdds || 0).toFixed(2)}x
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Risk Tolerance</span>
+                      <span className="text-sm ot-admin-muted ">Risk Tolerance</span>
                       <span className="font-semibold text-green-600">
                         {betDiceStats?.stats?.riskTolerance || 'Medium'}
                       </span>
@@ -460,30 +460,30 @@ const AdminBetDiceGame = () => {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+                <h3 className="text-lg font-semibold ot-admin-ink mb-4">
                   Revenue Breakdown
                 </h3>
                 {statsLoading ? (
-                  <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                  <div className="h-64 flex items-center justify-center ot-admin-muted ">
                     Loading analytics...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Bets Placed</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">
+                      <span className="text-sm ot-admin-muted ">Total Bets Placed</span>
+                      <span className="font-semibold ot-admin-ink ">
                         ₦{((betDiceStats?.stats?.totalGames || 0) * (betDiceStats?.stats?.averageBetSize || 0)).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Payouts</span>
+                      <span className="text-sm ot-admin-muted ">Total Payouts</span>
                       <span className="font-semibold text-green-600">
                         ₦{(betDiceStats?.stats?.totalWinnings || 0).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">House Profit</span>
+                      <span className="text-sm ot-admin-muted ">House Profit</span>
                       <span className="font-semibold text-purple-600">
                         ₦{((betDiceStats?.stats?.totalGames || 0) * (betDiceStats?.stats?.averageBetSize || 0) - (betDiceStats?.stats?.totalWinnings || 0)).toLocaleString()}
                       </span>
@@ -498,14 +498,14 @@ const AdminBetDiceGame = () => {
         {activeTab === "settings" && (
           <div className="space-y-6">
             {/* Game Configuration */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 Bet Dice Game Configuration
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Game Status
                   </label>
                   <div className="flex items-center">
@@ -513,16 +513,16 @@ const AdminBetDiceGame = () => {
                       type="checkbox"
                       checked={settings.gameEnabled}
                       onChange={(e) => handleSettingsChange('gameEnabled', e.target.checked)}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="ml-2 text-sm ot-admin-ink ">
                       Enable Bet Dice Game
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Maintenance Mode
                   </label>
                   <div className="flex items-center">
@@ -530,65 +530,65 @@ const AdminBetDiceGame = () => {
                       type="checkbox"
                       checked={settings.maintenanceMode}
                       onChange={(e) => handleSettingsChange('maintenanceMode', e.target.checked)}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="ml-2 text-sm ot-admin-ink ">
                       Maintenance Mode (Disable all betting)
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Minimum Bet Amount (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.minBetAmount}
                     onChange={(e) => handleSettingsChange('minBetAmount', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="1"
                     max="1000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Maximum Bet Amount (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.maxBetAmount}
                     onChange={(e) => handleSettingsChange('maxBetAmount', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="100"
                     max="10000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Entry Fee (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.entryFee}
                     onChange={(e) => handleSettingsChange('entryFee', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="0"
                     max="100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Maximum Dice Count
                   </label>
                   <input
                     type="number"
                     value={settings.maxDiceCount}
                     onChange={(e) => handleSettingsChange('maxDiceCount', parseInt(e.target.value) || 2)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="2"
                     max="6"
                   />
@@ -597,14 +597,14 @@ const AdminBetDiceGame = () => {
             </div>
 
             {/* Difficulty Level Configuration */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 Difficulty Level Settings
               </h3>
 
               <div className="space-y-4">
                 {Object.entries(settings.difficultyLevels).map(([key, level]) => (
-                  <div key={key} className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                  <div key={key} className="p-4 border ot-admin-border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-semibold capitalize">{key} Level</h4>
                       <div className="flex items-center">
@@ -612,7 +612,7 @@ const AdminBetDiceGame = () => {
                           type="checkbox"
                           checked={level.enabled}
                           onChange={(e) => handleSettingsChange(`difficultyLevels..${key}..enabled`, e.target.checked)}
-                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                         />
                         <span className="ml-2 text-sm">Enabled</span>
                       </div>
@@ -626,7 +626,7 @@ const AdminBetDiceGame = () => {
                           step="0.1"
                           value={level.oddsRange[0]}
                           onChange={(e) => handleSettingsChange(`difficultyLevels..${key}..oddsRange`, [parseFloat(e.target.value) || 1, level.oddsRange[1]])}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                           min="1"
                           max="50"
                         />
@@ -638,7 +638,7 @@ const AdminBetDiceGame = () => {
                           step="0.1"
                           value={level.oddsRange[1]}
                           onChange={(e) => handleSettingsChange(`difficultyLevels..${key}..oddsRange`, [level.oddsRange[0], parseFloat(e.target.value) || 1])}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                           min="1"
                           max="50"
                         />
@@ -650,7 +650,7 @@ const AdminBetDiceGame = () => {
                           step="0.01"
                           value={level.probability}
                           onChange={(e) => handleSettingsChange(`difficultyLevels..${key}..probability`, parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                           min="0"
                           max="100"
                         />
@@ -662,56 +662,56 @@ const AdminBetDiceGame = () => {
             </div>
 
             {/* Risk Management */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 Risk Management
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Max Loss per Hour (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.riskManagement.maxLossPerHour}
                     onChange={(e) => handleSettingsChange('riskManagement.maxLossPerHour', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="1000"
                     max="1000000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Max Win per Hour (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.riskManagement.maxWinPerHour}
                     onChange={(e) => handleSettingsChange('riskManagement.maxWinPerHour', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="1000"
                     max="1000000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Max Daily Bets per User
                   </label>
                   <input
                     type="number"
                     value={settings.riskManagement.maxDailyBetsPerUser}
                     onChange={(e) => handleSettingsChange('riskManagement.maxDailyBetsPerUser', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="1"
                     max="1000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium ot-admin-ink mb-2">
                     Target House Edge (%)
                   </label>
                   <input
@@ -719,7 +719,7 @@ const AdminBetDiceGame = () => {
                     step="0.1"
                     value={settings.houseEdge}
                     onChange={(e) => handleSettingsChange('houseEdge', parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                     min="0"
                     max="20"
                   />
@@ -731,9 +731,9 @@ const AdminBetDiceGame = () => {
                       type="checkbox"
                       checked={settings.riskManagement.autoShutdown}
                       onChange={(e) => handleSettingsChange('riskManagement.autoShutdown', e.target.checked)}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="ml-2 text-sm ot-admin-ink ">
                       Auto-shutdown on Risk Threshold Breach
                     </span>
                   </div>
@@ -742,8 +742,8 @@ const AdminBetDiceGame = () => {
             </div>
 
             {/* Notification Settings */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 Notification Settings
               </h3>
 
@@ -753,9 +753,9 @@ const AdminBetDiceGame = () => {
                     type="checkbox"
                     checked={settings.notifications.emailEnabled}
                     onChange={(e) => handleSettingsChange('notifications.emailEnabled', e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm ot-admin-ink ">
                     Enable Email Notifications
                   </span>
                 </div>
@@ -765,9 +765,9 @@ const AdminBetDiceGame = () => {
                     type="checkbox"
                     checked={settings.notifications.largeWinAlert}
                     onChange={(e) => handleSettingsChange('notifications.largeWinAlert', e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm ot-admin-ink ">
                     Alert on Large Wins
                   </span>
                 </div>
@@ -777,9 +777,9 @@ const AdminBetDiceGame = () => {
                     type="checkbox"
                     checked={settings.notifications.suspiciousActivity}
                     onChange={(e) => handleSettingsChange('notifications.suspiciousActivity', e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm ot-admin-ink ">
                     Alert on Suspicious Activity
                   </span>
                 </div>
@@ -789,9 +789,9 @@ const AdminBetDiceGame = () => {
                     type="checkbox"
                     checked={settings.notifications.betLimitExceeded}
                     onChange={(e) => handleSettingsChange('notifications.betLimitExceeded', e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm ot-admin-ink ">
                     Alert on Bet Limit Exceeded
                   </span>
                 </div>
@@ -799,8 +799,8 @@ const AdminBetDiceGame = () => {
             </div>
 
             {/* Analytics Settings */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
                 Analytics & Reporting
               </h3>
 
@@ -810,9 +810,9 @@ const AdminBetDiceGame = () => {
                     type="checkbox"
                     checked={settings.analytics.trackBettingPatterns}
                     onChange={(e) => handleSettingsChange('analytics.trackBettingPatterns', e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm ot-admin-ink ">
                     Track Betting Patterns
                   </span>
                 </div>
@@ -822,9 +822,9 @@ const AdminBetDiceGame = () => {
                     type="checkbox"
                     checked={settings.analytics.generateReports}
                     onChange={(e) => handleSettingsChange('analytics.generateReports', e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm ot-admin-ink ">
                     Generate Automated Reports
                   </span>
                 </div>
@@ -834,9 +834,9 @@ const AdminBetDiceGame = () => {
                     type="checkbox"
                     checked={settings.analytics.alertOnAnomalies}
                     onChange={(e) => handleSettingsChange('analytics.alertOnAnomalies', e.target.checked)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 ot-admin-border rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="ml-2 text-sm ot-admin-ink ">
                     Alert on Anomalous Activity
                   </span>
                 </div>
@@ -844,7 +844,7 @@ const AdminBetDiceGame = () => {
             </div>
 
             {/* Bet Dice Game Manipulation */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-red-200 dark:border-red-700">
+            <div className="ot-admin-paper p-6 rounded-lg border border-red-200 dark:border-red-700">
               <div className="flex items-center gap-2 mb-6">
                 <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
                   🎲 Bet Dice Game Manipulation
@@ -869,7 +869,7 @@ const AdminBetDiceGame = () => {
                         type="checkbox"
                         checked={settings.manipulation?.enabled || false}
                         onChange={(e) => handleSettingsChange('manipulation.enabled', e.target.checked)}
-                        className="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                        className="h-5 w-5 text-red-600 focus:ring-red-500 ot-admin-border rounded"
                       />
                     </div>
                   </div>
@@ -879,13 +879,13 @@ const AdminBetDiceGame = () => {
                   <>
                     {/* Manipulation Mode */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium ot-admin-ink mb-2">
                         Manipulation Mode
                       </label>
                       <select
                         value={settings.manipulation?.mode || 'fair'}
                         onChange={(e) => handleSettingsChange('manipulation.mode', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                       >
                         <option value="fair">Fair Play (No Manipulation)</option>
                         <option value="biased_win">Biased Towards Wins</option>
@@ -900,9 +900,9 @@ const AdminBetDiceGame = () => {
                     {/* Mode-specific settings */}
                     {(settings.manipulation?.mode === 'biased_win' || settings.manipulation?.mode === 'biased_loss') && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium ot-admin-ink mb-2">
                           Bias Factor (0-1)
-                          <span className="text-xs text-gray-500 ml-2">
+                          <span className="text-xs ot-admin-muted ml-2">
                             Higher = stronger {settings.manipulation?.mode === 'biased_win' ? 'win' : 'loss'} bias
                           </span>
                         </label>
@@ -913,16 +913,16 @@ const AdminBetDiceGame = () => {
                           max="1"
                           value={settings.manipulation?.bias || 0.5}
                           onChange={(e) => handleSettingsChange('manipulation.bias', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                         />
                       </div>
                     )}
 
                     {settings.manipulation?.mode === 'custom_probability' && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium ot-admin-ink mb-2">
                           Custom Win Probability (0-1)
-                          <span className="text-xs text-gray-500 ml-2">
+                          <span className="text-xs ot-admin-muted ml-2">
                             0.0278 = natural probability (varies by difficulty)
                           </span>
                         </label>
@@ -933,17 +933,17 @@ const AdminBetDiceGame = () => {
                           max="1"
                           value={settings.manipulation?.winProbability || 0.0278}
                           onChange={(e) => handleSettingsChange('manipulation.winProbability', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                         />
                       </div>
                     )}
 
                     {settings.manipulation?.mode === 'difficulty_based' && (
                       <div className="space-y-4">
-                        <h4 className="font-semibold text-gray-800 dark:text-gray-200">Difficulty-Specific Win Probabilities</h4>
+                        <h4 className="font-semibold ot-admin-ink ">Difficulty-Specific Win Probabilities</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {Object.entries(settings.difficultyLevels).map(([key, level]) => (
-                            <div key={key} className="p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                            <div key={key} className="p-3 border ot-admin-border rounded-lg">
                               <label className="block text-sm font-medium mb-2 capitalize">
                                 {key} Level Win Probability (0-1)
                               </label>
@@ -954,9 +954,9 @@ const AdminBetDiceGame = () => {
                                 max="1"
                                 value={settings.manipulation?.difficultySettings?.[key]?.winProbability || level.probability / 100}
                                 onChange={(e) => handleSettingsChange(`manipulation.difficultySettings..${key}..winProbability`, parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                               />
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs ot-admin-muted mt-1">
                                 Natural: {(level.probability / 100).toFixed(4)}
                               </p>
                             </div>
@@ -967,9 +967,9 @@ const AdminBetDiceGame = () => {
 
                     {/* Random Seed */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium ot-admin-ink mb-2">
                         Random Seed (Optional)
-                        <span className="text-xs text-gray-500 ml-2">
+                        <span className="text-xs ot-admin-muted ml-2">
                           For reproducible results - leave empty for true randomness
                         </span>
                       </label>
@@ -978,7 +978,7 @@ const AdminBetDiceGame = () => {
                         value={settings.manipulation?.seed || ''}
                         onChange={(e) => handleSettingsChange('manipulation.seed', e.target.value)}
                         placeholder="Enter seed string..."
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
                       />
                     </div>
 
@@ -989,9 +989,9 @@ const AdminBetDiceGame = () => {
                           type="checkbox"
                           checked={settings.manipulation?.adminOnly || true}
                           onChange={(e) => handleSettingsChange('manipulation.adminOnly', e.target.checked)}
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 ot-admin-border rounded"
                         />
-                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                        <span className="ml-2 text-sm ot-admin-ink ">
                           Admin Only Access
                         </span>
                       </div>
@@ -1001,9 +1001,9 @@ const AdminBetDiceGame = () => {
                           type="checkbox"
                           checked={settings.manipulation?.logManipulations || true}
                           onChange={(e) => handleSettingsChange('manipulation.logManipulations', e.target.checked)}
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 ot-admin-border rounded"
                         />
-                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                        <span className="ml-2 text-sm ot-admin-ink ">
                           Log All Manipulations
                         </span>
                       </div>
@@ -1042,14 +1042,14 @@ const AdminBetDiceGame = () => {
               <button
                 onClick={handleResetSettings}
                 disabled={isSavingSettings}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="ot-admin-control flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Reset to Defaults
               </button>
               <button
                 onClick={handleSaveSettings}
                 disabled={isSavingSettings}
-                className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="ot-admin-control flex items-center gap-2 px-6 py-3 ot-admin-action text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <FaSave className="text-sm" />
                 {isSavingSettings ? 'Saving...' : 'Save Settings'}

@@ -35,18 +35,18 @@ const Security = () => {
   };
 
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-6 w-full">
+    <div className="border border-solid ot-admin-border rounded-md p-6 w-full">
       <h2 className="text-2xl font-bold mb-4">Security</h2>
       <div className="max-w-sm w-auto bg-[#F7F9FB] py-2 px-4 rounded-md">
         <div className="space-y-8">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <span className="text-gray-500">Password</span>
+              <span className="ot-admin-muted">Password</span>
               <span className="text-blue-900">*******</span>
             </div>
             <button
               onClick={() => setChangePassword(true)}
-              className="text-blue-400 font-semibold hover:text-blue-600"
+              className="ot-admin-control text-blue-400 font-semibold hover:text-blue-600"
               aria-label="Change Password"
             >
               Change Password
@@ -54,7 +54,7 @@ const Security = () => {
           </div>
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <span className="text-gray-500">Transaction Pin</span>
+              <span className="ot-admin-muted">Transaction Pin</span>
               <span className="text-blue-900">****</span>
             </div>
             <span className="text-sm font-bold text-red-500">
@@ -63,7 +63,7 @@ const Security = () => {
           </div>
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <span className="text-gray-500">2FA Settings</span>
+              <span className="ot-admin-muted">2FA Settings</span>
               <span className="text-blue-900">
                 Add an extra layer of security
               </span>
@@ -77,10 +77,10 @@ const Security = () => {
 
       {changePassword && (
         <div className="fixed top-0 right-0 bottom-0 left-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="fixed top-0 right-0 bg-white shadow-md rounded-md p-6 w-full max-w-md h-screen w-80">
+          <div className="fixed top-0 right-0 ot-admin-paper rounded-md p-6 w-full max-w-md h-screen w-80">
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              className="ot-admin-control absolute top-2 right-2 ot-admin-muted hover:text-gray-700"
               aria-label="Close Modal"
             >
               <FaTimes className="w-5 h-5" />

@@ -1,9 +1,9 @@
-const nodemailer = require('nodemailer');
+const { createTransport } = require('./emailTransport');
 const Newsletter = require('../model/Newsletter');
 
 class NewsletterService {
   constructor() {
-    this.transporter = nodemailer.createTransport({
+    this.transporter = createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,

@@ -1,0 +1,75 @@
+/* Shared presentation for administration pages; customer pages are unaffected. */
+.ot-admin-main .ot-admin-ink { color:var(--ot-ink); }
+.ot-admin-main .ot-admin-muted { color:var(--ot-muted); }
+.ot-admin-main .ot-admin-border { border-color:var(--ot-line); }
+.ot-admin-main .ot-admin-paper { background-color:var(--ot-paper); }
+.ot-admin-main .ot-admin-soft { background-color:var(--ot-bg); }
+.ot-admin-main .ot-admin-page-title { font-size:26px; line-height:1.25; font-weight:550; letter-spacing:-.6px; color:var(--ot-ink); }
+.ot-admin-page-title>svg { display:none; }
+.ot-admin-page-title+p { font-size:13px; line-height:1.7; color:var(--ot-muted); }
+.ot-admin-main h2 { font-size:16px; font-weight:550; letter-spacing:-.2px; }
+.ot-admin-main h3 { font-size:14px; font-weight:550; }
+.ot-admin-main .ot-admin-neutral-card { background:var(--ot-paper); color:var(--ot-ink); border:1px solid var(--ot-line); border-radius:6px; }
+.ot-admin-neutral-card>div>svg { width:18px; height:18px; color:var(--ot-muted); }
+.ot-admin-neutral-card>div>div>p:first-child { color:var(--ot-muted); font-size:11px; font-weight:400; }
+.ot-admin-neutral-card>div>div>p+p { color:var(--ot-ink); font-size:25px; font-weight:550; letter-spacing:-.5px; font-variant-numeric:tabular-nums; }
+.ot-admin-main .ot-admin-control { font-size:12px; font-weight:500; box-shadow:none; transition:background-color .15s,color .15s; }
+.ot-admin-main .ot-admin-control:not([class*="rounded-full"]):not([role="switch"]) { border-radius:5px; }
+.ot-admin-main .ot-admin-control:disabled { opacity:.5; cursor:not-allowed; }
+.ot-admin-main .ot-admin-action { background:var(--ot-tint); color:var(--ot-accent); border-color:var(--ot-line); }
+.ot-admin-main .ot-admin-action:hover:not(:disabled) { background:var(--ot-line); }
+.ot-admin-main .ot-admin-action.text-white { color:var(--ot-accent); }
+.ot-admin-main button[type="submit"].ot-admin-action { background:#247366; color:#fff; }
+.ot-admin-main button[type="submit"].ot-admin-action:hover:not(:disabled) { background:#1e6156; }
+.ot-admin-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+.ot-admin-main select,.ot-admin-main textarea { background:var(--ot-paper); color:var(--ot-ink); border-color:var(--ot-line); border-radius:5px; font-size:12px; }
+.ot-admin-main input::placeholder,.ot-admin-main textarea::placeholder { color:var(--ot-muted); opacity:.8; }
+.ot-admin-main input:focus-visible,.ot-admin-main select:focus-visible,.ot-admin-main textarea:focus-visible { outline:2px solid var(--ot-accent); outline-offset:1px; }
+.ot-admin-main input[type="checkbox"],.ot-admin-main input[type="radio"] { accent-color:var(--ot-accent); }
+.ot-admin-main .ot-admin-data-table { width:100%; border-collapse:collapse; font-size:12px; background:var(--ot-paper); color:var(--ot-ink); }
+.ot-admin-main .ot-admin-data-table th { background:var(--ot-bg); color:var(--ot-muted); font-size:10px; font-weight:550; letter-spacing:.3px; padding:12px 16px; border-bottom:1px solid var(--ot-line); }
+.ot-admin-main .ot-admin-data-table td { padding:14px 16px; font-size:12px; border-bottom:1px solid var(--ot-line); }
+.ot-admin-main .ot-admin-data-table tbody tr:hover { background:var(--ot-bg); }
+.ot-admin-main .ot-admin-data-table tr:last-child td { border-bottom:0; }
+.ot-admin-table-reference { display:block; margin-top:5px; font-size:10px; color:var(--ot-muted); overflow-wrap:anywhere; }
+.ot-admin-main .ot-status { white-space:nowrap; }
+.ot-admin-pagination { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; padding:20px 0; color:var(--ot-muted); font-size:11px; }
+.ot-admin-pagination>div { display:flex; gap:6px; }
+.ot-admin-pagination button { min-width:34px; min-height:36px; padding:8px 11px; border:1px solid var(--ot-line); border-radius:5px; background:var(--ot-paper); color:var(--ot-muted); font-size:11px; }
+.ot-admin-pagination button:hover:not(:disabled) { background:var(--ot-bg); }
+.ot-admin-pagination button[aria-current="page"] { background:var(--ot-tint); color:var(--ot-accent); border-color:var(--ot-accent); }
+.ot-admin-pagination button:disabled { opacity:.45; cursor:not-allowed; }
+.ot-admin-main .ot-admin-table-wrap { min-width:0; }
+@media(max-width:767px) {
+  .ot-admin-main .ot-admin-page-title { font-size:23px; }
+  .ot-admin-main .ot-admin-data-table { min-width:580px; }
+  .ot-admin-main .ot-admin-data-table th,.ot-admin-main .ot-admin-data-table td { padding:12px; }
+  .ot-admin-main .ot-admin-neutral-card { padding:16px; }
+  .ot-admin-main .ot-admin-neutral-card>div>div>p+p { font-size:22px; }
+  .ot-admin-pagination .ot-admin-page-number { display:none; }
+}
+.ot-admin-main .ot-admin-neutral-card>svg { color:var(--ot-muted); }
+.ot-admin-main .ot-admin-neutral-card>p { color:var(--ot-muted); }
+.ot-admin-main .ot-admin-neutral-card.rounded-full { padding:0; border-radius:50%; }
+.ot-admin-main .ot-admin-control[aria-pressed="true"] { color:var(--ot-accent); }
+.ot-admin-main .ot-admin-control[aria-pressed="true"][class*="border-b-2"] { border-bottom-color:var(--ot-accent); }
+.ot-admin-main .ot-admin-select__control { min-height:38px; background:var(--ot-paper); border-color:var(--ot-line); border-radius:5px; box-shadow:none; font-size:12px; }
+.ot-admin-main .ot-admin-select__control--is-focused { border-color:var(--ot-accent); box-shadow:0 0 0 1px var(--ot-accent); }
+.ot-admin-main .ot-admin-select__menu { background:var(--ot-paper); border:1px solid var(--ot-line); box-shadow:0 6px 16px #0000000d; font-size:12px; z-index:20; }
+.ot-admin-main .ot-admin-select__option { background:var(--ot-paper); color:var(--ot-ink); }
+.ot-admin-main .ot-admin-select__option--is-focused,.ot-admin-main .ot-admin-select__option--is-selected { background:var(--ot-tint); color:var(--ot-accent); }
+.ot-admin-main .ot-admin-select__single-value,.ot-admin-main .ot-admin-select__input-container { color:var(--ot-ink); }
+.ot-admin-main .ot-admin-select__placeholder { color:var(--ot-muted); }
+.ot-admin-main .ot-admin-danger { background:#f9eeee; color:#a73b3b; }
+.dark .ot-admin-main .ot-admin-danger { background:#3c272b; color:#efa3a3; }
+.ot-admin-settings-nav { display:flex; flex-direction:column; gap:4px; }
+.ot-admin-settings-nav button { display:flex; align-items:center; gap:10px; padding:12px 14px; color:var(--ot-muted); border-radius:5px; text-align:left; font-size:12px; }
+.ot-admin-settings-nav button[aria-pressed="true"] { background:var(--ot-tint); color:var(--ot-accent); }
+.ot-admin-settings-nav svg { font-size:16px; }
+.ot-admin-main .ot-admin-neutral-card svg.text-white { color:var(--ot-muted); }
+@media(max-width:767px) { .ot-admin-settings-nav { flex-direction:row; overflow-x:auto; }.ot-admin-settings-nav button { flex-shrink:0; } }
+.ot-admin .ot-admin-service-tabs { overflow-x:auto; justify-content:flex-start; gap:24px; }
+.ot-admin-service-tabs button { flex-shrink:0; white-space:nowrap; }
+.ot-admin-main .ot-admin-neutral-card [class*="text-blue-100"],
+.ot-admin-main .ot-admin-neutral-card [class*="text-purple-100"],
+.ot-admin-main .ot-admin-neutral-card [class*="text-green-100"] { color:var(--ot-muted); }

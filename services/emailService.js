@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const { createTransport } = require('./emailTransport');
 const sgMail = require('@sendgrid/mail');
 const { createLog } = require('../controllers/systemLogController');
 const fs = require('fs').promises;
@@ -7,7 +7,7 @@ require("dotenv").config();
 
 class EmailService {
   constructor() {
-    this.provider = process.env.EMAIL_PROVIDER || 'gmail'; // 'gmail', 'sendgrid', 'mailgun', etc.
+    this.provider = process.env.EMAIL_PROVIDER || 'gmail'; // 'gmail', 'sendgrid', or 'resend'
     this.templates = new Map();
     this.queue = [];
     this.isProcessing = false;
@@ -29,9 +29,13 @@ class EmailService {
         this.transporter = null; // SendGrid uses its own SDK
         break;
 
+      case 'resend':
+        this.transporter = createTransport();
+        break;
+
       case 'gmail':
       default:
-        this.transporter = nodemailer.createTransport({
+        this.transporter = createTransport({
             service: 'gmail',
             auth: {
               user: process.env.EMAIL_USER,
@@ -833,7 +837,7 @@ class EmailService {
       } else {
         // Gmail health check
         await this.transporter.verify();
-        return { healthy: true, provider: 'gmail' };
+        return { healthy: true, provider: this.provider, ...(this.provider === 'resend' ? { configurationOnly: true } : {}) };
       }
     } catch (error) {
       return {

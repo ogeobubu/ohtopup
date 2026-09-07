@@ -1,9 +1,9 @@
-const nodemailer = require("nodemailer");
+const { createTransport } = require('../../services/emailTransport');
 
 require("dotenv").config();
 
 const createTransporter = () => {
-  return nodemailer.createTransport({
+  return createTransport({
     service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
@@ -37,7 +37,7 @@ const sendForgotPasswordEmail = async (email, user, fullName) => {
 
 const sendResendResetOTPEmail = async (username, email, otpCode) => {
   try {
-    const transporter = nodemailer.createTransport({
+    const transporter = createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
@@ -73,7 +73,7 @@ const sendResendResetOTPEmail = async (username, email, otpCode) => {
 
 const sendVerificationEmail = async (username, email, confirmationCode) => {
   try {
-    const transporter = nodemailer.createTransport({
+    const transporter = createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,

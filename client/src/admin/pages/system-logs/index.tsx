@@ -91,7 +91,7 @@ const SystemLogs = () => {
       case 'debug':
         return <FaCheckCircle className="text-green-500" />;
       default:
-        return <FaInfo className="text-gray-500" />;
+        return <FaInfo className="ot-admin-muted" />;
     }
   };
 
@@ -104,7 +104,7 @@ const SystemLogs = () => {
       case 'user':
         return <FaUserShield className="text-purple-500" />;
       case 'system':
-        return <FaServer className="text-gray-500" />;
+        return <FaServer className="ot-admin-muted" />;
       case 'game':
         return <FaGamepad className="text-orange-500" />;
       case 'game_manipulation':
@@ -118,7 +118,7 @@ const SystemLogs = () => {
       case 'payment':
         return <FaShoppingCart className="text-emerald-500" />;
       default:
-        return <FaInfo className="text-gray-500" />;
+        return <FaInfo className="ot-admin-muted" />;
     }
   };
 
@@ -193,11 +193,11 @@ const SystemLogs = () => {
       header: "Message",
       render: (log) => (
         <div className="max-w-xs lg:max-w-md xl:max-w-lg">
-          <div className="text-sm font-medium text-gray-900 truncate" title={log.message}>
+          <div className="text-sm font-medium ot-admin-ink truncate" title={log.message}>
             {log.message}
           </div>
           {log.metadata && Object.keys(log.metadata).length > 0 && (
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-xs ot-admin-muted mt-1">
               {Object.keys(log.metadata).length} metadata fields
             </div>
           )}
@@ -211,11 +211,11 @@ const SystemLogs = () => {
         <div className="text-sm min-w-0">
           {log.userEmail ? (
             <div>
-              <div className="font-medium text-gray-900 truncate" title={log.userEmail}>
+              <div className="font-medium ot-admin-ink truncate" title={log.userEmail}>
                 {log.userEmail}
               </div>
               {log.userId && (
-                <div className="text-xs text-gray-500 truncate">
+                <div className="text-xs ot-admin-muted truncate">
                   {typeof log.userId === 'object' && log.userId?.username
                     ? `User: ${log.userId.username}`
                     : `ID: ${typeof log.userId === 'object' ? log.userId._id : log.userId}`
@@ -224,7 +224,7 @@ const SystemLogs = () => {
               )}
             </div>
           ) : (
-            <span className="text-gray-400">System</span>
+            <span className="ot-admin-muted">System</span>
           )}
         </div>
       ),
@@ -233,7 +233,7 @@ const SystemLogs = () => {
     {
       header: "Timestamp",
       render: (log) => (
-        <div className="text-sm text-gray-600 whitespace-nowrap">
+        <div className="text-sm ot-admin-muted whitespace-nowrap">
           <div>{new Date(log.timestamp).toLocaleDateString()}</div>
           <div className="text-xs">{new Date(log.timestamp).toLocaleTimeString()}</div>
         </div>
@@ -243,7 +243,7 @@ const SystemLogs = () => {
     {
       header: "IP & Agent",
       render: (log) => (
-        <div className="text-xs text-gray-500 max-w-32 hidden lg:block">
+        <div className="text-xs ot-admin-muted max-w-32 hidden lg:block">
           {log.ipAddress && (
             <div className="truncate" title={log.ipAddress}>
               IP: {log.ipAddress}
@@ -262,7 +262,7 @@ const SystemLogs = () => {
       header: "Actions",
       render: (log) => (
         <button
-          className="bg-blue-500 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-blue-600 transition-colors whitespace-nowrap"
+          className="ot-admin-control ot-admin-action text-white rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap"
           onClick={() => {
             // Show detailed log information
             const details = {
@@ -299,13 +299,13 @@ const SystemLogs = () => {
   return (
     <div className="my-3 md:my-5 p-2 md:px-4 sm:px-6 lg:px-2">
       <div className="mb-4 md:mb-6">
-        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2">System Logs</h1>
-        <p className="text-gray-600 text-sm md:text-base">Monitor system activities, errors, and user actions</p>
+        <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink mb-2">System Logs</h1>
+        <p className="ot-admin-muted text-sm md:text-base">Monitor system activities, errors, and user actions</p>
       </div>
 
       {/* Stats Cards */}
       <div className="mb-4 md:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-3 md:gap-4">
-        <div className="bg-gradient-to-r from-red-500 to-red-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-red-100 text-xs md:text-sm font-medium">Error Logs</p>
@@ -315,7 +315,7 @@ const SystemLogs = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-yellow-100 text-xs md:text-sm font-medium">Warning Logs</p>
@@ -325,7 +325,7 @@ const SystemLogs = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-xs md:text-sm font-medium">Info Logs</p>
@@ -335,7 +335,7 @@ const SystemLogs = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 md:p-6 rounded-xl shadow-lg text-white">
+        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-xs md:text-sm font-medium">Total Logs</p>
@@ -350,7 +350,7 @@ const SystemLogs = () => {
       <div className="mb-4 md:mb-6 px-2 md:px-0">
         {/* Header with count */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
-          <div className="text-xs md:text-sm text-gray-600">
+          <div className="text-xs md:text-sm ot-admin-muted">
             {logsData?.total || 0} logs found
           </div>
         </div>
@@ -364,14 +364,14 @@ const SystemLogs = () => {
               placeholder="Search logs..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="border border-gray-300 rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm"
+              className="border ot-admin-border rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full text-sm"
             />
-            <FaSearch className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 text-gray-400" />
+            <FaSearch className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 ot-admin-muted" />
           </div>
 
           {/* Level Filter */}
           <div className="sm:col-span-1">
-            <Select
+            <Select classNamePrefix="ot-admin-select"
               options={[
                 { value: "", label: "All Levels" },
                 { value: "error", label: "Error" },
@@ -423,7 +423,7 @@ const SystemLogs = () => {
 
           {/* Category Filter */}
           <div className="sm:col-span-1">
-            <Select
+            <Select classNamePrefix="ot-admin-select"
               options={[
                 { value: "", label: "All Categories" },
                 { value: "auth", label: "Auth" },
@@ -481,7 +481,7 @@ const SystemLogs = () => {
 
           {/* Date Range Filter */}
           <div className="sm:col-span-1">
-            <Select
+            <Select classNamePrefix="ot-admin-select"
               options={[
                 { value: "1h", label: "Last Hour" },
                 { value: "24h", label: "Last 24 Hours" },
@@ -535,7 +535,7 @@ const SystemLogs = () => {
           <div className="sm:col-span-2 lg:col-span-1 xl:col-span-1">
             <button
               onClick={handleCleanupLogs}
-              className="bg-gradient-to-r from-red-500 to-red-600 text-white px-3 md:px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-xs md:text-sm w-full h-9 flex items-center justify-center"
+              className="ot-admin-control ot-admin-action px-3 md:px-4 py-2 rounded-lg transition-all duration-200 transform text-xs md:text-sm w-full h-9 flex items-center justify-center"
             >
               <FaSync className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Cleanup</span>
@@ -547,16 +547,16 @@ const SystemLogs = () => {
 
       {isLogsLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="bg-white rounded-full p-6 shadow-lg mb-4">
+          <div className="ot-admin-paper rounded-full p-6 mb-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Logs</h3>
-          <p className="text-gray-600 text-center max-w-md">
+          <h3 className="text-lg font-semibold ot-admin-ink mb-2">Loading Logs</h3>
+          <p className="ot-admin-muted text-center max-w-md">
             Please wait while we fetch the system logs...
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mx-2 md:mx-0">
+        <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden mx-2 md:mx-0">
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
               <Table columns={columns} data={logsData?.logs || []} />

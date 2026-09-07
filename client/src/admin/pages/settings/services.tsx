@@ -150,13 +150,13 @@ const Services = () => {
       render: (service) => (
         <div className="flex space-x-2">
           <button
-            className="border border-solid border-green-500 flex justify-center items-center rounded-full w-6 h-6 text-green-500 hover:text-green-700"
+            className="ot-admin-control border border-solid border-green-500 flex justify-center items-center rounded-full w-6 h-6 text-green-500 hover:text-green-700"
             onClick={() => handleEditService(service)}
           >
             <FaEdit size={15} />
           </button>
           <button
-            className="border border-solid border-red-500 flex justify-center items-center rounded-full w-6 h-6 text-red-500 hover:text-red-700"
+            className="ot-admin-control border border-solid border-red-500 flex justify-center items-center rounded-full w-6 h-6 text-red-500 hover:text-red-700"
             onClick={() => openDeleteModal(service._id)}
           >
             <FaTrash size={15} />
@@ -167,7 +167,7 @@ const Services = () => {
   ];
 
   return (
-    <div className="md:p-6 p-2 border border-solid rounded-md border-gray-200 w-full">
+    <div className="md:p-6 p-2 border border-solid rounded-md ot-admin-border w-full">
       <div className="flex flex-col md:flex-row justify-between items-center">
         <h2 className="text-2xl font-bold mb-4">Services</h2>
         <Button
@@ -204,7 +204,7 @@ const Services = () => {
 
           <div className="flex items-center justify-between mb-3 w-full">
             <label
-              className={`mr-2 ${isOn ? "text-green-600" : "text-gray-600"}`}
+              className={`mr-2 ${isOn ? "text-green-600" : "ot-admin-muted"}`}
             >
               Is this available?
             </label>
@@ -215,7 +215,7 @@ const Services = () => {
               }`}
             >
               <span
-                className={`absolute left-0 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-200 ${
+                className={`absolute left-0 w-6 h-6 ot-admin-paper rounded-full transform transition-transform duration-200 ${
                   isOn ? "translate-x-full" : "translate-x-0"
                 }`}
               />
@@ -247,7 +247,7 @@ const Services = () => {
 
           <div className="flex items-center justify-between mb-3 w-full">
             <label
-              className={`mr-2 ${isOn ? "text-green-600" : "text-gray-600"}`}
+              className={`mr-2 ${isOn ? "text-green-600" : "ot-admin-muted"}`}
             >
               Is this available?
             </label>
@@ -258,7 +258,7 @@ const Services = () => {
               }`}
             >
               <span
-                className={`absolute left-0 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-200 ${
+                className={`absolute left-0 w-6 h-6 ot-admin-paper rounded-full transform transition-transform duration-200 ${
                   isOn ? "translate-x-full" : "translate-x-0"
                 }`}
               />

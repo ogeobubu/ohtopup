@@ -1,11 +1,11 @@
-const nodemailer = require("nodemailer");
+const { createTransport } = require('../../services/emailTransport');
 
 const sendWaitlistEmail = async (
   email,
   subject = "Welcome to the Waitlist!",
   message = "Thank you for joining our waitlist!"
 ) => {
-  const transporter = createTransporter();
+  const transporter = createTransport();
 
   const mailOptions = {
     to: email,
