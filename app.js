@@ -277,6 +277,17 @@ const connectToDatabase = async () => {
   }
 };
 
+// API routes (registered before catch-all so they match first)
+app.use("/api/users", userRoutes);
+app.use("/api/users/admin", adminRoutes);
+app.use("/api/users/wallet", walletRoutes);
+app.use("/api/users/chat", chatRoutes);
+app.use("/api/users/admin/chat", chatRoutes);
+app.use("/api/users/admin/auth", authRoutes);
+app.use("/api/auth", authUserRoutes);
+app.use("/api/users/admin/x", xRoutes);
+app.use("/api/users", airtimeRoutes);
+
 const frontendBuildPath = path.join(__dirname, "client/dist");
 const clientPublicPath = path.join(__dirname, "client/public");
 
@@ -351,16 +362,6 @@ const startServer = async () => {
     await connectToDatabase();
 
     xController.setTwitterClient(null);
-
-    app.use("/api/users", userRoutes);
-    app.use("/api/users/admin", adminRoutes);
-    app.use("/api/users/wallet", walletRoutes);
-    app.use("/api/users/chat", chatRoutes);
-    app.use("/api/users/admin/chat", chatRoutes);
-    app.use("/api/users/admin/auth", authRoutes);
-    app.use("/api/auth", authUserRoutes);
-    app.use("/api/users/admin/x", xRoutes);
-    app.use("/api/users", airtimeRoutes);
 
     // Unique accounting keys must exist before serving money-moving requests.
     await Promise.all([
