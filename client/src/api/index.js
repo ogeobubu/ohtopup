@@ -1554,3 +1554,19 @@ export const getWithdrawalAuditLogs = async (params = {}) => {
     throw new Error(error.response?.data?.message || "Error fetching audit logs");
   }
 };
+
+// Web Push (Firebase Cloud Messaging)
+export const getFirebaseConfig = async () => {
+  const response = await instance.get(`/web-push/config`);
+  return response?.data;
+};
+
+export const subscribeWebPush = async (subscription) => {
+  const response = await instance.post(`/web-push/subscribe`, { subscription });
+  return response?.data;
+};
+
+export const unsubscribeWebPush = async (endpoint) => {
+  const response = await instance.delete(`/web-push/subscribe`, { data: { endpoint } });
+  return response?.data;
+};

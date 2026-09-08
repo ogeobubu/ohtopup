@@ -38,6 +38,7 @@ app.use(
         defaultSrc: ["'self'"],
         scriptSrc: [
           "'self'",
+          "https://www.gstatic.com",
           "'unsafe-inline'",
           "https://www.googletagmanager.com",
           "https://s3-eu-west-1.amazonaws.com",
@@ -60,6 +61,8 @@ app.use(
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: [
           "'self'",
+          "https://firebaseinstallations.googleapis.com",
+          "https://fcmregistrations.googleapis.com",
           "https://www.googleapis.com",
           "https://api.paystack.co",
           "https://checkout.paystack.com",
@@ -145,7 +148,6 @@ app.use(
         return callback(null, true);
       }
 
-      console.log('CORS blocked:', origin);
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
@@ -192,7 +194,6 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   // Skip CSRF for mobile app requests (identified by x-mobile-app header)
   if (req.headers['x-mobile-app'] === 'true') {
-    console.log('Skipping CSRF for mobile app request:', req.path);
     return next();
   }
 
@@ -303,7 +304,6 @@ app.get("/sitemap.xml", (req, res) => {
   res.setHeader("Content-Type", "application/xml");
   res.sendFile(sitemapPath, (err) => {
     if (err) {
-      console.error("Error serving sitemap.xml:", err);
       res.status(404).send("Sitemap not found");
     }
   });
@@ -315,7 +315,6 @@ app.get("/robots.txt", (req, res) => {
   res.setHeader("Content-Type", "text/plain");
   res.sendFile(robotsPath, (err) => {
     if (err) {
-      console.error("Error serving robots.txt:", err);
       res.status(404).send("Robots.txt not found");
     }
   });

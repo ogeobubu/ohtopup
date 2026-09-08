@@ -310,7 +310,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         const perfData = performance.getEntriesByType('navigation')[0];
         if (perfData) {
           // Could send to analytics service
-          console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart);
         }
       });
 
@@ -353,18 +352,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <!-- Main script -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Additional Performance Scripts -->
-    <script nonce="<%= nonce %>">
-      // Performance Observer for Core Web Vitals
-      try {
-        const po = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            if (entry.entryType === 'largest-contentful-paint') console.log('LCP:', entry.startTime);
-          }
-        });
-        po.observe({ entryTypes: ['largest-contentful-paint'] });
-      } catch (e) {}
-    </script>
+    
 
     <!-- Schema markup for additional services -->
     <script type="application/ld+json">

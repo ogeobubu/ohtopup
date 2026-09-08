@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { FiPlus, FiArrowRight, FiArrowDownLeft, FiArrowUpRight, FiClock, FiHelpCircle, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiPlus, FiArrowRight, FiArrowDownLeft, FiArrowUpRight, FiClock, FiHelpCircle, FiEye, FiEyeOff, FiBell, FiBellOff } from 'react-icons/fi';
 import { getUser, getWallet, getTransactions } from '../../api';
 import { setUser } from '../../actions/userActions';
 import { formatNairaAmount } from '../../utils';
 import Shortcut from './shortcut';
+import usePushNotifications from '../../hooks/usePushNotifications';
 
 function statusStyle(status: string) {
   if (['completed', 'successful', 'delivered'].includes(status)) return ['success', 'Completed'];
@@ -19,10 +20,20 @@ export default function Dashboard() {
   const user = useQuery({ queryKey: ['user'], queryFn: getUser });
   const wallet = useQuery({ queryKey: ['wallet'], queryFn: getWallet });
   const activity = useQuery({ queryKey: ['recent-transactions'], queryFn: () => getTransactions('', 1, 5) });
+  const { supported, isSubscribed, subscribe, loading } = usePushNotifications();
   useEffect(() => { if (user.data) dispatch(setUser(user.data)); }, [user.data, dispatch]);
   const transactions = activity.data?.transactions || [];
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem('push_banner_dismissed') === '1');
+  const hideBanner = isSubscribed || dismissed;
   return <div className="ot-dashboard">
     <div className="ot-dashboard-heading"><div><h1>Your overview</h1><p>{user.data?.username ? `Welcome back, ${user.data.username}.` : 'Your payments, all in one place.'}</p></div><span className="ot-date">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
+    {!hideBanner && supported && <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',marginBottom:'16px',borderRadius:'8px',background:'var(--ot-tint)',border:'1px solid var(--ot-line)',fontSize:'13px',color:'var(--ot-ink)'}}>
+      <span style={{display:'flex',alignItems:'center',gap:'8px'}}><FiBell /> Enable push notifications to get real-time updates.</span>
+      <div style={{display:'flex',gap:'8px',flexShrink:0}}>
+        <button onClick={subscribe} disabled={loading} style={{padding:'6px 14px',borderRadius:'5px',border:'none',background:'var(--ot-accent)',color:'#fff',fontSize:'12px',cursor:'pointer',opacity:loading?0.6:1}}>{loading ? 'Enabling…' : 'Enable'}</button>
+        <button onClick={() => { localStorage.setItem('push_banner_dismissed','1'); setDismissed(true); }} style={{padding:'6px 10px',borderRadius:'5px',border:'1px solid var(--ot-line)',background:'transparent',color:'var(--ot-muted)',fontSize:'12px',cursor:'pointer'}}>Later</button>
+      </div>
+    </div>}
     {user.isError && <p role="alert" className="ot-field-error mb-4">We couldn’t load your profile. <button onClick={() => user.refetch()}>Try again</button></p>}
     <div className="ot-overview">
       <section className="ot-balance" aria-label="Wallet balance"><div className="ot-balance-label">Available balance<button onClick={() => setHidden(!hidden)} aria-label={hidden ? 'Show balance' : 'Hide balance'}>{hidden ? <FiEyeOff /> : <FiEye />}</button></div>

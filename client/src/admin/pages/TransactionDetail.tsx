@@ -53,7 +53,6 @@ const AdminTransactionDetail = ({ isDarkMode }) => {
       // PDF generation will be implemented in the next step
       alert('PDF generation will be implemented soon!');
     } catch (error) {
-      console.error('Error generating PDF:', error);
     } finally {
       setIsGeneratingPDF(false);
     }

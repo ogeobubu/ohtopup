@@ -45,15 +45,15 @@ const Notification = () => {
     keepPreviousData: true,
   });
 
-  const { data: notificationsData = { notifications: [] }, isLoading: isNotificationLoading, isError: isNotificationError, error: notificationError } = useQuery({
+  const { data: notificationsData, isLoading: isNotificationLoading, isError: isNotificationError, error: notificationError } = useQuery({
     queryKey: ["notifications", currentPage, search],
     queryFn: () => getAllUsersNotifications({ page: currentPage, username: search }),
   });
 
   useEffect(() => {
     if(notificationsData) {
-      setTotalPages(notificationsData.totalPages);
-      setNotifications(notificationsData.notifications); 
+      setTotalPages(notificationsData.totalPages ?? 1);
+      setNotifications(notificationsData.notifications ?? []);
     }
   }, [notificationsData])
 

@@ -16,19 +16,15 @@ const fetchCsrfToken = async () => {
   }
 
   if (csrfToken) {
-    console.log("Using cached CSRF token");
     return csrfToken;
   }
 
   isFetchingToken = true;
   try {
-    console.log("Fetching new CSRF token");
     const response = await axios.get("/api/csrf-token", { withCredentials: true });
     csrfToken = response.data.csrfToken;
-    console.log("CSRF token fetched successfully");
     return csrfToken;
   } catch (error) {
-    console.error("Failed to fetch CSRF token:", error);
     return null;
   } finally {
     isFetchingToken = false;
@@ -54,29 +50,22 @@ instance.interceptors.request.use(
 
     // Attach CSRF token for state-changing requests (except login)
     if (["post", "put", "patch", "delete"].includes(config.method) && !config.url?.includes('/login')) {
-      console.log(`Making ${config.method.toUpperCase()} request to ${config.url}`);
       if (!csrfToken) {
-        console.log("No CSRF token cached, fetching...");
         try {
           await fetchCsrfToken();
         } catch (error) {
-          console.error("Failed to fetch CSRF token:", error);
         }
       }
       if (csrfToken) {
         config.headers["X-CSRF-Token"] = csrfToken;
-        console.log("CSRF token attached to request");
       } else {
-        console.log("No CSRF token available");
       }
-    } else if (config.url?.includes('/login')) {
-      console.log(`Making ${config.method.toUpperCase()} request to ${config.url} (CSRF skipped)`);
+    } else if (config.url?.includes('/login')) { 
     }
 
     return config;
   },
   (error) => {
-    console.error("Request Error:", error);
     return Promise.reject(error);
   }
 );
@@ -107,7 +96,6 @@ instance.interceptors.response.use(
                 return instance(config);
               }
             } catch (tokenError) {
-              console.error("Failed to refresh CSRF token:", tokenError);
             }
           }
         } else if (error.response.data.message === "Invalid token") {
@@ -115,10 +103,8 @@ instance.interceptors.response.use(
           window.location.href = "/admin";
         }
       } else {
-        console.error("Response Error:", error.response.data);
       }
     } else {
-      console.error("Error:", error.message);
     }
     return Promise.reject(error);
   }
@@ -575,7 +561,6 @@ export const triggerTelcoRepost = async () => {
 
 export const initiateXAuth = () => {
   const authUrl = `${instance.defaults.baseURL}/auth/x`;
-  console.log("Opening new tab for X authentication:", authUrl);
   window.open(authUrl, "_blank");
 };
 
@@ -584,7 +569,6 @@ export const getRandomContent = async () => {
     const response = await instance.get("/ai/random-content");
     return response?.data;
   } catch (error) {
-    console.error(error);
   }
 };
 
@@ -593,7 +577,6 @@ export const getUtilityBalance = async () => {
     const response = await instance.get("/utility-balance");
     return response?.data;
   } catch (error) {
-    console.error(error);
   }
 };
 

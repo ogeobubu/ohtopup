@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ToastContainer } from 'react-toastify';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ToastContainer, toast } from 'react-toastify';
+import { getFirebaseMessaging, onMessage, isSupported } from './config/firebase';
 import 'react-toastify/dist/ReactToastify.css';
 import Routes from "./routes";
 import ScrollToTop from "./components/ScrollToTop";
@@ -13,6 +14,7 @@ import { FaWhatsapp } from "react-icons/fa";
 
 const App = () => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const isDarkMode = useSelector((state: any) => state.theme?.isDarkMode || false);
   const savedUser = useSelector((state: any) => state.user?.user);
   const savedAdminUser = useSelector((state: any) => state.admin?.user);
@@ -51,6 +53,36 @@ const App = () => {
     document.documentElement.classList.toggle("dark", isDarkMode);
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  // Register service worker for push notifications
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch((error) => {
+        console.error("Push service worker registration failed:", error);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    let disposed = false;
+    let unsubscribe: (() => void) | undefined;
+    isSupported().then((supported) => {
+      if (!supported || disposed) return;
+      const messaging = getFirebaseMessaging();
+      if (!messaging) return;
+      unsubscribe = onMessage(messaging, (payload) => {
+        if (!localStorage.getItem("ohtopup-token")) return;
+        const title = payload.data?.title || payload.notification?.title || "OhTopUp";
+        const body = payload.data?.body || payload.data?.message || payload.notification?.body;
+        toast.info(body ? `${title}: ${body}` : title);
+        void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      });
+    }).catch((error) => console.error("Push message listener failed:", error));
+    return () => {
+      disposed = true;
+      unsubscribe?.();
+    };
+  }, [queryClient]);
 
   // Keep server alive with periodic health checks
   useEffect(() => {

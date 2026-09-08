@@ -261,6 +261,56 @@ router.post("/register-push-token", auth, (req, res) => {
     });
 });
 
+// Web Push (browser) routes — Firebase Cloud Messaging
+const webPushService = require("../services/webPushService");
+
+router.get("/web-push/config", (req, res) => {
+  res.json({
+    projectId: process.env.FIREBASE_PROJECT_ID || null,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || null,
+    appId: process.env.FIREBASE_APP_ID || null,
+  });
+});
+
+router.post("/web-push/subscribe", auth, async (req, res) => {
+  try {
+    const { subscription } = req.body;
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({ message: "Invalid subscription" });
+    }
+    const result = await webPushService.subscribe(
+      req.user.id,
+      subscription,
+      req.headers["user-agent"]
+    );
+    res.json({ message: "Subscribed", id: result._id });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to subscribe" });
+  }
+});
+
+router.delete("/web-push/subscribe", auth, async (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    if (!endpoint) {
+      return res.status(400).json({ message: "Endpoint required" });
+    }
+    await webPushService.unsubscribe(req.user.id, endpoint);
+    res.json({ message: "Unsubscribed" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to unsubscribe" });
+  }
+});
+
+router.get("/web-push/subscriptions", auth, async (req, res) => {
+  try {
+    const subs = await webPushService.getUserSubscriptions(req.user.id);
+    res.json({ subscriptions: subs });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch subscriptions" });
+  }
+});
+
 router.post("/ticket", auth, createTicket);
 router.get("/tickets", auth, getUserTickets);
 router.post("/tickets/:id/reply", auth, replyTicket);
