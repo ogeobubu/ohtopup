@@ -413,10 +413,7 @@ const AdminDiceGame = () => {
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                           <div className="text-xs md:text-sm ot-admin-ink ">
-                            {window.innerWidth < 768
-                              ? new Date(game.playedAt).toLocaleDateString()
-                              : new Date(game.playedAt).toLocaleString()
-                            }
+                            <span className="md:hidden">{new Date(game.playedAt).toLocaleDateString()}</span><span className="hidden md:inline">{new Date(game.playedAt).toLocaleString()}</span>
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">

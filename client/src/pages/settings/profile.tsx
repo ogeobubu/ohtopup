@@ -133,7 +133,7 @@ const Profile = () => {
 
       {/* Phone Number Edit Modal */}
       {isPhoneNumberEditMode && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="ot-responsive-dialog fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white shadow-md rounded-md p-4 md:p-6 w-full max-w-md mx-auto">
             <button
               onClick={closeModal}
@@ -211,7 +211,7 @@ const Profile = () => {
 
       {/* KYC Update Modal */}
       {isKYCEditMode && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="ot-responsive-dialog fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white shadow-md rounded-md p-4 md:p-6 w-full max-w-md mx-auto">
             <button
               onClick={closeKYCModal}
@@ -237,7 +237,7 @@ const Profile = () => {
 
       {/* Delete Confirmation Modal */}
       {isDelete && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="ot-responsive-dialog fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white shadow-md rounded-md p-4 md:p-6 w-full max-w-md mx-auto">
             <button
               onClick={closeDeleteModal}

@@ -34,9 +34,9 @@ const Settings = () => {
       </div>
 
       {/* Main layout container: stacks on small screens, side-by-side on medium screens and up */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+      <div className="flex flex-col xl:flex-row gap-4 md:gap-6">
         {/* Sidebar container */}
-        <div className="w-full md:w-64 flex-shrink-0">
+        <div className="w-full xl:w-64 flex-shrink-0">
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} className="" />
         </div>
         {/* Content area */}

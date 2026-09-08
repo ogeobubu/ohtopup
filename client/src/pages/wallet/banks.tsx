@@ -77,7 +77,7 @@ const Banks: React.FC<BanksProps> = ({ user, handleShowBanks, openModal }) => {
       <div className="mt-5 flex flex-wrap gap-3">
         <div
           onClick={openModal}
-          className="flex border-2 border-dashed border-blue-500 w-full sm:w-[400px] shadow-md justify-center items-center flex-col cursor-pointer rounded-md"
+          className="flex border-2 border-dashed border-blue-500 w-full max-w-[400px] shadow-md justify-center items-center flex-col cursor-pointer rounded-md"
         >
           <span className="text-4xl text-blue-500">+</span>
           <span className="text-blue-600 hover:underline">
@@ -89,7 +89,7 @@ const Banks: React.FC<BanksProps> = ({ user, handleShowBanks, openModal }) => {
           user?.bankAccounts.map((account, index) => (
             <div
               key={index}
-              className="bg-[#0B2253] rounded-md p-4 w-full sm:w-[400px] shadow-md"
+              className="bg-[#0B2253] rounded-md p-4 w-full max-w-[400px] shadow-md"
             >
               <div
                 onClick={() => openDeleteModal(account)}
@@ -155,7 +155,7 @@ const Banks: React.FC<BanksProps> = ({ user, handleShowBanks, openModal }) => {
         ) : (
           <>
             <div className="relative">
-              <div className="bg-[#0B2253] rounded-md p-4 w-full sm:w-[400px] shadow-md backdrop-blur-[12px]">
+              <div className="bg-[#0B2253] rounded-md p-4 w-full max-w-[400px] shadow-md backdrop-blur-[12px]">
                 <div className="flex flex-col cursor-pointer">
                   <div className="w-6 h-6 rounded-full bg-[#415379] flex justify-between items-center mb-5">
                     <FaBuilding

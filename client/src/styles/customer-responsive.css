@@ -79,7 +79,7 @@
 .ot-push-copy { display: flex; align-items: center; gap: 10px; flex: 1 1 260px; }
 .ot-push-copy svg { flex-shrink: 0; color: var(--ot-accent); }
 .ot-push-actions { display: flex; gap: 8px; }
-.ot-auth { min-height: 100dvh; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ot-auth { min-height: 100vh; min-height: 100dvh; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ot-auth-form button { min-height: 44px; }
 .ot-auth input:not([type=checkbox]):not([type=radio]), .ot-auth select, .ot-auth textarea {
   min-width: 0;
@@ -134,4 +134,51 @@
   .ot-shell .ot-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ot-push-actions { width: 100%; }
   .ot-push-actions button { flex: 1; }
+}
+
+/* Keep tab labels readable, with scrolling confined to the tab bar. */
+.ot-utility-tabs {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  justify-content: flex-start;
+  gap: clamp(16px, 3vw, 30px);
+  overscroll-behavior-x: contain;
+}
+.ot-utility-tabs button { flex-shrink: 0; min-height: 44px; white-space: nowrap; }
+.ot-dashboard-heading, .ot-panel-heading { min-width: 0; flex-wrap: wrap; }
+.ot-dashboard-heading > *, .ot-panel-heading > * { min-width: 0; }
+.ot-admin { overflow-wrap: anywhere; }
+.ot-admin-main, .ot-admin-overview-bottom > *, .ot-admin-metric { min-width: 0; }
+.ot-admin-footer, .ot-admin-footer > div { flex-wrap: wrap; }
+.ot-admin .ot-notifications { max-height: calc(100vh - 92px); max-height: calc(100dvh - 92px); overflow-y: auto; }
+.ot-sidebar, .ot-admin-sidebar { overscroll-behavior-y: contain; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
+.ot-admin-login { min-height: 100vh; min-height: 100dvh; }
+.ot-admin-pagination > div { flex-wrap: wrap; }
+
+@media (max-width: 767px), (pointer: coarse) {
+  .ot-admin-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  .ot-admin-main select, .ot-admin-main textarea,
+  .ot-admin-login input, .ot-modal input, .ot-modal select, .ot-modal textarea {
+    font-size: 16px;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .ot-admin .ot-icon-button, .ot-admin-menu-close { min-width: 44px; min-height: 44px; }
+  .ot-admin-nav-group a, .ot-admin-pagination button, .ot-admin-control { min-height: 44px; }
+}
+@media (max-width: 380px) {
+  .ot-admin-metrics { grid-template-columns: minmax(0, 1fr); }
+}
+
+.ot-responsive-dialog { overflow-y: auto; overscroll-behavior: contain; }
+.ot-responsive-dialog > div {
+  min-width: 0;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 380px) {
+  .ot-responsive-dialog > div { padding: 16px; }
 }

@@ -21,7 +21,7 @@ const ConfirmationModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="ot-responsive-dialog fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className={`rounded-lg p-6 w-full max-w-md ${isDarkMode ? 'bg-gray-800' : 'bg-[var(--ot-paper)]'}`}>
         <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
           Confirm Data Purchase

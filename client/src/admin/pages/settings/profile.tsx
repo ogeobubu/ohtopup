@@ -59,7 +59,7 @@ const Profile = () => {
     <div className="space-y-8">
       {/* Profile Header Card */}
       <div className="ot-admin-neutral-card rounded-lg p-8 ">
-        <div className="flex flex-col md:flex-row items-center gap-6">
+        <div className="flex flex-col lg:flex-row flex-wrap items-center gap-6">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-3xl font-bold border-4 border-white/30">
               {user?.username?.charAt(0).toUpperCase()}
@@ -68,10 +68,10 @@ const Profile = () => {
               <FaEdit className="w-4 h-4 text-white" />
             </div>
           </div>
-          <div className="text-center md:text-left">
+          <div className="min-w-0 max-w-full text-center lg:text-left">
             <h2 className="text-3xl font-bold mb-2">{user?.username}</h2>
             <p className="text-blue-100 text-lg mb-2">{user?.email}</p>
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="bg-white/20 px-3 py-1 rounded-full">Admin Account</span>
               <span className="bg-green-500/20 px-3 py-1 rounded-full">Verified</span>
             </div>
@@ -80,7 +80,7 @@ const Profile = () => {
       </div>
 
       {/* Profile Information Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
         <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border ">
           <h3 className="text-xl font-bold mb-6 ot-admin-ink flex items-center gap-2">
@@ -161,7 +161,7 @@ const Profile = () => {
       </div>
 
       {isPhoneNumberEditMode && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="ot-responsive-dialog fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="ot-admin-paper rounded-lg p-8 w-full max-w-lg transform transition-all duration-300 scale-100">
             {/* Header */}
             <div className="text-center mb-6">

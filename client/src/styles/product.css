@@ -186,7 +186,7 @@
 
 .ot-modal-overlay { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:24px; background:#101c2b80; }
 .ot-modal-overlay[hidden] { display:none; }
-.ot-modal { width:100%; min-width:0; max-height:calc(100dvh - 48px); display:flex; flex-direction:column; overflow:hidden; border-radius:10px; background:var(--ot-paper); color:var(--ot-ink); box-shadow:0 16px 60px #0002; }
+.ot-modal { width:100%; min-width:0; max-height:calc(100vh - 48px); max-height:calc(100dvh - 48px); display:flex; flex-direction:column; overflow:hidden; border-radius:10px; background:var(--ot-paper); color:var(--ot-ink); box-shadow:0 16px 60px #0002; }
 .ot-modal:focus { outline:none; }
 .ot-modal-sm { max-width:384px; }.ot-modal-md { max-width:480px; }.ot-modal-lg { max-width:720px; }.ot-modal-xl { max-width:960px; }.ot-modal-full { max-width:1200px; }
 .ot-modal-scroll { min-height:0; overflow-y:auto; overscroll-behavior:contain; scroll-padding:20px; }
@@ -198,7 +198,7 @@
 .ot-modal input,.ot-modal select,.ot-modal textarea { max-width:100%; }
 @media(max-width:639px) {
  .ot-modal-overlay { padding:0; align-items:stretch; }
- .ot-modal { max-width:none; height:100dvh; max-height:100dvh; border-radius:0; }
+ .ot-modal { max-width:none; height:100vh; height:100dvh; max-height:100vh; max-height:100dvh; border-radius:0; }
  .ot-modal-scroll { flex:1; padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); }
  .ot-modal-body { padding:18px 16px 24px; }
  .ot-modal-title { padding:12px 16px; }

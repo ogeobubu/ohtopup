@@ -370,10 +370,7 @@ const DiceGame = () => {
                         {game.gameResult === 'win' ? `Won ${game.winnings} Points` : `Lost ₦${game.entryFee}`}
                       </span>
                       <span className="opacity-75 text-xs">
-                        {window.innerWidth < 768
-                          ? new Date(game.playedAt).toLocaleDateString()
-                          : new Date(game.playedAt).toLocaleString()
-                        }
+                        <span className="md:hidden">{new Date(game.playedAt).toLocaleDateString()}</span><span className="hidden md:inline">{new Date(game.playedAt).toLocaleString()}</span>
                       </span>
                     </div>
                   </div>

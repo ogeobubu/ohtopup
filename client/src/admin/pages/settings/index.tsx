@@ -43,8 +43,8 @@ const Settings = () => {
       </div>
 
       {/* Two-column layout: sidebar + content */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-        <div className="w-full md:w-64 flex-shrink-0">
+      <div className="flex flex-col xl:flex-row gap-4 md:gap-6">
+        <div className="w-full xl:w-64 flex-shrink-0">
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
         <div className="w-full min-w-0">{renderContent()}</div>
