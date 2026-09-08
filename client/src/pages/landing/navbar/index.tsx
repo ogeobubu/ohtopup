@@ -12,6 +12,12 @@ export default function Navbar() {
   const location = useLocation();
   useEffect(() => { setOpen(false); }, [location.pathname]);
   useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1051px)');
+    const closeOnDesktop = () => { if (desktop.matches) setOpen(false); };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
+  }, []);
+  useEffect(() => {
     const close = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
     window.addEventListener('keydown', close);
     return () => window.removeEventListener('keydown', close);

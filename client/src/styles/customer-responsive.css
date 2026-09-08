@@ -1,0 +1,137 @@
+/* Fluid layouts for the public site and customer account. */
+:where(.ot-public, .ot-shell, .ot-auth) {
+  overflow-wrap: anywhere;
+}
+:where(.ot-public, .ot-shell, .ot-auth) :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--ot-accent);
+  outline-offset: 3px;
+}
+:where(.ot-public, .ot-shell, .ot-auth) .ot-icon-button {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.ot-public .ot-container {
+  padding-inline: clamp(16px, 4vw, 40px);
+}
+.ot-hero {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  padding-block: clamp(48px, 7vw, 104px);
+}
+.ot-hero h1 {
+  font-size: clamp(36px, 5vw, 66px);
+  letter-spacing: -.045em;
+  line-height: 1.12;
+}
+.ot-hero-description { font-size: clamp(15px, 1.5vw, 17px); }
+.ot-hero-note, .ot-preview-foot { font-size: 12px; line-height: 1.6; }
+.ot-preview-caption { font-size: 10px; flex-wrap: wrap; }
+.ot-service-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ot-service-tabs button { font-size: 12px; min-height: 64px; }
+.ot-preview-body { padding-inline: clamp(16px, 2vw, 25px); }
+.ot-preview-foot svg { flex-shrink: 0; }
+.ot-explainer, .ot-faq {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 7vw, 100px);
+  padding-block: clamp(48px, 7vw, 96px);
+}
+.ot-public :is(.ot-text-link, .ot-footer-top nav a) { min-height: 44px; }
+.ot-footer-top nav a { display: inline-flex; align-items: center; }
+.ot-faq summary { min-height: 44px; align-items: center; }
+.ot-app-content, .ot-app-main, .ot-auth-form, .ot-auth-aside,
+.ot-dashboard, .ot-overview > *, .ot-activity-name > div { min-width: 0; }
+.ot-shell .ot-app-content { min-height: 100dvh; }
+.ot-shell .ot-app-main { padding: clamp(24px, 3vw, 42px) clamp(16px, 3vw, 48px); }
+.ot-shell .ot-overview { grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); }
+.ot-shell .ot-balance-amount {
+  max-width: 100%;
+  font-size: clamp(28px, 3vw, 37px);
+  overflow-wrap: anywhere;
+}
+.ot-shell .ot-balance-label button { min-width: 44px; min-height: 44px; }
+.ot-shell .ot-panel-heading { flex-wrap: wrap; }
+.ot-shell .ot-panel-heading .ot-text-link { min-height: 44px; }
+.ot-shell .ot-shortcuts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ot-shell .ot-shortcut { font-size: 12px; }
+.ot-shell .ot-payment-note { font-size: 12px; line-height: 1.6; }
+.ot-shell .ot-activity-row, .ot-shell .ot-activity-header {
+  grid-template-columns: minmax(0, 2fr) minmax(0, .8fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+.ot-shell .ot-activity-name strong { line-height: 1.5; }
+.ot-shell .ot-activity-name small { font-size: 12px; }
+.ot-shell .ot-side-link { min-height: 46px; }
+.ot-shell .ot-app-footer { gap: 16px; flex-wrap: wrap; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+.ot-push-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--ot-line);
+  border-radius: 8px;
+  background: var(--ot-paper);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.ot-push-copy { display: flex; align-items: center; gap: 10px; flex: 1 1 260px; }
+.ot-push-copy svg { flex-shrink: 0; color: var(--ot-accent); }
+.ot-push-actions { display: flex; gap: 8px; }
+.ot-auth { min-height: 100dvh; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ot-auth-form button { min-height: 44px; }
+.ot-auth input:not([type=checkbox]):not([type=radio]), .ot-auth select, .ot-auth textarea {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 16px;
+}
+
+@media (max-width: 1050px) {
+  .ot-public .ot-desktop-links, .ot-public .ot-nav-cta { display: none; }
+  .ot-public .ot-mobile-only { display: inline-flex; }
+  .ot-public-nav { height: 76px; gap: 12px; }
+  .ot-mobile-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px clamp(16px, 4vw, 40px) 20px;
+    border-top: 1px solid var(--ot-line);
+  }
+  .ot-mobile-menu a { padding: 12px 0; font-size: 14px; }
+  .ot-shell .ot-overview { grid-template-columns: minmax(0, 1fr); }
+  .ot-auth-aside { padding: 40px 28px; }
+}
+@media (min-width: 768px) and (max-width: 900px) {
+  .ot-auth { grid-template-columns: minmax(0, 1fr); }
+  .ot-auth-aside { display: none; }
+  .ot-auth-form { min-height: 100dvh; }
+}
+@media (max-width: 767px) {
+  .ot-hero, .ot-explainer, .ot-faq { grid-template-columns: minmax(0, 1fr); }
+  .ot-hero { gap: 32px; }
+  .ot-service-preview { max-width: none; }
+  .ot-shell .ot-sidebar { width: min(300px, calc(100vw - 32px)); }
+  .ot-shell .ot-sidebar-brand { padding-inline: 8px; }
+  .ot-shell .ot-app-header { padding-left: 64px; }
+  .ot-shell .ot-header-inner { gap: 8px; }
+  .ot-shell .ot-sidebar-toggle { top: 16px; left: 12px; }
+  .ot-shell .ot-activity-row { grid-template-columns: minmax(0, 1fr) minmax(0, .7fr); }
+  .ot-shell .ot-shortcuts { gap: 8px; }
+  .ot-shell .ot-dashboard-heading h1 { font-size: clamp(25px, 5vw, 30px); }
+  .ot-shell .ot-notifications { max-height: calc(100dvh - 92px); overflow-y: auto; }
+  .ot-auth { grid-template-columns: minmax(0, 1fr); }
+  .ot-auth-form { min-height: 100dvh; padding: 28px max(20px, env(safe-area-inset-left)); }
+  .ot-auth-aside { display: none; }
+  .ot-shell input:not([type=checkbox]):not([type=radio]), .ot-shell select, .ot-shell textarea { font-size: 16px; }
+}
+@media (max-width: 380px) {
+  .ot-public .ot-nav-actions { gap: 2px; }
+  .ot-public .ot-login-link { display: none; }
+  .ot-hero-actions { align-items: stretch; flex-direction: column; gap: 8px; }
+  .ot-hero-actions .ot-text-link { justify-content: center; }
+  .ot-service-preview { padding: 12px; }
+  .ot-shell .ot-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ot-push-actions { width: 100%; }
+  .ot-push-actions button { flex: 1; }
+}
