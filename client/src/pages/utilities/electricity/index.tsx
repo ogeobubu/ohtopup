@@ -1,3 +1,4 @@
+import useQuotedPurchase from '../../../hooks/useQuotedPurchase';
 import PurchaseHeader from "../components/PurchaseHeader";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -67,7 +68,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
         getElectricityLimits(disco)
       ]);
 
-      setCommissionRate(commissionResult.commissionRate || 0);
+      setCommissionRate(0); // Final customer discount comes from the server quote.
       setMinAmount(limitsResult.minAmount || 1000);
       setMaxAmount(limitsResult.maxAmount || 50000);
     } catch (error) {
@@ -147,6 +148,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
     return false;
   };
 
+  const { reviewPurchase, pricingDialog } = useQuotedPurchase('electricity', purchaseElectricity);
+
   const confirmPurchase = async () => {
     try {
       setIsConfirming(true);
@@ -155,12 +158,13 @@ const ElectricityPurchase = ({ isDarkMode }) => {
         serviceID: selectedDisco,
         billersCode: meterNumber,
         variation_code: selectedMeterType,
-        amount: parseInt(selectedAmount),
+        amount: Number(selectedAmount),
         phone: phoneNumber,
         transactionPin: transactionPin,
       };
 
-      const response = await purchaseElectricity(purchaseData);
+      const response = await reviewPurchase(purchaseData);
+      if (!response) return;
       setPurchaseResult(response);
 
       // Show success modal
@@ -221,6 +225,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
   return (
     <div className="ot-utility-intro">
+      {pricingDialog}
       <div><h3>Pay your electricity bill</h3><p>Choose your provider and have your meter number ready.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose provider</button></div>
       <Modal
         isDarkMode={isDarkMode}
@@ -262,7 +267,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           {disco.displayName}
                         </div>
                         <div className="text-xs text-[var(--ot-muted)]">
-                          Commission: {disco.commissionRate}%
+                          Final discount shown at checkout
                         </div>
                       </div>
                     </button>
@@ -820,7 +825,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                     ) : (
                       <div className="flex items-center justify-center gap-1">
                         <FaCreditCard className="text-xs md:text-sm" />
-                        <span>Pay ₦{selectedAmount}</span>
+                        <span>Review final price</span>
                       </div>
                     )}
                   </button>

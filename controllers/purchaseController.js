@@ -7,6 +7,7 @@ const Variation = require('../model/Variation');
 const AirtimeSettings = require('../model/AirtimeSettings');
 const validation = require('../services/validationService');
 const purchases = require('../services/purchaseService');
+const pricingService = require('../services/pricingService');
 const { toKobo } = require('../utils/money');
 const validators = { airtime: 'validateAirtimePurchaseInput', data: 'validateDataPurchaseInput', cable: 'validateCablePurchaseInput', electricity: 'validateElectricityPurchaseInput' };
 const networkCodes = { mtn: '01', glo: '02', airtel: '04', '9mobile': '03' };
@@ -17,12 +18,12 @@ const makeAdapter = provider => {
   adapter.setProvider(provider);
   return adapter;
 };
-const buy = type => async (req, res, next) => {
+const buy = (type, quoteOnly = false) => async (req, res, next) => {
   let reservation;
   try {
-    const input = validation[validators[type]](req);
+    const input = validation[validators[type]](quoteOnly ? { body: { ...req.body, transactionPin: 'quote-only' } } : req);
     const user = await User.findById(req.user.id);
-    if (!user || !await require('../services/pinService').verify(user._id, input.transactionPin)) fail('Invalid transaction PIN');
+    if (!user || (!quoteOnly && !await require('../services/pinService').verify(user._id, input.transactionPin))) fail('Invalid transaction PIN');
     const filter = { isActive: true, supportedServices: type };
     if (input.provider) filter.name = input.provider;
     const provider = await Provider.findOne(filter).sort({ isDefault: -1 });
@@ -30,6 +31,7 @@ const buy = type => async (req, res, next) => {
     if (provider.name === 'clubkonnect' && !['airtime', 'data'].includes(type)) fail('Unsupported provider', 400);
     const adapter = makeAdapter(provider);
     let amount = input.amount;
+    let retailAmount;
     let serviceID = input.serviceID;
     let network;
     let plan;
@@ -37,7 +39,8 @@ const buy = type => async (req, res, next) => {
     if (type === 'data') {
       plan = await SelectedPlan.findOne({ provider: provider._id, planId: input.variation_code, isActive: true, isVisible: true });
       if (plan) {
-        amount = plan.adminPrice ?? plan.amount;
+        amount = plan.amount;
+        retailAmount = plan.adminPrice ?? plan.amount;
         serviceID = plan.serviceId;
         network = plan.network.toLowerCase();
       } else if (provider.name === 'vtpass') {
@@ -52,6 +55,8 @@ const buy = type => async (req, res, next) => {
         String(p.networkId) === networkCodes[network]);
       if (!catalog.success || !current?.productId) fail('Unable to verify the selected data plan', 503);
       providerPlanId = current.productId;
+      amount = Number(current.amount);
+      retailAmount = plan.adminPrice ?? amount;
     }
     if (type === 'cable' && input.subscription_type === 'renew') {
       const response = await require('axios').post(`${adapter.baseUrl}/api/merchant-verify`, {
@@ -77,8 +82,15 @@ const buy = type => async (req, res, next) => {
       if (!networkCodes[network]) fail('Invalid network');
       if (provider.name === 'vtpass') serviceID = `${network === '9mobile' ? 'etisalat' : network}${type === 'data' ? '-data' : ''}`;
     }
+    if (type === 'data' && provider.name === 'vtpass') {
+      const catalog = await adapter.getServiceVariations(serviceID);
+      const current = catalog.variations?.find(p => p.variation_code === input.variation_code);
+      if (!catalog.success || !current) fail('Unable to verify the current data plan price', 503);
+      amount = Number(current.variation_amount);
+      retailAmount = plan.adminPrice ?? amount;
+    }
     // Reject stale or tampered prices; the customer must confirm the current quote.
-    if (toKobo(input.amount) !== toKobo(amount)) fail('Price changed. Refresh the plan and confirm the new price.', 409);
+    if (!quoteOnly && toKobo(input.amount) !== toKobo(amount)) fail('Price changed. Refresh the plan and confirm the new price.', 409);
     let commissionRate = 0;
     if (type === 'airtime') await require('./airtimeController').validatePurchaseLimits(amount, input.phone, user._id);
     if (['airtime', 'data'].includes(type)) {
@@ -97,14 +109,19 @@ const buy = type => async (req, res, next) => {
       const commission = await settings.getCommissionRate(disco);
       commissionRate = commission.success ? commission.commissionRate : 0;
     }
-    if (!Number.isFinite(Number(commissionRate)) || commissionRate < 0 || commissionRate >= 100) fail('Invalid pricing configuration', 503);
-    const cost = Math.round(toKobo(amount) * (1 - commissionRate / 100)) / 100;
+    const rule = await pricingService.findRule({ provider: provider.name, type, network, serviceID, planCode: input.variation_code });
+    const pricing = pricingService.calculate({ amount, retailAmount: retailAmount ?? amount, rule, legacyRate: commissionRate });
+    const cost = pricing.customerCharge;
     const contact = input.billersCode || input.phone;
     const key = req.headers['idempotency-key'] || crypto.randomUUID();
     if (typeof key !== 'string' || !/^[\w-]{8,100}$/.test(key)) fail('Invalid purchase key');
     const identity = { type, provider: String(provider._id), serviceID, contact, amount, variation: input.variation_code, phone: input.phone || input.inputPhone, subscription: input.subscription_type };
+    const quote = pricingService.publicQuote(pricing, identity);
+    if (quoteOnly) return res.json({ ...quote, provider: provider.name, serviceID });
+    // New commission rules always require explicit confirmation of the current server quote.
+    if ((rule || req.body.pricingKey) && req.body.pricingKey !== quote.pricingKey) fail('Price changed. Review the current price and confirm again.', 409);
     reservation = await purchases.begin({ userId: user._id, key, fingerprint: purchases.fingerprint(identity), amount, cost,
-      serviceID, contact, type, provider: provider.name, providerId: provider._id,
+      serviceID, contact, type, provider: provider.name, providerId: provider._id, pricing,
       details: { network, variation_code: input.variation_code, subscription_type: input.subscription_type, dataPlan: input.variation_code } });
     let transaction = reservation.transaction;
     if (!reservation.duplicate) {
@@ -131,7 +148,7 @@ const buy = type => async (req, res, next) => {
     const status = transaction.status;
     return res.status(status === 'delivered' ? 201 : status === 'failed' ? 400 : 202).json({
       message: status === 'delivered' ? 'Purchase successful' : status === 'failed' ? 'Purchase failed; your wallet has been refunded.' : 'Purchase is being checked. Please do not buy again yet.',
-      transaction: { requestId: transaction.requestId, status, amount: transaction.amount, product_name: transaction.product_name, token: transaction.token, units: transaction.units },
+      transaction: { requestId: transaction.requestId, status, amount: transaction.amount, customerCharge: transaction.adjustedAmount, customerDiscountAmount: transaction.discount, product_name: transaction.product_name, token: transaction.token, units: transaction.units },
       newBalance: wallet.balance,
     });
   } catch (error) {

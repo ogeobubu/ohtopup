@@ -9,7 +9,7 @@ require("dotenv").config();
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 
 const checkWalletForDebit = (wallet, amount) => {
-    toKobo(amount, { allowZero: true });
+    toKobo(Math.round(amount * 100) / 100, { allowZero: true });
     if (!wallet) {
          throw { status: 404, message: "Wallet not found." };
     }
@@ -28,7 +28,7 @@ const accounting = require('./accountingService');
 const { randomUUID } = require('crypto');
 
 const changeWallet = async (wallet, amount, direction, options = {}) => {
-  const deltaKobo = direction * toKobo(amount);
+  const deltaKobo = direction * toKobo(Math.round(amount * 100) / 100);
   const key = options.key || randomUUID();
   const work = session => accounting.move({ walletId: wallet._id, deltaKobo,
     key, reason: options.reason || (direction > 0 ? 'credit' : 'debit'), session });

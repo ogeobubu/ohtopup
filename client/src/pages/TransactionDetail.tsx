@@ -71,7 +71,7 @@ const TransactionDetail = () => {
         <div style={{ padding: '0 24px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
           <div>
             <DetailRow label="Transaction ID" value={transaction.requestId} />
-            <DetailRow label="Amount" value={formatNairaAmount(transaction.amount)} color="#27805d" />
+            <DetailRow label={transaction.debitKobo != null ? "Wallet debit" : "Amount"} value={formatNairaAmount(transaction.debitKobo != null ? transaction.debitKobo / 100 : transaction.amount)} color="#27805d" />
             <DetailRow label="Date & Time" value={new Date(transaction.transactionDate).toLocaleString('en-NG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} />
           </div>
           <div>
@@ -95,8 +95,8 @@ const TransactionDetail = () => {
           <div>
             <p className="ot-field-label">Transaction Details</p>
             <DetailRow label="Service ID" value={transaction.serviceID || 'N/A'} />
-            <DetailRow label="Revenue" value={formatNairaAmount(transaction.revenue)} color="#27805d" />
-            <DetailRow label="Commission" value={formatNairaAmount(transaction.amount - transaction.revenue)} color="var(--ot-accent)" />
+            <DetailRow label="Service value" value={formatNairaAmount(transaction.amount)} color="#27805d" />
+            <DetailRow label="Customer discount" value={formatNairaAmount(transaction.discount || 0)} color="var(--ot-accent)" />
           </div>
         </div>
       </div>

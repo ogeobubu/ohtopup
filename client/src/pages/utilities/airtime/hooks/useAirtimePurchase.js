@@ -11,9 +11,7 @@ const useAirtimePurchase = (onSuccess) => {
       onSuccess?.();
     },
 
-    onError: (error) => {
-      toast.error(error.message || "Unable to confirm the purchase. Check your transaction history before trying again.");
-    }
+    onError: () => {}
   });
 };
 

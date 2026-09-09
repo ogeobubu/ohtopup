@@ -1,5 +1,4 @@
 import axios from "axios";
-import { store } from "../store";
 
 const API_URL = "/api/users";
 
@@ -51,24 +50,12 @@ instance.interceptors.request.use(config => {
 
 const getToken = () => {
   try {
-    // Check if user is authenticated in Redux state
-    const state = store.getState();
-    const isUserAuthenticated = state.user?.user !== null;
-    const isAdminAuthenticated = state.admin?.user !== null;
-
-    // Check current path to determine which token to use
     const currentPath = window.location.pathname;
-
     if (currentPath.startsWith('/admin')) {
-      // On admin routes, use admin token only if admin is authenticated
-      return isAdminAuthenticated ? localStorage.getItem("ohtopup-admin-token") : null;
-    } else {
-      // On user routes, use user token only if user is authenticated
-      return isUserAuthenticated ? localStorage.getItem("ohtopup-token") : null;
+      return localStorage.getItem("ohtopup-admin-token");
     }
+    return localStorage.getItem("ohtopup-token");
   } catch (error) {
-    // If store is not available or there's an error, don't attach token
-    console.warn("Unable to check authentication state:", error);
     return null;
   }
 };
@@ -1569,4 +1556,13 @@ export const subscribeWebPush = async (subscription) => {
 export const unsubscribeWebPush = async (endpoint) => {
   const response = await instance.delete(`/web-push/subscribe`, { data: { endpoint } });
   return response?.data;
+};
+
+export const getPurchaseQuote = async (service, data) => {
+  try {
+    const { transactionPin, ...details } = data;
+    return (await instance.post(`/purchase-quote/${service}`, details)).data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Unable to load the current price. Please try again.');
+  }
 };

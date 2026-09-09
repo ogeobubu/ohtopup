@@ -28,7 +28,7 @@ const move = async ({ walletId, deltaKobo, key, reason, session }) => {
   }
   const wallet = await Wallet.findById(walletId).session(session);
   if (!wallet) throw Object.assign(new Error('Wallet not found'), { status: 404 });
-  const before = wallet.balanceKobo ?? toKobo(wallet.balance, { allowZero: true });
+  const before = wallet.balanceKobo != null ? wallet.balanceKobo : Math.round((wallet.balance || 0) * 100);
   const after = before + deltaKobo;
   if (!Number.isSafeInteger(after) || after < 0 || (deltaKobo < 0 && !wallet.isActive)) {
     throw Object.assign(new Error('Insufficient funds or wallet disabled'), { status: 400 });

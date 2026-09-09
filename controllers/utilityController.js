@@ -492,6 +492,7 @@ const getAllUtilityTransactions = async (req, res) => {
       transactions = transactions.map((transaction) => {
         const {
           revenue,
+          pricing,
           discount,
           commissionRate,
           paymentMethod,

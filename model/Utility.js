@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const utilitySchema = new mongoose.Schema(
   {
+    pricing: { type: mongoose.Schema.Types.Mixed },
     operationKey: { type: String, unique: true, sparse: true },
     fingerprint: String,
     walletId: { type: mongoose.Schema.Types.ObjectId, ref: 'Wallet' },

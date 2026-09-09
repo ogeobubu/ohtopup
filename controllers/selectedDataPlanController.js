@@ -52,15 +52,21 @@ const getSelectedPlansForUsers = async (req, res) => {
       .lean();
 
     // Group by network for easier frontend handling
-    const groupedPlans = selectedPlans.reduce((acc, plan) => {
+    const pricedPlans = await Promise.all(selectedPlans.filter(plan => plan.provider?.isActive).map(async plan => {
+      try {
+        const pricing = await require('../services/pricingService').planPricing(plan);
+        return { ...plan, finalPrice: pricing.customerCharge, discountAmount: pricing.customerDiscountAmount, customerDiscountRate: pricing.customerDiscountRate };
+      } catch (error) { if (error.status === 400) return null; throw error; }
+    }));
+    const groupedPlans = pricedPlans.filter(Boolean).reduce((acc, plan) => {
       const network = plan.network.toUpperCase();
       if (!acc[network]) {
         acc[network] = [];
       }
       acc[network].push({
         ...plan,
-        finalPrice: plan.adminPrice || plan.amount,
-        discountAmount: plan.discount > 0 ? (plan.amount * plan.discount / 100) : 0
+        finalPrice: plan.finalPrice,
+        discountAmount: plan.discountAmount
       });
       return acc;
     }, {});
@@ -68,7 +74,7 @@ const getSelectedPlansForUsers = async (req, res) => {
     res.status(200).json({
       message: "Selected data plans retrieved successfully",
       plans: groupedPlans,
-      totalPlans: selectedPlans.length,
+      totalPlans: pricedPlans.filter(Boolean).length,
     });
   } catch (error) {
     console.error("Error fetching selected plans for users:", error);

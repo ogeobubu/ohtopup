@@ -884,3 +884,11 @@ export const getWithdrawalAuditLogs = async (params = {}) => {
     throw new Error(error.response?.data?.message || "Error fetching audit logs");
   }
 };
+
+export const getPricingRules = async () => (await instance.get('/pricing-rules')).data;
+export const getPricingOptions = async (params) => (await instance.get('/pricing-rules/options', { params })).data;
+export const getPricingPreview = async (params) => (await instance.get('/pricing-rules/preview', { params })).data;
+export const savePricingRule = async data => {
+  try { return (await instance.put('/pricing-rules', data)).data; }
+  catch (error) { throw new Error(error.response?.data?.message || 'Unable to save pricing rule'); }
+};

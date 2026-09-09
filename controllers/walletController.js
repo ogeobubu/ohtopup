@@ -478,6 +478,7 @@ const getTransactionDetails = async (req, res) => {
 
       transaction = {
         ...utilityTransaction.toJSON(),
+        pricing: userRole === 'admin' ? utilityTransaction.pricing : undefined,
         transactionType: 'utility',
         // Format for frontend consumption
         id: utilityTransaction._id,

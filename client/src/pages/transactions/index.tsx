@@ -81,7 +81,7 @@ export default function Transactions() {
                       </div></div>
                       <time className="ot-activity-date" dateTime={Number.isNaN(date.getTime()) ? undefined : date.toISOString()}>{Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</time>
                       <span className={`ot-status ot-status-${tone}`}>{label}</span>
-                      <span className="ot-activity-amount">{formatNairaAmount(transaction.amount)}</span>
+                      <span className="ot-activity-amount">{formatNairaAmount(transaction.debitKobo != null ? transaction.debitKobo / 100 : transaction.amount)}</span>
                     </Link>
                   </li>
                 );

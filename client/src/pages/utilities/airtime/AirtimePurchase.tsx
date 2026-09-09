@@ -1,3 +1,4 @@
+import useQuotedPurchase from '../../../hooks/useQuotedPurchase';
 import PurchaseHeader from "../components/PurchaseHeader";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -168,29 +169,17 @@ const AirtimePurchase = ({ isDarkMode }) => {
     }
   };
 
+  const { reviewPurchase, pricingDialog } = useQuotedPurchase('airtime', mutateAsync);
+
   const confirmPurchase = async () => {
     try {
       setIsConfirming(true);
       const formattedPhone = formatPhoneNumber(phoneNumber);
 
-      if (!isOnline) {
-        // Queue transaction for offline processing
-        const queuedTransaction = {
-          type: 'airtime',
-          amount: parseFloat(selectedAmount),
-          phoneNumber: formattedPhone,
-          provider: selectedNetwork,
-          transactionPin: transactionPin
-        };
-
-        addToQueue(queuedTransaction);
-        alert('Transaction queued! It will be processed when you\'re back online.');
-        setIsModalOpen(false);
-        return;
-      }
+      if (!isOnline) return; // A current server quote is required before payment.
 
       // Online purchase
-      await mutateAsync({
+      await reviewPurchase({
         serviceID: selectedNetwork, // This is the network code (e.g., "mtn", "glo")
         amount: selectedAmount,
         phone: formattedPhone,
@@ -203,29 +192,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
     }
   };
 
-  // Commission calculation
-  const calculateCommission = (amount, network) => {
-    if (!airtimeSettings?.settings || !amount) {
-      return { commissionAmount: 0, adjustedAmount: amount };
-    }
-
-    // Check for network-specific commission rate first, then fall back to global
-    const networkSettings = airtimeSettings.settings.networks?.[network];
-    const globalSettings = airtimeSettings.settings.global;
-
-    const commissionRate = networkSettings?.airtimeCommissionRate ||
-                          globalSettings?.airtimeCommissionRate || 0;
-
-    const commissionAmount = (amount * commissionRate) / 100;
-    const adjustedAmount = amount - commissionAmount;
-
-    return { commissionAmount, adjustedAmount, commissionRate };
-  };
-
-  const { commissionAmount, adjustedAmount, commissionRate } = calculateCommission(
-    parseFloat(selectedAmount) || 0,
-    selectedNetwork
-  );
+  // The final discount and debit are loaded from the server when reviewing payment.
+  const commissionAmount = 0, commissionRate = 0, adjustedAmount = 0;
 
   const isLoading = isWalletLoading || isProvidersLoading || isUserLoading || isSettingsLoading;
 
@@ -233,6 +201,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
   return (
     <div className="ot-utility-intro">
+      {pricingDialog}
       <div><h3>Buy airtime</h3><p>Choose your network and the amount you want to top up.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose airtime</button></div>
 
       <Modal
@@ -754,7 +723,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                   </button>
                   <button
                     onClick={confirmPurchase}
-                    disabled={isConfirming}
+                    disabled={isConfirming || !isOnline}
                     className={`flex-1 px-3 md:px-4 py-2 md:py-3 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm ${
                       isOnline
                         ? 'bg-[#3057c5] hover:bg-blue-700'
@@ -770,7 +739,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       <div className="flex items-center justify-center gap-1">
                         <FaCreditCard className="text-xs md:text-sm" />
                         <span>
-                          {isOnline ? 'Pay' : 'Queue'} ₦{commissionAmount > 0 ? adjustedAmount.toFixed(2) : selectedAmount}
+                          {isOnline ? 'Review final price' : 'Connect to review price'}
                           {commissionAmount > 0 && isOnline && (
                             <span className="text-xs block text-green-600">
                               (Save ₦{commissionAmount.toFixed(2)})

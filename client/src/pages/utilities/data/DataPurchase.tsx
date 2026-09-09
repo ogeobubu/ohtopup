@@ -1,3 +1,4 @@
+import useQuotedPurchase from '../../../hooks/useQuotedPurchase';
 import PurchaseHeader from "../components/PurchaseHeader";
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -151,14 +152,16 @@ const DataPurchase = ({ isDarkMode }) => {
 
   const [isConfirming, setIsConfirming] = useState(false);
 
+  const { reviewPurchase, pricingDialog } = useQuotedPurchase('data', mutateAsync);
+
   const confirmPurchase = async () => {
     try {
       setIsConfirming(true);
-      await mutateAsync({
-        serviceID: selectedPlan.providerName,
+      await reviewPurchase({
+        serviceID: selectedPlan.serviceId,
         billersCode: formatPhoneNumber(phoneNumber),
         variation_code: selectedPlan.planId,
-        amount: selectedPlan.finalPrice || selectedPlan.amount,
+        amount: selectedPlan.amount,
         phone: formatPhoneNumber(phoneNumber),
         provider: selectedPlan.providerName,
         transactionPin: transactionPin,
@@ -170,33 +173,14 @@ const DataPurchase = ({ isDarkMode }) => {
     }
   };
 
-  // Commission calculation
-  const calculateCommission = (amount, network) => {
-    if (!airtimeSettings?.settings || !amount) {
-      return { commissionAmount: 0, adjustedAmount: amount };
-    }
-
-    // Check for network-specific commission rate first, then fall back to global
-    const networkSettings = airtimeSettings.settings.networks?.[network];
-    const globalSettings = airtimeSettings.settings.global;
-
-    const commissionRate = networkSettings?.dataCommissionRate ||
-                          globalSettings?.dataCommissionRate || 0;
-
-    const commissionAmount = (amount * commissionRate) / 100;
-    const adjustedAmount = amount - commissionAmount;
-
-    return { commissionAmount, adjustedAmount, commissionRate };
-  };
-
-  const { commissionAmount, adjustedAmount, commissionRate } = selectedPlan && selectedNetwork ?
-    calculateCommission(selectedPlan.finalPrice || selectedPlan.amount, selectedNetwork) :
-    { commissionAmount: 0, adjustedAmount: 0, commissionRate: 0 };
+  // The final discount and debit are loaded from the server when reviewing payment.
+  const commissionAmount = 0, commissionRate = 0, adjustedAmount = 0;
 
   const isLoading = isSelectedPlansLoading || isWalletLoading || isUserLoading || isSettingsLoading;
 
   return (
     <div className="ot-utility-intro">
+      {pricingDialog}
       <div><h3>Buy data</h3><p>Find a data plan for your network and your everyday needs.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose data</button></div>
 
       <Modal
@@ -687,7 +671,7 @@ const DataPurchase = ({ isDarkMode }) => {
                       <div className="flex items-center justify-center gap-1">
                         <FaCreditCard className="text-sm" />
                         <span>
-                          Pay {formatNairaAmount(commissionAmount > 0 ? adjustedAmount : (selectedPlan.finalPrice || selectedPlan.amount))}
+                          Review final price
                           {commissionAmount > 0 && (
                             <span className="text-xs block text-green-600">
                               (Save {formatNairaAmount(commissionAmount)})

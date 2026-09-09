@@ -1,3 +1,4 @@
+import PricingRules from './PricingRules';
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -263,6 +264,7 @@ const ProviderManagement = () => {
   };
 
   const tabs = [
+    { id: "pricing", label: "Customer Discounts", icon: FaPercentage },
     { id: "providers", label: "3rd Party APIs", icon: FaServer },
     { id: "vtpass", label: "VTPass Config", icon: FaBolt },
     { id: "clubkonnect", label: "ClubKonnect Config", icon: FaServer },
@@ -281,6 +283,9 @@ const ProviderManagement = () => {
           {tabs.map(tab => <button key={tab.id} aria-pressed={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}><tab.icon />{tab.label}</button>)}
         </nav>
 
+        {activeTab === "pricing" && <PricingRules />}
+
+        {activeTab !== "pricing" && <p className="text-sm ot-admin-muted mb-4">Use Customer Discounts to split provider commission with customers. Existing commission settings below are fallback customer discounts where no OhTopUp rule matches.</p>}
         {/* Data Plans Tab */}
         {activeTab === "data-plans" && (
           <div className="space-y-4 md:space-y-6">

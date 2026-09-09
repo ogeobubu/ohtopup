@@ -1,6 +1,10 @@
 import React, { useRef, useEffect, useId } from "react";
 import { FiX } from "react-icons/fi";
 
+// Multiple open dialogs must share the scroll lock regardless of closing order.
+let openModalCount = 0;
+let previousBodyOverflow = '';
+
 interface ModalProps {
   isOpen: boolean;
   closeModal: () => void;
@@ -21,7 +25,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal, title, children, isDa
   useEffect(() => {
     if (!isOpen) return;
     const previousFocus = document.activeElement as HTMLElement | null;
-    const overflow = document.body.style.overflow;
+    if (openModalCount === 0) previousBodyOverflow = document.body.style.overflow;
+    openModalCount += 1;
     document.body.style.overflow = 'hidden';
     panel.current?.focus();
     const handleKey = (event: KeyboardEvent) => {
@@ -44,7 +49,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal, title, children, isDa
     const element = panel.current;
     return () => {
       element?.removeEventListener('keydown', handleKey);
-      document.body.style.overflow = overflow;
+      openModalCount -= 1;
+      if (openModalCount === 0) document.body.style.overflow = previousBodyOverflow;
       previousFocus?.focus();
     };
   }, [isOpen]);

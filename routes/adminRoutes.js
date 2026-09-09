@@ -307,4 +307,10 @@ router.delete("/tutorials/:id", authUser, authAdmin, deleteTutorial);
 router.patch("/tutorials/:id/toggle", authUser, authAdmin, toggleTutorialStatus);
 router.get("/tutorials/categories", authUser, authAdmin, getTutorialCategories);
 
+const pricingRules = require('../controllers/pricingController');
+router.get('/pricing-rules', authUser, authAdmin, pricingRules.list);
+router.get('/pricing-rules/options', authUser, authAdmin, pricingRules.options);
+router.get('/pricing-rules/preview', authUser, authAdmin, pricingRules.preview);
+router.put('/pricing-rules', authUser, authAdmin, pricingRules.save);
+
 module.exports = router;

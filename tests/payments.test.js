@@ -293,3 +293,161 @@ test('read-only deployment preflight runs against the isolated replica set', asy
   assert.equal(summary.transactionCapable, true);
   assert.equal(summary.duplicateWalletOwners, 0);
 });
+
+test('admin-only commission rules drive quotes, wallet debit, provider face value and realized margin', async t => {
+  const Rule = require('../model/PricingRule');
+  await Rule.deleteMany({});
+  t.after(() => Rule.deleteMany({}));
+  const { userId, token } = await authenticatedUser('user');
+  const admin = await authenticatedUser('admin');
+  await require('../model/User').updateOne({ _id: userId }, { $set: { transactionPin: '1234' } });
+  await Wallet.create({ userId, balance: 1000 });
+  const { Provider } = require('../model/Provider');
+  await Provider.deleteMany({});
+  await Provider.create({ name: 'vtpass', displayName: 'Test', description: 'Test', credentials: { apiKey: 'test' }, baseUrl: 'https://example.invalid', supportedServices: ['airtime'], isDefault: true });
+  const settings = { provider: 'vtpass', service: 'airtime', network: 'mtn', providerCommissionRate: 2, customerDiscountRate: 1 };
+  assert.equal((await call('/admin/pricing-rules', token, 'PUT', settings)).status, 403);
+  assert.equal((await call('/admin/pricing-rules', admin.token, 'PUT', { ...settings, customerDiscountRate: 3 })).status, 400);
+  assert.equal((await call('/admin/pricing-rules', admin.token, 'PUT', settings)).status, 200);
+  const input = { serviceID: 'mtn', phone: '08012345678', amount: 100, transactionPin: '1234' };
+  const quoted = await call('/users/purchase-quote/airtime', token, 'POST', { ...input, transactionPin: undefined });
+  assert.equal(quoted.status, 200, JSON.stringify(await quoted.clone().json()));
+  const quote = await quoted.json();
+  assert.equal(quote.customerCharge, 99);
+  assert.equal(quote.estimatedProviderCost, undefined);
+  assert.equal((await Wallet.findOne({ userId })).balance, 1000);
+  assert.equal((await call('/users/airtime', token, 'POST', input)).status, 409);
+  let sends = 0;
+  t.mock.method(require('../services/vtpassService').constructor.prototype, 'makePayment', async payload => {
+    sends++;
+    assert.equal(payload.amount, 100);
+    assert.equal((await Wallet.findOne({ userId })).balance, 901);
+    return { code: '000', content: { transactions: { status: 'delivered', total_amount: 98 } } };
+  });
+  const result = await call('/users/airtime', token, 'POST', { ...input, pricingKey: quote.pricingKey });
+  assert.equal(result.status, 201, JSON.stringify(await result.clone().json()));
+  assert.equal(sends, 1);
+  const tx = await Utility.findOne({ user: userId });
+  assert.equal(tx.pricing.customerDiscountAmount, 1);
+  assert.equal(tx.pricing.actualProviderCost, 98);
+  assert.equal(tx.pricing.actualPlatformMargin, 1);
+  assert.equal(tx.debitKobo, 9900);
+  const summary = await (await call('/admin/pricing-rules', admin.token)).json();
+  assert.equal(summary.summary.confirmedMargin, 1);
+  await call('/admin/pricing-rules', admin.token, 'PUT', { ...settings, customerDiscountRate: 0 });
+  assert.equal((await call('/users/airtime', token, 'POST', { ...input, pricingKey: quote.pricingKey })).status, 409);
+  assert.equal(sends, 1);
+});
+
+test('network and plan pricing overrides take precedence, including explicit zero', async t => {
+  const Rule = require('../model/PricingRule');
+  await Rule.deleteMany({});
+  t.after(() => Rule.deleteMany({}));
+  const base = { provider: 'clubkonnect', service: 'data', providerCommissionRate: 2, customerDiscountRate: 1 };
+  await Rule.create([{ ...base, network: '*' }, { ...base, network: 'mtn', customerDiscountRate: 0 }, { ...base, network: 'mtn', planCode: '100MB', customerDiscountRate: 0.5 }]);
+  const service = require('../services/pricingService');
+  assert.equal((await service.findRule({ provider: 'clubkonnect', type: 'data', network: 'mtn' })).customerDiscountRate, 0);
+  assert.equal((await service.findRule({ provider: 'clubkonnect', type: 'data', network: 'mtn', planCode: '100MB' })).customerDiscountRate, 0.5);
+  assert.equal((await service.findRule({ provider: 'clubkonnect', type: 'data', network: 'glo' })).customerDiscountRate, 1);
+});
+
+test('failed discounted purchases refund the actual customer debit once and never earn margin', async () => {
+  const { userId, wallet } = await fixture();
+  const pricing = require('../services/pricingService').calculate({ amount: 100, rule: { providerCommissionType: 'percentage', providerCommissionRate: 2, customerDiscountRate: 1 } });
+  const { transaction } = await purchases.begin({ userId, key: 'discounted-refund', fingerprint: 'discounted-refund', amount: 100, cost: 99, pricing, serviceID: 'mtn', contact: '08012345678', type: 'airtime', provider: 'clubkonnect' });
+  assert.equal((await Wallet.findById(wallet._id)).balance, 901);
+  await purchases.finish(transaction.requestId, { status: 'ORDER_FAILED' });
+  await purchases.finish(transaction.requestId, { status: 'ORDER_FAILED' });
+  assert.equal((await Wallet.findById(wallet._id)).balance, 1000);
+  assert.equal((await Utility.findById(transaction._id)).pricing.actualPlatformMargin, 0);
+  assert.equal(await Entry.countDocuments(), 2);
+});
+
+for (const providerName of ['vtpass', 'clubkonnect']) test(`${providerName} data quote uses current catalog price and retains configured margin`, async t => {
+  const Rule = require('../model/PricingRule');
+  const Plan = require('../model/SelectedDataPlan');
+  const { Provider } = require('../model/Provider');
+  await Promise.all([Rule.deleteMany({}), Plan.deleteMany({}), Provider.deleteMany({})]);
+  t.after(() => Promise.all([Rule.deleteMany({}), Plan.deleteMany({})]));
+  const { userId, token } = await authenticatedUser('user');
+  await require('../model/User').updateOne({ _id: userId }, { $set: { transactionPin: '1234' } });
+  await Wallet.create({ userId, balance: 1000 });
+  const provider = await Provider.create({ name: providerName, displayName: 'Test', description: 'Test', credentials: { apiKey: 'test' }, baseUrl: 'https://example.invalid', supportedServices: ['data'], isDefault: true });
+  await Plan.create({ provider: provider._id, providerName, planId: '100mb', serviceId: 'mtn-data', name: '100MB', displayName: '100MB', amount: 90, network: 'MTN', dataAmount: '100MB', validity: '1 day' });
+  await Rule.create({ provider: providerName, service: 'data', network: 'mtn', providerCommissionRate: 2, customerDiscountRate: 1 });
+  let livePrice = 100;
+  const prototype = require(providerName === 'vtpass' ? '../services/vtpassService' : '../services/clubkonnectService').constructor.prototype;
+  if (providerName === 'vtpass') {
+    t.mock.method(prototype, 'getServiceVariations', async () => ({ success: true, variations: [{ variation_code: '100mb', variation_amount: livePrice }] }));
+  } else {
+    t.mock.method(prototype, 'getDataPlans', async () => ({ success: true, plans: [{ productCode: '100mb', productId: 'provider-product', networkId: '01', amount: livePrice }] }));
+  }
+  let sends = 0;
+  t.mock.method(prototype, providerName === 'vtpass' ? 'makePayment' : 'purchaseData', async (...args) => {
+    sends++;
+    if (providerName === 'vtpass') assert.equal(args[0].amount, 100);
+    else assert.deepEqual(args.slice(0, 3), ['01', 'provider-product', '08012345678']);
+    return providerName === 'vtpass' ? { code: '000', content: { transactions: { status: 'delivered', total_amount: 98 } } } : { status: 'ORDER_COMPLETED', amountcharged: '98.00' };
+  });
+  const input = { serviceID: 'mtn-data', billersCode: '08012345678', phone: '08012345678', amount: 90, variation_code: '100mb', provider: providerName, transactionPin: '1234' };
+  const response = await call('/users/purchase-quote/data', token, 'POST', input);
+  assert.equal(response.status, 200, JSON.stringify(await response.clone().json()));
+  const quote = await response.json();
+  assert.equal(quote.amount, 100);
+  assert.equal(quote.customerCharge, 99);
+  livePrice = 110;
+  assert.equal((await call('/users/data', token, 'POST', { ...input, amount: quote.amount, pricingKey: quote.pricingKey })).status, 409);
+  assert.equal((await Wallet.findOne({ userId })).balance, 1000);
+  livePrice = 100;
+  const delivered = await call('/users/data', token, 'POST', { ...input, amount: quote.amount, pricingKey: quote.pricingKey });
+  assert.equal(delivered.status, 201, JSON.stringify(await delivered.clone().json()));
+  assert.equal(sends, 1);
+  assert.equal((await Wallet.findOne({ userId })).balance, 901);
+  assert.equal((await Utility.findOne({ user: userId })).pricing.actualPlatformMargin, 1);
+});
+
+test('missing provider cost stays unknown until requery and a higher actual cost is recorded as a loss', async () => {
+  const { userId } = await fixture();
+  const pricing = require('../services/pricingService').calculate({ amount: 100, rule: { providerCommissionType: 'percentage', providerCommissionRate: 2, customerDiscountRate: 1 } });
+  const { transaction } = await purchases.begin({ userId, key: 'late-provider-cost', fingerprint: 'late-provider-cost', amount: 100, cost: 99, pricing, serviceID: 'mtn', contact: '08012345678', type: 'airtime', provider: 'vtpass' });
+  const delivered = await purchases.finish(transaction.requestId, { code: '000', content: { transactions: { status: 'delivered' } } });
+  assert.equal(delivered.pricing.actualPlatformMargin, null);
+  const updated = await purchases.finish(transaction.requestId, { code: '000', content: { transactions: { status: 'delivered', total_amount: 100 } } });
+  assert.equal(updated.pricing.actualPlatformMargin, -1);
+  assert.equal(updated.pricing.costVariance, 2);
+  assert.equal((await Wallet.findOne({ userId })).balance, 901, 'provider cost changes do not change the customer charge');
+});
+
+for (const type of ['cable', 'electricity']) test(`${type} customer discount is confirmed before the full service value reaches VTPass`, async t => {
+  const Rule = require('../model/PricingRule');
+  const { Provider } = require('../model/Provider');
+  await Promise.all([Rule.deleteMany({}), Provider.deleteMany({})]);
+  t.after(() => Rule.deleteMany({}));
+  const { userId, token } = await authenticatedUser('user');
+  await require('../model/User').updateOne({ _id: userId }, { $set: { transactionPin: '1234' } });
+  await Wallet.create({ userId, balance: 2000 });
+  await Provider.create({ name: 'vtpass', displayName: 'Test', description: 'Test', credentials: { apiKey: 'test' }, baseUrl: 'https://example.invalid', supportedServices: [type], isDefault: true });
+  const serviceID = type === 'cable' ? 'dstv' : 'ikeja-electric';
+  await Rule.create({ provider: 'vtpass', service: type, network: serviceID, providerCommissionRate: 2, customerDiscountRate: 1 });
+  if (type === 'cable') {
+    t.mock.method(require('axios'), 'post', async () => ({ data: { code: '000', content: { Renewal_Amount: 1000 } } }));
+  } else {
+    const settings = require('../services/electricitySettingsService');
+    t.mock.method(settings, 'getAmountLimits', async () => ({ success: true, minAmount: 1000, maxAmount: 50000 }));
+    t.mock.method(settings, 'getCommissionRate', async () => ({ success: true, commissionRate: 0 }));
+  }
+  t.mock.method(require('../services/vtpassService').constructor.prototype, 'makePayment', async input => {
+    assert.equal(input.amount, 1000);
+    assert.equal((await Wallet.findOne({ userId })).balance, 1010);
+    return { code: '000', purchased_code: 'test-token', content: { transactions: { status: 'delivered', total_amount: 980 } } };
+  });
+  const input = { serviceID, billersCode: '1234567890', phone: '08012345678', amount: 1000, transactionPin: '1234', ...(type === 'cable' ? { subscription_type: 'renew' } : { variation_code: 'prepaid' }) };
+  const response = await call(`/users/purchase-quote/${type}`, token, 'POST', input);
+  assert.equal(response.status, 200, JSON.stringify(await response.clone().json()));
+  const quote = await response.json();
+  assert.equal(quote.customerCharge, 990);
+  const purchase = await call(`/users/${type}`, token, 'POST', { ...input, pricingKey: quote.pricingKey });
+  assert.equal(purchase.status, 201, JSON.stringify(await purchase.clone().json()));
+  const tx = await Utility.findOne({ user: userId });
+  assert.equal(tx.pricing.actualPlatformMargin, 10);
+});

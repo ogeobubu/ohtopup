@@ -1,3 +1,4 @@
+import useQuotedPurchase from '../../../hooks/useQuotedPurchase';
 import React, { useState, useEffect } from "react";
 import Modal from "../../../admin/components/modal";
 import mtn from "../../../assets/mtn.svg";
@@ -142,19 +143,15 @@ const Cable = ({ user, isDarkMode }) => {
     phoneNumber: Yup.string().required("Phone number is required"),
     amount: Yup.number()
       .required("Amount is required")
-      .min(0, "Amount must be at least ₦0")
-      .max(
-        walletData?.balance,
-        `Your wallet balance (₦${walletData?.balance?.toFixed(
-          0
-        )}) is insufficient for this transaction`
-      ),
+      .moreThan(0, "Amount must be greater than ₦0"),
     provider: Yup.string().required("Please select a provider"),
     source: Yup.string().required("Please select a data plan"),
     transactionPin: Yup.string()
       .required("Transaction PIN is required")
       .matches(/^\d{4,6}$/, "Transaction PIN must be 4-6 digits"),
   });
+
+  const { reviewPurchase, pricingDialog } = useQuotedPurchase('cable', mutation.mutateAsync);
 
   const handleSubmit = async (values) => {
     if (isSubmitting) return;
@@ -181,11 +178,13 @@ const Cable = ({ user, isDarkMode }) => {
         subscription_type: "change",
       };
     }
-    mutation.mutate({ ...data, transactionPin: values.transactionPin });
+    await reviewPurchase({ ...data, transactionPin: values.transactionPin });
+    setIsSubmitting(false);
   };
 
   return (
     <div className="ot-utility-intro">
+      {pricingDialog}
       <div><h3>Renew your TV subscription</h3><p>Choose your provider and a package for your next renewal.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose TV package</button></div>
       <Modal
         isOpen={isModalOpen}
@@ -503,12 +502,12 @@ const Cable = ({ user, isDarkMode }) => {
                         >
                           {isSubmitting ? (
                             <>
-                              <span className="opacity-0">Pay Now</span>
+                              <span className="opacity-0">Review final price</span>
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
                               </div>
                             </>
-                          ) : "Pay Now"}
+                          ) : "Review final price"}
                         </Button>
                       ) : (
                         accountNameApi && (

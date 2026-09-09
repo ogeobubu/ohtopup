@@ -391,4 +391,7 @@ router.get("/tutorials", getAllTutorials);
 router.get("/tutorials/:id", getTutorialById);
 router.get("/tutorials/categories/list", getTutorialCategories);
 
+for (const service of ['airtime', 'data', 'cable', 'electricity']) {
+  router.post(`/purchase-quote/${service}`, auth, require('../controllers/purchaseController').buy(service, true));
+}
 module.exports = router;

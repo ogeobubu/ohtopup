@@ -49,7 +49,7 @@ export default function Dashboard() {
           const [tone, label] = statusStyle(tx.status);
           const reference = tx.requestId || tx.reference;
           const date = new Date(tx.createdAt || tx.transactionDate);
-          const content = <><div className="ot-activity-name">{tx.type === 'deposit' ? <FiArrowDownLeft /> : <FiArrowUpRight />}<div><strong>{tx.product_name || tx.type || 'Payment'}</strong><small>{tx.phone || (reference ? `Ref · ${reference.slice(-8)}` : 'Wallet transaction')}</small></div></div><span className="ot-activity-date">{Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span><span className={`ot-status ot-status-${tone}`}>{label}</span><span className="ot-activity-amount">{formatNairaAmount(tx.amount)}</span></>;
+          const content = <><div className="ot-activity-name">{tx.type === 'deposit' ? <FiArrowDownLeft /> : <FiArrowUpRight />}<div><strong>{tx.product_name || tx.type || 'Payment'}</strong><small>{tx.phone || (reference ? `Ref · ${reference.slice(-8)}` : 'Wallet transaction')}</small></div></div><span className="ot-activity-date">{Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span><span className={`ot-status ot-status-${tone}`}>{label}</span><span className="ot-activity-amount">{formatNairaAmount(tx.debitKobo != null ? tx.debitKobo / 100 : tx.amount)}</span></>;
           return <li key={tx._id || reference || i}>{reference ? <Link className="ot-activity-row" to={`/transactions/${encodeURIComponent(reference)}`}>{content}</Link> : <div className="ot-activity-row">{content}</div>}</li>;
         })}</ul>
       </>}

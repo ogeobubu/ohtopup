@@ -214,7 +214,7 @@ const AdminTransactionDetail = ({ isDarkMode }) => {
               <div className="flex items-center gap-3">
                 <FaCreditCard className="text-cyan-500 text-lg" />
                 <div>
-                  <p className="text-sm ot-admin-muted ">Revenue</p>
+                  <p className="text-sm ot-admin-muted ">Customer charge</p>
                   <p className="font-semibold">{formatNairaAmount(transaction.revenue)}</p>
                 </div>
               </div>
@@ -222,14 +222,24 @@ const AdminTransactionDetail = ({ isDarkMode }) => {
               <div className="flex items-center gap-3">
                 <FaCreditCard className="text-emerald-500 text-lg" />
                 <div>
-                  <p className="text-sm ot-admin-muted ">Commission</p>
-                  <p className="font-semibold">{formatNairaAmount(transaction.amount - transaction.revenue)}</p>
+                  <p className="text-sm ot-admin-muted ">Customer discount</p>
+                  <p className="font-semibold">{formatNairaAmount(transaction.discount || 0)}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {transaction.pricing && <section className="ot-panel p-4 sm:p-6 mb-6">
+          <h3 className="mb-4">OhTopUp margin (before fees)</h3>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div><dt>Estimated provider cost</dt><dd>{transaction.pricing.estimatedProviderCost == null ? 'Not configured' : formatNairaAmount(transaction.pricing.estimatedProviderCost)}</dd></div>
+            <div><dt>Estimated margin</dt><dd>{transaction.pricing.estimatedPlatformMargin == null ? 'Not configured' : formatNairaAmount(transaction.pricing.estimatedPlatformMargin)}</dd></div>
+            <div><dt>Reported provider cost</dt><dd>{transaction.pricing.actualProviderCost == null ? 'Awaiting provider cost' : formatNairaAmount(transaction.pricing.actualProviderCost)}</dd></div>
+            <div><dt>Confirmed margin</dt><dd>{transaction.status !== 'delivered' ? 'Not earned' : transaction.pricing.actualPlatformMargin == null ? 'Awaiting provider cost' : formatNairaAmount(transaction.pricing.actualPlatformMargin)}</dd></div>
+          </dl>
+          {transaction.pricing.costVariance > 0 && <p className="ot-field-error mt-4">The provider charged more than the configured estimate. Review this pricing rule.</p>}
+        </section>}
         {/* User Information & Transaction Details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* User Information */}
@@ -270,7 +280,7 @@ const AdminTransactionDetail = ({ isDarkMode }) => {
                 <span className="font-medium">{formatNairaAmount(transaction.discount || 0)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="ot-admin-muted ">Commission Rate:</span>
+                <span className="ot-admin-muted ">Customer discount rate:</span>
                 <span className="font-medium">{transaction.commissionRate}%</span>
               </div>
               <div className="flex justify-between">

@@ -229,59 +229,19 @@ const getSavedVariationsForPricing = async (req, res) => {
     .sort({ priority: -1, network: 1, amount: 1 })
     .lean();
 
-    // Load commission settings
-    const airtimeSettings = await AirtimeSettings.find({ isActive: true });
-
-    const pricingData = selectedPlans.map(plan => {
-      // Normalize network name for commission lookup
-      const network = plan.network.toLowerCase();
-
-      // Handle special network mappings
-      const networkMap = {
-        '9mobile': '9mobile',
-        'airtel': 'airtel',
-        'glo': 'glo',
-        'mtn': 'mtn'
-      };
-      const normalizedNetwork = networkMap[network] || network;
-
-      // Get commission rates for data plans
-      const networkSettings = airtimeSettings.find(setting =>
-        setting.type === 'network' && setting.network === normalizedNetwork
-      );
-      const globalSettings = airtimeSettings.find(setting => setting.type === 'global');
-
-      const commissionRate = Math.floor(networkSettings?.settings?.dataCommissionRate ||
-                           globalSettings?.settings?.dataCommissionRate || 0);
-
-      // Use admin price if set, otherwise use provider amount
-      const basePrice = plan.adminPrice || plan.amount;
-      const discountAmount = plan.discount > 0 ? (basePrice * plan.discount / 100) : 0;
-      const priceAfterDiscount = basePrice - discountAmount;
-
-      // Apply commission
-      const commissionAmount = (priceAfterDiscount * commissionRate) / 100;
-      const finalPrice = priceAfterDiscount - commissionAmount;
-
-      return {
-        id: plan._id,
-        name: plan.displayName || plan.name,
-        price: basePrice,
-        finalPrice: finalPrice,
-        commissionRate: commissionRate,
-        commissionAmount: commissionAmount,
-        discount: plan.discount || 0,
-        discountAmount: discountAmount,
-        dataLimit: plan.dataAmount,
-        validity: plan.validity,
-        planId: plan.planId,
-        serviceID: plan.serviceId,
-        network: plan.network,
-        planType: plan.planType,
-        provider: plan.providerName,
-        type: 'data'
-      };
-    });
+    const pricingData = (await Promise.all(selectedPlans.filter(plan => plan.provider?.isActive).map(async plan => {
+      try {
+        const pricing = await require('../services/pricingService').planPricing(plan);
+        return {
+          id: plan._id, name: plan.displayName || plan.name, price: pricing.retailAmount,
+          finalPrice: pricing.customerCharge, commissionRate: pricing.customerDiscountRate,
+          commissionAmount: pricing.customerDiscountAmount, discount: 0, discountAmount: 0,
+          dataLimit: plan.dataAmount, validity: plan.validity, planId: plan.planId,
+          serviceID: plan.serviceId, network: plan.network, planType: plan.planType,
+          provider: plan.providerName, type: 'data'
+        };
+      } catch (error) { if (error.status === 400) return null; throw error; }
+    }))).filter(Boolean);
 
     res.status(200).json({
       success: true,

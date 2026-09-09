@@ -5,7 +5,7 @@ const { toKobo } = require('../utils/money');
 const crypto = require('crypto');
 const { generateRequestId } = require('../utils');
 
-const begin = async ({ userId, key, fingerprint, amount, cost, serviceID, contact, type, provider, providerId, details = {} }) => {
+const begin = async ({ userId, key, fingerprint, amount, cost, serviceID, contact, type, provider, providerId, pricing, details = {} }) => {
   const debitKobo = toKobo(cost);
   const operationKey = `${userId}:${key}`;
   return accounting.transact(async session => {
@@ -22,7 +22,8 @@ const begin = async ({ userId, key, fingerprint, amount, cost, serviceID, contac
     await accounting.move({ walletId: wallet._id, deltaKobo: -debitKobo, key: `purchase:${requestId}`, reason: `${type} purchase`, session });
     const [transaction] = await Utility.create([{ ...details, operationKey, fingerprint, walletId: wallet._id,
       debitKobo, requestId, user: userId, amount, adjustedAmount: cost, serviceID, phone: contact,
-      type, transactionType: type, product_name: `${type} purchase`, revenue: amount, commissionRate: 0,
+      type, transactionType: type, product_name: `${type} purchase`, revenue: cost, commissionRate: pricing?.customerDiscountRate || 0, discount: pricing?.customerDiscountAmount || 0,
+      ...(pricing && { pricing }),
       status: 'pending', provider, providerId, nextCheckAt: new Date(Date.now() + 120000),
     }], { session });
     return { transaction, duplicate: false };
@@ -41,10 +42,30 @@ const normalize = (provider, response) => {
   }
   return { status: result, raw };
 };
+const recordCosts = (tx, raw) => {
+  if (tx.pricing?.version !== 1) return;
+  const cost = require('./pricingService').actualCost(tx.provider, raw);
+  if (cost !== null) {
+    tx.pricing.actualProviderCost = cost;
+    tx.pricing.costVariance = tx.pricing.estimatedProviderCost == null ? null : Math.round((cost - tx.pricing.estimatedProviderCost) * 100) / 100;
+  }
+  tx.pricing.actualPlatformMargin = tx.status === 'failed' ? 0 :
+    tx.status === 'delivered' && tx.pricing.actualProviderCost != null ? (tx.debitKobo - Math.round(tx.pricing.actualProviderCost * 100)) / 100 : null;
+  tx.markModified('pricing');
+};
 const finish = async (requestId, response) => accounting.transact(async session => {
   const tx = await Utility.findOne({ requestId }).session(session);
   if (!tx || !tx.debitKobo) throw new Error('Purchase reservation missing');
-  if (['delivered', 'failed'].includes(tx.status)) return tx;
+  if (tx.status === 'failed') return tx;
+  if (tx.status === 'delivered') {
+    // A later authenticated requery can supply a previously missing provider cost.
+    const reported = normalize(tx.provider, response);
+    if (reported.status === 'delivered' && tx.pricing?.actualProviderCost == null) {
+      recordCosts(tx, reported.raw);
+      await tx.save({ session });
+    }
+    return tx;
+  }
   const outcome = normalize(tx.provider, response);
   const raw = outcome.raw;
   const token = raw.purchased_code || raw.token || raw.content?.transactions?.purchased_code;
@@ -53,6 +74,7 @@ const finish = async (requestId, response) => accounting.transact(async session 
   if (token) tx.token = String(token);
   if (raw.units || raw.content?.transactions?.units) tx.units = String(raw.units || raw.content.transactions.units);
   tx.providerResponse = raw;
+  recordCosts(tx, raw);
   tx.nextCheckAt = new Date(Date.now() + 120000);
   if (tx.status === 'failed') {
     await accounting.move({ walletId: tx.walletId, deltaKobo: tx.debitKobo, key: `purchase-refund:${requestId}`, reason: 'Confirmed purchase failure', session });
