@@ -16,6 +16,7 @@ const { createLog } = require("./systemLogController");
 
 const fs = require('fs').promises;
 const path = require('path');
+const { toCustomerUtility } = require("../utils/transactionMapper");
 
 // Get stored emails for admin review
 const getStoredEmails = async (req, res) => {
@@ -489,17 +490,7 @@ const getAllUtilityTransactions = async (req, res) => {
         .skip(skip)
         .limit(limit);
 
-      transactions = transactions.map((transaction) => {
-        const {
-          revenue,
-          pricing,
-          discount,
-          commissionRate,
-          paymentMethod,
-          ...transactionWithoutRevenue
-        } = transaction.toObject();
-        return transactionWithoutRevenue;
-      });
+      transactions = transactions.map(toCustomerUtility);
 
       const totalTransactions = await Utility.countDocuments(query);
       const totalPages = Math.ceil(totalTransactions / limit);

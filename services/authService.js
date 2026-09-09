@@ -2,6 +2,7 @@ const User = require("../model/User");
 const Wallet = require("../model/Wallet");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { randomUUID } = require("crypto");
 const { generateConfirmationCode } = require("../utils");
 const {
   sendConfirmationEmail,
@@ -172,11 +173,11 @@ const loginAdminUser = async (email, password) => {
   return token;
 };
 
-const generateRefreshToken = () => {
+const generateRefreshToken = (userId) => {
   return jwt.sign(
-    { type: 'refresh' },
+    { type: 'refresh', userId: String(userId) },
     process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
-    { expiresIn: '30d' }
+    { expiresIn: '30d', jwtid: randomUUID() }
   );
 };
 
@@ -187,6 +188,10 @@ const refreshAccessToken = async (refreshToken) => {
       refreshToken,
       process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
     );
+
+    if (decoded.type !== 'refresh') {
+      throw { status: 401, message: "Invalid refresh token" };
+    }
 
     // Find user with this refresh token
     const user = await User.findOne({
@@ -199,13 +204,17 @@ const refreshAccessToken = async (refreshToken) => {
       throw { status: 401, message: "Invalid or expired refresh token" };
     }
 
+    if (decoded.userId && decoded.userId !== String(user._id)) {
+      throw { status: 401, message: "Invalid refresh token" };
+    }
+
     // Generate new access token
     const payload = { user: { id: user._id, role: user.role } };
     const secret = process.env.JWT_SECRET;
     const newAccessToken = jwt.sign(payload, secret, { expiresIn: "15m" });
 
     // Optionally generate new refresh token (token rotation)
-    const newRefreshToken = generateRefreshToken();
+    const newRefreshToken = generateRefreshToken(user._id);
     const newRefreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     // Update refresh token in database
@@ -253,7 +262,11 @@ const loginUser = async (email, password) => {
     throw { status: 401, message: "Invalid email or password" };
   }
 
-  await sendLoginNotificationEmail(user.email);
+  // Authentication must not wait on an external email provider. SMTP retries can
+  // take minutes and cause the proxy to return 502 even when credentials are valid.
+  void sendLoginNotificationEmail(user.email).catch((error) => {
+    console.error("Login notification failed after authentication:", error.message);
+  });
 
   // Generate access token
   const payload = { user: { id: user._id, role: user.role } };
@@ -261,7 +274,7 @@ const loginUser = async (email, password) => {
   const token = jwt.sign(payload, secret, { expiresIn: "15m" }); // Shorter expiration for access token
 
   // Generate refresh token
-  const refreshToken = generateRefreshToken();
+  const refreshToken = generateRefreshToken(user._id);
   const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
   // Store refresh token in database

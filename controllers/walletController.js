@@ -17,6 +17,7 @@ const dbService = require("../services/dbService");
 const {
   sendTransactionEmailNotification,
 } = require("../controllers/email/sendTransactionEmailNotification");
+const { toCustomerUtility, toCustomerUtilityDetail } = require("../utils/transactionMapper");
 
 const createWallet = async (req, res) => {
   const { userId } = req.body;
@@ -370,30 +371,8 @@ const getTransactionsByUser = async (req, res) => {
 
     // Add utility transactions (higher priority - will override wallet transactions with same reference)
     utilityTransactions.forEach(tx => {
-      const key = tx.requestId; // Use requestId as deduplication key
-      if (transactionMap.has(key)) {
-      }
-      transactionMap.set(key, {
-        ...tx.toJSON(),
-        transactionType: 'utility',
-        // Map utility transaction fields to match wallet transaction format
-        type: tx.type,
-        amount: tx.amount,
-        status: tx.status,
-        createdAt: tx.createdAt,
-        reference: tx.requestId,
-        product_name: tx.product_name,
-        phone: tx.phone,
-        // Enhanced data purchase fields
-        ...(tx.provider && { provider: tx.provider }),
-        ...(tx.network && { network: tx.network }),
-        ...(tx.dataPlan && { dataPlan: tx.dataPlan }),
-        ...(tx.dataAmount && { dataAmount: tx.dataAmount }),
-        ...(tx.validity && { validity: tx.validity }),
-        ...(tx.token && { token: tx.token }),
-        ...(tx.units && { units: tx.units }),
-        ...(tx.subscription_type && { subscription_type: tx.subscription_type }),
-      });
+      const key = tx.requestId;
+      transactionMap.set(key, toCustomerUtility(tx));
     });
 
     // Convert map to array and sort by date
@@ -476,42 +455,17 @@ const getTransactionDetails = async (req, res) => {
         return res.status(403).json({ message: "Access denied. You can only view your own transactions." });
       }
 
-      transaction = {
-        ...utilityTransaction.toJSON(),
-        pricing: userRole === 'admin' ? utilityTransaction.pricing : undefined,
-        transactionType: 'utility',
-        // Format for frontend consumption
-        id: utilityTransaction._id,
-        requestId: utilityTransaction.requestId,
-        serviceID: utilityTransaction.serviceID,
-        status: utilityTransaction.status,
-        type: utilityTransaction.type,
-        product_name: utilityTransaction.product_name,
-        amount: utilityTransaction.amount,
-        phone: utilityTransaction.phone,
-        revenue: utilityTransaction.revenue,
-        discount: utilityTransaction.discount,
-        commissionRate: utilityTransaction.commissionRate,
-        user: {
-          id: utilityTransaction.user._id,
-          username: utilityTransaction.user.username,
-          email: utilityTransaction.user.email,
-          firstName: utilityTransaction.user.firstName,
-          lastName: utilityTransaction.user.lastName,
-          phoneNumber: utilityTransaction.user.phoneNumber
-        },
-        transactionDate: utilityTransaction.createdAt,
-        // Enhanced fields for data purchases
-        provider: utilityTransaction.provider,
-        network: utilityTransaction.network,
-        dataPlan: utilityTransaction.dataPlan,
-        dataAmount: utilityTransaction.dataAmount,
-        validity: utilityTransaction.validity,
-        providerStatus: utilityTransaction.providerStatus,
-        token: utilityTransaction.token,
-        units: utilityTransaction.units,
-        subscription_type: utilityTransaction.subscription_type
-      };
+      transaction = userRole === 'admin'
+        ? {
+            ...utilityTransaction.toJSON(),
+            transactionType: 'utility',
+            user: {
+              id: utilityTransaction.user._id,
+              username: utilityTransaction.user.username,
+              email: utilityTransaction.user.email,
+            },
+          }
+        : toCustomerUtilityDetail(utilityTransaction);
     } else {
       // If not found in Utility, try wallet transactions
       const walletTransaction = await Transaction.findOne({ reference: requestId })

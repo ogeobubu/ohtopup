@@ -8,16 +8,17 @@ import Textarea from "../../components/ui/forms/input";
 import Button from "../../components/ui/forms/button";
 import { loginUser } from "../../api";
 
-const storeToken = (token) => {
+const storeSession = (token: string, refreshToken: string) => {
   localStorage.setItem('ohtopup-token', token);
+  localStorage.setItem('ohtopup-refresh-token', refreshToken);
 };
 
-const Login = ({ darkMode }) => {
+const Login = ({ darkMode }: { darkMode?: boolean }) => {
   const navigate = useNavigate();
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      storeToken(data.token);
+      storeSession(data.token, data.refreshToken);
       toast.success("Login successful!");
       navigate("/dashboard");
     },
@@ -128,7 +129,7 @@ const Login = ({ darkMode }) => {
                     </Button>
                   </div>
                   <p className="text-center">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link to="/create" className="text-blue-500">
                       Create Account
                     </Link>

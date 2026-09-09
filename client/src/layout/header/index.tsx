@@ -41,6 +41,7 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("ohtopup-token");
+    localStorage.removeItem("ohtopup-refresh-token");
     dispatch(clearUserData());
     navigate("/login");
   };

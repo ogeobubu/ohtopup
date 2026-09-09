@@ -5,6 +5,10 @@ const API_URL = "/api/users";
 // CSRF token management
 let csrfToken = null;
 let csrfTokenPromise = null;
+let accessTokenRefreshPromise = null;
+
+const ACCESS_TOKEN_KEY = "ohtopup-token";
+const REFRESH_TOKEN_KEY = "ohtopup-refresh-token";
 
 // Function to fetch CSRF token from backend
 const fetchCsrfToken = async () => {
@@ -54,10 +58,38 @@ const getToken = () => {
     if (currentPath.startsWith('/admin')) {
       return localStorage.getItem("ohtopup-admin-token");
     }
-    return localStorage.getItem("ohtopup-token");
-  } catch (error) {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
+  } catch {
     return null;
   }
+};
+
+const clearCustomerSession = () => {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
+const refreshCustomerAccessToken = () => {
+  if (accessTokenRefreshPromise) return accessTokenRefreshPromise;
+
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (!refreshToken) return Promise.reject(new Error("No refresh token available"));
+
+  accessTokenRefreshPromise = axios
+    .post(`${API_URL}/refresh`, { refreshToken }, { withCredentials: true })
+    .then(({ data }) => {
+      if (!data?.token || !data?.refreshToken) {
+        throw new Error("Invalid token refresh response");
+      }
+      localStorage.setItem(ACCESS_TOKEN_KEY, data.token);
+      localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+      return data.token;
+    })
+    .finally(() => {
+      accessTokenRefreshPromise = null;
+    });
+
+  return accessTokenRefreshPromise;
 };
 
 // Interceptor to attach CSRF token to requests
@@ -93,9 +125,24 @@ instance.interceptors.response.use(
 
     if (error.response) {
       if (error.response.status === 401) {
-        if (error.response.data.message === "Invalid token") {
-          localStorage.removeItem("ohtopup-token");
-          window.location.href = "/login";
+        if (error.response.data.message === "Invalid token" && config && !config._authRetry) {
+          const customerToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+          const requestToken = config.headers?.Authorization;
+          const isCustomerRequest = customerToken && requestToken === `Bearer ${customerToken}`;
+
+          if (isCustomerRequest && localStorage.getItem(REFRESH_TOKEN_KEY)) {
+            config._authRetry = true;
+            try {
+              const newAccessToken = await refreshCustomerAccessToken();
+              config.headers.Authorization = `Bearer ${newAccessToken}`;
+              return instance(config);
+            } catch (refreshError) {
+              console.error("Session refresh failed:", refreshError);
+            }
+          }
+
+          clearCustomerSession();
+          if (!window.location.pathname.startsWith('/login')) window.location.replace("/login");
         }
       } else if (error.response.status === 403) {
         if (error.response.data.message === "Invalid CSRF token") {
@@ -114,8 +161,8 @@ instance.interceptors.response.use(
             }
           }
         } else if (error.response.data.message === "Invalid token") {
-          localStorage.removeItem("ohtopup-token");
-          window.location.href = "/login";
+          clearCustomerSession();
+          if (!window.location.pathname.startsWith('/login')) window.location.replace("/login");
         }
       } else {
         console.error("Response Error:", error.response.data);
@@ -1560,7 +1607,8 @@ export const unsubscribeWebPush = async (endpoint) => {
 
 export const getPurchaseQuote = async (service, data) => {
   try {
-    const { transactionPin, ...details } = data;
+    const details = { ...data };
+    delete details.transactionPin;
     return (await instance.post(`/purchase-quote/${service}`, details)).data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Unable to load the current price. Please try again.');

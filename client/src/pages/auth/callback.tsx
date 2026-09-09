@@ -19,6 +19,9 @@ const OAuthCallback = () => {
     if (token) {
       // Store the token in localStorage
       localStorage.setItem('ohtopup-token', token);
+      // OAuth currently supplies a longer-lived access token, not a refresh token.
+      // Never retain a refresh token from a previous email/password session.
+      localStorage.removeItem('ohtopup-refresh-token');
       toast.success('Successfully signed in with Google!');
       navigate('/dashboard');
     } else {

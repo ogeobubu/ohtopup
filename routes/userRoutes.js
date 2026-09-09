@@ -153,6 +153,7 @@ router.get("/referrals", auth, getReferrals);
 router.post("/verify", verifyUser);
 router.post("/resend-code", resendVerificationCode);
 router.post("/login", loginUser);
+router.post("/refresh", refreshToken);
 router.post("/forgot", forgotPassword);
 router.post("/reset", verifyOtpAndResetPassword);
 router.post("/resend-otp", resendOtp);

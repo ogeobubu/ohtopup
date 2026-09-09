@@ -1,5 +1,3 @@
-import { lazy } from "react";
-import { useSelector } from "react-redux";
 import AuthGuard from "../utils/guard";
 import MainLayout from "../layout/mainLayout";
 import Dashboard from "../pages/dashboard";
@@ -14,11 +12,6 @@ import Rank from "../pages/rank";
 import Support from "../pages/support";
 import DiceGame from "../pages/dice";
 import BetDiceGame from "../pages/betDice";
-
-const TransactionDetailWrapper = () => {
-  const isDarkMode = useSelector((state:any) => state.theme && state.theme.isDarkMode);
-  return <TransactionDetail isDarkMode={isDarkMode} />;
-};
 
 const MainRoutes = {
   path: "/",
@@ -38,7 +31,7 @@ const MainRoutes = {
     },
     {
       path: "transactions/:requestId",
-      element: <TransactionDetailWrapper />,
+      element: <TransactionDetail />,
     },
     {
       path: "wallet",
