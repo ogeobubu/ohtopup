@@ -7,13 +7,14 @@ import { formatNairaAmount } from "../utils";
 
 const TransactionDetail = () => {
   const { requestId } = useParams();
+  const hasValidReference = Boolean(requestId && requestId !== 'undefined' && requestId !== 'null');
   const navigate = useNavigate();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const { data: transactionData, isLoading, error } = useQuery({
     queryKey: ['transaction-detail', requestId],
     queryFn: () => getTransactionDetails(requestId),
-    enabled: !!requestId,
+    enabled: hasValidReference,
   });
 
   const transaction = transactionData?.transaction;
@@ -39,7 +40,7 @@ const TransactionDetail = () => {
     <div className="ot-dashboard">
       <div className="ot-empty">
         <h3>Transaction Not Found</h3>
-        <p>{error?.message || "The requested transaction could not be found."}</p>
+        <p>{!hasValidReference ? "This transaction does not have a valid reference." : error?.message || "The requested transaction could not be found."}</p>
         <button onClick={() => navigate(-1)} className="ot-button ot-button-primary" style={{ marginTop: 12 }}>Go Back</button>
       </div>
     </div>

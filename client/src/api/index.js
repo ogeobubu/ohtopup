@@ -696,7 +696,7 @@ export const getAllUtilityTransactions = async (
     if (type) {
       params.type = type;
     }
-    if (type) {
+    if (requestId) {
       params.requestId = requestId;
     }
 

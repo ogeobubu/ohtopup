@@ -69,11 +69,11 @@ export default function Transactions() {
             <ul className="ot-transactions-list">
               {transactions.map((transaction: any) => {
                 const [tone, label] = statusStyle(transaction.status);
+                const reference = transaction.reference || transaction.requestId;
                 const date = new Date(transaction.createdAt);
                 const token = transaction.token?.includes(":") ? transaction.token.split(":").slice(1).join(":").trim() : transaction.token;
-                return (
-                  <li key={transaction._id || transaction.requestId}>
-                    <Link className="ot-activity-row" to={`/transactions/${encodeURIComponent(transaction.requestId)}`} aria-label={`View ${transaction.product_name || selectedService[1]} transaction ${transaction.requestId}`}>
+                const content = (
+                  <>
                       <div className="ot-activity-name"><ServiceIcon /><div>
                         <strong>{transaction.product_name || transaction.serviceID || selectedService[1]}</strong>
                         <small>{transaction.phone}</small>
@@ -82,7 +82,17 @@ export default function Transactions() {
                       <time className="ot-activity-date" dateTime={Number.isNaN(date.getTime()) ? undefined : date.toISOString()}>{Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</time>
                       <span className={`ot-status ot-status-${tone}`}>{label}</span>
                       <span className="ot-activity-amount">{formatNairaAmount(transaction.debitKobo != null ? transaction.debitKobo / 100 : transaction.amount)}</span>
-                    </Link>
+                  </>
+                );
+                return (
+                  <li key={transaction.id || transaction._id || reference}>
+                    {reference ? (
+                      <Link className="ot-activity-row" to={`/transactions/${encodeURIComponent(reference)}`} aria-label={`View ${transaction.product_name || selectedService[1]} transaction ${reference}`}>
+                        {content}
+                      </Link>
+                    ) : (
+                      <div className="ot-activity-row">{content}</div>
+                    )}
                   </li>
                 );
               })}
