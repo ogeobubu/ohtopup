@@ -171,7 +171,7 @@ const Wallet = () => {
 
             <section className="ot-panel" aria-label="Transactions">
               <div className="ot-panel-heading"><div><h2>Transactions</h2><p>Your recent top-ups.</p></div></div>
-              <div style={{ padding: '0 24px 16px' }}><input type="text" placeholder="Search by reference…" value={reference} onChange={handleSearchChange} className="ot-field" style={{ maxWidth: 320 }} /></div>
+              <div style={{ padding: '0 24px 16px' }}><input type="text" placeholder="Search by reference…" value={reference} onChange={handleSearchChange} className="ot-field" style={{ maxWidth: '100%' }} /></div>
               {transactionsLoading ? (
                 <div className="ot-empty" role="status"><p>Loading your transactions…</p></div>
               ) : transactionsError ? (
@@ -180,8 +180,8 @@ const Wallet = () => {
                 <div className="ot-empty"><p>No transactions found.</p></div>
               ) : (
                 <>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 480 }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--ot-line)' }}>
                           <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reference</th>
