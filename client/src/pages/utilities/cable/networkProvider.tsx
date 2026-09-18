@@ -6,23 +6,24 @@ const NetworkProviderSelector = ({
   onProviderChange,
 }) => {
   return (
-    <div className="flex justify-evenly space-x-4 border border-solid border-[var(--ot-line)] py-2">
+    <div style={{ display: 'flex', justifyContent: 'space-evenly', gap: 16, border: '1px solid var(--ot-line)', padding: '8px 0' }}>
       {providers?.map((provider) => {
         return (
             <button
               key={provider.serviceID}
               type="button"
-              className={`flex justify-center items-center rounded-full h-9 w-9 ${
-                selectedProvider === provider.serviceID
-                  ? "border-2 border-blue-500"
-                  : "border-0"
-              }`}
+              style={{
+                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                width: 36, height: 36, borderRadius: '50%',
+                border: selectedProvider === provider.serviceID ? '2px solid var(--ot-accent)' : '2px solid transparent',
+                background: 'transparent', cursor: 'pointer'
+              }}
               onClick={() => onProviderChange(provider.serviceID)}
             >
               <img
                 src={provider?.image}
                 alt={provider.serviceID}
-                className="h-8 w-8 rounded-full"
+                style={{ width: 32, height: 32, borderRadius: '50%' }}
               />
             </button>
           )

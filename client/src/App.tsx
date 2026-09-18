@@ -108,11 +108,11 @@ const App = () => {
 
   if (userLoading && !savedUser) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading your account...</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">This may take a moment on first load</p>
+      <div className="ot-public" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="ot-spinner" style={{ margin: '0 auto 16px' }} />
+          <p style={{ color: 'var(--ot-muted)' }}>Loading your account...</p>
+          <p style={{ color: 'var(--ot-muted)', fontSize: 13, marginTop: 8 }}>This may take a moment on first load</p>
         </div>
       </div>
     );

@@ -11,25 +11,25 @@ const General = () => {
   };
 
   return (
-    <div className="p-6 border border-solid rounded-md border-gray-200 w-full">
-      <h2 className="text-2xl font-bold mb-4">General Settings</h2>
-      <p className="mb-4 text-gray-600">Toggle dark mode:</p>
-      <label className="flex items-center cursor-pointer">
-        <div className="relative">
+    <div>
+      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>General Settings</h2>
+      <p style={{ color: 'var(--ot-muted)', marginBottom: 16, fontSize: 13 }}>Toggle dark mode:</p>
+      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: 12 }}>
+        <div style={{ position: 'relative' }}>
           <input
             type="checkbox"
             checked={currentTheme === "dark"}
             onChange={handleThemeChange}
-            className="hidden"
+            style={{ display: 'none' }}
           />
-          <div className="block bg-gray-200 w-14 h-8 rounded-full"></div>
-          <div
-            className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ease-in-out ${
-              currentTheme === "dark" ? "translate-x-6 bg-blue-500" : ""
-            }`}
-          ></div>
+          <div style={{ width: 56, height: 32, borderRadius: 16, background: currentTheme === "dark" ? 'var(--ot-accent)' : '#ccc' }} />
+          <div style={{
+            position: 'absolute', left: currentTheme === "dark" ? 28 : 4, top: 4,
+            width: 24, height: 24, borderRadius: '50%', background: '#fff',
+            transition: 'transform 0.2s'
+          }} />
         </div>
-        <span className="ml-3 text-gray-600">
+        <span style={{ fontSize: 13 }}>
           {currentTheme === "dark" ? "Dark Mode" : "Light Mode"}
         </span>
       </label>

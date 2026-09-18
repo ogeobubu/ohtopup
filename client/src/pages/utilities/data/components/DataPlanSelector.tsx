@@ -7,23 +7,23 @@ const DataPlanSelector = ({ providerId, isDarkMode, onChange, value }) => {
 
   if (isLoading) {
     return (
-      <div className="h-12 bg-[var(--ot-bg)]  rounded-lg animate-pulse flex items-center justify-center">
-        <span className="text-[var(--ot-muted)] ">Loading plans...</span>
+      <div style={{ height: 48, background: 'var(--ot-bg)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Loading plans...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-300">
+      <div style={{ padding: 12, background: 'var(--ot-tint)', borderRadius: 8, color: '#b84545', fontSize: 13 }}>
         Failed to load data plans. Please try again.
       </div>
     );
   }
 
   return (
-    <div className="mb-4">
-      <label className="block text-[var(--ot-muted)]  mb-2">Data Plan</label>
+    <div style={{ marginBottom: 16 }}>
+      <label className="ot-field-label">Data Plan</label>
       <Select
         options={options}
         onChange={onChange}
@@ -33,33 +33,29 @@ const DataPlanSelector = ({ providerId, isDarkMode, onChange, value }) => {
         styles={{
           control: (base) => ({
             ...base,
-            backgroundColor: isDarkMode ? '#2d3748' : '#ffffff',
-            borderColor: isDarkMode ? '#4a5568' : '#d1d5db',
-            color: isDarkMode ? '#cbd5e0' : '#000000',
+            backgroundColor: isDarkMode ? '#1a232c' : '#ffffff',
+            borderColor: isDarkMode ? '#303b46' : '#e2e6e9',
+            color: isDarkMode ? '#e9edf1' : '#18232d',
             minHeight: '44px',
           }),
           placeholder: (base) => ({
             ...base,
-            color: isDarkMode ? '#a0aec0' : '#9ca3af',
+            color: isDarkMode ? '#a5afb9' : '#626d79',
           }),
           singleValue: (base) => ({
             ...base,
-            color: isDarkMode ? '#cbd5e0' : '#000000',
+            color: isDarkMode ? '#e9edf1' : '#18232d',
           }),
           menu: (base) => ({
             ...base,
-            backgroundColor: isDarkMode ? '#2d3748' : '#ffffff',
+            backgroundColor: isDarkMode ? '#1a232c' : '#ffffff',
           }),
           option: (base, { isFocused }) => ({
             ...base,
             backgroundColor: isFocused
-              ? isDarkMode
-                ? '#4a5568'
-                : '#e5f3ff'
-              : isDarkMode
-              ? '#2d3748'
-              : '#ffffff',
-            color: isDarkMode ? '#cbd5e0' : '#000000',
+              ? isDarkMode ? '#243245' : '#eef2fa'
+              : isDarkMode ? '#1a232c' : '#ffffff',
+            color: isDarkMode ? '#e9edf1' : '#18232d',
           }),
         }}
       />

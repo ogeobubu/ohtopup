@@ -19,6 +19,8 @@ img, video, svg { max-width: 100%; height: auto; }
 .ot-button-light { background:#fff; color:#18232d; }
 .ot-button-light:hover { background:#e9edfa; }
 .ot-button:disabled { opacity:.5; }
+.ot-spinner { width:48px; height:48px; border:3px solid var(--ot-line); border-top-color:var(--ot-accent); border-radius:50%; animation:ot-spin .6s linear infinite; }
+@keyframes ot-spin { to { transform:rotate(360deg); } }
 .ot-icon-button { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:6px; color:var(--ot-muted); position:relative; }
 .ot-icon-button:hover { background:var(--ot-tint); color:var(--ot-ink); }
 .ot-icon-button svg { width:18px; height:18px; }

@@ -21,55 +21,36 @@ const ConfirmationModal = ({
   };
 
   return (
-    <div className="ot-responsive-dialog fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`rounded-lg p-6 w-full max-w-md ${isDarkMode ? 'bg-gray-800' : 'bg-[var(--ot-paper)]'}`}>
-        <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
-          Confirm Data Purchase
-        </h3>
-        <div className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>
-          <div className="grid grid-cols-2 gap-4 mb-3">
-            <span>Network:</span>
-            <span className="font-medium">{transactionDetails?.providerName}</span>
+    <div className="ot-modal-overlay" onClick={onClose}>
+      <div className="ot-modal ot-modal-md" onClick={e => e.stopPropagation()}>
+        <div className="ot-modal-scroll" style={{ padding: 24 }}>
+          <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 16 }}>Confirm Data Purchase</h3>
+          <div style={{ color: 'var(--ot-muted)', marginBottom: 24, fontSize: 13 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <span>Network:</span>
+              <span style={{ fontWeight: 500, color: 'var(--ot-ink)' }}>{transactionDetails?.providerName}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <span>Phone Number:</span>
+              <span style={{ fontWeight: 500, color: 'var(--ot-ink)' }}>{formatPhoneNumber(transactionDetails?.phoneNumber)}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <span>Data Plan:</span>
+              <span style={{ fontWeight: 500, color: 'var(--ot-ink)' }}>{transactionDetails?.planName}</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <span>Amount:</span>
+              <span style={{ fontWeight: 500, color: 'var(--ot-ink)' }}>{formatNairaAmount(transactionDetails?.amount)}</span>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 mb-3">
-            <span>Phone Number:</span>
-            <span className="font-medium">{formatPhoneNumber(transactionDetails?.phoneNumber)}</span>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <button onClick={onClose} disabled={isLoading} className="ot-button ot-button-secondary">
+              Cancel
+            </button>
+            <button onClick={handleConfirm} disabled={isLoading} className="ot-button ot-button-primary" style={{ minWidth: 120 }}>
+              {isLoading ? 'Processing...' : 'Confirm Purchase'}
+            </button>
           </div>
-          <div className="grid grid-cols-2 gap-4 mb-3">
-            <span>Data Plan:</span>
-            <span className="font-medium">{transactionDetails?.planName}</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <span>Amount:</span>
-            <span className="font-medium">{formatNairaAmount(transactionDetails?.amount)}</span>
-          </div>
-        </div>
-        <div className="flex justify-end space-x-3">
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className={`px-4 py-2 rounded-md ${
-              isDarkMode 
-                ? 'bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50' 
-                : 'bg-[var(--ot-line)] text-[var(--ot-ink)] hover:bg-gray-300 disabled:opacity-50'
-            }`}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={isLoading}
-            className={`px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed relative min-w-[120px]`}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <span className="mr-2">Processing</span>
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-              </span>
-            ) : (
-              "Confirm Purchase"
-            )}
-          </button>
         </div>
       </div>
     </div>

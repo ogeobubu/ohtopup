@@ -14,7 +14,6 @@ const ConfirmationModal = ({
       try {
         await onConfirm();
       } catch (error) {
-        // Error is handled by the parent component
         console.error('Purchase confirmation failed:', error);
       }
     }
@@ -23,99 +22,46 @@ const ConfirmationModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="ot-responsive-dialog fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className={`rounded-2xl shadow-2xl p-8 w-full max-w-lg transform transition-all duration-300 scale-100 ${isDarkMode ? 'bg-gray-800' : 'bg-[var(--ot-paper)]'}`}>
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--ot-tint)] dark:bg-blue-900 rounded-full mb-4">
-            <svg className="h-8 w-8 text-[var(--ot-accent)] dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+    <div className="ot-modal-overlay" onClick={onClose}>
+      <div className="ot-modal ot-modal-md" onClick={e => e.stopPropagation()}>
+        <div className="ot-modal-scroll" style={{ padding: 32 }}>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'var(--ot-tint)', marginBottom: 16 }}>
+              <svg style={{ width: 32, height: 32, color: 'var(--ot-accent)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>Confirm Purchase</h3>
+            <p style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Please review your airtime purchase details</p>
           </div>
-          <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
-            Confirm Purchase
-          </h3>
-          <p className={`text-sm ${isDarkMode ? 'text-[var(--ot-muted)]' : 'text-[var(--ot-muted)]'}`}>
-            Please review your airtime purchase details
-          </p>
-        </div>
 
-        {/* Transaction Details */}
-        <div className={`mb-8 p-6 rounded-xl ${isDarkMode ? 'bg-gray-700' : 'bg-[var(--ot-bg)]'}`}>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center py-2 border-b border-[var(--ot-line)] ">
-              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>Network Provider</span>
-              <span className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
-                {transactionDetails?.providerName}
-              </span>
+          <div style={{ background: 'var(--ot-bg)', borderRadius: 8, padding: 24, marginBottom: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--ot-line)' }}>
+              <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Network Provider</span>
+              <span style={{ fontWeight: 600, fontSize: 17 }}>{transactionDetails?.providerName}</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-[var(--ot-line)] ">
-              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>Phone Number</span>
-              <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-[var(--ot-ink)]'}`}>
-                {formatPhoneNumber(transactionDetails?.phoneNumber)}
-              </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--ot-line)' }}>
+              <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Phone Number</span>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>{formatPhoneNumber(transactionDetails?.phoneNumber)}</span>
             </div>
-            <div className="flex justify-between items-center py-2">
-              <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-[var(--ot-muted)]'}`}>Amount</span>
-              <span className={`font-bold text-xl text-green-600 dark:text-green-400`}>
-                {formatNairaAmount(transactionDetails?.amount)}
-              </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
+              <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Amount</span>
+              <span style={{ fontWeight: 700, fontSize: 17, color: '#27805d' }}>{formatNairaAmount(transactionDetails?.amount)}</span>
             </div>
           </div>
-        </div>
 
-        {/* Warning Message */}
-        <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-amber-900/30 border-amber-600' : 'bg-amber-50 border-amber-200'} border`}>
-          <div className="flex items-start">
-            <svg className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <div>
-              <p className={`text-sm font-medium ${isDarkMode ? 'text-amber-300' : 'text-amber-800'}`}>
-                Important Notice
-              </p>
-              <p className={`text-sm mt-1 ${isDarkMode ? 'text-amber-200' : 'text-amber-700'}`}>
-                Please ensure the phone number and amount are correct. This action cannot be undone.
-              </p>
-            </div>
+          <div style={{ background: '#fef3cd', border: '1px solid #ffc107', borderRadius: 8, padding: 16, marginBottom: 24, fontSize: 13, lineHeight: 1.6 }}>
+            <strong>Important Notice</strong> — Please ensure the phone number and amount are correct. This action cannot be undone.
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex space-x-4">
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-              isDarkMode
-                ? 'bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50'
-                : 'bg-[var(--ot-line)] text-[var(--ot-ink)] hover:bg-gray-300 disabled:opacity-50'
-            }`}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={isLoading}
-            className={`flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-600 hover:from-green-700 hover:to-green-700 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative`}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              <span className="flex items-center justify-center">
-                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Confirm Purchase
-              </span>
-            )}
-          </button>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button onClick={onClose} disabled={isLoading} className="ot-button ot-button-secondary" style={{ flex: 1 }}>
+              Cancel
+            </button>
+            <button onClick={handleConfirm} disabled={isLoading} className="ot-button ot-button-primary" style={{ flex: 1, background: '#27805d' }}>
+              {isLoading ? 'Processing...' : 'Confirm Purchase'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
