@@ -151,7 +151,7 @@ const Notification = () => {
       render: (notification) => (
         <div className="flex space-x-2">
           <button
-            className="ot-admin-control border border-solid border-red-500 flex justify-center items-center rounded-full w-8 h-8 text-red-500 hover:text-red-700"
+            className="min-h-[44px] border border-solid border-red-500 flex justify-center items-center rounded-full w-8 h-8 text-red-500 hover:text-red-700"
             onClick={() => openDeleteModal(notification.id)}
           >
             <FaTrash size={15} />
@@ -164,7 +164,7 @@ const Notification = () => {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="ot-admin-neutral-card rounded-lg p-8 ">
+      <div className="min-w-0 rounded-md border border-line bg-paper rounded-lg p-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <h2 className="text-3xl font-bold mb-2">Notification Management</h2>
@@ -172,7 +172,7 @@ const Notification = () => {
           </div>
           <button
             onClick={toggleModal}
-            className="ot-admin-control ot-admin-action px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform flex items-center gap-2"
+            className="min-h-[44px] bg-tint px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform flex items-center gap-2"
           >
             <FaPlus className="text-sm" />
             Create Notification
@@ -182,38 +182,38 @@ const Notification = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border transition-all duration-300">
+        <div className="bg-paper rounded-lg p-6 border border-line transition-all duration-300">
           <div className="flex items-center gap-4">
-            <div className="ot-admin-neutral-card w-12 h-12 rounded-lg flex items-center justify-center">
+            <div className="min-w-0 rounded-md border border-line bg-paper w-12 h-12 rounded-lg flex items-center justify-center">
               <FaBell className="text-white text-xl" />
             </div>
             <div>
-              <p className="text-sm ot-admin-muted ">Total Notifications</p>
-              <p className="text-2xl font-bold ot-admin-ink ">{notifications.length}</p>
+              <p className="text-sm text-muted">Total Notifications</p>
+              <p className="text-2xl font-bold text-ink">{notifications.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border transition-all duration-300">
+        <div className="bg-paper rounded-lg p-6 border border-line transition-all duration-300">
           <div className="flex items-center gap-4">
-            <div className="ot-admin-neutral-card w-12 h-12 rounded-lg flex items-center justify-center">
+            <div className="min-w-0 rounded-md border border-line bg-paper w-12 h-12 rounded-lg flex items-center justify-center">
               <FaUsers className="text-white text-xl" />
             </div>
             <div>
-              <p className="text-sm ot-admin-muted ">Active Users</p>
-              <p className="text-2xl font-bold ot-admin-ink ">{users.length}</p>
+              <p className="text-sm text-muted">Active Users</p>
+              <p className="text-2xl font-bold text-ink">{users.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border transition-all duration-300">
+        <div className="bg-paper rounded-lg p-6 border border-line transition-all duration-300">
           <div className="flex items-center gap-4">
-            <div className="ot-admin-neutral-card w-12 h-12 rounded-lg flex items-center justify-center">
+            <div className="min-w-0 rounded-md border border-line bg-paper w-12 h-12 rounded-lg flex items-center justify-center">
               <FaPaperPlane className="text-white text-xl" />
             </div>
             <div>
-              <p className="text-sm ot-admin-muted ">Sent Today</p>
-              <p className="text-2xl font-bold ot-admin-ink ">
+              <p className="text-sm text-muted">Sent Today</p>
+              <p className="text-2xl font-bold text-ink">
                 {notifications.filter(n => {
                   const today = new Date();
                   const notificationDate = new Date(n.createdAt);
@@ -226,10 +226,10 @@ const Notification = () => {
       </div>
 
       {/* Search and Filter */}
-      <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border ">
+      <div className="bg-paper rounded-lg p-6 border border-line">
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="relative flex-1">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 ot-admin-muted" />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted" />
             <input
               type="text"
               placeholder="Search notifications by username..."
@@ -238,11 +238,11 @@ const Notification = () => {
                 setSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-3 border ot-admin-border rounded-lg ot-admin-soft ot-admin-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 border border-line rounded-lg bg-bg text-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div className="flex gap-2">
-            <button className="ot-admin-control ot-admin-action px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
+            <button className="min-h-[44px] bg-tint px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2">
               <FaFilter className="text-sm" />
               Filter
             </button>
@@ -251,16 +251,16 @@ const Notification = () => {
       </div>
 
       {/* Notifications Table */}
-      <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden">
-        <div className="p-6 border-b ot-admin-border ">
-          <h3 className="text-xl font-bold ot-admin-ink ">Recent Notifications</h3>
-          <p className="text-sm ot-admin-muted mt-1">Manage and monitor sent notifications</p>
+      <div className="bg-paper rounded-lg border border-line overflow-hidden">
+        <div className="p-6 border-b border-line">
+          <h3 className="text-xl font-bold text-ink">Recent Notifications</h3>
+          <p className="text-sm text-muted mt-1">Manage and monitor sent notifications</p>
         </div>
 
         {isNotificationLoading ? (
           <div className="p-12 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 ot-admin-muted ">Loading notifications...</p>
+            <p className="mt-4 text-muted">Loading notifications...</p>
           </div>
         ) : isNotificationError ? (
           <div className="p-12 text-center">
@@ -271,12 +271,12 @@ const Notification = () => {
           </div>
         ) : notifications.length === 0 ? (
           <div className="p-12 text-center">
-            <FaBell className="text-4xl mx-auto mb-4 opacity-50 ot-admin-muted" />
-            <h3 className="text-xl font-bold mb-2 ot-admin-ink ">No Notifications Found</h3>
-            <p className="ot-admin-muted mb-4">Start by creating your first notification</p>
+            <FaBell className="text-4xl mx-auto mb-4 opacity-50 text-muted" />
+            <h3 className="text-xl font-bold mb-2 text-ink">No Notifications Found</h3>
+            <p className="text-muted mb-4">Start by creating your first notification</p>
             <button
               onClick={toggleModal}
-              className="ot-admin-control ot-admin-action px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+              className="min-h-[44px] bg-tint px-6 py-3 rounded-lg font-semibold transition-all duration-200"
             >
               Create First Notification
             </button>
@@ -284,58 +284,58 @@ const Notification = () => {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="ot-admin-data-table w-full">
-                <thead className="ot-admin-soft ">
+              <table className="w-full border-collapse bg-paper text-ink text-xs w-full">
+                <thead className="bg-bg">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Message
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-paper divide-y divide-gray-200 dark:divide-gray-700">
                   {notifications.map((notification) => (
                     <tr key={notification.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="ot-admin-neutral-card w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                          <div className="min-w-0 rounded-md border border-line bg-paper w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">
                             {notification?.user?.username?.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="text-sm font-medium ot-admin-ink ">
+                            <div className="text-sm font-medium text-ink">
                               {notification?.user?.username}
                             </div>
-                            <div className="text-sm ot-admin-muted ">
+                            <div className="text-sm text-muted">
                               {notification?.user?.email}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm ot-admin-ink max-w-xs truncate">
+                        <div className="text-sm text-ink max-w-xs truncate">
                           {notification.message}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm ot-admin-muted ">
+                        <div className="text-sm text-muted">
                           {new Date(notification.createdAt).toLocaleDateString()}
                         </div>
-                        <div className="text-xs ot-admin-muted ">
+                        <div className="text-xs text-muted">
                           {new Date(notification.createdAt).toLocaleTimeString()}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => openDeleteModal(notification.id)}
-                          className="ot-admin-control ot-admin-action p-2 rounded-lg transition-all duration-200"
+                          className="min-h-[44px] bg-tint p-2 rounded-lg transition-all duration-200"
                           title="Delete Notification"
                         >
                           <FaTrash className="text-sm" />
@@ -347,7 +347,7 @@ const Notification = () => {
               </table>
             </div>
 
-            <div className="p-6 border-t ot-admin-border ">
+            <div className="p-6 border-t border-line">
               <ModernPagination
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -361,16 +361,16 @@ const Notification = () => {
       {/* Create Notification Modal */}
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="ot-admin-paper rounded-lg p-8 w-full max-w-lg transform transition-all duration-300 scale-100">
+          <div className="bg-paper rounded-lg p-8 w-full max-w-lg transform transition-all duration-300 scale-100">
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="ot-admin-neutral-card inline-flex items-center justify-center w-16 h-16 dark:from-blue-900/20 dark:to-blue-800/20 rounded-full mb-4">
+              <div className="min-w-0 rounded-md border border-line bg-paper inline-flex items-center justify-center w-16 h-16 dark:from-blue-900/20 dark:to-blue-800/20 rounded-full mb-4">
                 <FaBell className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold ot-admin-ink ">
+              <h3 className="text-2xl font-bold text-ink">
                 Create Notification
               </h3>
-              <p className="text-sm ot-admin-muted ">
+              <p className="text-sm text-muted">
                 Send a notification to users
               </p>
             </div>
@@ -378,7 +378,7 @@ const Notification = () => {
             {/* Form */}
             <form onSubmit={formik.handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium ot-admin-ink mb-2">
+                <label className="block text-sm font-medium text-ink mb-2">
                   Notification Type
                 </label>
                 <input
@@ -388,7 +388,7 @@ const Notification = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   placeholder="e.g., System Update, Promotion"
-                  className="w-full px-4 py-3 border ot-admin-border rounded-lg ot-admin-soft ot-admin-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-line rounded-lg bg-bg text-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 {formik.touched.type && formik.errors.type && (
                   <div className="text-red-600 text-sm mt-1">{formik.errors.type}</div>
@@ -396,7 +396,7 @@ const Notification = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium ot-admin-ink mb-2">
+                <label className="block text-sm font-medium text-ink mb-2">
                   Select Recipients
                 </label>
                 <Select
@@ -422,7 +422,7 @@ const Notification = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium ot-admin-ink mb-2">
+                <label className="block text-sm font-medium text-ink mb-2">
                   Message
                 </label>
                 <textarea
@@ -432,7 +432,7 @@ const Notification = () => {
                   onBlur={formik.handleBlur}
                   placeholder="Enter your notification message..."
                   rows={4}
-                  className="w-full px-4 py-3 border ot-admin-border rounded-lg ot-admin-soft ot-admin-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-line rounded-lg bg-bg text-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />
                 {formik.touched.message && formik.errors.message && (
                   <div className="text-red-600 text-sm mt-1">{formik.errors.message}</div>
@@ -444,14 +444,14 @@ const Notification = () => {
                 <button
                   type="button"
                   onClick={toggleModal}
-                  className="ot-admin-control flex-1 px-6 py-3 bg-gray-200 ot-admin-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300"
+                  className="min-h-[44px] flex-1 px-6 py-3 bg-gray-200 text-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!formik.values.type || !formik.values.user || !formik.values.message}
-                  className="ot-admin-control flex-1 px-6 py-3 ot-admin-action rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
+                  className="min-h-[44px] flex-1 px-6 py-3 bg-tint rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
                 >
                   <span className="flex items-center justify-center">
                     <FaPaperPlane className="h-5 w-5 mr-2" />
@@ -467,15 +467,15 @@ const Notification = () => {
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="ot-admin-paper rounded-lg p-8 w-full max-w-md transform transition-all duration-300 scale-100">
+          <div className="bg-paper rounded-lg p-8 w-full max-w-md transform transition-all duration-300 scale-100">
             <div className="text-center mb-6">
-              <div className="ot-admin-neutral-card inline-flex items-center justify-center w-16 h-16 dark:from-red-900/20 dark:to-red-800/20 rounded-full mb-4">
+              <div className="min-w-0 rounded-md border border-line bg-paper inline-flex items-center justify-center w-16 h-16 dark:from-red-900/20 dark:to-red-800/20 rounded-full mb-4">
                 <FaTrash className="h-8 w-8 text-red-600" />
               </div>
-              <h3 className="text-2xl font-bold ot-admin-ink ">
+              <h3 className="text-2xl font-bold text-ink">
                 Delete Notification
               </h3>
-              <p className="text-sm ot-admin-muted ">
+              <p className="text-sm text-muted">
                 Are you sure you want to delete this notification? This action cannot be undone.
               </p>
             </div>
@@ -483,13 +483,13 @@ const Notification = () => {
             <div className="flex space-x-4">
               <button
                 onClick={closeDeleteModal}
-                className="ot-admin-control flex-1 px-6 py-3 bg-gray-200 ot-admin-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300"
+                className="min-h-[44px] flex-1 px-6 py-3 bg-gray-200 text-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteData(userIdToDelete)}
-                className="ot-admin-control flex-1 px-6 py-3 ot-admin-action rounded-lg font-semibold transition-all duration-200 transform "
+                className="min-h-[44px] flex-1 px-6 py-3 bg-tint rounded-lg font-semibold transition-all duration-200 transform"
               >
                 Delete
               </button>

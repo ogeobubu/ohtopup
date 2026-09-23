@@ -3,14 +3,121 @@
 @tailwind utilities;
 
 @layer base {
-  * { box-sizing: border-box; }
-  html { font-size: 16px; -webkit-text-size-adjust: 100%; }
-  body { margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.9375rem; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-  button, input, select, textarea { font: inherit; }
-  button, a, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
-  :focus-visible { outline: 2px solid #3458cf; outline-offset: 4px; }
-  button:disabled { cursor: not-allowed; }
-  h1, h2, h3, h4 { text-wrap: balance; }
-  #root { min-height: 100vh; }
+  :root {
+    --ot-bg: #f7f8fa;
+    --ot-paper: #fff;
+    --ot-ink: #18232d;
+    --ot-muted: #626d79;
+    --ot-line: #e2e6e9;
+    --ot-accent: #3057c5;
+    --ot-tint: #eef2fa;
+    --ot-warm: #f6f5f1;
+  }
+
+  .dark {
+    --ot-bg: #12191f;
+    --ot-paper: #1a232c;
+    --ot-ink: #e9edf1;
+    --ot-muted: #a5afb9;
+    --ot-line: #303b46;
+    --ot-accent: #9bb4ff;
+    --ot-tint: #243245;
+    --ot-warm: #172027;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  body {
+    margin: 0;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid #3458cf;
+    outline-offset: 4px;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
-.PhoneInputInput { background: none !important; }
+
+@layer components {
+  .PhoneInputInput {
+    background: none !important;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+  }
+}

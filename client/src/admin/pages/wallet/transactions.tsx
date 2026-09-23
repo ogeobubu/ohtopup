@@ -43,7 +43,7 @@ const Transactions = () => {
   };
 
   const getSortIcon = (field) => {
-    if (sortField !== field) return <FaSort className="ml-1 h-3 w-3 ot-admin-muted" />;
+    if (sortField !== field) return <FaSort className="ml-1 h-3 w-3 text-muted" />;
     return sortOrder === 'asc'
       ? <FaSortUp className="ml-1 h-3 w-3 text-blue-600" />
       : <FaSortDown className="ml-1 h-3 w-3 text-blue-600" />;
@@ -57,12 +57,12 @@ const Transactions = () => {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="ot-admin-page-title text-2xl font-bold ot-admin-ink ">Transactions</h1>
+          <h1 className="text-[26px] font-mediumish leading-tight tracking-[-0.6px] text-ink text-2xl font-bold text-ink">Transactions</h1>
           <div className="w-24 h-10 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
         </div>
 
         {/* Filters Skeleton */}
-        <div className="ot-admin-paper rounded-lg p-6">
+        <div className="bg-paper rounded-lg p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[...Array(4)].map((_, index) => (
               <div key={index}>
@@ -74,10 +74,10 @@ const Transactions = () => {
         </div>
 
         {/* Table Skeleton */}
-        <div className="ot-admin-paper rounded-lg overflow-hidden">
+        <div className="bg-paper rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="ot-admin-data-table min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="ot-admin-soft ">
+            <table className="w-full border-collapse bg-paper text-ink text-xs min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-bg">
                 <tr>
                   <th className="px-6 py-3 text-left">
                     <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-20 animate-pulse"></div>
@@ -102,7 +102,7 @@ const Transactions = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="bg-paper divide-y divide-gray-200 dark:divide-gray-700">
                 {[...Array(5)].map((_, index) => (
                   <tr key={index} className="animate-pulse">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -149,10 +149,10 @@ const Transactions = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="ot-admin-page-title text-2xl font-bold ot-admin-ink ">Transactions</h1>
+        <h1 className="text-[26px] font-mediumish leading-tight tracking-[-0.6px] text-ink text-2xl font-bold text-ink">Transactions</h1>
         <button
           onClick={() => refetch()}
-          className="ot-admin-control inline-flex items-center px-4 py-2 border ot-admin-border rounded-md text-sm font-medium ot-admin-ink ot-admin-paper hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="min-h-[44px] inline-flex items-center px-4 py-2 border border-line rounded-md text-sm font-medium text-ink bg-paper hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           <FaFilter className="mr-2 h-4 w-4" />
           Refresh
@@ -160,31 +160,31 @@ const Transactions = () => {
       </div>
 
       {/* Filters */}
-      <div className="ot-admin-paper rounded-lg p-6">
+      <div className="bg-paper rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium ot-admin-ink mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               Search
             </label>
             <div className="relative">
-              <FaSearch className="absolute left-3 top-3 h-4 w-4 ot-admin-muted" />
+              <FaSearch className="absolute left-3 top-3 h-4 w-4 text-muted" />
               <input
                 type="text"
                 placeholder="Search by reference..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full px-3 py-2 border ot-admin-border rounded-md focus:ring-blue-500 focus:border-blue-500 "
+                className="pl-10 w-full px-3 py-2 border border-line rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium ot-admin-ink mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               Type
             </label>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border ot-admin-border rounded-md focus:ring-blue-500 focus:border-blue-500 "
+              className="w-full px-3 py-2 border border-line rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Types</option>
               <option value="deposit">Deposit</option>
@@ -192,13 +192,13 @@ const Transactions = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium ot-admin-ink mb-2">
+            <label className="block text-sm font-medium text-ink mb-2">
               Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border ot-admin-border rounded-md focus:ring-blue-500 focus:border-blue-500 "
+              className="w-full px-3 py-2 border border-line rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
@@ -215,7 +215,7 @@ const Transactions = () => {
                 setStatusFilter('');
                 setCurrentPage(1);
               }}
-              className="ot-admin-control w-full px-4 py-2 ot-admin-soft ot-admin-ink rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="min-h-[44px] w-full px-4 py-2 bg-bg text-ink rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Clear Filters
             </button>
@@ -225,13 +225,13 @@ const Transactions = () => {
 
       {/* Transactions Table */}
       {data && data.transactions && data.transactions.length > 0 ? (
-        <div className="ot-admin-paper rounded-lg overflow-hidden">
+        <div className="bg-paper rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="ot-admin-data-table min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="ot-admin-soft ">
+            <table className="w-full border-collapse bg-paper text-ink text-xs min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-bg">
                 <tr>
                   <th
-                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                     onClick={() => handleSort('reference')}
                   >
                     <div className="flex items-center">
@@ -239,11 +239,11 @@ const Transactions = () => {
                       {getSortIcon('reference')}
                     </div>
                   </th>
-                  <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     User
                   </th>
                   <th
-                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                     onClick={() => handleSort('amount')}
                   >
                     <div className="flex items-center">
@@ -251,11 +251,11 @@ const Transactions = () => {
                       {getSortIcon('amount')}
                     </div>
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Type
                   </th>
                   <th
-                    className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                     onClick={() => handleSort('createdAt')}
                   >
                     <div className="flex items-center">
@@ -263,26 +263,26 @@ const Transactions = () => {
                       {getSortIcon('createdAt')}
                     </div>
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="bg-paper divide-y divide-gray-200 dark:divide-gray-700">
                 {data.transactions.map((transaction) => (
                   <tr key={transaction._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div>
-                          <div className="text-sm font-medium ot-admin-ink ">
+                          <div className="text-sm font-medium text-ink">
                             {transaction.reference && transaction.reference.length > 15
                               ? `${transaction.reference.slice(0, 15)}...`
                               : transaction.reference}
                           </div>
-                          <div className="text-sm ot-admin-muted ">
+                          <div className="text-sm text-muted">
                             ID: {transaction._id.slice(-8)}
                           </div>
                         </div>
@@ -291,28 +291,28 @@ const Transactions = () => {
                     <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-8 w-8">
-                          <div className="ot-admin-neutral-card h-8 w-8 rounded-full flex items-center justify-center">
+                          <div className="min-w-0 rounded-md border border-line bg-paper h-8 w-8 rounded-full flex items-center justify-center">
                             <span className="text-xs font-medium text-white">
                               {(transaction.user?.username || "N/A").charAt(0).toUpperCase()}
                             </span>
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium ot-admin-ink ">
+                          <div className="text-sm font-medium text-ink">
                             {transaction.user?.username || "N/A"}
                           </div>
-                          <div className="text-sm ot-admin-muted ">
+                          <div className="text-sm text-muted">
                             {transaction.user?.email || "N/A"}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold ot-admin-ink ">
+                      <div className="text-sm font-semibold text-ink">
                         ₦{transaction.amount.toLocaleString('en-NG')}
                       </div>
                       {transaction.type === 'withdrawal' && transaction.details && (
-                        <div className="text-xs ot-admin-muted space-y-1">
+                        <div className="text-xs text-muted space-y-1">
                           {transaction.details.originalAmount && (
                             <div>Requested: ₦{transaction.details.originalAmount.toLocaleString('en-NG')}</div>
                           )}
@@ -327,7 +327,7 @@ const Transactions = () => {
                         </div>
                       )}
                       {transaction.type === 'withdrawal' && transaction.bankName && (
-                        <div className="text-xs ot-admin-muted ">
+                        <div className="text-xs text-muted">
                           {transaction.bankName}
                         </div>
                       )}
@@ -341,7 +341,7 @@ const Transactions = () => {
                         {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
                       </span>
                     </td>
-                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm ot-admin-muted ">
+                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-muted">
                       <div>
                         <div>{new Date(transaction.timestamp).toLocaleDateString()}</div>
                         <div className="text-xs">{new Date(transaction.timestamp).toLocaleTimeString()}</div>
@@ -353,7 +353,7 @@ const Transactions = () => {
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => handleViewDetails(transaction)}
-                        className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border ot-admin-border text-xs font-medium rounded-md ot-admin-ink ot-admin-paper hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-line text-xs font-medium rounded-md text-ink bg-paper hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                         title="View transaction details"
                       >
                         <FaEye className="mr-1 h-3 w-3" />
@@ -368,26 +368,26 @@ const Transactions = () => {
           </div>
 
           {/* Pagination */}
-          <div className="ot-admin-paper px-4 py-3 flex items-center justify-between border-t ot-admin-border sm:px-6">
+          <div className="bg-paper px-4 py-3 flex items-center justify-between border-t border-line sm:px-6">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="ot-admin-control relative inline-flex items-center px-4 py-2 border ot-admin-border text-sm font-medium rounded-md ot-admin-ink ot-admin-paper hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-h-[44px] relative inline-flex items-center px-4 py-2 border border-line text-sm font-medium rounded-md text-ink bg-paper hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
               <button
                 onClick={() => setCurrentPage(Math.min(data.totalPages, currentPage + 1))}
                 disabled={currentPage === data.totalPages}
-                className="ot-admin-control ml-3 relative inline-flex items-center px-4 py-2 border ot-admin-border text-sm font-medium rounded-md ot-admin-ink ot-admin-paper hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-h-[44px] ml-3 relative inline-flex items-center px-4 py-2 border border-line text-sm font-medium rounded-md text-ink bg-paper hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
             </div>
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm ot-admin-ink ">
+                <p className="text-sm text-ink">
                   Showing <span className="font-medium">{(currentPage - 1) * limit + 1}</span> to{' '}
                   <span className="font-medium">
                     {Math.min(currentPage * limit, data.totalTransactions)}
@@ -400,7 +400,7 @@ const Transactions = () => {
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="ot-admin-control relative inline-flex items-center px-2 py-2 rounded-l-md border ot-admin-border ot-admin-paper text-sm font-medium ot-admin-muted hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-h-[44px] relative inline-flex items-center px-2 py-2 rounded-l-md border border-line bg-paper text-sm font-medium text-muted hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="sr-only">Previous</span>
                     ‹
@@ -411,10 +411,10 @@ const Transactions = () => {
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`ot-admin-control relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        className={`min-h-[44px] relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                           pageNum === currentPage
                             ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                            : 'ot-admin-paper ot-admin-border ot-admin-muted hover:bg-gray-50'
+                            : 'bg-paper border-line text-muted hover:bg-gray-50'
                         }`}
                       >
                         {pageNum}
@@ -424,7 +424,7 @@ const Transactions = () => {
                   <button
                     onClick={() => setCurrentPage(Math.min(data.totalPages, currentPage + 1))}
                     disabled={currentPage === data.totalPages}
-                    className="ot-admin-control relative inline-flex items-center px-2 py-2 rounded-r-md border ot-admin-border ot-admin-paper text-sm font-medium ot-admin-muted hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-h-[44px] relative inline-flex items-center px-2 py-2 rounded-r-md border border-line bg-paper text-sm font-medium text-muted hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="sr-only">Next</span>
                     ›
@@ -436,11 +436,11 @@ const Transactions = () => {
         </div>
       ) : (
         <div className="text-center py-12">
-          <div className="mx-auto w-24 h-24 ot-admin-soft rounded-full flex items-center justify-center mb-4">
-            <FaSearch className="h-12 w-12 ot-admin-muted" />
+          <div className="mx-auto w-24 h-24 bg-bg rounded-full flex items-center justify-center mb-4">
+            <FaSearch className="h-12 w-12 text-muted" />
           </div>
-          <h3 className="text-lg font-medium ot-admin-ink mb-2">No transactions found</h3>
-          <p className="ot-admin-muted ">
+          <h3 className="text-lg font-medium text-ink mb-2">No transactions found</h3>
+          <p className="text-muted">
             {searchQuery || typeFilter || statusFilter
               ? "Try adjusting your filters to see more results."
               : "There are no transactions to display at the moment."}
@@ -451,14 +451,14 @@ const Transactions = () => {
       {/* Transaction Detail Modal */}
       {showDetailModal && selectedTransaction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]" style={{ zIndex: 9999 }}>
-          <div className="ot-admin-paper rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b ot-admin-border ">
-              <h3 className="text-lg font-semibold ot-admin-ink ">
+          <div className="bg-paper rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-line">
+              <h3 className="text-lg font-semibold text-ink">
                 Transaction Details
               </h3>
               <button
                 onClick={closeDetailModal}
-                className="ot-admin-control ot-admin-muted hover:text-gray-600 dark:hover:text-gray-300"
+                className="min-h-[44px] text-muted hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <FaTimes className="h-5 w-5" />
               </button>
@@ -467,25 +467,25 @@ const Transactions = () => {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink ">
+                  <label className="block text-sm font-medium text-ink">
                     Reference
                   </label>
-                  <p className="mt-1 text-sm ot-admin-ink ">
+                  <p className="mt-1 text-sm text-ink">
                     {selectedTransaction.reference}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink ">
+                  <label className="block text-sm font-medium text-ink">
                     Type
                   </label>
-                  <p className="mt-1 text-sm ot-admin-ink capitalize">
+                  <p className="mt-1 text-sm text-ink capitalize">
                     {selectedTransaction.type}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink ">
+                  <label className="block text-sm font-medium text-ink">
                     Status
                   </label>
                   <div className="mt-1">
@@ -494,32 +494,32 @@ const Transactions = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink ">
+                  <label className="block text-sm font-medium text-ink">
                     Date
                   </label>
-                  <p className="mt-1 text-sm ot-admin-ink ">
+                  <p className="mt-1 text-sm text-ink">
                     {new Date(selectedTransaction.timestamp).toLocaleString()}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink ">
+                  <label className="block text-sm font-medium text-ink">
                     Amount
                   </label>
-                  <p className="mt-1 text-sm font-semibold ot-admin-ink ">
+                  <p className="mt-1 text-sm font-semibold text-ink">
                     ₦{selectedTransaction.amount.toLocaleString('en-NG')}
                   </p>
                 </div>
 
                 {selectedTransaction.user && (
                   <div>
-                    <label className="block text-sm font-medium ot-admin-ink ">
+                    <label className="block text-sm font-medium text-ink">
                       User
                     </label>
-                    <p className="mt-1 text-sm ot-admin-ink ">
+                    <p className="mt-1 text-sm text-ink">
                       {selectedTransaction.user.username}
                     </p>
-                    <p className="text-xs ot-admin-muted ">
+                    <p className="text-xs text-muted">
                       {selectedTransaction.user.email}
                     </p>
                   </div>
@@ -527,17 +527,17 @@ const Transactions = () => {
               </div>
 
               {selectedTransaction.type === 'withdrawal' && selectedTransaction.details && (
-                <div className="border-t ot-admin-border pt-4">
-                  <h4 className="text-md font-semibold ot-admin-ink mb-3">
+                <div className="border-t border-line pt-4">
+                  <h4 className="text-md font-semibold text-ink mb-3">
                     Withdrawal Details
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedTransaction.details.originalAmount && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink ">
+                        <label className="block text-sm font-medium text-ink">
                           Requested Amount
                         </label>
-                        <p className="mt-1 text-sm ot-admin-ink ">
+                        <p className="mt-1 text-sm text-ink">
                           ₦{selectedTransaction.details.originalAmount.toLocaleString('en-NG')}
                         </p>
                       </div>
@@ -545,10 +545,10 @@ const Transactions = () => {
 
                     {selectedTransaction.details.feeAmount && selectedTransaction.details.feeAmount > 0 && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink ">
+                        <label className="block text-sm font-medium text-ink">
                           Fee Amount
                         </label>
-                        <p className="mt-1 text-sm ot-admin-ink ">
+                        <p className="mt-1 text-sm text-ink">
                           ₦{selectedTransaction.details.feeAmount.toLocaleString('en-NG')}
                         </p>
                       </div>
@@ -556,10 +556,10 @@ const Transactions = () => {
 
                     {selectedTransaction.details.feeDeductionMethod && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink ">
+                        <label className="block text-sm font-medium text-ink">
                           Fee Deduction Method
                         </label>
-                        <p className="mt-1 text-sm ot-admin-ink capitalize">
+                        <p className="mt-1 text-sm text-ink capitalize">
                           {selectedTransaction.details.feeDeductionMethod === 'fromWallet' ? 'From Wallet' : 'From Withdrawal'}
                         </p>
                       </div>
@@ -567,10 +567,10 @@ const Transactions = () => {
 
                     {selectedTransaction.details.totalDebited && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink ">
+                        <label className="block text-sm font-medium text-ink">
                           Total Debited
                         </label>
-                        <p className="mt-1 text-sm ot-admin-ink ">
+                        <p className="mt-1 text-sm text-ink">
                           ₦{selectedTransaction.details.totalDebited.toLocaleString('en-NG')}
                         </p>
                       </div>
@@ -578,10 +578,10 @@ const Transactions = () => {
 
                     {selectedTransaction.bankName && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink ">
+                        <label className="block text-sm font-medium text-ink">
                           Bank Name
                         </label>
-                        <p className="mt-1 text-sm ot-admin-ink ">
+                        <p className="mt-1 text-sm text-ink">
                           {selectedTransaction.bankName}
                         </p>
                       </div>
@@ -589,10 +589,10 @@ const Transactions = () => {
 
                     {selectedTransaction.accountNumber && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink ">
+                        <label className="block text-sm font-medium text-ink">
                           Account Number
                         </label>
-                        <p className="mt-1 text-sm ot-admin-ink ">
+                        <p className="mt-1 text-sm text-ink">
                           {selectedTransaction.accountNumber}
                         </p>
                       </div>
@@ -602,10 +602,10 @@ const Transactions = () => {
               )}
             </div>
 
-            <div className="flex justify-end p-6 border-t ot-admin-border ">
+            <div className="flex justify-end p-6 border-t border-line">
               <button
                 onClick={closeDetailModal}
-                className="ot-admin-control px-4 py-2 ot-admin-soft ot-admin-ink rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="min-h-[44px] px-4 py-2 bg-bg text-ink rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Close
               </button>

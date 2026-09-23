@@ -34,10 +34,10 @@ const Settings = () => {
     <div className="min-h-screen p-2 md:p-6">
       {/* Header */}
       <div className="mb-4 md:mb-6">
-        <h1 className="ot-admin-page-title text-xl md:text-2xl lg:text-3xl font-bold text-center md:text-left">
+        <h1 className="text-[26px] font-mediumish leading-tight tracking-[-0.6px] text-ink text-xl md:text-2xl lg:text-3xl font-bold text-center md:text-left">
           Settings
         </h1>
-        <p className="text-sm md:text-base ot-admin-muted text-center md:text-left mt-2">
+        <p className="text-sm md:text-base text-muted text-center md:text-left mt-2">
           Manage your profile, security, and platform preferences.
         </p>
       </div>

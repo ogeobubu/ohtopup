@@ -10,20 +10,26 @@ const channels = [
 const Contact = () => {
   return (
     <div>
-      <p style={{ fontSize: 13, color: 'var(--ot-muted)', marginBottom: 20 }}>You can reach us via the following channels:</p>
-      <div style={{ display: 'grid', gap: 10 }}>
+      <p className="mb-5 text-[13px] text-muted">You can reach us via the following channels:</p>
+      <div className="grid gap-2.5">
         {channels.map((ch) => (
-          <a key={ch.detail} href={ch.href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--ot-tint)', borderRadius: 6, textDecoration: 'none', color: 'var(--ot-ink)', fontSize: 13, transition: 'background 0.15s' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--ot-paper)', border: '1px solid var(--ot-line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <a
+            key={ch.detail}
+            href={ch.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between rounded-md bg-tint px-4 py-3.5 text-[13px] text-ink transition-colors hover:bg-line/40"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-paper">
                 <ch.icon size={16} style={{ color: ch.color }} />
               </div>
               <div>
-                <div style={{ fontWeight: 500 }}>{ch.label}</div>
-                <div style={{ fontSize: 12, color: 'var(--ot-muted)' }}>{ch.detail}</div>
+                <div className="font-medium">{ch.label}</div>
+                <div className="text-xs text-muted">{ch.detail}</div>
               </div>
             </div>
-            <span style={{ color: 'var(--ot-muted)', fontSize: 14 }}>→</span>
+            <span className="text-sm text-muted">→</span>
           </a>
         ))}
       </div>

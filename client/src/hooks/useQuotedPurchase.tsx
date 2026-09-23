@@ -39,16 +39,16 @@ export default function useQuotedPurchase(service: string, purchase: (data: any)
   };
   const pricingDialog = <div style={{ position: 'relative', zIndex: 110 }}><Modal isOpen={!!pending} closeModal={close} title="Confirm payment" showCloseButton={!busy} size="sm">
     {pending && <div className="space-y-4">
-      <p>Review the current price before your wallet is charged.</p>
-      <dl className="space-y-3">
-        <div className="flex justify-between gap-4"><dt>Service value</dt><dd>{formatNairaAmount(pending.quote.amount)}</dd></div>
-        {pending.quote.retailAmount !== pending.quote.amount && <div className="flex justify-between gap-4"><dt>Listed price</dt><dd>{formatNairaAmount(pending.quote.retailAmount)}</dd></div>}
-        <div className="flex justify-between gap-4"><dt>Customer discount ({pending.quote.customerDiscountRate}%)</dt><dd>{formatNairaAmount(pending.quote.customerDiscountAmount)}</dd></div>
-        <div className="flex justify-between gap-4 font-semibold"><dt>Wallet debit</dt><dd>{formatNairaAmount(pending.quote.customerCharge)}</dd></div>
+      <p className="text-sm text-muted">Review the current price before your wallet is charged.</p>
+      <dl className="space-y-3 text-sm">
+        <div className="flex justify-between gap-4"><dt className="text-muted">Service value</dt><dd>{formatNairaAmount(pending.quote.amount)}</dd></div>
+        {pending.quote.retailAmount !== pending.quote.amount && <div className="flex justify-between gap-4"><dt className="text-muted">Listed price</dt><dd>{formatNairaAmount(pending.quote.retailAmount)}</dd></div>}
+        <div className="flex justify-between gap-4"><dt className="text-muted">Customer discount ({pending.quote.customerDiscountRate}%)</dt><dd>{formatNairaAmount(pending.quote.customerDiscountAmount)}</dd></div>
+        <div className="flex justify-between gap-4 border-t border-line pt-2 font-semibold"><dt>Wallet debit</dt><dd>{formatNairaAmount(pending.quote.customerCharge)}</dd></div>
       </dl>
       <div className="flex flex-wrap gap-3">
-        <button type="button" className="ot-button ot-button-secondary" disabled={busy} onClick={close}>Cancel</button>
-        <button type="button" className="ot-button ot-button-primary" disabled={busy} onClick={confirm}>{busy ? 'Processing…' : `Pay ${formatNairaAmount(pending.quote.customerCharge)}`}</button>
+        <button type="button" className="inline-flex min-h-[46px] items-center justify-center gap-3 rounded-md border border-line bg-paper px-[15px] py-[11px] text-[13px] font-semibold text-ink transition hover:bg-tint disabled:opacity-45" disabled={busy} onClick={close}>Cancel</button>
+        <button type="button" className="inline-flex min-h-[46px] items-center justify-center gap-3 rounded-md border border-transparent bg-accent px-[15px] py-[11px] text-[13px] font-semibold text-white transition hover:bg-accent-dark disabled:opacity-45" disabled={busy} onClick={confirm}>{busy ? 'Processing…' : `Pay ${formatNairaAmount(pending.quote.customerCharge)}`}</button>
       </div>
     </div>}
   </Modal></div>;

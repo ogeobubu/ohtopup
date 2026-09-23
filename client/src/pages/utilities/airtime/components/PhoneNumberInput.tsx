@@ -70,7 +70,7 @@ const PhoneNumberInput = ({ name, isDarkMode, disabled, onNetworkDetected }) => 
       'airtel': 'bg-red-100 text-red-800 border-red-300',
       '9mobile': 'bg-purple-100 text-purple-800 border-purple-300'
     };
-    return colors[network] || 'bg-[var(--ot-bg)] text-[var(--ot-ink)] border-[var(--ot-line)]';
+    return colors[network] || 'bg-bg text-ink border-line';
   };
 
   // Detect network when phone number changes
@@ -86,7 +86,7 @@ const PhoneNumberInput = ({ name, isDarkMode, disabled, onNetworkDetected }) => 
 
   return (
     <div className="flex flex-col">
-      <label className="mb-2 block text-[var(--ot-muted)] ">
+      <label className="mb-2 block text-muted">
         Phone Number
       </label>
 
@@ -98,7 +98,7 @@ const PhoneNumberInput = ({ name, isDarkMode, disabled, onNetworkDetected }) => 
           value={field.value}
           onChange={(value) => helpers.setValue(value)}
           className={`w-full p-2 border rounded-lg ${
-            isDarkMode ? 'bg-gray-800 text-gray-200 border-gray-600' : 'bg-[var(--ot-bg)] text-[var(--ot-ink)] border-[var(--ot-line)]'
+            isDarkMode ? 'bg-gray-800 text-gray-200 border-gray-600' : 'bg-bg text-ink border-line'
           } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           placeholder="Enter phone number"
           disabled={disabled}
@@ -134,7 +134,7 @@ const PhoneNumberInput = ({ name, isDarkMode, disabled, onNetworkDetected }) => 
       />
 
       {/* Network information */}
-      <div className="mt-2 text-xs text-[var(--ot-muted)] ">
+      <div className="mt-2 text-xs text-muted">
         Supported networks: MTN, Glo, Airtel, 9mobile
       </div>
     </div>

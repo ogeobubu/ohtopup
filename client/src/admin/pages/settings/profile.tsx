@@ -58,7 +58,7 @@ const Profile = () => {
   return (
     <div className="space-y-8">
       {/* Profile Header Card */}
-      <div className="ot-admin-neutral-card rounded-lg p-8 ">
+      <div className="min-w-0 rounded-md border border-line bg-paper rounded-lg p-8">
         <div className="flex flex-col lg:flex-row flex-wrap items-center gap-6">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-3xl font-bold border-4 border-white/30">
@@ -82,50 +82,50 @@ const Profile = () => {
       {/* Profile Information Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
-        <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border ">
-          <h3 className="text-xl font-bold mb-6 ot-admin-ink flex items-center gap-2">
-            <div className="ot-admin-neutral-card w-8 h-8 rounded-lg flex items-center justify-center">
+        <div className="bg-paper rounded-lg p-6 border border-line">
+          <h3 className="text-xl font-bold mb-6 text-ink flex items-center gap-2">
+            <div className="min-w-0 rounded-md border border-line bg-paper w-8 h-8 rounded-lg flex items-center justify-center">
               <FaEdit className="w-4 h-4 text-white" />
             </div>
             Basic Information
           </h3>
 
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-4 ot-admin-soft rounded-lg">
+            <div className="flex justify-between items-center p-4 bg-bg rounded-lg">
               <div>
-                <p className="text-sm ot-admin-muted ">Unique ID</p>
-                <p className="font-semibold ot-admin-ink ">{user?._id}</p>
+                <p className="text-sm text-muted">Unique ID</p>
+                <p className="font-semibold text-ink">{user?._id}</p>
               </div>
             </div>
 
-            <div className="flex justify-between items-center p-4 ot-admin-soft rounded-lg">
+            <div className="flex justify-between items-center p-4 bg-bg rounded-lg">
               <div>
-                <p className="text-sm ot-admin-muted ">Country</p>
-                <p className="font-semibold ot-admin-ink ">Nigeria</p>
+                <p className="text-sm text-muted">Country</p>
+                <p className="font-semibold text-ink">Nigeria</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Contact Information */}
-        <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border ">
-          <h3 className="text-xl font-bold mb-6 ot-admin-ink flex items-center gap-2">
-            <div className="ot-admin-neutral-card w-8 h-8 rounded-lg flex items-center justify-center">
+        <div className="bg-paper rounded-lg p-6 border border-line">
+          <h3 className="text-xl font-bold mb-6 text-ink flex items-center gap-2">
+            <div className="min-w-0 rounded-md border border-line bg-paper w-8 h-8 rounded-lg flex items-center justify-center">
               <FaEdit className="w-4 h-4 text-white" />
             </div>
             Contact Information
           </h3>
 
           <div className="space-y-4">
-            <div className="p-4 ot-admin-soft rounded-lg">
+            <div className="p-4 bg-bg rounded-lg">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <p className="text-sm ot-admin-muted mb-1">Phone Number</p>
-                  <p className="font-semibold ot-admin-ink ">{user?.phoneNumber}</p>
+                  <p className="text-sm text-muted mb-1">Phone Number</p>
+                  <p className="font-semibold text-ink">{user?.phoneNumber}</p>
                 </div>
                 <button
                   onClick={() => setIsPhoneNumberEditMode(true)}
-                  className="ot-admin-control ot-admin-action p-2 rounded-lg transition-all duration-200 "
+                  className="min-h-[44px] bg-tint p-2 rounded-lg transition-all duration-200"
                   aria-label="Edit Phone Number"
                 >
                   <FaEdit className="w-4 h-4" />
@@ -133,45 +133,45 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="p-4 ot-admin-soft rounded-lg">
-              <p className="text-sm ot-admin-muted mb-1">Email Address</p>
-              <p className="font-semibold ot-admin-ink ">{user?.email}</p>
+            <div className="p-4 bg-bg rounded-lg">
+              <p className="text-sm text-muted mb-1">Email Address</p>
+              <p className="font-semibold text-ink">{user?.email}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Account Statistics */}
-      <div className="ot-admin-paper rounded-lg p-6 border ot-admin-border ">
-        <h3 className="text-xl font-bold mb-6 ot-admin-ink ">Account Statistics</h3>
+      <div className="bg-paper rounded-lg p-6 border border-line">
+        <h3 className="text-xl font-bold mb-6 text-ink">Account Statistics</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="ot-admin-neutral-card text-center p-4 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
+          <div className="min-w-0 rounded-md border border-line bg-paper text-center p-4 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
             <div className="text-2xl font-bold text-blue-600 mb-1">Admin</div>
-            <p className="text-sm ot-admin-muted ">Account Type</p>
+            <p className="text-sm text-muted">Account Type</p>
           </div>
-          <div className="ot-admin-neutral-card text-center p-4 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
+          <div className="min-w-0 rounded-md border border-line bg-paper text-center p-4 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
             <div className="text-2xl font-bold text-green-600 mb-1">Active</div>
-            <p className="text-sm ot-admin-muted ">Status</p>
+            <p className="text-sm text-muted">Status</p>
           </div>
-          <div className="ot-admin-neutral-card text-center p-4 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg">
+          <div className="min-w-0 rounded-md border border-line bg-paper text-center p-4 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg">
             <div className="text-2xl font-bold text-purple-600 mb-1">High</div>
-            <p className="text-sm ot-admin-muted ">Security Level</p>
+            <p className="text-sm text-muted">Security Level</p>
           </div>
         </div>
       </div>
 
       {isPhoneNumberEditMode && (
-        <div className="ot-responsive-dialog fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="ot-admin-paper rounded-lg p-8 w-full max-w-lg transform transition-all duration-300 scale-100">
+        <div className="overflow-y-auto overscroll-contain fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-paper rounded-lg p-8 w-full max-w-lg transform transition-all duration-300 scale-100">
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="ot-admin-neutral-card inline-flex items-center justify-center w-16 h-16 dark:from-blue-900/20 dark:to-blue-800/20 rounded-full mb-4">
+              <div className="min-w-0 rounded-md border border-line bg-paper inline-flex items-center justify-center w-16 h-16 dark:from-blue-900/20 dark:to-blue-800/20 rounded-full mb-4">
                 <FaEdit className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold ot-admin-ink ">
+              <h3 className="text-2xl font-bold text-ink">
                 Update Phone Number
               </h3>
-              <p className="text-sm ot-admin-muted ">
+              <p className="text-sm text-muted">
                 Enter your new phone number below
               </p>
             </div>
@@ -179,7 +179,7 @@ const Profile = () => {
             {/* Form */}
             <div className="space-y-6">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium ot-admin-ink mb-2">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-ink mb-2">
                   Phone Number
                 </label>
                 <PhoneInput
@@ -189,7 +189,7 @@ const Profile = () => {
                   id="phoneNumber"
                   value={formik.values.phoneNumber}
                   onChange={(phone) => formik.setFieldValue("phoneNumber", phone)}
-                  className="w-full px-4 py-3 border ot-admin-border rounded-lg ot-admin-soft ot-admin-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-line rounded-lg bg-bg text-ink focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter phone number"
                   disabled={isPending}
                   onKeyDown={(event) => {
@@ -211,7 +211,7 @@ const Profile = () => {
                   type="button"
                   onClick={closeModal}
                   disabled={isPending}
-                  className="ot-admin-control flex-1 px-6 py-3 bg-gray-200 ot-admin-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
+                  className="min-h-[44px] flex-1 px-6 py-3 bg-gray-200 text-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -219,7 +219,7 @@ const Profile = () => {
                   type="submit"
                   disabled={!formik.values.phoneNumber || isPending}
                   onClick={formik.handleSubmit}
-                  className="ot-admin-control flex-1 px-6 py-3 ot-admin-action rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
+                  className="min-h-[44px] flex-1 px-6 py-3 bg-tint rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
                 >
                   {isPending ? (
                     <span className="flex items-center justify-center">

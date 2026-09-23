@@ -194,13 +194,13 @@ const TutorialManagement = () => {
   return (
     <div className="my-3 md:my-5 p-2 md:px-4 sm:px-4 lg:px-4">
       <div className="mb-4 md:mb-6">
-        <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink mb-2">Tutorial Management</h1>
-        <p className="ot-admin-muted text-sm md:text-base">Create and manage tutorials for users</p>
+        <h1 className="text-[26px] font-mediumish leading-tight tracking-[-0.6px] text-ink text-xl md:text-3xl font-bold text-ink mb-2">Tutorial Management</h1>
+        <p className="text-muted text-sm md:text-base">Create and manage tutorials for users</p>
       </div>
 
       {/* Stats Cards */}
       <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-xs md:text-sm font-medium">Total Tutorials</p>
@@ -210,7 +210,7 @@ const TutorialManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-xs md:text-sm font-medium">Active Tutorials</p>
@@ -222,7 +222,7 @@ const TutorialManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-xs md:text-sm font-medium">Popular Tutorials</p>
@@ -237,7 +237,7 @@ const TutorialManagement = () => {
 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 px-2 md:px-0">
-        <div className="text-xs md:text-sm ot-admin-muted">
+        <div className="text-xs md:text-sm text-muted">
           {tutorialsData?.tutorials?.length || 0} tutorials found
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -247,11 +247,11 @@ const TutorialManagement = () => {
               placeholder="Search tutorials..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border ot-admin-border rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
+              className="border border-line rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
             />
-            <FaBook className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 ot-admin-muted" />
+            <FaBook className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 text-muted" />
           </div>
-          <Select classNamePrefix="ot-admin-select"
+          <Select classNamePrefix="min-w-0"
             options={categoryOptions}
             value={categoryFilter}
             onChange={setCategoryFilter}
@@ -283,7 +283,7 @@ const TutorialManagement = () => {
               })
             }}
           />
-          <Select classNamePrefix="ot-admin-select"
+          <Select classNamePrefix="min-w-0"
             options={[
               { value: "all", label: "All Status" },
               { value: "active", label: "Active" },
@@ -309,7 +309,7 @@ const TutorialManagement = () => {
           />
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="ot-admin-control ot-admin-action px-3 md:px-4 py-2 rounded-lg transition-all duration-200 transform text-xs md:text-sm"
+            className="min-h-[44px] bg-tint px-3 md:px-4 py-2 rounded-lg transition-all duration-200 transform text-xs md:text-sm"
           >
             <FaPlus className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
             <span className="hidden sm:inline">Add Tutorial</span>
@@ -320,50 +320,50 @@ const TutorialManagement = () => {
       {/* Tutorials Table */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="ot-admin-paper rounded-full p-6 mb-4">
+          <div className="bg-paper rounded-full p-6 mb-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
-          <h3 className="text-lg font-semibold ot-admin-ink mb-2">Loading Tutorials</h3>
-          <p className="ot-admin-muted text-center max-w-md">
+          <h3 className="text-lg font-semibold text-ink mb-2">Loading Tutorials</h3>
+          <p className="text-muted text-center max-w-md">
             Please wait while we fetch the tutorial data...
           </p>
         </div>
       ) : (
-        <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden mx-2 md:mx-0">
+        <div className="bg-paper rounded-lg border border-line overflow-hidden mx-2 md:mx-0">
           <div className="overflow-x-auto">
-            <table className="ot-admin-data-table min-w-full divide-y divide-gray-200">
-              <thead className="ot-admin-soft">
+            <table className="w-full border-collapse bg-paper text-ink text-xs min-w-full divide-y divide-gray-200">
+              <thead className="bg-bg">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Tutorial
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Category
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="ot-admin-paper divide-y divide-gray-200">
+              <tbody className="bg-paper divide-y divide-gray-200">
                 {tutorialsData?.tutorials?.map((tutorial) => (
                   <tr key={tutorial._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            {tutorial.type === 'video' ? <FaVideo className="h-5 w-5 ot-admin-muted" /> : <FaBook className="h-5 w-5 ot-admin-muted" />}
+                            {tutorial.type === 'video' ? <FaVideo className="h-5 w-5 text-muted" /> : <FaBook className="h-5 w-5 text-muted" />}
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium ot-admin-ink">{tutorial.title}</div>
-                          <div className="text-sm ot-admin-muted flex items-center">
+                          <div className="text-sm font-medium text-ink">{tutorial.title}</div>
+                          <div className="text-sm text-muted flex items-center">
                             <FaClock className="mr-1 h-3 w-3" />
                             {tutorial.duration}
                           </div>
@@ -394,7 +394,7 @@ const TutorialManagement = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(tutorial)}
-                          className="ot-admin-control text-blue-600 hover:text-blue-900"
+                          className="min-h-[44px] text-blue-600 hover:text-blue-900"
                           title="Edit Tutorial"
                         >
                           <FaEdit className="h-4 w-4" />
@@ -408,7 +408,7 @@ const TutorialManagement = () => {
                         </button>
                         <button
                           onClick={() => handleDelete(tutorial._id)}
-                          className="ot-admin-control text-red-600 hover:text-red-900"
+                          className="min-h-[44px] text-red-600 hover:text-red-900"
                           title="Delete Tutorial"
                         >
                           <FaTrash className="h-4 w-4" />
@@ -430,7 +430,7 @@ const TutorialManagement = () => {
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="ot-admin-control relative inline-flex items-center px-2 py-2 rounded-l-md border ot-admin-border ot-admin-paper text-sm font-medium ot-admin-muted hover:bg-gray-50 disabled:opacity-50"
+              className="min-h-[44px] relative inline-flex items-center px-2 py-2 rounded-l-md border border-line bg-paper text-sm font-medium text-muted hover:bg-gray-50 disabled:opacity-50"
             >
               Previous
             </button>
@@ -438,10 +438,10 @@ const TutorialManagement = () => {
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`ot-admin-control relative inline-flex items-center px-4 py-2 border ot-admin-border ot-admin-paper text-sm font-medium ${
+                className={`min-h-[44px] relative inline-flex items-center px-4 py-2 border border-line bg-paper text-sm font-medium ${
                   page === currentPage
                     ? 'text-blue-600 bg-blue-50 border-blue-500'
-                    : 'ot-admin-ink hover:bg-gray-50'
+                    : 'text-ink hover:bg-gray-50'
                 }`}
               >
                 {page}
@@ -450,7 +450,7 @@ const TutorialManagement = () => {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="ot-admin-control relative inline-flex items-center px-2 py-2 rounded-r-md border ot-admin-border ot-admin-paper text-sm font-medium ot-admin-muted hover:bg-gray-50 disabled:opacity-50"
+              className="min-h-[44px] relative inline-flex items-center px-2 py-2 rounded-r-md border border-line bg-paper text-sm font-medium text-muted hover:bg-gray-50 disabled:opacity-50"
             >
               Next
             </button>
@@ -461,42 +461,42 @@ const TutorialManagement = () => {
       {/* Create/Edit Modal */}
       {(isCreateModalOpen || isEditModalOpen) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="ot-admin-paper rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-paper rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h3 className="text-lg font-medium ot-admin-ink mb-4">
+              <h3 className="text-lg font-medium text-ink mb-4">
                 {isCreateModalOpen ? 'Create New Tutorial' : 'Edit Tutorial'}
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink">Title *</label>
+                  <label className="block text-sm font-medium text-ink">Title *</label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="mt-1 block w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink">Description *</label>
+                  <label className="block text-sm font-medium text-ink">Description *</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     rows={3}
-                    className="mt-1 block w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium ot-admin-ink">Category *</label>
+                    <label className="block text-sm font-medium text-ink">Category *</label>
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                      className="mt-1 block w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       required
                     >
                       <option value="">Select Category</option>
@@ -507,13 +507,13 @@ const TutorialManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium ot-admin-ink">Duration *</label>
+                    <label className="block text-sm font-medium text-ink">Duration *</label>
                     <input
                       type="text"
                       value={formData.duration}
                       onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
                       placeholder="e.g., 5 min"
-                      className="mt-1 block w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
@@ -521,11 +521,11 @@ const TutorialManagement = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium ot-admin-ink">Difficulty</label>
+                    <label className="block text-sm font-medium text-ink">Difficulty</label>
                     <select
                       value={formData.difficulty}
                       onChange={(e) => setFormData(prev => ({ ...prev, difficulty: e.target.value }))}
-                      className="mt-1 block w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="Beginner">Beginner</option>
                       <option value="Intermediate">Intermediate</option>
@@ -534,11 +534,11 @@ const TutorialManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium ot-admin-ink">Type</label>
+                    <label className="block text-sm font-medium text-ink">Type</label>
                     <select
                       value={formData.type}
                       onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                      className="mt-1 block w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="mt-1 block w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="text">Text</option>
                       <option value="video">Video</option>
@@ -548,28 +548,28 @@ const TutorialManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink">Video URL (optional)</label>
+                  <label className="block text-sm font-medium text-ink">Video URL (optional)</label>
                   <input
                     type="url"
                     value={formData.videoUrl}
                     onChange={(e) => setFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
-                    className="mt-1 block w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">Tutorial Steps</label>
-                  <p className="text-xs ot-admin-muted mb-3">Create step-by-step instructions for users to follow</p>
+                  <label className="block text-sm font-medium text-ink mb-2">Tutorial Steps</label>
+                  <p className="text-xs text-muted mb-3">Create step-by-step instructions for users to follow</p>
 
                   {formData.steps.map((step, index) => (
-                    <div key={index} className="mb-3 p-3 border ot-admin-border rounded-lg ot-admin-soft">
+                    <div key={index} className="mb-3 p-3 border border-line rounded-lg bg-bg">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium ot-admin-ink">Step {index + 1}</span>
+                        <span className="text-sm font-medium text-ink">Step {index + 1}</span>
                         {formData.steps.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeStep(index)}
-                            className="ot-admin-control text-red-500 hover:text-red-700 p-1"
+                            className="min-h-[44px] text-red-500 hover:text-red-700 p-1"
                             title="Remove this step"
                           >
                             <FaTrash className="h-4 w-4" />
@@ -581,9 +581,9 @@ const TutorialManagement = () => {
                         onChange={(e) => updateStep(index, e.target.value)}
                         placeholder={`Describe step ${index + 1} in detail...`}
                         rows={2}
-                        className="w-full border ot-admin-border rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        className="w-full border border-line rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                       />
-                      <div className="mt-2 text-xs ot-admin-muted">
+                      <div className="mt-2 text-xs text-muted">
                         💡 Tip: Be specific and include screenshots or visual cues when possible
                       </div>
                     </div>
@@ -593,7 +593,7 @@ const TutorialManagement = () => {
                     <button
                       type="button"
                       onClick={addStep}
-                      className="ot-admin-control px-4 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-600 rounded-md hover:bg-blue-50 flex items-center gap-2"
+                      className="min-h-[44px] px-4 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-600 rounded-md hover:bg-blue-50 flex items-center gap-2"
                     >
                       <span>+</span>
                       Add New Step
@@ -607,7 +607,7 @@ const TutorialManagement = () => {
                           newSteps.splice(formData.steps.length - 1, 0, "");
                           setFormData(prev => ({ ...prev, steps: newSteps }));
                         }}
-                        className="ot-admin-control px-4 py-2 text-sm text-green-600 hover:text-green-800 border border-green-600 rounded-md hover:bg-green-50 flex items-center gap-2"
+                        className="min-h-[44px] px-4 py-2 text-sm text-green-600 hover:text-green-800 border border-green-600 rounded-md hover:bg-green-50 flex items-center gap-2"
                       >
                         <span>↗</span>
                         Insert Step
@@ -616,9 +616,9 @@ const TutorialManagement = () => {
                   </div>
 
                   {formData.steps.length === 0 && (
-                    <div className="mt-3 p-4 border-2 border-dashed ot-admin-border rounded-lg text-center">
-                      <p className="ot-admin-muted text-sm">No steps added yet</p>
-                      <p className="ot-admin-muted text-xs mt-1">Click "Add New Step" to get started</p>
+                    <div className="mt-3 p-4 border-2 border-dashed border-line rounded-lg text-center">
+                      <p className="text-muted text-sm">No steps added yet</p>
+                      <p className="text-muted text-xs mt-1">Click "Add New Step" to get started</p>
                     </div>
                   )}
 
@@ -638,9 +638,9 @@ const TutorialManagement = () => {
                     id="popular"
                     checked={formData.popular}
                     onChange={(e) => setFormData(prev => ({ ...prev, popular: e.target.checked }))}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                   />
-                  <label htmlFor="popular" className="ml-2 block text-sm ot-admin-ink">
+                  <label htmlFor="popular" className="ml-2 block text-sm text-ink">
                     Mark as Popular Tutorial
                   </label>
                 </div>
@@ -654,14 +654,14 @@ const TutorialManagement = () => {
                     setSelectedTutorial(null);
                     resetForm();
                   }}
-                  className="ot-admin-control px-4 py-2 text-sm font-medium ot-admin-ink ot-admin-soft border ot-admin-border rounded-md hover:bg-gray-200"
+                  className="min-h-[44px] px-4 py-2 text-sm font-medium text-ink bg-bg border border-line rounded-md hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={isCreateModalOpen ? handleCreate : handleUpdate}
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="ot-admin-control px-4 py-2 text-sm font-medium text-white ot-admin-action border border-transparent rounded-md disabled:opacity-50"
+                  className="min-h-[44px] px-4 py-2 text-sm font-medium text-white bg-accent border border-transparent rounded-md disabled:opacity-50"
                 >
                   {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (isCreateModalOpen ? 'Create' : 'Update')}
                 </button>

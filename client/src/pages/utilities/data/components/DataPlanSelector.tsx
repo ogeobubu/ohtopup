@@ -1,29 +1,35 @@
-import PropTypes from 'prop-types';
 import Select from 'react-select';
 import useDataVariations from '../hooks/useDataVariations';
 
-const DataPlanSelector = ({ providerId, isDarkMode, onChange, value }) => {
+type Props = {
+  providerId?: string;
+  isDarkMode?: boolean;
+  onChange: (value: any) => void;
+  value?: object;
+};
+
+const DataPlanSelector = ({ providerId, isDarkMode = false, onChange, value }: Props) => {
   const { data: options, isLoading, error } = useDataVariations(providerId);
 
   if (isLoading) {
     return (
-      <div style={{ height: 48, background: 'var(--ot-bg)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Loading plans...</span>
+      <div className="mb-4 flex h-12 items-center justify-center rounded-lg bg-bg">
+        <span className="text-[13px] text-muted">Loading plans...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: 12, background: 'var(--ot-tint)', borderRadius: 8, color: '#b84545', fontSize: 13 }}>
+      <div className="mb-4 rounded-lg bg-tint p-3 text-[13px] text-danger dark:text-danger-dark">
         Failed to load data plans. Please try again.
       </div>
     );
   }
 
   return (
-    <div style={{ marginBottom: 16 }}>
-      <label className="ot-field-label">Data Plan</label>
+    <div className="mb-4">
+      <label className="mb-2 block text-xs font-semibold text-ink">Data Plan</label>
       <Select
         options={options}
         onChange={onChange}
@@ -61,13 +67,6 @@ const DataPlanSelector = ({ providerId, isDarkMode, onChange, value }) => {
       />
     </div>
   );
-};
-
-DataPlanSelector.propTypes = {
-  providerId: PropTypes.string,
-  isDarkMode: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.object
 };
 
 export default DataPlanSelector;

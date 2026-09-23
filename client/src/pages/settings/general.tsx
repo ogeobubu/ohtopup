@@ -4,7 +4,7 @@ import { toggleDarkMode } from "../../actions/themeActions";
 
 const General = () => {
   const dispatch = useDispatch();
-  const currentTheme = useSelector((state) => state.theme.mode);
+  const currentTheme = useSelector((state: any) => state.theme.mode);
 
   const handleThemeChange = () => {
     dispatch(toggleDarkMode());
@@ -12,26 +12,26 @@ const General = () => {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16 }}>General Settings</h2>
-      <p style={{ color: 'var(--ot-muted)', marginBottom: 16, fontSize: 13 }}>Toggle dark mode:</p>
-      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: 12 }}>
-        <div style={{ position: 'relative' }}>
+      <h2 className="mb-4 text-[22px] font-bold">General Settings</h2>
+      <p className="mb-4 text-[13px] text-muted">Toggle dark mode:</p>
+      <label className="flex cursor-pointer items-center gap-3">
+        <div className="relative">
           <input
             type="checkbox"
             checked={currentTheme === "dark"}
             onChange={handleThemeChange}
-            style={{ display: 'none' }}
+            className="sr-only"
           />
-          <div style={{ width: 56, height: 32, borderRadius: 16, background: currentTheme === "dark" ? 'var(--ot-accent)' : '#ccc' }} />
-          <div style={{
-            position: 'absolute', left: currentTheme === "dark" ? 28 : 4, top: 4,
-            width: 24, height: 24, borderRadius: '50%', background: '#fff',
-            transition: 'transform 0.2s'
-          }} />
+          <div
+            className="h-8 w-14 rounded-full transition-colors"
+            style={{ background: currentTheme === "dark" ? "var(--ot-accent)" : "#ccc" }}
+          />
+          <div
+            className="absolute top-1 h-6 w-6 rounded-full bg-white transition-all"
+            style={{ left: currentTheme === "dark" ? 28 : 4 }}
+          />
         </div>
-        <span style={{ fontSize: 13 }}>
-          {currentTheme === "dark" ? "Dark Mode" : "Light Mode"}
-        </span>
+        <span className="text-[13px]">{currentTheme === "dark" ? "Dark Mode" : "Light Mode"}</span>
       </label>
     </div>
   );

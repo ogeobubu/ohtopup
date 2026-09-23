@@ -11,7 +11,7 @@ import { FaBolt, FaCheck, FaCreditCard, FaChevronRight, FaUser, FaMapMarkerAlt }
 const Loader = () => (
   <div className="flex items-center justify-center py-8">
     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-500"></div>
-    <p className="mt-3 text-[var(--ot-muted)] ">Loading electricity services...</p>
+    <p className="mt-3 text-muted">Loading electricity services...</p>
   </div>
 );
 
@@ -224,9 +224,9 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
 
   return (
-    <div className="ot-utility-intro">
+    <div className="p-7">
       {pricingDialog}
-      <div><h3>Pay your electricity bill</h3><p>Choose your provider and have your meter number ready.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose provider</button></div>
+      <div><h3>Pay your electricity bill</h3><p>Choose your provider and have your meter number ready.</p><button className="inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition border border-transparent bg-accent text-white hover:bg-accent-dark" onClick={() => setIsModalOpen(true)}>Choose provider</button></div>
       <Modal
         isDarkMode={isDarkMode}
         isOpen={isModalOpen}
@@ -238,13 +238,13 @@ const ElectricityPurchase = ({ isDarkMode }) => {
         {isLoading ? (
           <Loader />
         ) : (
-          <div className="ot-purchase-content flex flex-col">
+          <div className="min-w-0 flex-1 flex flex-col flex flex-col">
             {/* Step 1: Disco Selection */}
             {currentStep === 1 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Choose Your Disco</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Select your electricity distribution company</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose Your Disco</h3>
+                  <p className="text-sm text-muted">Select your electricity distribution company</p>
                 </div>
                 <div className="grid grid-cols-1 gap-2 md:gap-3 max-w-sm mx-auto">
                   {providers?.discos?.map(disco => (
@@ -253,20 +253,20 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       onClick={() => {
                         handleDiscoChange(disco.serviceID);
                       }}
-                      className={`p-3 md:p-4 bg-[var(--ot-paper)] border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
+                      className={`p-3 md:p-4 bg-paper border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
                         selectedDisco === disco.serviceID
                           ? 'border-yellow-500 bg-yellow-50 shadow-md'
-                          : 'border-[var(--ot-line)] hover:border-yellow-300'
+                          : 'border-line hover:border-yellow-300'
                       }`}
                     >
                       <div className="text-center">
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
-                          <FaBolt className="text-[var(--ot-accent)] text-base md:text-lg" />
+                          <FaBolt className="text-accent text-base md:text-lg" />
                         </div>
-                        <div className="text-base md:text-lg font-bold text-[var(--ot-ink)] mb-1">
+                        <div className="text-base md:text-lg font-bold text-ink mb-1">
                           {disco.displayName}
                         </div>
-                        <div className="text-xs text-[var(--ot-muted)]">
+                        <div className="text-xs text-muted">
                           Final discount shown at checkout
                         </div>
                       </div>
@@ -310,22 +310,22 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                     </div>
 
                     {/* Amount Limits for Selected Disco */}
-                    <div className="p-3 bg-[var(--ot-tint)] border border-blue-200 rounded-lg">
+                    <div className="p-3 bg-tint border border-blue-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
-                        <FaBolt className="text-[var(--ot-accent)] text-sm" />
-                        <span className="text-sm font-medium text-[var(--ot-accent)]">Transaction Limits</span>
+                        <FaBolt className="text-accent text-sm" />
+                        <span className="text-sm font-medium text-accent">Transaction Limits</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="bg-[var(--ot-paper)] p-2 rounded border">
-                          <span className="text-[var(--ot-accent)] font-medium block">Minimum</span>
-                          <span className="text-[var(--ot-accent)] font-bold text-lg">₦{minAmount.toLocaleString()}</span>
+                        <div className="bg-paper p-2 rounded border">
+                          <span className="text-accent font-medium block">Minimum</span>
+                          <span className="text-accent font-bold text-lg">₦{minAmount.toLocaleString()}</span>
                         </div>
-                        <div className="bg-[var(--ot-paper)] p-2 rounded border">
-                          <span className="text-[var(--ot-accent)] font-medium block">Maximum</span>
-                          <span className="text-[var(--ot-accent)] font-bold text-lg">₦{maxAmount.toLocaleString()}</span>
+                        <div className="bg-paper p-2 rounded border">
+                          <span className="text-accent font-medium block">Maximum</span>
+                          <span className="text-accent font-bold text-lg">₦{maxAmount.toLocaleString()}</span>
                         </div>
                       </div>
-                      <p className="text-xs text-[var(--ot-accent)] mt-2">
+                      <p className="text-xs text-accent mt-2">
                         These limits are configured by your electricity provider for secure transactions.
                       </p>
                     </div>
@@ -338,8 +338,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 2 && selectedDisco && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Meter Type</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Meter Type</h3>
+                  <p className="text-sm text-muted">
                     Select your meter type for {providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}
                   </p>
                 </div>
@@ -364,10 +364,10 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       handleMeterTypeChange('prepaid');
                       setCurrentStep(3);
                     }}
-                    className={`w-full p-3 md:p-4 bg-[var(--ot-paper)] border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
+                    className={`w-full p-3 md:p-4 bg-paper border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
                       selectedMeterType === 'prepaid'
                         ? 'border-yellow-500 bg-yellow-50 shadow-md'
-                        : 'border-[var(--ot-line)] hover:border-yellow-300'
+                        : 'border-line hover:border-yellow-300'
                     }`}
                   >
                     <div className="flex items-center gap-2 md:gap-3">
@@ -375,8 +375,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                         <FaBolt className="text-yellow-600 text-base md:text-lg" />
                       </div>
                       <div className="text-left flex-1">
-                        <div className="font-semibold text-[var(--ot-ink)] text-sm md:text-base">Prepaid Meter</div>
-                        <div className="text-[var(--ot-muted)] text-xs md:text-sm">Buy electricity token</div>
+                        <div className="font-semibold text-ink text-sm md:text-base">Prepaid Meter</div>
+                        <div className="text-muted text-xs md:text-sm">Buy electricity token</div>
                       </div>
                       <div className="text-yellow-600">
                         <FaChevronRight className="text-base md:text-lg" />
@@ -389,21 +389,21 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       handleMeterTypeChange('postpaid');
                       setCurrentStep(3);
                     }}
-                    className={`w-full p-3 md:p-4 bg-[var(--ot-paper)] border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
+                    className={`w-full p-3 md:p-4 bg-paper border-2 rounded-xl transition-all duration-200 hover:shadow-md ${
                       selectedMeterType === 'postpaid'
                         ? 'border-yellow-500 bg-yellow-50 shadow-md'
-                        : 'border-[var(--ot-line)] hover:border-yellow-300'
+                        : 'border-line hover:border-yellow-300'
                     }`}
                   >
                     <div className="flex items-center gap-2 md:gap-3">
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-[var(--ot-tint)] rounded-lg flex items-center justify-center">
-                        <FaBolt className="text-[var(--ot-accent)] text-base md:text-lg" />
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-tint rounded-lg flex items-center justify-center">
+                        <FaBolt className="text-accent text-base md:text-lg" />
                       </div>
                       <div className="text-left flex-1">
-                        <div className="font-semibold text-[var(--ot-ink)] text-sm md:text-base">Postpaid Meter</div>
-                        <div className="text-[var(--ot-muted)] text-xs md:text-sm">Pay outstanding bill</div>
+                        <div className="font-semibold text-ink text-sm md:text-base">Postpaid Meter</div>
+                        <div className="text-muted text-xs md:text-sm">Pay outstanding bill</div>
                       </div>
-                      <div className="text-[var(--ot-accent)]">
+                      <div className="text-accent">
                         <FaChevronRight className="text-base md:text-lg" />
                       </div>
                     </div>
@@ -414,7 +414,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(1)}
-                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -426,12 +426,12 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 3 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Meter Details</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Enter your meter number</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Meter Details</h3>
+                  <p className="text-sm text-muted">Enter your meter number</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-ink mb-2">
                     Meter Number
                   </label>
                   <input
@@ -442,28 +442,28 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       setMeterNumber(value);
                       await validateMeterNumber(value);
                     }}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-line rounded-lg text-sm md:text-base font-medium bg-paper focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder="Enter meter number"
                   />
 
                   {/* Amount Limits Info - Early visibility */}
                   {selectedDisco && (
-                    <div className="mt-3 p-3 bg-[var(--ot-tint)] rounded-lg border border-blue-200">
+                    <div className="mt-3 p-3 bg-tint rounded-lg border border-blue-200">
                       <div className="flex items-center gap-2 mb-2">
-                        <FaBolt className="text-[var(--ot-accent)] text-sm" />
-                        <span className="text-sm font-medium text-[var(--ot-accent)]">Purchase Limits</span>
+                        <FaBolt className="text-accent text-sm" />
+                        <span className="text-sm font-medium text-accent">Purchase Limits</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <span className="text-[var(--ot-accent)] font-medium">Min Amount:</span>
-                          <p className="text-[var(--ot-accent)] font-semibold">₦{minAmount.toLocaleString()}</p>
+                          <span className="text-accent font-medium">Min Amount:</span>
+                          <p className="text-accent font-semibold">₦{minAmount.toLocaleString()}</p>
                         </div>
                         <div>
-                          <span className="text-[var(--ot-accent)] font-medium">Max Amount:</span>
-                          <p className="text-[var(--ot-accent)] font-semibold">₦{maxAmount.toLocaleString()}</p>
+                          <span className="text-accent font-medium">Max Amount:</span>
+                          <p className="text-accent font-semibold">₦{maxAmount.toLocaleString()}</p>
                         </div>
                       </div>
-                      <p className="text-xs text-[var(--ot-accent)] mt-2">
+                      <p className="text-xs text-accent mt-2">
                         These limits ensure secure and compliant transactions.
                       </p>
                     </div>
@@ -471,16 +471,16 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
                   {/* Customer Details Display */}
                   {customerName && (
-                    <div className="mt-4 p-4 bg-[var(--ot-bg)] rounded-lg border border-[var(--ot-line)]">
-                      <h4 className="font-semibold text-[var(--ot-ink)] mb-2">Customer Details</h4>
+                    <div className="mt-4 p-4 bg-bg rounded-lg border border-line">
+                      <h4 className="font-semibold text-ink mb-2">Customer Details</h4>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <FaUser className="text-[var(--ot-muted)] text-sm" />
-                          <span className="text-sm text-[var(--ot-ink)]">{customerName}</span>
+                          <FaUser className="text-muted text-sm" />
+                          <span className="text-sm text-ink">{customerName}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <FaMapMarkerAlt className="text-[var(--ot-muted)] text-sm" />
-                          <span className="text-sm text-[var(--ot-ink)]">{customerAddress}</span>
+                          <FaMapMarkerAlt className="text-muted text-sm" />
+                          <span className="text-sm text-ink">{customerAddress}</span>
                         </div>
                       </div>
                     </div>
@@ -491,7 +491,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(2)}
-                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -514,12 +514,12 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 4 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Enter Amount</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">How much electricity do you want to purchase?</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Enter Amount</h3>
+                  <p className="text-sm text-muted">How much electricity do you want to purchase?</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-ink mb-2">
                     Amount (₦)
                   </label>
                   <input
@@ -532,7 +532,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       const calculatedSavings = calculateSavings(value, commissionRate);
                       setSavings(calculatedSavings);
                     }}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-line rounded-lg text-sm md:text-base font-medium bg-paper focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder={`Min: ₦${minAmount.toLocaleString()} - Max: ₦${maxAmount.toLocaleString()}`}
                     min={minAmount}
                     max={maxAmount}
@@ -547,8 +547,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                             <FaCreditCard className="text-yellow-600 text-sm" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-[var(--ot-ink)] text-sm">₦{parseFloat(selectedAmount).toLocaleString()}</h4>
-                            <p className="text-xs text-[var(--ot-muted)]">Electricity purchase amount</p>
+                            <h4 className="font-bold text-ink text-sm">₦{parseFloat(selectedAmount).toLocaleString()}</h4>
+                            <p className="text-xs text-muted">Electricity purchase amount</p>
                           </div>
                         </div>
                       </div>
@@ -574,18 +574,18 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       )}
 
                       {/* Amount Limits Info */}
-                      <div className="p-3 bg-[var(--ot-tint)] rounded-lg border border-blue-200">
+                      <div className="p-3 bg-tint rounded-lg border border-blue-200">
                         <div className="flex items-center gap-2 mb-1">
-                          <FaBolt className="text-[var(--ot-accent)] text-sm" />
-                          <span className="text-sm font-medium text-[var(--ot-accent)]">Amount Limits</span>
+                          <FaBolt className="text-accent text-sm" />
+                          <span className="text-sm font-medium text-accent">Amount Limits</span>
                         </div>
-                        <p className="text-sm text-[var(--ot-accent)]">
+                        <p className="text-sm text-accent">
                           Minimum: ₦{minAmount.toLocaleString()}
                         </p>
-                        <p className="text-sm text-[var(--ot-accent)]">
+                        <p className="text-sm text-accent">
                           Maximum: ₦{maxAmount.toLocaleString()}
                         </p>
-                        <p className="text-xs text-[var(--ot-accent)] mt-1">
+                        <p className="text-xs text-accent mt-1">
                           These limits are set by your service provider for security and compliance.
                         </p>
                       </div>
@@ -597,7 +597,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(3)}
-                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -620,19 +620,19 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 5 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Confirm Phone Number</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">We'll send your receipt to this number</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Confirm Phone Number</h3>
+                  <p className="text-sm text-muted">We&apos;ll send your receipt to this number</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-ink mb-2">
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-line rounded-lg text-sm md:text-base font-medium bg-paper focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder="+2348012345678"
                   />
                 </div>
@@ -641,7 +641,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(4)}
-                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -664,23 +664,23 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 6 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Enter Transaction PIN</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Enter your 4-6 digit transaction PIN to proceed</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Enter Transaction PIN</h3>
+                  <p className="text-sm text-muted">Enter your 4-6 digit transaction PIN to proceed</p>
                 </div>
 
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-ink mb-2">
                     Transaction PIN
                   </label>
                   <input
                     type="password"
                     value={transactionPin}
                     onChange={(e) => setTransactionPin(e.target.value)}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-yellow-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-line rounded-lg text-sm md:text-base font-medium bg-paper focus:border-yellow-500 focus:outline-none transition-colors"
                     placeholder="Enter your PIN"
                     maxLength={6}
                   />
-                  <p className="text-xs text-[var(--ot-muted)]  mt-2">
+                  <p className="text-xs text-muted mt-2">
                     Enter your 4-6 digit transaction PIN to proceed with the payment
                   </p>
                 </div>
@@ -689,7 +689,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(5)}
-                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -712,13 +712,13 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 7 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Confirm Your Purchase</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Review your electricity purchase details</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Confirm Your Purchase</h3>
+                  <p className="text-sm text-muted">Review your electricity purchase details</p>
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-[var(--ot-paper)] rounded-xl border-2 border-[var(--ot-line)] p-3 md:p-4 mb-3 md:mb-4">
-                  <h4 className="text-sm md:text-base font-bold text-[var(--ot-ink)] mb-2 md:mb-3">Purchase Summary</h4>
+                <div className="bg-paper rounded-xl border-2 border-line p-3 md:p-4 mb-3 md:mb-4">
+                  <h4 className="text-sm md:text-base font-bold text-ink mb-2 md:mb-3">Purchase Summary</h4>
 
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
@@ -727,8 +727,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           <FaBolt className="text-yellow-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-[var(--ot-ink)] text-sm">Electricity Provider</div>
-                          <div className="text-xs text-[var(--ot-muted)]">
+                          <div className="font-medium text-ink text-sm">Electricity Provider</div>
+                          <div className="text-xs text-muted">
                             {providers?.discos?.find(d => d.serviceID === selectedDisco)?.displayName || selectedDisco?.toUpperCase()}
                           </div>
                         </div>
@@ -737,12 +737,12 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[var(--ot-tint)] rounded-lg flex items-center justify-center">
-                          <FaBolt className="text-[var(--ot-accent)] text-sm" />
+                        <div className="w-8 h-8 bg-tint rounded-lg flex items-center justify-center">
+                          <FaBolt className="text-accent text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-[var(--ot-ink)] text-sm">Meter Type</div>
-                          <div className="text-xs text-[var(--ot-muted)]">{selectedMeterType?.toUpperCase()}</div>
+                          <div className="font-medium text-ink text-sm">Meter Type</div>
+                          <div className="text-xs text-muted">{selectedMeterType?.toUpperCase()}</div>
                         </div>
                       </div>
                     </div>
@@ -753,8 +753,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           <FaUser className="text-green-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-[var(--ot-ink)] text-sm">Customer Name</div>
-                          <div className="text-xs text-[var(--ot-muted)]">{customerName}</div>
+                          <div className="font-medium text-ink text-sm">Customer Name</div>
+                          <div className="text-xs text-muted">{customerName}</div>
                         </div>
                       </div>
                     </div>
@@ -765,16 +765,16 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                           <FaCreditCard className="text-purple-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-[var(--ot-ink)] text-sm">Amount</div>
-                          <div className="text-xs text-[var(--ot-muted)]">₦{selectedAmount}</div>
+                          <div className="font-medium text-ink text-sm">Amount</div>
+                          <div className="text-xs text-muted">₦{selectedAmount}</div>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                        <div className="font-medium text-[var(--ot-ink)] text-sm">Purchase Amount</div>
-                        <div className="text-sm text-[var(--ot-ink)]">
+                        <div className="font-medium text-ink text-sm">Purchase Amount</div>
+                        <div className="text-sm text-ink">
                           ₦{parseFloat(selectedAmount).toLocaleString()}
                         </div>
                       </div>
@@ -788,8 +788,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                         </div>
                       )}
 
-                      <div className="flex justify-between items-center py-3 bg-[var(--ot-bg)] rounded-lg px-3">
-                        <div className="font-bold text-[var(--ot-ink)] text-base">You Pay</div>
+                      <div className="flex justify-between items-center py-3 bg-bg rounded-lg px-3">
+                        <div className="font-bold text-ink text-base">You Pay</div>
                         <div className="text-xl font-bold text-yellow-600">
                           ₦{(parseFloat(selectedAmount) - savings).toLocaleString()}
                         </div>
@@ -808,7 +808,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentStep(6)}
-                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -850,10 +850,10 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               {purchaseResult.transaction?.status === 'delivered' ? <FaCheck className="text-green-600 text-2xl" /> : <span className="text-2xl">…</span>}
             </div>
-            <h3 className="text-xl font-bold text-[var(--ot-ink)] mb-2">{purchaseResult.transaction?.status === 'delivered' ? 'Purchase successful' : 'Purchase being checked'}</h3>
-            <p className="text-[var(--ot-muted)] mb-4">{purchaseResult.message}</p>
+            <h3 className="text-xl font-bold text-ink mb-2">{purchaseResult.transaction?.status === 'delivered' ? 'Purchase successful' : 'Purchase being checked'}</h3>
+            <p className="text-muted mb-4">{purchaseResult.message}</p>
 
-            <div className="bg-[var(--ot-bg)] rounded-lg p-4 mb-4">
+            <div className="bg-bg rounded-lg p-4 mb-4">
               <div className="space-y-2 text-left">
                 <div className="flex justify-between">
                   <span className="font-medium">Transaction ID:</span>

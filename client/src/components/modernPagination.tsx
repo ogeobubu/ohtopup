@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-const ModernPagination = ({
-  currentPage,
-  totalPages,
-  onPageChange,
-}) => {
+const btn =
+  'inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-tint disabled:opacity-45 disabled:cursor-not-allowed';
+const activeBtn =
+  'inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-transparent bg-accent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-accent-dark';
+
+const ModernPagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
   const getPageNumbers = () => {
@@ -33,13 +34,12 @@ const ModernPagination = ({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="ot-transactions-pagination" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="flex flex-wrap items-center justify-center gap-3 py-4 text-[11px] text-muted">
+      <div className="flex flex-wrap items-center gap-2">
         <button
-          className="ot-button ot-button-secondary"
+          className={btn}
           onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
           disabled={currentPage === 1}
-          style={{ minHeight: 36, padding: '6px 12px', fontSize: 12 }}
         >
           <FaChevronLeft /> Previous
         </button>
@@ -47,12 +47,11 @@ const ModernPagination = ({
         {pageNumbers.map((pageNum, index) => (
           <div key={index}>
             {pageNum === '...' ? (
-              <span style={{ padding: '6px 8px', fontSize: 12, color: 'var(--ot-muted)' }}>...</span>
+              <span className="px-2 py-1.5 text-xs text-muted">...</span>
             ) : (
               <button
                 onClick={() => onPageChange(pageNum)}
-                className={currentPage === pageNum ? 'ot-button ot-button-primary' : 'ot-button ot-button-secondary'}
-                style={{ minHeight: 36, padding: '6px 12px', fontSize: 12 }}
+                className={currentPage === pageNum ? activeBtn : btn}
               >
                 {pageNum}
               </button>
@@ -61,10 +60,9 @@ const ModernPagination = ({
         ))}
 
         <button
-          className="ot-button ot-button-secondary"
+          className={btn}
           onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
           disabled={currentPage === totalPages}
-          style={{ minHeight: 36, padding: '6px 12px', fontSize: 12 }}
         >
           Next <FaChevronRight />
         </button>

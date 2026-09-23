@@ -80,17 +80,17 @@ const BetDiceGame = () => {
   const difficultyColor = (d) => ({ easy: '#27805d', medium: 'var(--ot-accent)', hard: '#d97706', expert: '#ef4444', legendary: '#8b5cf6' }[d] || 'var(--ot-muted)');
 
   return (
-    <div className="ot-dashboard">
-      <div className="ot-dashboard-heading"><div><h1>Bet Dice Game</h1><p>Strategic betting with dynamic odds</p></div></div>
+    <div className="min-w-0">
+      <div className="mb-6 min-w-0"><div><h1>Bet Dice Game</h1><p>Strategic betting with dynamic odds</p></div></div>
 
       {/* Wallet */}
-      <div className="ot-overview" style={{ marginBottom: 24 }}>
-        <section className="ot-balance" aria-label="Wallet balance">
-          <div className="ot-balance-label">Available balance</div>
-          <div className="ot-balance-amount">₦{walletData?.balance?.toLocaleString() || 0}</div>
+      <div className="grid min-w-0 grid-cols-1 gap-4" style={{ marginBottom: 24 }}>
+        <section className="block" aria-label="Wallet balance">
+          <div className="block-label">Available balance</div>
+          <div className="block-amount">₦{walletData?.balance?.toLocaleString() || 0}</div>
         </section>
-        <section className="ot-panel">
-          <div className="ot-panel-heading"><div><h2>Game Info</h2><p>Entry fee and odds.</p></div></div>
+        <section className="min-w-0 overflow-hidden rounded-lg border border-line bg-paper">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-5"><div><h2>Game Info</h2><p>Entry fee and odds.</p></div></div>
           <div style={{ padding: '0 24px 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={{ padding: '12px 16px', background: 'var(--ot-tint)', borderRadius: 6 }}><div style={{ fontSize: 11, color: 'var(--ot-muted)' }}>Entry Fee</div><div style={{ fontSize: 18, fontWeight: 600 }}>₦{gameSettings?.settings?.entryFee || 0}</div></div>
             <div style={{ padding: '12px 16px', background: 'var(--ot-tint)', borderRadius: 6 }}><div style={{ fontSize: 11, color: 'var(--ot-muted)' }}>Current Odds</div><div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ot-accent)' }}>{currentOdds}x</div></div>
@@ -98,7 +98,7 @@ const BetDiceGame = () => {
         </section>
       </div>
 
-      <nav className="ot-utility-tabs" aria-label="Game sections">
+      <nav className="flex min-h-11 flex-wrap items-stretch justify-between border-b border-line" aria-label="Game sections">
         {[{ id: "play", label: "Play" }, { id: "history", label: "History" }, { id: "stats", label: "Statistics" }].map((tab) => (
           <button key={tab.id} aria-pressed={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>
         ))}
@@ -106,16 +106,16 @@ const BetDiceGame = () => {
 
       {/* Play Tab */}
       {activeTab === "play" && (
-        <section className="ot-panel" aria-label="Play game">
-          <div className="ot-panel-heading"><div><h2>Strategic Dice Betting</h2><p>Potential payout: ₦{(betAmount * currentOdds).toLocaleString()}</p></div></div>
+        <section className="min-w-0 overflow-hidden rounded-lg border border-line bg-paper" aria-label="Play game">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-5"><div><h2>Strategic Dice Betting</h2><p>Potential payout: ₦{(betAmount * currentOdds).toLocaleString()}</p></div></div>
           <div style={{ padding: '0 24px 24px' }}>
-            {!gameSettings?.settings?.gameEnabled && <div className="ot-field-error mb-3">Game is currently disabled.</div>}
-            {gameSettings?.settings?.maintenanceMode && <div className="ot-field-error mb-3">Game is under maintenance.</div>}
+            {!gameSettings?.settings?.gameEnabled && <div className="mt-1 text-[11px] text-danger mb-3">Game is currently disabled.</div>}
+            {gameSettings?.settings?.maintenanceMode && <div className="mt-1 text-[11px] text-danger mb-3">Game is under maintenance.</div>}
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
               {/* Difficulty */}
               <div>
-                <p className="ot-field-label">Difficulty Level</p>
+                <p className="mb-2 block text-xs font-mediumish text-ink">Difficulty Level</p>
                 <div style={{ display: 'grid', gap: 8 }}>
                   {Object.entries(difficultyLevels).map(([key, level]) => (
                     <button key={key} onClick={() => setSelectedDifficulty(key)} style={{ padding: '10px 14px', borderRadius: 6, border: `2px solid ${selectedDifficulty === key ? difficultyColor(key) : 'var(--ot-line)'}`, background: selectedDifficulty === key ? 'var(--ot-tint)' : 'transparent', textAlign: 'left', cursor: 'pointer', fontSize: 13 }}>
@@ -130,17 +130,17 @@ const BetDiceGame = () => {
 
               {/* Bet config */}
               <div>
-                <p className="ot-field-label">Betting Setup</p>
+                <p className="mb-2 block text-xs font-mediumish text-ink">Betting Setup</p>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>Number of Dice{selectedDifficulty === 'legendary' && <span style={{ color: '#8b5cf6', marginLeft: 6 }}>(Min 3)</span>}</label>
-                  <select value={selectedDiceCount} onChange={(e) => setSelectedDiceCount(parseInt(e.target.value))} className="ot-field" style={{ width: '100%' }}>
+                  <select value={selectedDiceCount} onChange={(e) => setSelectedDiceCount(parseInt(e.target.value))} className="block min-h-[46px] w-full rounded-[5px] border border-line bg-paper px-3 py-2.5 text-sm text-ink" style={{ width: '100%' }}>
                     <option value={2} disabled={selectedDifficulty === 'legendary'}>2 Dice</option>
                     <option value={3}>3 Dice</option><option value={4}>4 Dice</option><option value={5}>5 Dice</option><option value={6}>6 Dice</option>
                   </select>
                 </div>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>Bet Amount (₦)</label>
-                  <input type="number" value={betAmount} onChange={(e) => setBetAmount(Math.max(0, parseInt(e.target.value) || 0))} className="ot-field" style={{ width: '100%' }} min={gameSettings?.settings?.minBetAmount || 10} max={gameSettings?.settings?.maxBetAmount || 1000} />
+                  <input type="number" value={betAmount} onChange={(e) => setBetAmount(Math.max(0, parseInt(e.target.value) || 0))} className="block min-h-[46px] w-full rounded-[5px] border border-line bg-paper px-3 py-2.5 text-sm text-ink" style={{ width: '100%' }} min={gameSettings?.settings?.minBetAmount || 10} max={gameSettings?.settings?.maxBetAmount || 1000} />
                   <div style={{ fontSize: 11, color: 'var(--ot-muted)', marginTop: 4 }}>Min: ₦{gameSettings?.settings?.minBetAmount || 10} · Max: ₦{gameSettings?.settings?.maxBetAmount || 1000}</div>
                 </div>
                 <div style={{ padding: 12, background: 'var(--ot-tint)', borderRadius: 6 }}>
@@ -164,14 +164,14 @@ const BetDiceGame = () => {
 
             {/* Play button */}
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <button onClick={handlePlayGame} disabled={isRolling || playGameMutation.isPending || !gameSettings?.settings?.gameEnabled || gameSettings?.settings?.maintenanceMode} className="ot-button ot-button-primary" style={{ fontSize: 15, padding: '12px 32px' }}>
+              <button onClick={handlePlayGame} disabled={isRolling || playGameMutation.isPending || !gameSettings?.settings?.gameEnabled || gameSettings?.settings?.maintenanceMode} className="inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition border border-transparent bg-accent text-white hover:bg-accent-dark" style={{ fontSize: 15, padding: '12px 32px' }}>
                 {isRolling ? 'Rolling…' : playGameMutation.isPending ? 'Processing…' : `Bet ₦${betAmount} (${currentOdds}x)`}
               </button>
             </div>
 
             {/* Result */}
             {showResult && gameResult && (
-              <div className="ot-panel" style={{ padding: 20, borderLeft: `4px solid ${gameResult.game.isWin ? '#27805d' : '#b84545'}` }}>
+              <div className="min-w-0 overflow-hidden rounded-lg border border-line bg-paper" style={{ padding: 20, borderLeft: `4px solid ${gameResult.game.isWin ? '#27805d' : '#b84545'}` }}>
                 <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{gameResult.game.isWin ? 'Congratulations!' : 'Better Luck Next Time!'}</div>
                 <div style={{ fontSize: 13, marginBottom: 8 }}>You rolled: <strong>{gameResult.game.dice.join(", ")}</strong></div>
                 {gameResult.game.isWin ? (
@@ -192,8 +192,8 @@ const BetDiceGame = () => {
 
       {/* History Tab */}
       {activeTab === "history" && (
-        <section className="ot-panel" aria-label="Betting history">
-          <div className="ot-panel-heading"><div><h2>Betting History</h2><p>Your recent games.</p></div></div>
+        <section className="min-w-0 overflow-hidden rounded-lg border border-line bg-paper" aria-label="Betting history">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-5"><div><h2>Betting History</h2><p>Your recent games.</p></div></div>
           {gameHistory?.games?.length > 0 ? (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -222,15 +222,15 @@ const BetDiceGame = () => {
               </table>
             </div>
           ) : (
-            <div className="ot-empty"><p>No games played yet.</p></div>
+            <div className="p-12 text-center"><p>No games played yet.</p></div>
           )}
         </section>
       )}
 
       {/* Stats Tab */}
       {activeTab === "stats" && (
-        <section className="ot-panel" aria-label="Betting statistics">
-          <div className="ot-panel-heading"><div><h2>Betting Statistics</h2><p>Your performance overview.</p></div></div>
+        <section className="min-w-0 overflow-hidden rounded-lg border border-line bg-paper" aria-label="Betting statistics">
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-5"><div><h2>Betting Statistics</h2><p>Your performance overview.</p></div></div>
           {enhancedStats ? (
             <div style={{ padding: '0 24px 24px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
@@ -239,7 +239,7 @@ const BetDiceGame = () => {
                 ))}
               </div>
 
-              <p className="ot-field-label">Performance by Difficulty</p>
+              <p className="mb-2 block text-xs font-mediumish text-ink">Performance by Difficulty</p>
               <div style={{ display: 'grid', gap: 8, marginBottom: 24 }}>
                 {Object.entries(difficultyLevels).map(([key, level]) => {
                   const ds = enhancedStats.difficultyStats?.[key] || { games: 0, wins: 0, winRate: 0, totalBet: 0, totalWon: 0, netProfit: 0 };
@@ -255,7 +255,7 @@ const BetDiceGame = () => {
                 })}
               </div>
 
-              <p className="ot-field-label">Insights</p>
+              <p className="mb-2 block text-xs font-mediumish text-ink">Insights</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {[{ label: 'Most Profitable', value: enhancedStats.mostProfitableDifficulty || '—' }, { label: 'Avg Bet Size', value: `₦${(enhancedStats.averageBetSize || 0).toLocaleString()}` }, { label: 'Largest Win', value: `₦${(enhancedStats.largestWin || 0).toLocaleString()}` }, { label: 'Best Streak', value: `${enhancedStats.bestWinStreak || 0} games` }, { label: 'Total Wagered', value: `₦${(enhancedStats.totalWagered || 0).toLocaleString()}` }].map(s => (
                   <div key={s.label} style={{ padding: '10px 14px', background: 'var(--ot-tint)', borderRadius: 6 }}><div style={{ fontSize: 11, color: 'var(--ot-muted)' }}>{s.label}</div><div style={{ fontSize: 13, fontWeight: 600, textTransform: 'capitalize' }}>{s.value}</div></div>
@@ -263,7 +263,7 @@ const BetDiceGame = () => {
               </div>
             </div>
           ) : (
-            <div className="ot-empty"><p>No statistics available yet. Play some games!</p></div>
+            <div className="p-12 text-center"><p>No statistics available yet. Play some games!</p></div>
           )}
         </section>
       )}

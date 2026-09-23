@@ -81,15 +81,15 @@ const Create = ({ darkMode }) => {
   const referralCode = queryParams.get("code") || "";
 
   return (
-    <div className="ot-auth">
-      <div className="ot-auth-form">
-        <div className="ot-auth-inner">
-          <Logo className="mx-auto w-auto" darkMode={darkMode} href="/" />
-          <div className="ot-auth-fields">
-            <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
+    <div className="grid min-h-dvh grid-cols-1 overflow-wrap-anywhere bg-bg text-ink nav:grid-cols-2">
+      <div className="flex min-w-0 flex-col justify-center bg-paper px-6 py-[30px] xs:px-8 nav:px-[clamp(24px,6vw,95px)] nav:py-[45px]">
+        <div className="mx-auto my-5 w-full max-w-auth min-w-0 nav:my-auto">
+          <Logo className="mx-auto mb-11 w-auto" darkMode={darkMode} href="/" />
+          <div>
+            <h3 className="mb-2 text-xl font-mediumish tracking-[-0.8px] nav:text-[30px]">
               Create Your Account
             </h3>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="mb-6 text-sm text-muted">
               Please fill in the details below to sign up.
             </p>
 
@@ -269,7 +269,12 @@ const Create = ({ darkMode }) => {
         </div>
       </div>
 
-      <aside className="ot-auth-aside"><span className="ot-eyebrow">EVERYDAY ESSENTIALS</span><h2>A little less admin.<br />A lot more life.</h2><p>Data, airtime and household bills. Take care of the everyday, all in one place.</p><small>OhTopUp · Made for everyday life in Nigeria.</small></aside>
+      <aside className="hidden min-w-0 flex-col justify-center bg-night px-10 py-10 text-white nav:flex nav:px-[50px] nav:py-20 max-[900px]:hidden">
+        <span className="text-[10px] font-semiboldish tracking-[1.7px] text-[#bdc9d5]">EVERYDAY ESSENTIALS</span>
+        <h2 className="my-[22px] text-[clamp(36px,4vw,57px)] font-thin leading-tight tracking-[-2px]">A little less admin.<br />A lot more life.</h2>
+        <p className="max-w-[330px] text-[15px] leading-[1.8] text-[#bdc9d5]">Data, airtime and household bills. Take care of the everyday, all in one place.</p>
+        <small className="mt-[70px] text-[10px] text-[#bdc9d5]">OhTopUp · Made for everyday life in Nigeria.</small>
+      </aside>
     </div>
   );
 };

@@ -12,6 +12,17 @@ import { updateUser, deleteUser } from "../../api";
 import { updateUserDispatch } from "../../actions/userActions";
 import percentageImage from "../../assets/percentage.svg";
 
+const secondaryBtn =
+  "inline-flex min-h-[46px] items-center justify-center gap-3 rounded-md border border-line bg-paper px-[15px] py-[11px] text-[13px] font-semibold text-ink transition hover:bg-tint";
+const dangerBtn =
+  "inline-flex min-h-[46px] items-center justify-center gap-3 rounded-md border border-transparent bg-danger px-[15px] py-[11px] text-[13px] font-semibold text-white transition hover:opacity-90";
+const iconBtn =
+  "flex h-11 w-11 items-center justify-center rounded-md text-muted hover:bg-tint hover:text-ink";
+const modalOverlay =
+  "fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4";
+const modalPanel =
+  "relative flex max-h-full w-full max-w-[480px] flex-col overflow-hidden rounded-t-lg bg-paper text-ink shadow-xl sm:rounded-lg sm:max-h-[90vh]";
+
 const Profile = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.user?.user);
@@ -35,7 +46,7 @@ const Profile = () => {
 
   const { mutate, isPending } = useMutation({
     mutationFn: (phoneNumber: string) => updateUser({ phoneNumber }),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast.success("Phone number updated successfully");
       dispatch(updateUserDispatch(data));
       setIsPhoneNumberEditMode(false);
@@ -52,6 +63,7 @@ const Profile = () => {
     if (user?.phoneNumber) {
       formik.setFieldValue("phoneNumber", user.phoneNumber);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const closeModal = () => setIsPhoneNumberEditMode(false);
@@ -63,71 +75,79 @@ const Profile = () => {
       const response = await deleteUser();
       toast.success(response.data);
       setIsDelete(false);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error);
     }
   };
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>Profile</h2>
-      <div style={{ maxWidth: 384, width: '100%' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--ot-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 28, fontWeight: 700 }}>
+      <h2 className="mb-3 text-[22px] font-bold">Profile</h2>
+      <div className="w-full max-w-[384px]">
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-accent text-2xl font-bold text-white">
             {user?.username?.charAt(0).toUpperCase()}
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{user?.username}</h3>
-            <p style={{ color: 'var(--ot-muted)', fontSize: 13, margin: 0 }}>{user?.email}</p>
+          <div className="text-center">
+            <h3 className="m-0 text-xl font-bold">{user?.username}</h3>
+            <p className="m-0 text-[13px] text-muted">{user?.email}</p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Unique ID:</span>
-            <span style={{ fontSize: 12, fontFamily: 'monospace', wordBreak: 'break-all', maxWidth: '60%', textAlign: 'right' }}>{user?._id}</span>
+        <div className="flex flex-col gap-3.5">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-[13px] text-muted">Unique ID:</span>
+            <span className="max-w-[60%] break-all text-right font-mono text-xs">{user?._id}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Phone Number:</span>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 13 }}>{user?.phoneNumber}</span>
-              <button onClick={() => setIsPhoneNumberEditMode(true)} className="ot-icon-button" style={{ width: 28, height: 28 }} aria-label="Edit Phone Number">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-[13px] text-muted">Phone Number:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[13px]">{user?.phoneNumber}</span>
+              <button
+                onClick={() => setIsPhoneNumberEditMode(true)}
+                className={`${iconBtn} !h-7 !w-7`}
+                aria-label="Edit Phone Number"
+              >
                 <FaEdit />
               </button>
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>Country:</span>
-            <span style={{ fontSize: 13 }}>Nigeria</span>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-[13px] text-muted">Country:</span>
+            <span className="text-[13px]">Nigeria</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--ot-muted)', fontSize: 13 }}>KYC Status:</span>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span style={{ color: '#b84545', fontWeight: 500, fontSize: 13 }}>Not Set</span>
-              <button onClick={() => setIsKYCEditMode(true)} className="ot-icon-button" style={{ width: 28, height: 28 }} aria-label="Update KYC">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-[13px] text-muted">KYC Status:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] font-medium text-danger">Not Set</span>
+              <button
+                onClick={() => setIsKYCEditMode(true)}
+                className={`${iconBtn} !h-7 !w-7`}
+                aria-label="Update KYC"
+              >
                 <FaEdit />
               </button>
             </div>
           </div>
         </div>
 
-        <div style={{ marginTop: 20 }}>
-          <button onClick={() => setIsDelete(true)} className="ot-button ot-button-danger" style={{ width: '100%' }}>
+        <div className="mt-5">
+          <button onClick={() => setIsDelete(true)} className={`${dangerBtn} w-full`}>
             Delete User Account
           </button>
         </div>
       </div>
 
       {isPhoneNumberEditMode && (
-        <div className="ot-modal-overlay" onClick={closeModal}>
-          <div className="ot-modal ot-modal-md" onClick={e => e.stopPropagation()}>
-            <div className="ot-modal-scroll" style={{ padding: 24 }}>
-              <button onClick={closeModal} className="ot-icon-button" style={{ position: 'absolute', top: 12, right: 12 }} aria-label="Close Modal">
+        <div className={modalOverlay} onClick={closeModal}>
+          <div className={modalPanel} onClick={(e) => e.stopPropagation()}>
+            <div className="relative max-h-full min-h-0 flex-1 overflow-y-auto p-6">
+              <button onClick={closeModal} className={`${iconBtn} absolute right-3 top-3`} aria-label="Close Modal">
                 <FaTimes />
               </button>
-              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Update Phone Number</h2>
-              <div style={{ marginBottom: 20 }}>
-                <label className="ot-field-label">Phone Number</label>
+              <h2 className="mb-4 text-xl font-bold">Update Phone Number</h2>
+              <div className="mb-5">
+                <label className="mb-2 block text-xs font-mediumish text-ink">Phone Number</label>
                 <PhoneInput
                   international
                   countryCallingCodeEditable={false}
@@ -135,7 +155,7 @@ const Profile = () => {
                   id="phoneNumber"
                   value={formik.values.phoneNumber}
                   onChange={(phone) => formik.setFieldValue("phoneNumber", phone)}
-                  className="ot-field"
+                  className="h-11 w-full rounded-md border border-line bg-bg px-3 text-sm text-ink outline-none focus:ring-2 focus:ring-accent/40"
                   placeholder="Enter phone number"
                   disabled={isPending}
                   onKeyDown={(event) => {
@@ -143,7 +163,7 @@ const Profile = () => {
                   }}
                 />
                 {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                  <div className="ot-field-error">{formik.errors.phoneNumber}</div>
+                  <div className="mt-1 text-[11px] text-danger">{formik.errors.phoneNumber}</div>
                 )}
               </div>
               <Button type="submit" disabled={!formik.values.phoneNumber || isPending} onClick={formik.handleSubmit} onSuccess={() => {}}>
@@ -155,27 +175,35 @@ const Profile = () => {
       )}
 
       {isKYCEditMode && (
-        <div className="ot-modal-overlay" onClick={closeKYCModal}>
-          <div className="ot-modal ot-modal-md" onClick={e => e.stopPropagation()}>
-            <div className="ot-modal-scroll" style={{ padding: 24, textAlign: 'center' }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Update KYC</h2>
-              <img src={percentageImage} alt="Feature Coming Soon" style={{ width: 128, height: 128, objectFit: 'cover', margin: '0 auto 12px' }} />
-              <p style={{ color: 'var(--ot-muted)', fontWeight: 600 }}>Feature Coming Soon!</p>
+        <div className={modalOverlay} onClick={closeKYCModal}>
+          <div className={modalPanel} onClick={(e) => e.stopPropagation()}>
+            <div className="relative max-h-full min-h-0 flex-1 overflow-y-auto p-6 text-center">
+              <h2 className="mb-4 text-xl font-bold">Update KYC</h2>
+              <img
+                src={percentageImage}
+                alt="Feature Coming Soon"
+                className="mx-auto mb-3 h-32 w-32 object-cover"
+              />
+              <p className="font-semibold text-muted">Feature Coming Soon!</p>
             </div>
           </div>
         </div>
       )}
 
       {isDelete && (
-        <div className="ot-modal-overlay" onClick={closeDeleteModal}>
-          <div className="ot-modal ot-modal-md" onClick={e => e.stopPropagation()}>
-            <div className="ot-modal-scroll" style={{ padding: 24 }}>
-              <FaExclamationTriangle style={{ color: '#b84545', fontSize: 24, marginBottom: 12 }} />
-              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Are you sure you want to delete your account?</h2>
-              <p style={{ color: 'var(--ot-muted)', marginBottom: 20, fontSize: 13 }}>This action is irreversible.</p>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button onClick={closeDeleteModal} className="ot-button ot-button-secondary">Cancel</button>
-                <button onClick={handleDelete} className="ot-button ot-button-danger">Delete Account</button>
+        <div className={modalOverlay} onClick={closeDeleteModal}>
+          <div className={modalPanel} onClick={(e) => e.stopPropagation()}>
+            <div className="relative max-h-full min-h-0 flex-1 overflow-y-auto p-6">
+              <FaExclamationTriangle className="mb-3 text-danger" size={24} />
+              <h2 className="mb-3 text-xl font-bold">Are you sure you want to delete your account?</h2>
+              <p className="mb-5 text-[13px] text-muted">This action is irreversible.</p>
+              <div className="flex justify-end gap-2.5">
+                <button onClick={closeDeleteModal} className={secondaryBtn}>
+                  Cancel
+                </button>
+                <button onClick={handleDelete} className={dangerBtn}>
+                  Delete Account
+                </button>
               </div>
             </div>
           </div>

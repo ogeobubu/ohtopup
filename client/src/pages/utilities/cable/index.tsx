@@ -183,9 +183,9 @@ const Cable = ({ user, isDarkMode }) => {
   };
 
   return (
-    <div className="ot-utility-intro">
+    <div className="p-7">
       {pricingDialog}
-      <div><h3>Renew your TV subscription</h3><p>Choose your provider and a package for your next renewal.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose TV package</button></div>
+      <div><h3>Renew your TV subscription</h3><p>Choose your provider and a package for your next renewal.</p><button className="inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition border border-transparent bg-accent text-white hover:bg-accent-dark" onClick={() => setIsModalOpen(true)}>Choose TV package</button></div>
       <Modal
         isOpen={isModalOpen}
         closeModal={closeModal}
@@ -197,7 +197,7 @@ const Cable = ({ user, isDarkMode }) => {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : identifersError ? (
-          <p className="text-center text-xl text-[var(--ot-muted)]">
+          <p className="text-center text-xl text-muted">
             A problem occurred or service is currently unavailable. Try again later!
           </p>
         ) : (
@@ -239,7 +239,7 @@ const Cable = ({ user, isDarkMode }) => {
                         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
                       </div>
                     ) : (
-                      <div className="flex justify-evenly space-x-4 border border-solid border-[var(--ot-line)] py-2 ">
+                      <div className="flex justify-evenly space-x-4 border border-solid border-line py-2">
                         {identifers?.map((provider) => (
                           <button
                             key={provider.serviceID}
@@ -273,7 +273,7 @@ const Cable = ({ user, isDarkMode }) => {
                   {formik.values.provider && (
                     <>
                       <div className="flex flex-col mt-3">
-                        <label className={`block text-[var(--ot-muted)] `}>
+                        <label className={`block text-muted `}>
                           Smart Card Number
                         </label>
                         <Field name="accountNumber">
@@ -283,7 +283,7 @@ const Cable = ({ user, isDarkMode }) => {
                                 {...field}
                                 type="text"
                                 value={field.value || ""}
-                                className="w-full border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
+                                className="w-full border rounded bg-bg text-ink"
                                 onChange={(e) => {
                                   form.setFieldValue(field.name, e.target.value);
                                   verifyAccountName(e.target.value);
@@ -306,13 +306,13 @@ const Cable = ({ user, isDarkMode }) => {
                       </div>
                       {accountNameLoading ? (
                         <div className="space-y-3 my-3">
-                          <div className="h-10 bg-[var(--ot-bg)]  rounded animate-pulse"></div>
-                          <div className="h-10 bg-[var(--ot-bg)]  rounded animate-pulse"></div>
+                          <div className="h-10 bg-bg rounded animate-pulse"></div>
+                          <div className="h-10 bg-bg rounded animate-pulse"></div>
                         </div>
                       ) : accountNameApi && (
                         <>
                           <div className="flex flex-col">
-                            <label className={`mb-1 block text-[var(--ot-muted)] `}>
+                            <label className={`mb-1 block text-muted `}>
                               Smart Card Name
                             </label>
                             <Field name="accountName">
@@ -322,13 +322,13 @@ const Cable = ({ user, isDarkMode }) => {
                                   type="text"
                                   disabled
                                   value={accountNameApi?.data.Customer_Name}
-                                  className="w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
+                                  className="w-full p-2 border rounded bg-bg text-ink"
                                 />
                               )}
                             </Field>
                           </div>
                           <div className="flex flex-col">
-                            <label className={`mb-1 block text-[var(--ot-muted)] `}>
+                            <label className={`mb-1 block text-muted `}>
                               Current Bouquet
                             </label>
                             <Field name="accountName">
@@ -338,7 +338,7 @@ const Cable = ({ user, isDarkMode }) => {
                                   type="text"
                                   disabled
                                   value={accountNameApi?.data.Current_Bouquet}
-                                  className="w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
+                                  className="w-full p-2 border rounded bg-bg text-ink"
                                 />
                               )}
                             </Field>
@@ -355,11 +355,11 @@ const Cable = ({ user, isDarkMode }) => {
                       )}
                       {changeBouquet && (
                         <div>
-                          <label className="block text-[var(--ot-muted)] mb-2 ">
+                          <label className="block text-muted mb-2">
                             Package Plan
                           </label>
                           {variationsLoading ? (
-                            <div className="h-10 bg-[var(--ot-bg)]  rounded animate-pulse"></div>
+                            <div className="h-10 bg-bg rounded animate-pulse"></div>
                           ) : (
                             <Select
                               options={options}
@@ -399,7 +399,7 @@ const Cable = ({ user, isDarkMode }) => {
                       )}
                       {!changeBouquet && (
                         <div className="flex flex-col mt-3">
-                          <label className={`mb-1 block text-[var(--ot-muted)] `}>
+                          <label className={`mb-1 block text-muted `}>
                             Amount
                           </label>
                           <Field name="amount">
@@ -409,7 +409,7 @@ const Cable = ({ user, isDarkMode }) => {
                                 type="text"
                                 disabled
                                 value={formatNairaAmount(accountNameApi?.data.Renewal_Amount)}
-                                className="w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)] "
+                                className="w-full p-2 border rounded bg-bg text-ink"
                                 onChange={(e) => {
                                   form.setFieldValue(
                                     field.name,
@@ -422,7 +422,7 @@ const Cable = ({ user, isDarkMode }) => {
                         </div>
                       )}
                       <div className="flex flex-col my-3">
-                        <label className={`mb-1 block text-[var(--ot-muted)]  mb-2`}>
+                        <label className={`mb-1 block text-muted  mb-2`}>
                           Phone Number
                         </label>
                         <Field name="phoneNumber">
@@ -435,7 +435,7 @@ const Cable = ({ user, isDarkMode }) => {
                               onChange={(value) =>
                                 form.setFieldValue(field.name, value)
                               }
-                              className={`w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)]  focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
+                              className={`w-full p-2 border rounded bg-bg  text-ink  focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
                               placeholder="Enter phone number"
                               disabled={isSubmitting}
                             />
@@ -450,7 +450,7 @@ const Cable = ({ user, isDarkMode }) => {
 
                       {/* Transaction PIN Section */}
                       <div className="flex flex-col my-3">
-                        <label className={`mb-1 block text-[var(--ot-muted)] `}>
+                        <label className={`mb-1 block text-muted `}>
                           Transaction PIN
                         </label>
                         <Field name="transactionPin">
@@ -459,7 +459,7 @@ const Cable = ({ user, isDarkMode }) => {
                               {...field}
                               type="password"
                               placeholder="Enter your 4-6 digit PIN"
-                              className={`w-full p-2 border rounded bg-[var(--ot-bg)]  text-[var(--ot-ink)]  focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
+                              className={`w-full p-2 border rounded bg-bg  text-ink  focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400`}
                               disabled={isSubmitting}
                               maxLength={6}
                             />
@@ -470,15 +470,15 @@ const Cable = ({ user, isDarkMode }) => {
                           component="div"
                           className="text-red-500 text-sm"
                         />
-                        <p className="text-xs text-[var(--ot-muted)]  mt-1">
+                        <p className="text-xs text-muted mt-1">
                           Enter your 4-6 digit transaction PIN to proceed
                         </p>
                       </div>
 
-                      <div className="bg-[#F7F9FB]  rounded-md p-4 w-full max-w-md mb-3">
+                      <div className="bg-[#F7F9FB] rounded-md p-4 w-full max-w-md mb-3">
                         <div className="flex justify-between items-center">
-                          <h2 className="text-[var(--ot-ink)] dark:text-white">Total</h2>
-                          <p className="text-[var(--ot-ink)] dark:text-white">
+                          <h2 className="text-ink dark:text-white">Total</h2>
+                          <p className="text-ink dark:text-white">
                             {!changeBouquet
                               ? formatNairaAmount(accountNameApi?.data.Renewal_Amount)
                               : formatNairaAmount(formik.values.amount) || 0}

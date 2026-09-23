@@ -5,7 +5,6 @@ import {
   FaWifi,
   FaBolt,
   FaTv,
-  FaMoneyBill,
 } from "react-icons/fa";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
@@ -64,19 +63,19 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   };
 
   return (
-    <div className="flex flex-col md:gap-8 gap-3">
+    <div className="flex flex-col gap-3 md:gap-8">
       {tabs.map((tab, index) => (
         <div
           key={index}
-          className={`border border-solid rounded-md transition-colors duration-200 ${
+          className={`flex w-full cursor-pointer items-center space-x-4 rounded-md border border-solid px-4 py-4 transition-colors duration-200 ${
             activeTab === tab.name
-              ? "border-blue-600 bg-[var(--ot-line)]  text-[var(--ot-muted)] "
-              : "border-[var(--ot-line)] text-[var(--ot-muted)] hover:bg-[var(--ot-bg)]    hover:"
-          } flex w-full md:w-64 items-center space-x-4 px-4 py-4 cursor-pointer`}
+              ? "border-accent bg-line text-muted"
+              : "border-line text-muted hover:bg-bg"
+          } md:w-64`}
           onClick={() => handleTabClick(tab)}
         >
           <tab.icon
-            className={`w-6 h-6 ${activeTab === tab.name ? "text-blue-500 dark:text-blue-400" : "text-[var(--ot-muted)] "}`}
+            className={`h-6 w-6 ${activeTab === tab.name ? "text-accent" : "text-muted"}`}
           />
           <div className="flex flex-col gap-1">
             <span>{tab.label}</span>

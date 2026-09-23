@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../components/ui/forms/button';
 
+type Prefs = {
+  transactionEmails: boolean;
+  promotionalEmails: boolean;
+  newsletterEmails: boolean;
+  securityEmails: boolean;
+  accountEmails: boolean;
+  systemEmails: boolean;
+  referralEmails: boolean;
+  summaryEmails: boolean;
+  emailFrequency: string;
+};
+
+const panel = "mb-6 rounded-lg border border-line bg-paper p-6";
+const row = "flex items-center justify-between gap-6 border-b border-line py-4 last:border-b-0";
+const toggle =
+  "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors peer-checked:bg-accent bg-line after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-['']";
+
 const EmailPreferences = () => {
-  const [preferences, setPreferences] = useState({
+  const [preferences, setPreferences] = useState<Prefs>({
     transactionEmails: true,
     promotionalEmails: true,
     newsletterEmails: true,
@@ -11,7 +28,7 @@ const EmailPreferences = () => {
     systemEmails: true,
     referralEmails: true,
     summaryEmails: true,
-    emailFrequency: 'immediate'
+    emailFrequency: 'immediate',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -25,8 +42,8 @@ const EmailPreferences = () => {
     try {
       const response = await fetch('/api/email/preferences', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
 
       if (response.ok) {
@@ -40,10 +57,10 @@ const EmailPreferences = () => {
     }
   };
 
-  const handlePreferenceChange = (key, value) => {
-    setPreferences(prev => ({
+  const handlePreferenceChange = (key: keyof Prefs, value: any) => {
+    setPreferences((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -56,9 +73,9 @@ const EmailPreferences = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(preferences)
+        body: JSON.stringify(preferences),
       });
 
       if (response.ok) {
@@ -76,7 +93,11 @@ const EmailPreferences = () => {
   };
 
   const handleUnsubscribeAll = async () => {
-    if (window.confirm('Are you sure you want to unsubscribe from all emails? You can change this later.')) {
+    if (
+      window.confirm(
+        'Are you sure you want to unsubscribe from all emails? You can change this later.'
+      )
+    ) {
       const updatedPreferences = {
         ...preferences,
         transactionEmails: false,
@@ -86,7 +107,7 @@ const EmailPreferences = () => {
         accountEmails: false,
         systemEmails: false,
         referralEmails: false,
-        summaryEmails: false
+        summaryEmails: false,
       };
 
       setPreferences(updatedPreferences);
@@ -96,9 +117,9 @@ const EmailPreferences = () => {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
-          body: JSON.stringify(updatedPreferences)
+          body: JSON.stringify(updatedPreferences),
         });
 
         if (response.ok) {
@@ -114,234 +135,145 @@ const EmailPreferences = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-accent" />
       </div>
     );
   }
 
+  const notificationItems: Array<{ key: keyof Prefs; title: string; desc: string }> = [
+    {
+      key: 'transactionEmails',
+      title: 'Transaction Emails',
+      desc: 'Receive notifications about your purchases, payments, and transaction status updates',
+    },
+    {
+      key: 'promotionalEmails',
+      title: 'Promotional Emails',
+      desc: 'Receive special offers, discounts, and promotional content',
+    },
+    {
+      key: 'newsletterEmails',
+      title: 'Newsletter',
+      desc: 'Stay updated with our latest news, tips, and industry insights',
+    },
+    {
+      key: 'securityEmails',
+      title: 'Security Alerts',
+      desc: 'Important security notifications and login alerts (recommended to keep enabled)',
+    },
+    {
+      key: 'accountEmails',
+      title: 'Account Updates',
+      desc: 'Notifications about account changes, profile updates, and important announcements',
+    },
+    {
+      key: 'referralEmails',
+      title: 'Referral Program',
+      desc: 'Updates about your referral earnings and program notifications',
+    },
+    {
+      key: 'summaryEmails',
+      title: 'Weekly Summary',
+      desc: 'Receive a weekly summary of your account activity and earnings',
+    },
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="mx-auto max-w-4xl p-2">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Email Preferences</h1>
-        <p className="text-gray-600">Manage your email notification preferences and subscription settings.</p>
+        <h1 className="mb-2 text-3xl font-bold text-ink">Email Preferences</h1>
+        <p className="text-muted">Manage your email notification preferences and subscription settings.</p>
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-md ${message.includes('success') || message.includes('updated') ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+        <div
+          className={`mb-6 rounded-md border p-4 ${
+            message.includes('success') || message.includes('updated')
+              ? 'border-success/40 bg-success/10 text-success'
+              : 'border-danger/40 bg-danger/10 text-danger'
+          }`}
+        >
           {message}
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className={panel}>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Email Notifications</h2>
-            <p className="text-gray-600">Choose which emails you'd like to receive</p>
+            <h2 className="text-xl font-semibold text-ink">Email Notifications</h2>
+            <p className="text-muted">Choose which emails you&apos;d like to receive</p>
           </div>
           <button
             onClick={handleUnsubscribeAll}
-            className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
+            className="rounded-md border border-danger/40 px-4 py-2 text-sm text-danger transition hover:bg-danger/10"
           >
             Unsubscribe from All
           </button>
         </div>
 
-        <div className="space-y-6">
-          {/* Transaction Emails */}
-          <div className="flex items-center justify-between py-4 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Transaction Emails</h3>
-              <p className="text-gray-600">Receive notifications about your purchases, payments, and transaction status updates</p>
+        <div>
+          {notificationItems.map((item) => (
+            <div key={item.key} className={row}>
+              <div className="min-w-0">
+                <h3 className="text-lg font-medium text-ink">{item.title}</h3>
+                <p className="text-muted">{item.desc}</p>
+              </div>
+              <label className="relative inline-flex shrink-0 cursor-pointer items-center">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={preferences[item.key] as boolean}
+                  onChange={(e) => handlePreferenceChange(item.key, e.target.checked)}
+                />
+                <div className={toggle} />
+              </label>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={preferences.transactionEmails}
-                onChange={(e) => handlePreferenceChange('transactionEmails', e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          {/* Promotional Emails */}
-          <div className="flex items-center justify-between py-4 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Promotional Emails</h3>
-              <p className="text-gray-600">Receive special offers, discounts, and promotional content</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={preferences.promotionalEmails}
-                onChange={(e) => handlePreferenceChange('promotionalEmails', e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          {/* Newsletter Emails */}
-          <div className="flex items-center justify-between py-4 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Newsletter</h3>
-              <p className="text-gray-600">Stay updated with our latest news, tips, and industry insights</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={preferences.newsletterEmails}
-                onChange={(e) => handlePreferenceChange('newsletterEmails', e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          {/* Security Emails */}
-          <div className="flex items-center justify-between py-4 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Security Alerts</h3>
-              <p className="text-gray-600">Important security notifications and login alerts (recommended to keep enabled)</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={preferences.securityEmails}
-                onChange={(e) => handlePreferenceChange('securityEmails', e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          {/* Account Emails */}
-          <div className="flex items-center justify-between py-4 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Account Updates</h3>
-              <p className="text-gray-600">Notifications about account changes, profile updates, and important announcements</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={preferences.accountEmails}
-                onChange={(e) => handlePreferenceChange('accountEmails', e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          {/* Referral Emails */}
-          <div className="flex items-center justify-between py-4 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Referral Program</h3>
-              <p className="text-gray-600">Updates about your referral earnings and program notifications</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={preferences.referralEmails}
-                onChange={(e) => handlePreferenceChange('referralEmails', e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          {/* Summary Emails */}
-          <div className="flex items-center justify-between py-4">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Weekly Summary</h3>
-              <p className="text-gray-600">Receive a weekly summary of your account activity and earnings</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={preferences.summaryEmails}
-                onChange={(e) => handlePreferenceChange('summaryEmails', e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* Email Frequency Settings */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Email Frequency</h2>
-        <p className="text-gray-600 mb-4">Choose how often you'd like to receive emails</p>
+      <div className={panel}>
+        <h2 className="mb-1 text-xl font-semibold text-ink">Email Frequency</h2>
+        <p className="mb-4 text-muted">Choose how often you&apos;d like to receive emails</p>
 
         <div className="space-y-3">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="frequency"
-              value="immediate"
-              checked={preferences.emailFrequency === 'immediate'}
-              onChange={(e) => handlePreferenceChange('emailFrequency', e.target.value)}
-              className="mr-3"
-            />
-            <div>
-              <span className="font-medium">Immediate</span>
-              <p className="text-sm text-gray-600">Receive emails as soon as events occur</p>
-            </div>
-          </label>
-
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="frequency"
-              value="daily"
-              checked={preferences.emailFrequency === 'daily'}
-              onChange={(e) => handlePreferenceChange('emailFrequency', e.target.value)}
-              className="mr-3"
-            />
-            <div>
-              <span className="font-medium">Daily Digest</span>
-              <p className="text-sm text-gray-600">Receive a daily summary of all activities</p>
-            </div>
-          </label>
-
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="frequency"
-              value="weekly"
-              checked={preferences.emailFrequency === 'weekly'}
-              onChange={(e) => handlePreferenceChange('emailFrequency', e.target.value)}
-              className="mr-3"
-            />
-            <div>
-              <span className="font-medium">Weekly Summary</span>
-              <p className="text-sm text-gray-600">Receive a weekly summary of your account activity</p>
-            </div>
-          </label>
+          {[
+            { value: 'immediate', title: 'Immediate', desc: 'Receive emails as soon as events occur' },
+            { value: 'daily', title: 'Daily Digest', desc: 'Receive a daily summary of all activities' },
+            { value: 'weekly', title: 'Weekly Summary', desc: 'Receive a weekly summary of your account activity' },
+          ].map((opt) => (
+            <label key={opt.value} className="flex cursor-pointer items-start gap-3">
+              <input
+                type="radio"
+                name="frequency"
+                value={opt.value}
+                checked={preferences.emailFrequency === opt.value}
+                onChange={(e) => handlePreferenceChange('emailFrequency', e.target.value)}
+                className="mt-1"
+              />
+              <div>
+                <span className="font-medium">{opt.title}</span>
+                <p className="text-sm text-muted">{opt.desc}</p>
+              </div>
+            </label>
+          ))}
         </div>
       </div>
 
-      {/* Save Button */}
       <div className="flex justify-end">
-        <Button
-          onClick={handleSavePreferences}
-          onSuccess={() => {}}
-          variant="primary"
-          disabled={saving}
-        >
+        <Button onClick={handleSavePreferences} onSuccess={() => {}} variant="primary" disabled={saving}>
           {saving ? 'Saving...' : 'Save Preferences'}
         </Button>
       </div>
 
-      {/* Footer Information */}
-      <div className="mt-8 bg-gray-50 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Privacy & Unsubscribe</h3>
-        <p className="text-gray-600 mb-4">
+      <div className="mt-8 rounded-lg bg-bg p-6">
+        <h3 className="mb-2 text-lg font-medium text-ink">Privacy & Unsubscribe</h3>
+        <p className="mb-4 text-muted">
           You can unsubscribe from any email by clicking the unsubscribe link at the bottom of our emails.
           We respect your privacy and will never sell your email address to third parties.
         </p>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-muted">
           <p>Last updated: {new Date().toLocaleDateString()}</p>
           <p>For support, contact us at support@ohtopup.com</p>
         </div>

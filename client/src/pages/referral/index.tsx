@@ -5,6 +5,18 @@ import { useSelector } from "react-redux";
 import { getReferrals as getReferralsApi } from "../../api";
 import { FaShareAlt } from "react-icons/fa";
 
+const primaryBtn =
+  "inline-flex min-h-[46px] items-center justify-center gap-3 rounded-md border border-transparent bg-accent px-[15px] py-[11px] text-[13px] font-semibold text-white transition hover:bg-accent-dark disabled:opacity-45";
+const secondaryBtn =
+  "inline-flex min-h-[38px] items-center justify-center gap-3 rounded-md border border-line bg-paper px-3 py-2 text-xs font-semibold text-ink transition hover:bg-tint disabled:opacity-45 disabled:cursor-not-allowed";
+const panel =
+  "overflow-hidden rounded-lg border border-line bg-paper";
+const panelHeading =
+  "flex min-w-0 flex-wrap items-center justify-between gap-4 p-5 nav:p-[22px_24px]";
+const panelBody = "px-6 pb-6";
+const th = "px-6 py-2.5 text-left text-[11px] font-medium uppercase tracking-[0.5px] text-muted";
+const td = "px-6 py-3";
+
 const Referral = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,9 +38,15 @@ const Referral = () => {
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Join me on OhTopUp!", text: `Use my referral code: ${user?.referralCode}`, url: `https://ohtopup.name.ng/create?code=${user?.referralCode}` });
+        await navigator.share({
+          title: "Join me on OhTopUp!",
+          text: `Use my referral code: ${user?.referralCode}`,
+          url: `https://ohtopup.name.ng/create?code=${user?.referralCode}`,
+        });
         toast.success("Referral link shared successfully!");
-      } catch { toast.error("Failed to share the referral link."); }
+      } catch {
+        toast.error("Failed to share the referral link.");
+      }
     } else {
       navigator.clipboard.writeText(user?.referralCode);
       toast.success("Referral code copied to clipboard!");
@@ -39,86 +57,193 @@ const Referral = () => {
   const refList = referrals?.users ?? [];
 
   return (
-    <div className="ot-dashboard">
-      <div className="ot-dashboard-heading"><div><h1>Referral Program</h1><p>Invite friends and earn rewards when they join and make their first deposit</p></div></div>
+    <div className="min-w-0">
+      <div className="mb-[30px] flex min-w-0 flex-wrap items-center justify-between gap-5">
+        <div className="min-w-0">
+          <h1 className="mb-2 text-[22px] font-mediumish leading-tight tracking-[-0.5px] nav:text-[30px] nav:tracking-[-0.9px]">
+            Referral Program
+          </h1>
+          <p className="text-[13px] text-muted">
+            Invite friends and earn rewards when they join and make their first deposit
+          </p>
+        </div>
+      </div>
 
-      <div className="ot-overview">
-        {/* Referral code card */}
-        <section className="ot-panel">
-          <div className="ot-panel-heading"><div><h2>Your Referral Code</h2><p>Share this code with friends to earn rewards.</p></div></div>
-          <div style={{ padding: '0 24px 24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-              <div style={{ flex: 1, padding: '12px 16px', background: 'var(--ot-tint)', border: '1px solid var(--ot-line)', borderRadius: 6, fontFamily: 'monospace', fontSize: 16, fontWeight: 600, textAlign: 'center', letterSpacing: '1px' }}>
+      <div className="mb-8 grid min-w-0 grid-cols-1 gap-6 md:mb-8 nav:grid-cols-[minmax(0,1fr)_minmax(0,1.55fr)]">
+        <section className={panel}>
+          <div className={panelHeading}>
+            <div className="min-w-0">
+              <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Your Referral Code</h2>
+              <p className="mt-1 text-xs text-muted">Share this code with friends to earn rewards.</p>
+            </div>
+          </div>
+          <div className={panelBody}>
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <div className="min-w-[160px] flex-1 rounded-md border border-line bg-tint px-4 py-3 text-center font-mono text-base font-semibold tracking-[1px]">
                 {user?.referralCode}
               </div>
-              <button onClick={handleShare} className="ot-button ot-button-primary" style={{ whiteSpace: 'nowrap' }}><FaShareAlt /> Share Code</button>
+              <button onClick={handleShare} className={`${primaryBtn} whitespace-nowrap`}>
+                <FaShareAlt /> Share Code
+              </button>
             </div>
 
-            <p className="ot-field-label" style={{ marginBottom: 12 }}>How it works</p>
-            <div className="ot-feature-row" style={{ borderTop: 'none', paddingTop: 0 }}><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>01</span><div><h3>Share your code</h3><p>Send your unique referral code to friends.</p></div></div>
-            <div className="ot-feature-row"><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>02</span><div><h3>They sign up</h3><p>Friends register using your referral code.</p></div></div>
-            <div className="ot-feature-row"><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>03</span><div><h3>First deposit</h3><p>They make their first ₦1,000+ deposit.</p></div></div>
-            <div className="ot-feature-row"><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>04</span><div><h3>You earn ₦500</h3><p>Points are credited to your account instantly.</p></div></div>
+            <p className="mb-3 block text-xs font-mediumish text-ink">How it works</p>
+            <div className="flex min-w-0 gap-6 border-line pb-[23px] pt-[23px] [&+&]:border-t [&+&]:border-t-line first:border-t-0 first:pt-0">
+              {[
+                ["01", "Share your code", "Send your unique referral code to friends."],
+                ["02", "They sign up", "Friends register using your referral code."],
+                ["03", "First deposit", "They make their first ₦1,000+ deposit."],
+                ["04", "You earn ₦500", "Points are credited to your account instantly."],
+              ].map(([n, title, body]) => (
+                <div key={n} className="flex min-w-0 gap-6 border-t border-line py-[23px] first:border-t-0 first:pt-0">
+                  <span className="shrink-0 pt-1 text-[11px] tabular-nums text-muted">{n}</span>
+                  <div>
+                    <h3 className="mb-[7px] text-base font-semibold">{title}</h3>
+                    <p className="text-[13px] leading-[1.8] text-muted">{body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="ot-panel">
-          <div className="ot-panel-heading"><div><h2>Your Stats</h2><p>Referral performance at a glance.</p></div></div>
-          <div style={{ padding: '0 24px 24px', display: 'grid', gap: 12 }}>
-            {[{ label: 'Total Referrals', value: referrals?.totalUsers || 0 }, { label: 'Points Earned', value: user?.points || 0, color: '#27805d' }, { label: 'Potential Earnings', value: `₦${((referrals?.totalUsers || 0) * 500).toLocaleString()}`, color: 'var(--ot-accent)' }].map(s => (
-              <div key={s.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--ot-tint)', borderRadius: 6 }}>
-                <span style={{ fontSize: 13, color: 'var(--ot-muted)' }}>{s.label}</span>
-                <span style={{ fontSize: 20, fontWeight: 600, color: s.color || 'var(--ot-ink)', fontVariantNumeric: 'tabular-nums' }}>{s.value}</span>
+        <section className={panel}>
+          <div className={panelHeading}>
+            <div className="min-w-0">
+              <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Your Stats</h2>
+              <p className="mt-1 text-xs text-muted">Referral performance at a glance.</p>
+            </div>
+          </div>
+          <div className={`${panelBody} grid gap-3`}>
+            {[
+              { label: "Total Referrals", value: referrals?.totalUsers || 0 },
+              { label: "Points Earned", value: user?.points || 0, color: "#27805d" },
+              {
+                label: "Potential Earnings",
+                value: `₦${((referrals?.totalUsers || 0) * 500).toLocaleString()}`,
+                color: "var(--ot-accent)",
+              },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="flex items-center justify-between rounded-md bg-tint px-4 py-3.5"
+              >
+                <span className="text-[13px] text-muted">{s.label}</span>
+                <span
+                  className="text-xl font-semibold tabular-nums"
+                  style={{ color: s.color || "var(--ot-ink)" }}
+                >
+                  {s.value}
+                </span>
               </div>
             ))}
           </div>
         </section>
       </div>
 
-      {/* Referrals list */}
-      <section className="ot-panel" aria-label="Referrals list">
-        <div className="ot-panel-heading"><div><h2>Your Referrals</h2><p>People who joined using your code.</p></div></div>
-        <div style={{ padding: '0 24px 16px', display: 'flex', gap: 10, alignItems: 'center' }}>
-          <input type="search" placeholder="Search by username or email…" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} className="ot-field" style={{ flex: '1 1 200px', maxWidth: 320 }} />
-          {searchTerm && <button onClick={() => { setSearchTerm(""); setDebouncedSearchTerm(""); }} className="ot-button ot-button-secondary" style={{ fontSize: 12, padding: '6px 12px', minHeight: 'auto' }}>Clear</button>}
+      <section className={panel} aria-label="Referrals list">
+        <div className={panelHeading}>
+          <div className="min-w-0">
+            <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Your Referrals</h2>
+            <p className="mt-1 text-xs text-muted">People who joined using your code.</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 px-6 pb-4">
+          <input
+            type="search"
+            placeholder="Search by username or email…"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="h-11 min-w-[200px] max-w-[320px] flex-1 rounded-md border border-line bg-bg px-3 text-xs text-ink outline-none placeholder:text-muted focus:ring-2 focus:ring-accent/40"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setDebouncedSearchTerm("");
+              }}
+              className={`${secondaryBtn} !min-h-auto !px-3 !py-1.5 !text-xs`}
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {isLoading ? (
-          <div className="ot-empty" role="status"><p>Loading referrals…</p></div>
+          <div className="p-12 text-center" role="status">
+            <p className="text-xs text-muted">Loading referrals…</p>
+          </div>
         ) : isError ? (
-          <div className="ot-empty"><h3>We couldn't load your referrals.</h3><p>{error?.message || 'Please try again.'}</p><button className="ot-button ot-button-secondary" onClick={() => window.location.reload()}>Try again</button></div>
+          <div className="p-12 text-center">
+            <h3 className="mb-1.5 text-[15px] font-mediumish">We couldn&apos;t load your referrals.</h3>
+            <p className="mb-4 text-xs text-muted">{(error as any)?.message || "Please try again."}</p>
+            <button className={secondaryBtn} onClick={() => window.location.reload()}>
+              Try again
+            </button>
+          </div>
         ) : refList.length === 0 ? (
-          <div className="ot-empty"><h3>No referrals yet.</h3><p>Share your code and earn ₦500 for every friend who joins.</p><button onClick={handleShare} className="ot-button ot-button-primary"><FaShareAlt /> Share Your Code</button></div>
+          <div className="p-12 text-center">
+            <h3 className="mb-1.5 text-[15px] font-mediumish">No referrals yet.</h3>
+            <p className="mb-4 text-xs text-muted">Share your code and earn ₦500 for every friend who joins.</p>
+            <button onClick={handleShare} className={primaryBtn}>
+              <FaShareAlt /> Share Your Code
+            </button>
+          </div>
         ) : (
           <>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-[13px]">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--ot-line)' }}>
-                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Username</th>
-                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</th>
-                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Joined</th>
-                    <th style={{ padding: '10px 24px', textAlign: 'left', fontWeight: 500, color: 'var(--ot-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
+                  <tr className="border-b border-line">
+                    <th className={th}>Username</th>
+                    <th className={th}>Email</th>
+                    <th className={th}>Joined</th>
+                    <th className={th}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {refList.map((u) => (
-                    <tr key={u._id} style={{ borderBottom: '1px solid var(--ot-line)' }}>
-                      <td style={{ padding: '12px 24px', fontWeight: 500 }}>{u.username}</td>
-                      <td style={{ padding: '12px 24px', color: 'var(--ot-muted)' }}>{u.email}</td>
-                      <td style={{ padding: '12px 24px', color: 'var(--ot-muted)' }}>{new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-                      <td style={{ padding: '12px 24px' }}><span style={{ fontSize: 12, color: u.points > 0 ? '#27805d' : '#9a6818', fontWeight: 500 }}>{u.points > 0 ? 'Rewarded' : 'Pending'}</span></td>
+                  {refList.map((u: any) => (
+                    <tr key={u._id} className="border-b border-line last:border-b-0">
+                      <td className={`${td} font-medium`}>{u.username}</td>
+                      <td className={`${td} text-muted`}>{u.email}</td>
+                      <td className={`${td} text-muted`}>
+                        {new Date(u.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className={td}>
+                        <span
+                          className="text-xs font-medium"
+                          style={{ color: u.points > 0 ? "#27805d" : "#9a6818" }}
+                        >
+                          {u.points > 0 ? "Rewarded" : "Pending"}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             {totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, padding: '16px 24px' }}>
-                <button className="ot-button ot-button-secondary" disabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)}>← Prev</button>
-                <span style={{ fontSize: 12, color: 'var(--ot-muted)' }}>Page {currentPage} of {totalPages}</span>
-                <button className="ot-button ot-button-secondary" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(currentPage + 1)}>Next →</button>
+              <div className="flex items-center justify-center gap-3 px-6 py-4">
+                <button className={secondaryBtn} disabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)}>
+                  ← Prev
+                </button>
+                <span className="text-xs text-muted">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  className={secondaryBtn}
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next →
+                </button>
               </div>
             )}
           </>

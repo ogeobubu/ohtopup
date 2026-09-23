@@ -415,12 +415,12 @@ const AdminWalletManagement = () => {
   return (
     <>
       <div className="mb-4 md:mb-6 p-2 md:p-0">
-        <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink mb-2">Wallet Management</h1>
-        <p className="ot-admin-muted text-sm md:text-base">Manage user wallets, view transactions, and set rates</p>
+        <h1 className="text-[26px] font-mediumish leading-tight tracking-[-0.6px] text-ink text-xl md:text-3xl font-bold text-ink mb-2">Wallet Management</h1>
+        <p className="text-muted text-sm md:text-base">Manage user wallets, view transactions, and set rates</p>
       </div>
 
       <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 px-2 md:px-0">
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-xs md:text-sm font-medium">Total Wallet Balance</p>
@@ -430,7 +430,7 @@ const AdminWalletManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-xs md:text-sm font-medium">VTPass Balance</p>
@@ -440,7 +440,7 @@ const AdminWalletManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-xs md:text-sm font-medium">ClubKonnect Balance</p>
@@ -451,19 +451,19 @@ const AdminWalletManagement = () => {
         </div>
       </div>
 
-      <nav className="ot-utility-tabs" aria-label="Wallet sections">
+      <nav className="flex min-h-11 flex-wrap items-stretch justify-between border-b border-line" aria-label="Wallet sections">
         {["Wallets", "Transactions", "Withdrawals", "Settings"].map(tab => <button key={tab} aria-pressed={activeTab === tab} onClick={() => handleTabClick(tab)}>{tab}</button>)}
       </nav>
 
       <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-2 px-2 md:px-0">
-        <div className="text-xs md:text-sm ot-admin-muted">
+        <div className="text-xs md:text-sm text-muted">
           {activeTab === "Wallets" && `${wallets?.wallets?.length || 0} wallets found`}
           {activeTab === "Transactions" && `${transactions?.transactions?.length || 0} transactions found`}
         </div>
         <div className="flex gap-2">
           <button
             onClick={openRate}
-            className="ot-admin-control px-3 md:px-6 py-2 md:py-3 ot-admin-action rounded-lg transition-all duration-200 transform text-xs md:text-sm"
+            className="min-h-[44px] px-3 md:px-6 py-2 md:py-3 bg-tint rounded-lg transition-all duration-200 transform text-xs md:text-sm"
           >
             <FaPlus className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
             Set Rates
@@ -471,7 +471,7 @@ const AdminWalletManagement = () => {
           <button
             onClick={openSettingsModal}
             disabled={loadingSettings}
-            className="ot-admin-control px-3 md:px-6 py-2 md:py-3 ot-admin-action rounded-lg transition-all duration-200 transform text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="min-h-[44px] px-3 md:px-6 py-2 md:py-3 bg-tint rounded-lg transition-all duration-200 transform text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loadingSettings ? (
               <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -492,7 +492,7 @@ const AdminWalletManagement = () => {
             <div className="space-y-4">
               {/* Skeleton Loader */}
               {[...Array(5)].map((_, index) => (
-                <div key={index} className="ot-admin-paper rounded-lg p-6 animate-pulse">
+                <div key={index} className="bg-paper rounded-lg p-6 animate-pulse">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
                     <div className="flex-1 space-y-2">
@@ -511,63 +511,63 @@ const AdminWalletManagement = () => {
             </div>
           ) : wallets?.wallets?.length === 0 ? (
             <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 ot-admin-soft rounded-full flex items-center justify-center mb-4">
-                <FaWallet className="h-12 w-12 ot-admin-muted" />
+              <div className="mx-auto w-24 h-24 bg-bg rounded-full flex items-center justify-center mb-4">
+                <FaWallet className="h-12 w-12 text-muted" />
               </div>
-              <h3 className="text-lg font-medium ot-admin-ink mb-2">No wallets found</h3>
-              <p className="ot-admin-muted">There are no user wallets to display.</p>
+              <h3 className="text-lg font-medium text-ink mb-2">No wallets found</h3>
+              <p className="text-muted">There are no user wallets to display.</p>
             </div>
           ) : (
             <>
-              <div className="ot-admin-paper rounded-lg overflow-hidden">
+              <div className="bg-paper rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="ot-admin-data-table min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="ot-admin-soft ">
+                  <table className="w-full border-collapse bg-paper text-ink text-xs min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-bg">
                       <tr>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           User Details
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Wallet Balance
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody className="bg-paper divide-y divide-gray-200 dark:divide-gray-700">
                       {wallets?.wallets?.map((wallet) => (
                         <tr key={wallet._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                                <div className="ot-admin-neutral-card h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center">
+                                <div className="min-w-0 rounded-md border border-line bg-paper h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center">
                                   <span className="text-xs sm:text-sm font-medium text-white">
                                     {(wallet.username || "N/A").charAt(0).toUpperCase()}
                                   </span>
                                 </div>
                               </div>
                               <div className="ml-2 sm:ml-4">
-                                <div className="text-sm font-medium ot-admin-ink ">
+                                <div className="text-sm font-medium text-ink">
                                   {wallet.username || "N/A"}
                                 </div>
-                                <div className="text-xs sm:text-sm ot-admin-muted ">
+                                <div className="text-xs sm:text-sm text-muted">
                                   {wallet.email || "N/A"}
                                 </div>
-                                <div className="text-xs ot-admin-muted ">
+                                <div className="text-xs text-muted">
                                   ID: {wallet._id.slice(-8)}
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm sm:text-lg font-semibold ot-admin-ink ">
+                            <div className="text-sm sm:text-lg font-semibold text-ink">
                               {formatNairaAmount(wallet?.balance)}
                             </div>
-                            <div className="text-xs sm:text-sm ot-admin-muted ">
+                            <div className="text-xs sm:text-sm text-muted">
                               {wallet.transactions?.length || 0} transactions
                             </div>
                           </td>
@@ -585,7 +585,7 @@ const AdminWalletManagement = () => {
                               <div className="flex flex-col sm:flex-row gap-2">
                                 <button
                                   onClick={() => handleToggleWallet(wallet._id, wallet.isActive)}
-                                  className={`ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
+                                  className={`min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors ${
                                     wallet.isActive
                                       ? 'text-green-700 bg-green-100 hover:bg-green-200 border-green-300'
                                       : 'text-red-700 bg-red-100 hover:bg-red-200 border-red-300'
@@ -602,7 +602,7 @@ const AdminWalletManagement = () => {
                                 </button>
                                 <button
                                   onClick={() => openModal(wallet)}
-                                  className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white ot-admin-action focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                  className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                                   title="Add funds to wallet"
                                 >
                                   <FaPlus className="mr-1 h-3 w-3" />
@@ -631,7 +631,7 @@ const AdminWalletManagement = () => {
       {activeTab === "Transactions" && (
         <div className="overflow-x-auto px-2 md:px-0">
           <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-3 md:mb-4 gap-2">
-            <Select classNamePrefix="ot-admin-select"
+            <Select classNamePrefix="min-w-0"
               options={transactionTypeOptions}
               onChange={(selectedOption) => {
                 setTransactionType(selectedOption?.value || null);
@@ -706,7 +706,7 @@ const AdminWalletManagement = () => {
       {activeTab === "Withdrawals" && (
         <div className="overflow-x-auto px-2 md:px-0">
           <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-3 md:mb-4 gap-2">
-            <Select classNamePrefix="ot-admin-select"
+            <Select classNamePrefix="min-w-0"
               options={[
                 { value: "", label: "All Statuses" },
                 { value: "pending", label: "Pending" },
@@ -737,7 +737,7 @@ const AdminWalletManagement = () => {
             <div className="space-y-4">
               {/* Skeleton Loader */}
               {[...Array(5)].map((_, index) => (
-                <div key={index} className="ot-admin-paper rounded-lg p-6 animate-pulse">
+                <div key={index} className="bg-paper rounded-lg p-6 animate-pulse">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
                     <div className="flex-1 space-y-2">
@@ -757,54 +757,54 @@ const AdminWalletManagement = () => {
             </div>
           ) : withdrawals.length === 0 ? (
             <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 ot-admin-soft rounded-full flex items-center justify-center mb-4">
-                <FaMoneyBill className="h-12 w-12 ot-admin-muted" />
+              <div className="mx-auto w-24 h-24 bg-bg rounded-full flex items-center justify-center mb-4">
+                <FaMoneyBill className="h-12 w-12 text-muted" />
               </div>
-              <h3 className="text-lg font-medium ot-admin-ink mb-2">No withdrawals found</h3>
-              <p className="ot-admin-muted">There are no withdrawal requests matching your criteria.</p>
+              <h3 className="text-lg font-medium text-ink mb-2">No withdrawals found</h3>
+              <p className="text-muted">There are no withdrawal requests matching your criteria.</p>
             </div>
           ) : (
             <>
-              <div className="ot-admin-paper rounded-lg overflow-hidden">
+              <div className="bg-paper rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="ot-admin-data-table min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="ot-admin-soft ">
+                  <table className="w-full border-collapse bg-paper text-ink text-xs min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-bg">
                       <tr>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Reference
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           User Details
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Bank Details
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Timeline
                         </th>
-                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody className="bg-paper divide-y divide-gray-200 dark:divide-gray-700">
                       {withdrawals.map((row) => (
                         <tr key={row._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div>
-                                <div className="text-sm font-medium ot-admin-ink ">
+                                <div className="text-sm font-medium text-ink">
                                   {row.reference && row.reference.length > 15
                                     ? `${row.reference.slice(0, 15)}...`
                                     : row.reference}
                                 </div>
-                                <div className="text-sm ot-admin-muted ">
+                                <div className="text-sm text-muted">
                                   ID: {row._id.slice(-8)}
                                 </div>
                               </div>
@@ -813,24 +813,24 @@ const AdminWalletManagement = () => {
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
-                                <div className="ot-admin-neutral-card h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center">
+                                <div className="min-w-0 rounded-md border border-line bg-paper h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center">
                                   <span className="text-xs sm:text-sm font-medium text-white">
                                     {(row.user?.username || "N/A").charAt(0).toUpperCase()}
                                   </span>
                                 </div>
                               </div>
                               <div className="ml-2 sm:ml-4">
-                                <div className="text-sm font-medium ot-admin-ink ">
+                                <div className="text-sm font-medium text-ink">
                                   {row.user?.username || "N/A"}
                                 </div>
-                                <div className="text-xs sm:text-sm ot-admin-muted ">
+                                <div className="text-xs sm:text-sm text-muted">
                                   {row.user?.email || "N/A"}
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-semibold ot-admin-ink ">
+                            <div className="text-sm font-semibold text-ink">
                               {formatNairaAmount(row.amount)}
                             </div>
                             {row.retryCount > 0 && (
@@ -840,14 +840,14 @@ const AdminWalletManagement = () => {
                             )}
                           </td>
                           <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm ot-admin-ink ">
+                            <div className="text-sm text-ink">
                               {row.bankName}
                             </div>
-                            <div className="text-sm ot-admin-muted ">
+                            <div className="text-sm text-muted">
                               {row.accountNumber}
                             </div>
                             {row.accountName && (
-                              <div className="text-xs ot-admin-muted ">
+                              <div className="text-xs text-muted">
                                 {row.accountName}
                               </div>
                             )}
@@ -855,12 +855,12 @@ const AdminWalletManagement = () => {
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                             <Chip status={row.status} />
                             {row.processingStartedAt && (
-                              <div className="text-xs ot-admin-muted mt-1">
+                              <div className="text-xs text-muted mt-1">
                                 Processing since {new Date(row.processingStartedAt).toLocaleDateString()}
                               </div>
                             )}
                           </td>
-                          <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm ot-admin-muted ">
+                          <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-muted">
                             <div className="space-y-1">
                               <div>
                                 <span className="font-medium">Created:</span>
@@ -885,7 +885,7 @@ const AdminWalletManagement = () => {
                                 <div className="flex flex-col sm:flex-row gap-2">
                                   <button
                                     onClick={() => handleApproveWithdrawal(row._id)}
-                                    className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white ot-admin-action focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                                    className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                                     title="Approve this withdrawal request"
                                   >
                                     <FaMoneyBill className="mr-1 h-3 w-3" />
@@ -894,7 +894,7 @@ const AdminWalletManagement = () => {
                                   </button>
                                   <button
                                     onClick={() => handleRejectWithdrawal(row._id)}
-                                    className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                                    className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                                     title="Reject this withdrawal request"
                                   >
                                     <FaMoneyBill className="mr-1 h-3 w-3" />
@@ -906,7 +906,7 @@ const AdminWalletManagement = () => {
                               {row.status === "approved" && (
                                 <button
                                   onClick={() => handleProcessWithdrawal(row._id)}
-                                  className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white ot-admin-action focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                  className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                                   title="Start processing this withdrawal"
                                 >
                                   <FaMoneyBill className="mr-1 h-3 w-3" />
@@ -918,7 +918,7 @@ const AdminWalletManagement = () => {
                                 <div className="flex flex-col sm:flex-row gap-2">
                                   <button
                                     onClick={() => handleCompleteWithdrawal(row._id)}
-                                    className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white ot-admin-action focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                                    className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                                     title="Mark as completed"
                                   >
                                     <FaMoneyBill className="mr-1 h-3 w-3" />
@@ -927,7 +927,7 @@ const AdminWalletManagement = () => {
                                   </button>
                                   <button
                                     onClick={() => handleFailWithdrawal(row._id)}
-                                    className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                                    className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                                     title="Mark as failed"
                                   >
                                     <FaMoneyBill className="mr-1 h-3 w-3" />
@@ -939,7 +939,7 @@ const AdminWalletManagement = () => {
                               {row.status === "failed" && (
                                 <button
                                   onClick={() => handleRetryWithdrawal(row._id)}
-                                  className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+                                  className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
                                   title="Retry this failed withdrawal"
                                 >
                                   <FaMoneyBill className="mr-1 h-3 w-3" />
@@ -949,7 +949,7 @@ const AdminWalletManagement = () => {
                               )}
                               {/* View Details Button */}
                               <button
-                                className="ot-admin-control inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border ot-admin-border text-xs font-medium rounded-md ot-admin-ink ot-admin-paper hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                className="min-h-[44px] inline-flex items-center justify-center px-2 sm:px-3 py-1.5 border border-line text-xs font-medium rounded-md text-ink bg-paper hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                                 title="View detailed information"
                               >
                                 <FaEye className="mr-1 h-3 w-3" />
@@ -980,7 +980,7 @@ const AdminWalletManagement = () => {
           onClick={closeModal}
         >
           <div
-            className="ot-admin-paper rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            className="bg-paper rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Scrollable Content */}
@@ -990,10 +990,10 @@ const AdminWalletManagement = () => {
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
                   <FaWallet className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-2xl font-bold ot-admin-ink">
+                <h3 className="text-2xl font-bold text-ink">
                   {isCreatingWallet ? "Create Wallet" : "Add Funds"}
                 </h3>
-                <p className="text-sm ot-admin-muted">
+                <p className="text-sm text-muted">
                   {isCreatingWallet
                     ? `Create a wallet for ${selectedUser?.username}`
                     : `Add funds to ${selectedUser?.username}'s wallet`
@@ -1002,23 +1002,23 @@ const AdminWalletManagement = () => {
               </div>
 
               {/* User Details */}
-              <div className="mb-6 p-6 rounded-lg ot-admin-soft">
+              <div className="mb-6 p-6 rounded-lg bg-bg">
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b ot-admin-border">
-                    <span className="font-medium ot-admin-muted">Username</span>
-                    <span className="font-semibold text-lg ot-admin-ink">
+                  <div className="flex justify-between items-center py-2 border-b border-line">
+                    <span className="font-medium text-muted">Username</span>
+                    <span className="font-semibold text-lg text-ink">
                       {selectedUser?.username}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b ot-admin-border">
-                    <span className="font-medium ot-admin-muted">User ID</span>
-                    <span className="font-semibold ot-admin-ink">
+                  <div className="flex justify-between items-center py-2 border-b border-line">
+                    <span className="font-medium text-muted">User ID</span>
+                    <span className="font-semibold text-ink">
                       {selectedUser?.userId}
                     </span>
                   </div>
                   {!isCreatingWallet && (
                     <div className="flex justify-between items-center py-2">
-                      <span className="font-medium ot-admin-muted">Current Balance</span>
+                      <span className="font-medium text-muted">Current Balance</span>
                       <span className="font-bold text-xl text-green-600">
                         {formatNairaAmount(selectedUser?.balance)}
                       </span>
@@ -1047,7 +1047,7 @@ const AdminWalletManagement = () => {
                   <Form className="space-y-6 pb-8">
                     {!isCreatingWallet && (
                       <div>
-                        <label htmlFor="amount" className="block text-sm font-medium ot-admin-ink mb-2">
+                        <label htmlFor="amount" className="block text-sm font-medium text-ink mb-2">
                           Enter Amount to Add:
                         </label>
                         <Field
@@ -1082,21 +1082,21 @@ const AdminWalletManagement = () => {
                     )}
 
                     {/* Fixed Action Buttons at Bottom */}
-                    <div className="flex-shrink-0 pt-4 border-t ot-admin-border mt-4">
+                    <div className="flex-shrink-0 pt-4 border-t border-line mt-4">
                       {/* Action Buttons */}
                       <div className="flex space-x-4">
                         <button
                           type="button"
                           onClick={closeModal}
                           disabled={loadingTransaction}
-                          className="ot-admin-control flex-1 px-6 py-3 bg-gray-200 ot-admin-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
+                          className="min-h-[44px] flex-1 px-6 py-3 bg-gray-200 text-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
                           disabled={loadingTransaction}
-                          className="ot-admin-control flex-1 px-6 py-3 ot-admin-action rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
+                          className="min-h-[44px] flex-1 px-6 py-3 bg-tint rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
                         >
                           {loadingTransaction ? (
                             <span className="flex items-center justify-center">
@@ -1129,20 +1129,20 @@ const AdminWalletManagement = () => {
           onClick={closeRate}
         >
           <div
-            className="ot-admin-paper rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            className="bg-paper rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-700 dark:hover:scrollbar-thumb-gray-500 px-2 sm:px-0">
               {/* Header */}
               <div className="text-center mb-6">
-                <div className="ot-admin-neutral-card inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
+                <div className="min-w-0 rounded-md border border-line bg-paper inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
                   <FaMoneyBill className="h-8 w-8 text-purple-600" />
                 </div>
-                <h3 className="text-2xl font-bold ot-admin-ink">
+                <h3 className="text-2xl font-bold text-ink">
                   Set Transaction Rates
                 </h3>
-                <p className="text-sm ot-admin-muted">
+                <p className="text-sm text-muted">
                   Configure withdrawal and deposit rates for the system
                 </p>
               </div>
@@ -1151,25 +1151,25 @@ const AdminWalletManagement = () => {
               {loadingRates ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-                  <p className="ot-admin-muted mt-2">Loading current rates...</p>
+                  <p className="text-muted mt-2">Loading current rates...</p>
                 </div>
               ) : ratesError ? (
                 <div className="p-4 rounded-lg bg-red-50 border border-red-200 mb-6">
                   <p className="text-red-800">Error fetching rates: {ratesError.message}</p>
                 </div>
               ) : (
-                <div className="mb-6 p-6 rounded-lg ot-admin-soft">
-                  <h4 className="font-semibold ot-admin-ink mb-4">Current Rates</h4>
+                <div className="mb-6 p-6 rounded-lg bg-bg">
+                  <h4 className="font-semibold text-ink mb-4">Current Rates</h4>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center py-2 border-b ot-admin-border">
-                      <span className="font-medium ot-admin-muted">Withdrawal Rate</span>
-                      <span className="font-semibold text-lg ot-admin-ink">
+                    <div className="flex justify-between items-center py-2 border-b border-line">
+                      <span className="font-medium text-muted">Withdrawal Rate</span>
+                      <span className="font-semibold text-lg text-ink">
                         {formatNairaAmount(rates?.withdrawalRate)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="font-medium ot-admin-muted">Deposit Rate</span>
-                      <span className="font-semibold text-lg ot-admin-ink">
+                      <span className="font-medium text-muted">Deposit Rate</span>
+                      <span className="font-semibold text-lg text-ink">
                         {rates?.depositRate}%
                       </span>
                     </div>
@@ -1201,7 +1201,7 @@ const AdminWalletManagement = () => {
                 {({ handleSubmit }) => (
                   <Form onSubmit={handleSubmit} className="space-y-6 pb-8">
                     <div>
-                      <label className="block text-sm font-medium ot-admin-ink mb-2">
+                      <label className="block text-sm font-medium text-ink mb-2">
                         New Withdrawal Rate:
                       </label>
                       <Field
@@ -1211,7 +1211,7 @@ const AdminWalletManagement = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium ot-admin-ink mb-2">
+                      <label className="block text-sm font-medium text-ink mb-2">
                         New Deposit Rate (%):
                       </label>
                       <Field
@@ -1226,7 +1226,7 @@ const AdminWalletManagement = () => {
             </div>
 
             {/* Fixed Action Buttons at Bottom */}
-            <div className="flex-shrink-0 pt-4 border-t ot-admin-border mt-4">
+            <div className="flex-shrink-0 pt-4 border-t border-line mt-4">
               <Formik
                 initialValues={{ withdrawalRate: "", depositRate: "" }}
                 validationSchema={Yup.object({
@@ -1255,13 +1255,13 @@ const AdminWalletManagement = () => {
                       <button
                         type="button"
                         onClick={closeRate}
-                        className="ot-admin-control flex-1 px-6 py-3 bg-gray-200 ot-admin-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300"
+                        className="min-h-[44px] flex-1 px-6 py-3 bg-gray-200 text-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="ot-admin-control flex-1 px-6 py-3 ot-admin-action rounded-lg font-semibold transition-all duration-200 transform "
+                        className="min-h-[44px] flex-1 px-6 py-3 bg-tint rounded-lg font-semibold transition-all duration-200 transform"
                       >
                         <FaPlus className="inline mr-2 h-4 w-4" />
                         Update Rates
@@ -1277,13 +1277,13 @@ const AdminWalletManagement = () => {
 
       {activeTab === "Settings" && (
         <div className="px-2 md:px-0">
-          <div className="ot-admin-paper rounded-lg p-6">
+          <div className="bg-paper rounded-lg p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold ot-admin-ink">Wallet Settings</h3>
+              <h3 className="text-lg font-semibold text-ink">Wallet Settings</h3>
               <button
                 onClick={openSettingsModal}
                 disabled={loadingWalletSettings}
-                className="ot-admin-control px-4 py-2 ot-admin-action text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-h-[44px] px-4 py-2 bg-accent text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingWalletSettings ? "Loading..." : "Configure Settings"}
               </button>
@@ -1305,61 +1305,61 @@ const AdminWalletManagement = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Paystack Fee Settings */}
-              <div className="ot-admin-soft p-4 rounded-lg">
-                <h4 className="font-medium ot-admin-ink mb-3">Paystack Fee Settings</h4>
+              <div className="bg-bg p-4 rounded-lg">
+                <h4 className="font-medium text-ink mb-3">Paystack Fee Settings</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Percentage:</span>
+                    <span className="text-muted">Percentage:</span>
                     <span className="font-medium">{walletSettingsData?.paystackFee?.percentage || 1.5}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Fixed Fee:</span>
+                    <span className="text-muted">Fixed Fee:</span>
                     <span className="font-medium">₦{walletSettingsData?.paystackFee?.fixedFee || 100}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Fee Cap:</span>
+                    <span className="text-muted">Fee Cap:</span>
                     <span className="font-medium">₦{walletSettingsData?.paystackFee?.cap || 2000}</span>
                   </div>
                 </div>
               </div>
 
               {/* Transaction Limits */}
-              <div className="ot-admin-soft p-4 rounded-lg">
-                <h4 className="font-medium ot-admin-ink mb-3">Transaction Limits</h4>
+              <div className="bg-bg p-4 rounded-lg">
+                <h4 className="font-medium text-ink mb-3">Transaction Limits</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Min Deposit:</span>
+                    <span className="text-muted">Min Deposit:</span>
                     <span className="font-medium">₦{walletSettingsData?.minDepositAmount || 100}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Max Deposit:</span>
+                    <span className="text-muted">Max Deposit:</span>
                     <span className="font-medium">₦{walletSettingsData?.maxDepositAmount?.toLocaleString() || "1,000,000"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Min Withdrawal:</span>
+                    <span className="text-muted">Min Withdrawal:</span>
                     <span className="font-medium">₦{walletSettingsData?.minWithdrawalAmount || 100}</span>
                   </div>
                 </div>
               </div>
 
               {/* System Status */}
-              <div className="ot-admin-soft p-4 rounded-lg">
-                <h4 className="font-medium ot-admin-ink mb-3">System Status</h4>
+              <div className="bg-bg p-4 rounded-lg">
+                <h4 className="font-medium text-ink mb-3">System Status</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Maintenance Mode:</span>
+                    <span className="text-muted">Maintenance Mode:</span>
                     <span className={`font-medium ${walletSettingsData?.maintenanceMode ? 'text-red-600' : 'text-green-600'}`}>
                       {walletSettingsData?.maintenanceMode ? 'Enabled' : 'Disabled'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Auto Approve Deposits:</span>
+                    <span className="text-muted">Auto Approve Deposits:</span>
                     <span className={`font-medium ${walletSettingsData?.autoApproveDeposits ? 'text-green-600' : 'text-red-600'}`}>
                       {walletSettingsData?.autoApproveDeposits ? 'Enabled' : 'Disabled'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="ot-admin-muted">Fee Deduction:</span>
+                    <span className="text-muted">Fee Deduction:</span>
                     <span className={`font-medium ${walletSettingsData?.deductFeesFromDeposits ? 'text-green-600' : 'text-red-600'}`}>
                       {walletSettingsData?.deductFeesFromDeposits ? 'Enabled' : 'Disabled'}
                     </span>
@@ -1370,7 +1370,7 @@ const AdminWalletManagement = () => {
 
             {!walletSettingsData && !loadingWalletSettings && (
               <div className="text-center py-8">
-                <p className="ot-admin-muted">No settings configured yet. Click "Configure Settings" to set up wallet settings.</p>
+                <p className="text-muted">No settings configured yet. Click "Configure Settings" to set up wallet settings.</p>
               </div>
             )}
           </div>
@@ -1384,17 +1384,17 @@ const AdminWalletManagement = () => {
           onClick={closeSettingsModal}
         >
           <div
-            className="ot-admin-paper rounded-lg w-full max-w-4xl mx-4 transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden"
+            className="bg-paper rounded-lg w-full max-w-4xl mx-4 transform transition-all duration-300 scale-100 max-h-[95vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col h-full max-h-[95vh]">
               {/* Header */}
-              <div className="flex-shrink-0 px-6 py-4 border-b ot-admin-border">
+              <div className="flex-shrink-0 px-6 py-4 border-b border-line">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold ot-admin-ink">Wallet Settings</h3>
+                  <h3 className="text-xl font-bold text-ink">Wallet Settings</h3>
                   <button
                     onClick={closeSettingsModal}
-                    className="ot-admin-control ot-admin-muted hover:text-gray-600 transition-colors duration-200"
+                    className="min-h-[44px] text-muted hover:text-gray-600 transition-colors duration-200"
                   >
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1409,7 +1409,7 @@ const AdminWalletManagement = () => {
                   <div className="flex items-center justify-center py-12">
                     <div className="text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                      <p className="ot-admin-muted">Loading wallet settings...</p>
+                      <p className="text-muted">Loading wallet settings...</p>
                     </div>
                   </div>
                 ) : (
@@ -1466,11 +1466,11 @@ const AdminWalletManagement = () => {
                     {({ values, setFieldValue, handleSubmit, isSubmitting, errors, touched }) => (
                       <Form onSubmit={handleSubmit} className="space-y-8">
                         {/* Paystack Fee Settings */}
-                        <div className="ot-admin-soft p-6 rounded-lg">
-                          <h4 className="text-lg font-semibold ot-admin-ink mb-4">Paystack Fee Settings</h4>
+                        <div className="bg-bg p-6 rounded-lg">
+                          <h4 className="text-lg font-semibold text-ink mb-4">Paystack Fee Settings</h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Percentage (%)
                               </label>
                               <Field
@@ -1479,96 +1479,96 @@ const AdminWalletManagement = () => {
                                 step="0.1"
                                 min="0"
                                 max="100"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Fixed Fee (₦)
                               </label>
                               <Field
                                 name="paystackFee.fixedFee"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Fee Cap (₦)
                               </label>
                               <Field
                                 name="paystackFee.cap"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                           </div>
                         </div>
 
                         {/* Transaction Limits */}
-                        <div className="ot-admin-soft p-6 rounded-lg">
-                          <h4 className="text-lg font-semibold ot-admin-ink mb-4">Transaction Limits</h4>
+                        <div className="bg-bg p-6 rounded-lg">
+                          <h4 className="text-lg font-semibold text-ink mb-4">Transaction Limits</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Minimum Deposit (₦)
                               </label>
                               <Field
                                 name="minDepositAmount"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Maximum Deposit (₦)
                               </label>
                               <Field
                                 name="maxDepositAmount"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Minimum Withdrawal (₦)
                               </label>
                               <Field
                                 name="minWithdrawalAmount"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Maximum Withdrawal (₦)
                               </label>
                               <Field
                                 name="maxWithdrawalAmount"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                           </div>
                         </div>
 
                         {/* Fee Deduction Settings */}
-                        <div className="ot-admin-soft p-6 rounded-lg">
-                          <h4 className="text-lg font-semibold ot-admin-ink mb-4">Fee Deduction Settings</h4>
+                        <div className="bg-bg p-6 rounded-lg">
+                          <h4 className="text-lg font-semibold text-ink mb-4">Fee Deduction Settings</h4>
                           <div className="space-y-4">
                             <div className="flex items-center">
                               <Field
                                 name="deductFeesFromDeposits"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Deduct processing fees from deposit amounts
                               </label>
                             </div>
@@ -1576,9 +1576,9 @@ const AdminWalletManagement = () => {
                               <Field
                                 name="deductFeesFromWithdrawals"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Deduct processing fees from withdrawal amounts
                               </label>
                             </div>
@@ -1586,11 +1586,11 @@ const AdminWalletManagement = () => {
                         </div>
 
                         {/* Withdrawal Fee Settings */}
-                        <div className="ot-admin-soft p-6 rounded-lg">
-                          <h4 className="text-lg font-semibold ot-admin-ink mb-4">Withdrawal Fee Settings</h4>
+                        <div className="bg-bg p-6 rounded-lg">
+                          <h4 className="text-lg font-semibold text-ink mb-4">Withdrawal Fee Settings</h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Percentage (%)
                               </label>
                               <Field
@@ -1599,29 +1599,29 @@ const AdminWalletManagement = () => {
                                 step="0.1"
                                 min="0"
                                 max="100"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Fixed Fee (₦)
                               </label>
                               <Field
                                 name="withdrawalFee.fixedFee"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium ot-admin-ink mb-2">
+                              <label className="block text-sm font-medium text-ink mb-2">
                                 Fee Cap (₦)
                               </label>
                               <Field
                                 name="withdrawalFee.cap"
                                 type="number"
                                 min="0"
-                                className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               />
                             </div>
                           </div>
@@ -1633,15 +1633,15 @@ const AdminWalletManagement = () => {
                             </div>
 
                             <div className="space-y-3">
-                              <h5 className="text-sm font-medium ot-admin-ink">Available Fee Deduction Methods</h5>
+                              <h5 className="text-sm font-medium text-ink">Available Fee Deduction Methods</h5>
                               <div className="space-y-2">
                                 <div className="flex items-center">
                                   <Field
                                     name="withdrawalFee.deductionMethods.fromWallet"
                                     type="checkbox"
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                                   />
-                                  <label className="ml-2 block text-sm ot-admin-ink">
+                                  <label className="ml-2 block text-sm text-ink">
                                     Allow deduction from wallet balance
                                   </label>
                                 </div>
@@ -1649,14 +1649,14 @@ const AdminWalletManagement = () => {
                                   <Field
                                     name="withdrawalFee.deductionMethods.fromWithdrawal"
                                     type="checkbox"
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                                   />
-                                  <label className="ml-2 block text-sm ot-admin-ink">
+                                  <label className="ml-2 block text-sm text-ink">
                                     Allow deduction from withdrawal amount
                                   </label>
                                 </div>
                               </div>
-                              <p className="text-xs ot-admin-muted">
+                              <p className="text-xs text-muted">
                                 Users can choose how they want to pay the withdrawal fee.
                               </p>
                             </div>
@@ -1664,16 +1664,16 @@ const AdminWalletManagement = () => {
                         </div>
 
                         {/* System Settings */}
-                        <div className="ot-admin-soft p-6 rounded-lg">
-                          <h4 className="text-lg font-semibold ot-admin-ink mb-4">System Settings</h4>
+                        <div className="bg-bg p-6 rounded-lg">
+                          <h4 className="text-lg font-semibold text-ink mb-4">System Settings</h4>
                           <div className="space-y-4">
                             <div className="flex items-center">
                               <Field
                                 name="maintenanceMode"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Enable maintenance mode
                               </label>
                             </div>
@@ -1681,9 +1681,9 @@ const AdminWalletManagement = () => {
                               <Field
                                 name="autoApproveDeposits"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Auto-approve deposits
                               </label>
                             </div>
@@ -1691,9 +1691,9 @@ const AdminWalletManagement = () => {
                               <Field
                                 name="autoApproveWithdrawals"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Auto-approve withdrawals
                               </label>
                             </div>
@@ -1701,16 +1701,16 @@ const AdminWalletManagement = () => {
                         </div>
 
                         {/* Email Notifications */}
-                        <div className="ot-admin-soft p-6 rounded-lg">
-                          <h4 className="text-lg font-semibold ot-admin-ink mb-4">Email Notifications</h4>
+                        <div className="bg-bg p-6 rounded-lg">
+                          <h4 className="text-lg font-semibold text-ink mb-4">Email Notifications</h4>
                           <div className="space-y-4">
                             <div className="flex items-center">
                               <Field
                                 name="emailNotifications.depositSuccess"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Send email on successful deposits
                               </label>
                             </div>
@@ -1718,9 +1718,9 @@ const AdminWalletManagement = () => {
                               <Field
                                 name="emailNotifications.withdrawalSuccess"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Send email on successful withdrawals
                               </label>
                             </div>
@@ -1728,9 +1728,9 @@ const AdminWalletManagement = () => {
                               <Field
                                 name="emailNotifications.lowBalance"
                                 type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 ot-admin-border rounded"
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-line rounded"
                               />
-                              <label className="ml-2 block text-sm ot-admin-ink">
+                              <label className="ml-2 block text-sm text-ink">
                                 Send email on low balance alerts
                               </label>
                             </div>
@@ -1738,27 +1738,27 @@ const AdminWalletManagement = () => {
                         </div>
 
                         {/* Low Balance Threshold */}
-                        <div className="ot-admin-soft p-6 rounded-lg">
-                          <h4 className="text-lg font-semibold ot-admin-ink mb-4">Low Balance Alert</h4>
+                        <div className="bg-bg p-6 rounded-lg">
+                          <h4 className="text-lg font-semibold text-ink mb-4">Low Balance Alert</h4>
                           <div>
-                            <label className="block text-sm font-medium ot-admin-ink mb-2">
+                            <label className="block text-sm font-medium text-ink mb-2">
                               Low Balance Threshold (₦)
                             </label>
                             <Field
                               name="lowBalanceThreshold"
                               type="number"
                               min="0"
-                              className="w-full px-3 py-2 border ot-admin-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              className="w-full px-3 py-2 border border-line rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex justify-between items-center pt-6 border-t ot-admin-border">
+                        <div className="flex justify-between items-center pt-6 border-t border-line">
                           <button
                             type="button"
                             onClick={handleResetWalletSettings}
-                            className="ot-admin-control px-4 py-2 ot-admin-muted border ot-admin-border rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                            className="min-h-[44px] px-4 py-2 text-muted border border-line rounded-lg hover:bg-gray-50 transition-colors duration-200"
                           >
                             Reset to Defaults
                           </button>
@@ -1766,14 +1766,14 @@ const AdminWalletManagement = () => {
                             <button
                               type="button"
                               onClick={closeSettingsModal}
-                              className="ot-admin-control px-4 py-2 ot-admin-muted border ot-admin-border rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                              className="min-h-[44px] px-4 py-2 text-muted border border-line rounded-lg hover:bg-gray-50 transition-colors duration-200"
                             >
                               Cancel
                             </button>
                             <button
                               type="submit"
                               disabled={isSubmitting}
-                              className="ot-admin-control px-6 py-2 ot-admin-action text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="min-h-[44px] px-6 py-2 bg-accent text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {isSubmitting ? 'Saving...' : 'Save Settings'}
                             </button>

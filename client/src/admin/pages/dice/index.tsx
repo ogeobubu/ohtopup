@@ -247,11 +247,11 @@ const AdminDiceGame = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink flex items-center gap-2 md:gap-3">
+          <h1 className="text-[26px] font-mediumish leading-tight tracking-[-0.6px] text-ink text-xl md:text-3xl font-bold text-ink flex items-center gap-2 md:gap-3">
             <FaGamepad className="text-purple-500 text-lg md:text-xl" />
             Dice Game Management
           </h1>
-          <p className="ot-admin-muted mt-1 text-sm md:text-base">
+          <p className="text-muted mt-1 text-sm md:text-base">
             Monitor dice game activity, revenue, and player statistics
           </p>
         </div>
@@ -259,12 +259,12 @@ const AdminDiceGame = () => {
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => refetchGames()}
-            className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm"
+            className="min-h-[44px] flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-accent text-white rounded-lg transition-colors text-xs md:text-sm"
           >
             <FaSync className="text-xs md:text-sm" />
             <span className="hidden sm:inline">Refresh</span>
           </button>
-          <button className="ot-admin-control flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 ot-admin-action text-white rounded-lg transition-colors text-xs md:text-sm">
+          <button className="min-h-[44px] flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-accent text-white rounded-lg transition-colors text-xs md:text-sm">
             <FaDownload className="text-xs md:text-sm" />
             <span className="hidden sm:inline">Export Data</span>
           </button>
@@ -272,16 +272,16 @@ const AdminDiceGame = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b ot-admin-border overflow-x-auto">
+      <div className="border-b border-line overflow-x-auto">
         <nav className="flex space-x-4 md:space-x-8 min-w-max">
           {tabs.map((tab) => (
             <button aria-pressed={activeTab === tab.id}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`ot-admin-control flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
+              className={`min-h-[44px] flex items-center gap-1 md:gap-2 py-3 md:py-4 px-1 border-b-2 font-medium text-xs md:text-sm transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-purple-500 text-purple-600 dark:text-purple-400"
-                  : "border-transparent ot-admin-muted hover:text-gray-700 dark:hover:text-gray-300"
+                  : "border-transparent text-muted hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               <tab.icon className="text-xs md:text-sm" />
@@ -297,11 +297,11 @@ const AdminDiceGame = () => {
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {/* Stats Cards */}
-            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
+            <div className="bg-paper p-4 md:p-6 rounded-lg border border-line">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">Total Games</p>
-                  <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
+                  <p className="text-xs md:text-sm font-medium text-muted">Total Games</p>
+                  <p className="text-lg md:text-2xl font-bold text-ink">
                     {statsLoading ? '...' : (diceStats?.stats?.totalGames || 0)}
                   </p>
                 </div>
@@ -309,11 +309,11 @@ const AdminDiceGame = () => {
               </div>
             </div>
 
-            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
+            <div className="bg-paper p-4 md:p-6 rounded-lg border border-line">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">Total Wins</p>
-                  <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
+                  <p className="text-xs md:text-sm font-medium text-muted">Total Wins</p>
+                  <p className="text-lg md:text-2xl font-bold text-ink">
                     {statsLoading ? '...' : (diceStats?.stats?.totalWins || 0)}
                   </p>
                 </div>
@@ -321,11 +321,11 @@ const AdminDiceGame = () => {
               </div>
             </div>
 
-            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
+            <div className="bg-paper p-4 md:p-6 rounded-lg border border-line">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">House Revenue</p>
-                  <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
+                  <p className="text-xs md:text-sm font-medium text-muted">House Revenue</p>
+                  <p className="text-lg md:text-2xl font-bold text-ink">
                     ₦{walletLoading ? '...' : (managementWallet?.balance || 0).toLocaleString()}
                   </p>
                 </div>
@@ -333,11 +333,11 @@ const AdminDiceGame = () => {
               </div>
             </div>
 
-            <div className="ot-admin-paper p-4 md:p-6 rounded-lg border ot-admin-border ">
+            <div className="bg-paper p-4 md:p-6 rounded-lg border border-line">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium ot-admin-muted ">Win Rate</p>
-                  <p className="text-lg md:text-2xl font-bold ot-admin-ink ">
+                  <p className="text-xs md:text-sm font-medium text-muted">Win Rate</p>
+                  <p className="text-lg md:text-2xl font-bold text-ink">
                     {statsLoading ? '...' : `${diceStats?.stats?.winRate || 0}%`}
                   </p>
                 </div>
@@ -348,39 +348,39 @@ const AdminDiceGame = () => {
         )}
 
         {activeTab === "games" && (
-          <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden">
-            <div className="p-4 md:p-6 border-b ot-admin-border ">
-              <h3 className="text-base md:text-lg font-semibold ot-admin-ink ">Recent Games</h3>
+          <div className="bg-paper rounded-lg border border-line overflow-hidden">
+            <div className="p-4 md:p-6 border-b border-line">
+              <h3 className="text-base md:text-lg font-semibold text-ink">Recent Games</h3>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="ot-admin-data-table w-full">
-                <thead className="ot-admin-soft ">
+              <table className="w-full border-collapse bg-paper text-ink text-xs w-full">
+                <thead className="bg-bg">
                   <tr>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Dice Roll
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Result
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Winnings
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium ot-admin-muted uppercase tracking-wider">
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="ot-admin-paper divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-paper divide-y divide-gray-200 dark:divide-gray-700">
                   {gamesLoading ? (
                     <tr>
-                      <td colSpan={6} className="px-3 md:px-6 py-3 md:py-4 text-center ot-admin-muted ">
+                      <td colSpan={6} className="px-3 md:px-6 py-3 md:py-4 text-center text-muted">
                         Loading games...
                       </td>
                     </tr>
@@ -388,12 +388,12 @@ const AdminDiceGame = () => {
                     diceGames.games.map((game) => (
                       <tr key={game._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm font-medium ot-admin-ink truncate max-w-20 md:max-w-none">
+                          <div className="text-xs md:text-sm font-medium text-ink truncate max-w-20 md:max-w-none">
                             {game.user?.username || 'Unknown'}
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm ot-admin-ink ">
+                          <div className="text-xs md:text-sm text-ink">
                             {game.dice1} + {game.dice2}
                           </div>
                         </td>
@@ -407,21 +407,21 @@ const AdminDiceGame = () => {
                           </span>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm ot-admin-ink ">
+                          <div className="text-xs md:text-sm text-ink">
                             {game.gameResult === 'win' ? `+₦${game.winnings}` : `-₦${game.entryFee}`}
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                          <div className="text-xs md:text-sm ot-admin-ink ">
+                          <div className="text-xs md:text-sm text-ink">
                             <span className="md:hidden">{new Date(game.playedAt).toLocaleDateString()}</span><span className="hidden md:inline">{new Date(game.playedAt).toLocaleString()}</span>
                           </div>
                         </td>
                         <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
                           <div className="flex gap-1 md:gap-2">
-                            <button className="ot-admin-control p-1 md:p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors">
+                            <button className="min-h-[44px] p-1 md:p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors">
                               <FaEye className="text-xs md:text-sm" />
                             </button>
-                            <button className="ot-admin-control p-1 md:p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors">
+                            <button className="min-h-[44px] p-1 md:p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors">
                               <FaTrash className="text-xs md:text-sm" />
                             </button>
                           </div>
@@ -430,7 +430,7 @@ const AdminDiceGame = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-3 md:px-6 py-3 md:py-4 text-center ot-admin-muted ">
+                      <td colSpan={6} className="px-3 md:px-6 py-3 md:py-4 text-center text-muted">
                         No games played yet
                       </td>
                     </tr>
@@ -445,48 +445,48 @@ const AdminDiceGame = () => {
           <div className="space-y-6">
             {/* Analytics Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <div className="bg-paper p-6 rounded-lg border border-line">
                 <div className="flex items-center gap-3">
                   <FaGamepad className="text-purple-500 text-2xl" />
                   <div>
-                    <p className="text-sm ot-admin-muted ">Total Games</p>
-                    <p className="text-2xl font-bold ot-admin-ink ">
+                    <p className="text-sm text-muted">Total Games</p>
+                    <p className="text-2xl font-bold text-ink">
                       {statsLoading ? '...' : (diceStats?.stats?.totalGames || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <div className="bg-paper p-6 rounded-lg border border-line">
                 <div className="flex items-center gap-3">
                   <FaUsers className="text-blue-500 text-2xl" />
                   <div>
-                    <p className="text-sm ot-admin-muted ">Active Players</p>
-                    <p className="text-2xl font-bold ot-admin-ink ">
+                    <p className="text-sm text-muted">Active Players</p>
+                    <p className="text-2xl font-bold text-ink">
                       {statsLoading ? '...' : (diceStats?.stats?.activePlayers || 0)}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <div className="bg-paper p-6 rounded-lg border border-line">
                 <div className="flex items-center gap-3">
                   <FaTrophy className="text-green-500 text-2xl" />
                   <div>
-                    <p className="text-sm ot-admin-muted ">Total Winnings Paid</p>
-                    <p className="text-2xl font-bold ot-admin-ink ">
+                    <p className="text-sm text-muted">Total Winnings Paid</p>
+                    <p className="text-2xl font-bold text-ink">
                       ₦{statsLoading ? '...' : (diceStats?.stats?.totalWinnings || 0).toLocaleString()}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
+              <div className="bg-paper p-6 rounded-lg border border-line">
                 <div className="flex items-center gap-3">
                   <FaChartLine className="text-orange-500 text-2xl" />
                   <div>
-                    <p className="text-sm ot-admin-muted ">House Edge</p>
-                    <p className="text-2xl font-bold ot-admin-ink ">
+                    <p className="text-sm text-muted">House Edge</p>
+                    <p className="text-2xl font-bold text-ink">
                       {statsLoading ? '...' : `${diceStats?.stats?.houseEdge || 0}%`}
                     </p>
                   </div>
@@ -496,30 +496,30 @@ const AdminDiceGame = () => {
 
             {/* Detailed Analytics */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-                <h3 className="text-lg font-semibold ot-admin-ink mb-4">
+              <div className="bg-paper p-6 rounded-lg border border-line">
+                <h3 className="text-lg font-semibold text-ink mb-4">
                   Game Results Distribution
                 </h3>
                 {statsLoading ? (
-                  <div className="h-64 flex items-center justify-center ot-admin-muted ">
+                  <div className="h-64 flex items-center justify-center text-muted">
                     Loading analytics...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm ot-admin-muted ">Wins</span>
+                      <span className="text-sm text-muted">Wins</span>
                       <span className="font-semibold text-green-600">
                         {diceStats?.stats?.totalWins || 0}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm ot-admin-muted ">Losses</span>
+                      <span className="text-sm text-muted">Losses</span>
                       <span className="font-semibold text-red-600">
                         {(diceStats?.stats?.totalGames || 0) - (diceStats?.stats?.totalWins || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm ot-admin-muted ">Win Rate</span>
+                      <span className="text-sm text-muted">Win Rate</span>
                       <span className="font-semibold text-blue-600">
                         {diceStats?.stats?.winRate || 0}%
                       </span>
@@ -528,30 +528,30 @@ const AdminDiceGame = () => {
                 )}
               </div>
 
-              <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-                <h3 className="text-lg font-semibold ot-admin-ink mb-4">
+              <div className="bg-paper p-6 rounded-lg border border-line">
+                <h3 className="text-lg font-semibold text-ink mb-4">
                   Revenue Breakdown
                 </h3>
                 {statsLoading ? (
-                  <div className="h-64 flex items-center justify-center ot-admin-muted ">
+                  <div className="h-64 flex items-center justify-center text-muted">
                     Loading analytics...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm ot-admin-muted ">Total Entry Fees</span>
-                      <span className="font-semibold ot-admin-ink ">
+                      <span className="text-sm text-muted">Total Entry Fees</span>
+                      <span className="font-semibold text-ink">
                         ₦{((diceStats?.stats?.totalGames || 0) * 10).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm ot-admin-muted ">Total Winnings Paid</span>
+                      <span className="text-sm text-muted">Total Winnings Paid</span>
                       <span className="font-semibold text-green-600">
                         ₦{(diceStats?.stats?.totalWinnings || 0).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm ot-admin-muted ">House Profit</span>
+                      <span className="text-sm text-muted">House Profit</span>
                       <span className="font-semibold text-purple-600">
                         ₦{((diceStats?.stats?.totalGames || 0) * 10 - (diceStats?.stats?.totalWinnings || 0)).toLocaleString()}
                       </span>
@@ -566,8 +566,8 @@ const AdminDiceGame = () => {
         {activeTab === "wallet" && (
           <div className="space-y-6">
             {/* Management Wallet Section */}
-            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
+            <div className="bg-paper p-6 rounded-lg border border-line">
+              <h3 className="text-lg font-semibold text-ink mb-6">
                 Management Wallet
               </h3>
 
@@ -576,34 +576,34 @@ const AdminDiceGame = () => {
                   <div className="text-3xl font-bold text-green-600 mb-2">
                     ₦{walletLoading ? '...' : (managementWallet?.balance || 0).toLocaleString()}
                   </div>
-                  <p className="text-sm ot-admin-muted ">Current Balance</p>
+                  <p className="text-sm text-muted">Current Balance</p>
                 </div>
 
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-2">
                     ₦{walletLoading ? '...' : (managementWallet?.availableForWithdrawal || 0).toLocaleString()}
                   </div>
-                  <p className="text-sm ot-admin-muted ">Available for Withdrawal</p>
+                  <p className="text-sm text-muted">Available for Withdrawal</p>
                 </div>
 
                 <div className="text-center">
                   <div className="text-3xl font-bold text-purple-600 mb-2">
                     {walletLoading ? '...' : (managementWallet?.totalGames || 0)}
                   </div>
-                  <p className="text-sm ot-admin-muted ">Total Games Played</p>
+                  <p className="text-sm text-muted">Total Games Played</p>
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t ot-admin-border ">
+              <div className="mt-6 pt-6 border-t border-line">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="font-semibold ot-admin-ink ">Withdraw Funds</h4>
-                    <p className="text-sm ot-admin-muted ">
+                    <h4 className="font-semibold text-ink">Withdraw Funds</h4>
+                    <p className="text-sm text-muted">
                       Transfer funds from management wallet to your account
                     </p>
                   </div>
                   <button
-                    className="ot-admin-control px-6 py-2 ot-admin-action text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="min-h-[44px] px-6 py-2 bg-accent text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => {
                       setShowWithdrawModal(true);
                       loadBanks();
@@ -617,24 +617,24 @@ const AdminDiceGame = () => {
             </div>
 
             {/* Wallet Transaction History */}
-            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
+            <div className="bg-paper p-6 rounded-lg border border-line">
+              <h3 className="text-lg font-semibold text-ink mb-6">
                 Recent Transactions
               </h3>
 
               <div className="space-y-4">
                 {walletLoading ? (
-                  <div className="text-center py-8 ot-admin-muted ">
+                  <div className="text-center py-8 text-muted">
                     Loading transactions...
                   </div>
                 ) : managementWallet?.transactions?.length > 0 ? (
                   managementWallet.transactions.slice(0, 10).map((transaction, index) => (
-                    <div key={index} className="flex justify-between items-center py-3 border-b ot-admin-border ">
+                    <div key={index} className="flex justify-between items-center py-3 border-b border-line">
                       <div>
-                        <p className="font-medium ot-admin-ink ">
+                        <p className="font-medium text-ink">
                           {transaction.type === 'credit' ? 'Game Loss' : 'Withdrawal'}
                         </p>
-                        <p className="text-sm ot-admin-muted ">
+                        <p className="text-sm text-muted">
                           {new Date(transaction.date).toLocaleString()}
                         </p>
                       </div>
@@ -646,7 +646,7 @@ const AdminDiceGame = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 ot-admin-muted ">
+                  <div className="text-center py-8 text-muted">
                     No transactions yet
                   </div>
                 )}
@@ -658,14 +658,14 @@ const AdminDiceGame = () => {
         {activeTab === "settings" && (
           <div className="space-y-6">
             {/* Game Configuration */}
-            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
+            <div className="bg-paper p-6 rounded-lg border border-line">
+              <h3 className="text-lg font-semibold text-ink mb-6">
                 Game Configuration
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Game Status
                   </label>
                   <div className="flex items-center">
@@ -673,16 +673,16 @@ const AdminDiceGame = () => {
                       type="checkbox"
                       checked={settings.gameEnabled}
                       onChange={(e) => handleSettingsChange('gameEnabled', e.target.checked)}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 ot-admin-border rounded"
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-line rounded"
                     />
-                    <span className="ml-2 text-sm ot-admin-ink ">
+                    <span className="ml-2 text-sm text-ink">
                       Enable Dice Game
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Maintenance Mode
                   </label>
                   <div className="flex items-center">
@@ -690,65 +690,65 @@ const AdminDiceGame = () => {
                       type="checkbox"
                       checked={settings.maintenanceMode}
                       onChange={(e) => handleSettingsChange('maintenanceMode', e.target.checked)}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 ot-admin-border rounded"
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-line rounded"
                     />
-                    <span className="ml-2 text-sm ot-admin-ink ">
+                    <span className="ml-2 text-sm text-ink">
                       Maintenance Mode (Disable all games)
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Entry Fee (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.entryFee}
                     onChange={(e) => handleSettingsChange('entryFee', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                    className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                     min="1"
                     max="1000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Win Amount (Points)
                   </label>
                   <input
                     type="number"
                     value={settings.winAmount}
                     onChange={(e) => handleSettingsChange('winAmount', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                    className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                     min="100"
                     max="10000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Minimum Balance Required (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.minBalanceRequired}
                     onChange={(e) => handleSettingsChange('minBalanceRequired', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                    className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                     min="1"
                     max="1000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Max Daily Games per User
                   </label>
                   <input
                     type="number"
                     value={settings.maxDailyGames}
                     onChange={(e) => handleSettingsChange('maxDailyGames', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                    className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                     min="1"
                     max="1000"
                   />
@@ -757,8 +757,8 @@ const AdminDiceGame = () => {
             </div>
 
             {/* Notification Settings */}
-            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
+            <div className="bg-paper p-6 rounded-lg border border-line">
+              <h3 className="text-lg font-semibold text-ink mb-6">
                 Notification Settings
               </h3>
 
@@ -768,9 +768,9 @@ const AdminDiceGame = () => {
                     type="checkbox"
                     checked={settings.notifications.emailEnabled}
                     onChange={(e) => handleSettingsChange('notifications.emailEnabled', e.target.checked)}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 ot-admin-border rounded"
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-line rounded"
                   />
-                  <span className="ml-2 text-sm ot-admin-ink ">
+                  <span className="ml-2 text-sm text-ink">
                     Enable Email Notifications
                   </span>
                 </div>
@@ -780,9 +780,9 @@ const AdminDiceGame = () => {
                     type="checkbox"
                     checked={settings.notifications.largeWinAlert}
                     onChange={(e) => handleSettingsChange('notifications.largeWinAlert', e.target.checked)}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 ot-admin-border rounded"
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-line rounded"
                   />
-                  <span className="ml-2 text-sm ot-admin-ink ">
+                  <span className="ml-2 text-sm text-ink">
                     Alert on Dice Game Wins
                   </span>
                 </div>
@@ -792,9 +792,9 @@ const AdminDiceGame = () => {
                     type="checkbox"
                     checked={settings.notifications.suspiciousActivity}
                     onChange={(e) => handleSettingsChange('notifications.suspiciousActivity', e.target.checked)}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 ot-admin-border rounded"
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-line rounded"
                   />
-                  <span className="ml-2 text-sm ot-admin-ink ">
+                  <span className="ml-2 text-sm text-ink">
                     Alert on Suspicious Activity
                   </span>
                 </div>
@@ -802,35 +802,35 @@ const AdminDiceGame = () => {
             </div>
 
             {/* Risk Management */}
-            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
+            <div className="bg-paper p-6 rounded-lg border border-line">
+              <h3 className="text-lg font-semibold text-ink mb-6">
                 Risk Management
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Max Loss per Hour (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.riskManagement.maxLossPerHour}
                     onChange={(e) => handleSettingsChange('riskManagement.maxLossPerHour', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                    className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                     min="1000"
                     max="1000000"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium ot-admin-ink mb-2">
+                  <label className="block text-sm font-medium text-ink mb-2">
                     Max Win per Hour (₦)
                   </label>
                   <input
                     type="number"
                     value={settings.riskManagement.maxWinPerHour}
                     onChange={(e) => handleSettingsChange('riskManagement.maxWinPerHour', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                    className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                     min="1000"
                     max="1000000"
                   />
@@ -842,9 +842,9 @@ const AdminDiceGame = () => {
                       type="checkbox"
                       checked={settings.riskManagement.autoShutdown}
                       onChange={(e) => handleSettingsChange('riskManagement.autoShutdown', e.target.checked)}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 ot-admin-border rounded"
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-line rounded"
                     />
-                    <span className="ml-2 text-sm ot-admin-ink ">
+                    <span className="ml-2 text-sm text-ink">
                       Auto-shutdown on Risk Threshold Breach
                     </span>
                   </div>
@@ -853,7 +853,7 @@ const AdminDiceGame = () => {
             </div>
 
             {/* Game Outcome Manipulation */}
-            <div className="ot-admin-paper p-6 rounded-lg border border-red-200 dark:border-red-700">
+            <div className="bg-paper p-6 rounded-lg border border-red-200 dark:border-red-700">
               <div className="flex items-center gap-2 mb-6">
                 <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
                   ⚠️ Game Outcome Manipulation
@@ -878,7 +878,7 @@ const AdminDiceGame = () => {
                         type="checkbox"
                         checked={settings.manipulation.enabled}
                         onChange={(e) => handleSettingsChange('manipulation.enabled', e.target.checked)}
-                        className="h-5 w-5 text-red-600 focus:ring-red-500 ot-admin-border rounded"
+                        className="h-5 w-5 text-red-600 focus:ring-red-500 border-line rounded"
                       />
                     </div>
                   </div>
@@ -888,13 +888,13 @@ const AdminDiceGame = () => {
                   <>
                     {/* Manipulation Mode */}
                     <div>
-                      <label className="block text-sm font-medium ot-admin-ink mb-2">
+                      <label className="block text-sm font-medium text-ink mb-2">
                         Manipulation Mode
                       </label>
                       <select
                         value={settings.manipulation.mode}
                         onChange={(e) => handleSettingsChange('manipulation.mode', e.target.value)}
-                        className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                        className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                       >
                         <option value="fair">Fair Play (No Manipulation)</option>
                         <option value="biased_win">Biased Towards Wins</option>
@@ -909,9 +909,9 @@ const AdminDiceGame = () => {
                     {/* Mode-specific settings */}
                     {(settings.manipulation.mode === 'biased_win' || settings.manipulation.mode === 'biased_loss') && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink mb-2">
+                        <label className="block text-sm font-medium text-ink mb-2">
                           Bias Factor (0-1)
-                          <span className="text-xs ot-admin-muted ml-2">
+                          <span className="text-xs text-muted ml-2">
                             Higher = stronger {settings.manipulation.mode === 'biased_win' ? 'win' : 'loss'} bias
                           </span>
                         </label>
@@ -922,16 +922,16 @@ const AdminDiceGame = () => {
                           max="1"
                           value={settings.manipulation.bias}
                           onChange={(e) => handleSettingsChange('manipulation.bias', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                          className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                         />
                       </div>
                     )}
 
                     {settings.manipulation.mode === 'custom_probability' && (
                       <div>
-                        <label className="block text-sm font-medium ot-admin-ink mb-2">
+                        <label className="block text-sm font-medium text-ink mb-2">
                           Custom Win Probability (0-1)
-                          <span className="text-xs ot-admin-muted ml-2">
+                          <span className="text-xs text-muted ml-2">
                             0.0278 = natural probability (1/36)
                           </span>
                         </label>
@@ -942,7 +942,7 @@ const AdminDiceGame = () => {
                           max="1"
                           value={settings.manipulation.winProbability}
                           onChange={(e) => handleSettingsChange('manipulation.winProbability', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                          className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                         />
                       </div>
                     )}
@@ -950,7 +950,7 @@ const AdminDiceGame = () => {
                     {settings.manipulation.mode === 'specific_dice' && (
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium ot-admin-ink mb-2">
+                          <label className="block text-sm font-medium text-ink mb-2">
                             Target Dice 1 (1-6)
                           </label>
                           <input
@@ -959,11 +959,11 @@ const AdminDiceGame = () => {
                             max="6"
                             value={settings.manipulation.targetDice1}
                             onChange={(e) => handleSettingsChange('manipulation.targetDice1', parseInt(e.target.value) || 1)}
-                            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                            className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium ot-admin-ink mb-2">
+                          <label className="block text-sm font-medium text-ink mb-2">
                             Target Dice 2 (1-6)
                           </label>
                           <input
@@ -972,7 +972,7 @@ const AdminDiceGame = () => {
                             max="6"
                             value={settings.manipulation.targetDice2}
                             onChange={(e) => handleSettingsChange('manipulation.targetDice2', parseInt(e.target.value) || 1)}
-                            className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                            className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                           />
                         </div>
                       </div>
@@ -980,9 +980,9 @@ const AdminDiceGame = () => {
 
                     {/* Random Seed */}
                     <div>
-                      <label className="block text-sm font-medium ot-admin-ink mb-2">
+                      <label className="block text-sm font-medium text-ink mb-2">
                         Random Seed (Optional)
-                        <span className="text-xs ot-admin-muted ml-2">
+                        <span className="text-xs text-muted ml-2">
                           For reproducible results - leave empty for true randomness
                         </span>
                       </label>
@@ -991,7 +991,7 @@ const AdminDiceGame = () => {
                         value={settings.manipulation.seed}
                         onChange={(e) => handleSettingsChange('manipulation.seed', e.target.value)}
                         placeholder="Enter seed string..."
-                        className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                        className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                       />
                     </div>
 
@@ -1002,9 +1002,9 @@ const AdminDiceGame = () => {
                           type="checkbox"
                           checked={settings.manipulation.adminOnly}
                           onChange={(e) => handleSettingsChange('manipulation.adminOnly', e.target.checked)}
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 ot-admin-border rounded"
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-line rounded"
                         />
-                        <span className="ml-2 text-sm ot-admin-ink ">
+                        <span className="ml-2 text-sm text-ink">
                           Admin Only Access
                         </span>
                       </div>
@@ -1014,9 +1014,9 @@ const AdminDiceGame = () => {
                           type="checkbox"
                           checked={settings.manipulation.logManipulations}
                           onChange={(e) => handleSettingsChange('manipulation.logManipulations', e.target.checked)}
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 ot-admin-border rounded"
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-line rounded"
                         />
-                        <span className="ml-2 text-sm ot-admin-ink ">
+                        <span className="ml-2 text-sm text-ink">
                           Log All Manipulations
                         </span>
                       </div>
@@ -1052,8 +1052,8 @@ const AdminDiceGame = () => {
             </div>
 
             {/* Game Statistics Info */}
-            <div className="ot-admin-paper p-6 rounded-lg border ot-admin-border ">
-              <h3 className="text-lg font-semibold ot-admin-ink mb-6">
+            <div className="bg-paper p-6 rounded-lg border border-line">
+              <h3 className="text-lg font-semibold text-ink mb-6">
                 Current Game Statistics
               </h3>
 
@@ -1062,8 +1062,8 @@ const AdminDiceGame = () => {
                   <div className="text-2xl font-bold text-purple-600 mb-2">
                     {settings.houseEdge}%
                   </div>
-                  <p className="text-sm ot-admin-muted ">House Edge</p>
-                  <p className="text-xs ot-admin-muted mt-1">
+                  <p className="text-sm text-muted">House Edge</p>
+                  <p className="text-xs text-muted mt-1">
                     (Theoretical advantage)
                   </p>
                 </div>
@@ -1072,8 +1072,8 @@ const AdminDiceGame = () => {
                   <div className="text-2xl font-bold text-green-600 mb-2">
                     ₦{settings.entryFee}
                   </div>
-                  <p className="text-sm ot-admin-muted ">Entry Fee</p>
-                  <p className="text-xs ot-admin-muted mt-1">
+                  <p className="text-sm text-muted">Entry Fee</p>
+                  <p className="text-xs text-muted mt-1">
                     Cost per game
                   </p>
                 </div>
@@ -1082,8 +1082,8 @@ const AdminDiceGame = () => {
                   <div className="text-2xl font-bold text-blue-600 mb-2">
                     {settings.winAmount.toLocaleString()}
                   </div>
-                  <p className="text-sm ot-admin-muted ">Win Amount</p>
-                  <p className="text-xs ot-admin-muted mt-1">
+                  <p className="text-sm text-muted">Win Amount</p>
+                  <p className="text-xs text-muted mt-1">
                     Points awarded
                   </p>
                 </div>
@@ -1095,14 +1095,14 @@ const AdminDiceGame = () => {
               <button
                 onClick={handleResetSettings}
                 disabled={isSavingSettings}
-                className="ot-admin-control flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="min-h-[44px] flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Reset to Defaults
               </button>
               <button
                 onClick={handleSaveSettings}
                 disabled={isSavingSettings}
-                className="ot-admin-control flex items-center gap-2 px-6 py-3 ot-admin-action text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="min-h-[44px] flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <FaSave className="text-sm" />
                 {isSavingSettings ? 'Saving...' : 'Save Settings'}
@@ -1115,14 +1115,14 @@ const AdminDiceGame = () => {
       {/* Withdrawal Modal */}
       {showWithdrawModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="ot-admin-paper p-6 rounded-lg max-w-md w-full mx-4">
+          <div className="bg-paper p-6 rounded-lg max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold ot-admin-ink ">
+              <h3 className="text-lg font-semibold text-ink">
                 Withdraw Management Funds
               </h3>
               <button
                 onClick={() => setShowWithdrawModal(false)}
-                className="ot-admin-control p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="min-h-[44px] p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <FaTimes className="text-sm" />
               </button>
@@ -1138,14 +1138,14 @@ const AdminDiceGame = () => {
 
               {/* Amount Input */}
               <div>
-                <label className="block text-sm font-medium ot-admin-ink mb-1">
+                <label className="block text-sm font-medium text-ink mb-1">
                   Withdrawal Amount (₦)
                 </label>
                 <input
                   type="number"
                   value={withdrawForm.amount}
                   onChange={(e) => setWithdrawForm(prev => ({ ...prev, amount: e.target.value }))}
-                  className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                  className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                   placeholder="Enter amount"
                   min="1"
                   max={managementWallet?.availableForWithdrawal || 0}
@@ -1154,7 +1154,7 @@ const AdminDiceGame = () => {
 
               {/* Bank Selection */}
               <div>
-                <label className="block text-sm font-medium ot-admin-ink mb-1">
+                <label className="block text-sm font-medium text-ink mb-1">
                   Select Bank
                 </label>
                 <select
@@ -1165,7 +1165,7 @@ const AdminDiceGame = () => {
                       handleBankSelect({ label: selectedBank.name, code: selectedBank.code });
                     }
                   }}
-                  className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                  className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                 >
                   <option value="">Choose a bank...</option>
                   {banks.map((bank) => (
@@ -1178,14 +1178,14 @@ const AdminDiceGame = () => {
 
               {/* Account Number */}
               <div>
-                <label className="block text-sm font-medium ot-admin-ink mb-1">
+                <label className="block text-sm font-medium text-ink mb-1">
                   Account Number
                 </label>
                 <input
                   type="text"
                   value={withdrawForm.accountNumber}
                   onChange={(e) => handleAccountNumberChange(e.target.value)}
-                  className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                  className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                   placeholder="Enter account number"
                   maxLength={10}
                 />
@@ -1195,7 +1195,7 @@ const AdminDiceGame = () => {
                     Business owner account detected - no verification needed
                   </p>
                 ) : withdrawForm.accountNumber.length === 10 && withdrawForm.bankCode ? (
-                  <p className="text-xs ot-admin-muted mt-1">
+                  <p className="text-xs text-muted mt-1">
                     Account will be verified automatically
                   </p>
                 ) : null}
@@ -1203,14 +1203,14 @@ const AdminDiceGame = () => {
 
               {/* Account Name */}
               <div>
-                <label className="block text-sm font-medium ot-admin-ink mb-1">
+                <label className="block text-sm font-medium text-ink mb-1">
                   Account Name
                 </label>
                 <input
                   type="text"
                   value={withdrawForm.accountName}
                   onChange={(e) => setWithdrawForm(prev => ({ ...prev, accountName: e.target.value }))}
-                  className="w-full px-3 py-2 border ot-admin-border rounded-md ot-admin-paper ot-admin-ink "
+                  className="w-full px-3 py-2 border border-line rounded-md bg-paper text-ink"
                   placeholder="Enter account name"
                 />
               </div>
@@ -1220,13 +1220,13 @@ const AdminDiceGame = () => {
                 <button
                   onClick={handleWithdraw}
                   disabled={isWithdrawing}
-                  className="ot-admin-control flex-1 px-4 py-2 ot-admin-action text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="min-h-[44px] flex-1 px-4 py-2 bg-accent text-white rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   {isWithdrawing ? 'Processing...' : 'Withdraw Funds'}
                 </button>
                 <button
                   onClick={() => setShowWithdrawModal(false)}
-                  className="ot-admin-control px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="min-h-[44px] px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Cancel
                 </button>

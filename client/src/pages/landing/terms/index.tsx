@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { FiArrowRight, FiArrowUpRight } from "react-icons/fi";
+import { FiArrowUpRight } from "react-icons/fi";
 import Navbar from "../navbar";
 import Footer from "../footer";
 
-const sections = [
+const sections: [string, string][] = [
   ['Acceptance of Terms', 'By accessing or using the OhTopUp website and services, you agree to comply with these Terms and Conditions. If you do not agree, please do not use our services.'],
   ['Services', 'OhTopUp provides affordable digital utility services tailored for cost-conscious users. We aim to help you save on your monthly utility expenses.'],
   ['User Accounts', 'Users must create an account to access certain features. You are responsible for maintaining the confidentiality of your account information and for all activities under your account. Notify us immediately of any unauthorized use of your account.'],
@@ -24,50 +24,85 @@ const referralTerms = [
   'OhTopUp reserves the right to modify or terminate the referral program at any time.',
 ];
 
+const textLink = 'inline-flex min-h-11 items-center gap-3 text-xs font-semibold text-accent hover:underline hover:underline-offset-4 nav:text-sm nav:gap-4';
+const eyebrow = 'mb-[22px] text-[9px] font-semiboldish tracking-[1.4px] leading-relaxed nav:text-[10px] nav:tracking-[1.7px]';
+const panel = 'mb-4 min-w-0 overflow-hidden rounded-lg border border-line bg-paper';
+const panelHeading = 'flex min-w-0 flex-wrap items-center justify-between gap-4 p-5 nav:p-[22px_24px]';
+const panelBody = 'px-5 pb-5 text-sm leading-[1.8] text-muted nav:px-6 nav:pb-6';
+
 const Terms = () => {
   return (
-    <div className="ot-public">
+    <div className="min-w-0 overflow-wrap-anywhere bg-paper text-ink">
       <Navbar />
       <main id="main-content">
-        <section className="ot-container ot-hero">
-          <div className="ot-hero-copy">
-            <p className="ot-eyebrow"><span className="ot-small-line" /> LEGAL</p>
-            <h1>Terms and<br />Conditions.</h1>
-            <p className="ot-hero-description">Please read these terms carefully before using OhTopUp.</p>
-            <div className="ot-hero-actions"><Link to="/about" className="ot-text-link">Learn more about us <FiArrowUpRight /></Link></div>
+        <section className="mx-auto box-border grid w-full max-w-app grid-cols-1 items-center gap-7 px-4 py-10 nav:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] nav:gap-[clamp(28px,5vw,72px)] nav:px-10 nav:py-[clamp(48px,7vw,104px)]">
+          <div className="min-w-0">
+            <p className={eyebrow}><span className="mr-3 inline-block h-px w-[26px] bg-current align-middle" /> LEGAL</p>
+            <h1 className="m-0 text-[clamp(28px,8.5vw,34px)] font-mediumish leading-[1.15] tracking-[-0.03em] overflow-wrap-anywhere xs:text-[49px] xs:tracking-[-2.4px] nav:text-[clamp(36px,5vw,66px)] nav:leading-[1.12] nav:tracking-[-0.045em]">
+              Terms and<br />Conditions.
+            </h1>
+            <p className="my-0 mb-5 mt-4 max-w-[425px] text-sm leading-relaxed text-muted nav:mb-[29px] nav:mt-[26px] nav:text-[clamp(15px,1.5vw,17px)] nav:leading-[1.8]">
+              Please read these terms carefully before using OhTopUp.
+            </p>
+            <div className="flex flex-col items-stretch gap-2 xs:flex-row xs:flex-wrap xs:items-center xs:gap-[18px] nav:gap-[25px]">
+              <Link to="/about" className={textLink}>Learn more about us <FiArrowUpRight className="shrink-0" /></Link>
+            </div>
           </div>
         </section>
 
-        <section className="ot-container" style={{ paddingBottom: 98, maxWidth: 720 }}>
-          <p style={{ fontSize: 12, color: 'var(--ot-muted)', marginBottom: 32 }}><strong>Last Updated:</strong> April 27, 2025</p>
+        <section className="mx-auto box-border w-full max-w-[720px] px-4 pb-24 nav:px-10">
+          <p className="mb-8 text-xs text-muted"><strong>Last Updated:</strong> April 27, 2025</p>
 
           {sections.map(([title, body], i) => (
-            <div key={i} className="ot-panel" style={{ marginBottom: 16 }}>
-              <div className="ot-panel-heading"><h2>{`${i + 1}. ${title}`}</h2></div>
-              <p style={{ padding: '0 24px 24px', fontSize: 14, lineHeight: 1.8, color: 'var(--ot-muted)' }}>{body}</p>
+            <div key={i} className={panel}>
+              <div className={panelHeading}>
+                <h2 className="text-[15px] font-semibold tracking-[-0.2px]">{`${i + 1}. ${title}`}</h2>
+              </div>
+              <p className={panelBody}>{body}</p>
             </div>
           ))}
 
-          <div className="ot-panel" style={{ marginBottom: 16 }}>
-            <div className="ot-panel-heading"><h2>10. Referral Program</h2></div>
-            <div style={{ padding: '0 24px 24px' }}>
-              <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--ot-muted)', marginBottom: 16 }}>OhTopUp offers a referral program where users can earn rewards by referring new users to our platform. By participating, you agree to the following:</p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          <div className={panel}>
+            <div className={panelHeading}>
+              <h2 className="text-[15px] font-semibold tracking-[-0.2px]">10. Referral Program</h2>
+            </div>
+            <div className={panelBody}>
+              <p className="mb-4">
+                OhTopUp offers a referral program where users can earn rewards by referring new users to our platform. By participating, you agree to the following:
+              </p>
+              <ul className="m-0 list-none p-0">
                 {referralTerms.map((term, i) => (
-                  <li key={i} className="ot-feature-row" style={{ borderTop: i === 0 ? 'none' : undefined, paddingTop: i === 0 ? 0 : undefined }}><span style={{ fontSize: 11, fontVariantNumeric: 'tabular-nums', color: 'var(--ot-muted)', paddingTop: 4 }}>{`0${i + 1}`}</span><div><p style={{ fontSize: 14, lineHeight: 1.8 }}>{term}</p></div></li>
+                  <li
+                    key={i}
+                    className={`flex gap-6 min-w-0 ${i === 0 ? '' : 'border-t border-line pt-[23px] mt-[23px]'}`}
+                  >
+                    <span className="shrink-0 pt-1 text-[11px] tabular-nums text-muted">{`0${i + 1}`}</span>
+                    <div><p className="text-sm leading-[1.8] text-ink">{term}</p></div>
+                  </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          <div className="ot-panel" style={{ marginBottom: 16 }}>
-            <div className="ot-panel-heading"><h2>11. Governing Law</h2></div>
-            <p style={{ padding: '0 24px 24px', fontSize: 14, lineHeight: 1.8, color: 'var(--ot-muted)' }}>These Terms and Conditions are governed by the laws of Nigeria. Any disputes will be resolved in accordance with applicable Nigerian law.</p>
+          <div className={panel}>
+            <div className={panelHeading}>
+              <h2 className="text-[15px] font-semibold tracking-[-0.2px]">11. Governing Law</h2>
+            </div>
+            <p className={panelBody}>
+              These Terms and Conditions are governed by the laws of Nigeria. Any disputes will be resolved in accordance with applicable Nigerian law.
+            </p>
           </div>
 
-          <div className="ot-panel">
-            <div className="ot-panel-heading"><h2>12. Contact Us</h2></div>
-            <p style={{ padding: '0 24px 24px', fontSize: 14, lineHeight: 1.8, color: 'var(--ot-muted)' }}>For any questions or concerns regarding these Terms and Conditions, please contact us at <a href="mailto:ohtopup@gmail.com" style={{ color: 'var(--ot-accent)' }}>ohtopup@gmail.com</a>.</p>
+          <div className="mb-4">
+            <div className={panel} style={{ marginBottom: 0 }}>
+              <div className={panelHeading}>
+                <h2 className="text-[15px] font-semibold tracking-[-0.2px]">12. Contact Us</h2>
+              </div>
+              <p className={panelBody}>
+                For any questions or concerns regarding these Terms and Conditions, please contact us at{" "}
+                <a href="mailto:ohtopup@gmail.com" className="text-accent hover:underline">ohtopup@gmail.com</a>.
+              </p>
+            </div>
           </div>
         </section>
       </main>

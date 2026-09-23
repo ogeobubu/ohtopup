@@ -5,40 +5,43 @@ import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const Services = () => {
   const { data, error, isLoading } = useQuery({
-    queryKey: ['services'],
+    queryKey: ["services"],
     queryFn: getServices,
   });
 
   if (isLoading) {
-    return <div>Loading services...</div>;
+    return <div className="text-sm text-muted">Loading services...</div>;
   }
 
   if (error) {
-    return <div>Error fetching services: {error.message}</div>;
+    return <div className="text-sm text-danger">Error fetching services: {(error as any).message}</div>;
   }
 
   return (
-    <div className="border border-solid border-gray-200 rounded-md p-4 md:p-6">
-      <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">Services</h2>
-      <div className="max-w-sm w-full bg-[#F7F9FB] dark:bg-gray-800 p-3 md:p-4 rounded-md">
+    <div className="rounded-md border border-line p-4 md:p-6">
+      <h2 className="mb-3 text-xl font-bold md:mb-4 md:text-2xl">Services</h2>
+      <div className="w-full max-w-sm rounded-md bg-bg p-3 dark:bg-gray-800 md:p-4">
         <div className="space-y-6 md:space-y-8">
-          {data?.map((service) => (
-            <div key={service._id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+          {data?.map((service: any) => (
+            <div
+              key={service._id}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
+            >
               <div className="flex flex-col gap-1">
-                <span className="text-gray-500 dark:text-white text-sm md:text-base">{service.name}</span>
+                <span className="text-sm text-muted md:text-base">{service.name}</span>
               </div>
               <div className="flex items-center self-start sm:self-auto">
                 {service.isAvailable ? (
                   <>
-                    <FaCheckCircle className="text-green-400 mr-1 text-sm md:text-base" aria-hidden="true" />
-                    <span className="text-green-400 font-semibold text-sm md:text-base" aria-label="Available">
+                    <FaCheckCircle className="mr-1 text-sm text-success md:text-base" aria-hidden="true" />
+                    <span className="text-sm font-semibold text-success md:text-base" aria-label="Available">
                       Available
                     </span>
                   </>
                 ) : (
                   <>
-                    <FaTimesCircle className="text-red-400 mr-1 text-sm md:text-base" aria-hidden="true" />
-                    <span className="text-red-400 font-semibold text-sm md:text-base" aria-label="Unavailable">
+                    <FaTimesCircle className="mr-1 text-sm text-danger md:text-base" aria-hidden="true" />
+                    <span className="text-sm font-semibold text-danger md:text-base" aria-label="Unavailable">
                       Unavailable
                     </span>
                   </>

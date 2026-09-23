@@ -47,7 +47,7 @@ const FormInput: React.FC<FormInputProps> = ({
 
   return (
     <div className="mb-4">
-      {label && <label htmlFor={id} className="ot-field-label">{label}</label>}
+      {label && <label htmlFor={id} className="mb-[7px] block text-xs font-mediumish text-ink">{label}</label>}
       <div className="relative">
         <input
           id={id}
@@ -61,7 +61,7 @@ const FormInput: React.FC<FormInputProps> = ({
           onBlur={onBlur}
           min={min}
           disabled={disabled}
-          className="ot-field pr-16"
+          className="block min-h-[46px] w-full min-w-0 max-w-full rounded-control border border-line bg-paper px-3 py-[10px] text-sm text-ink outline-none focus:outline-2 focus:outline-accent focus:outline-offset-1 aria-[invalid=true]:border-danger disabled:opacity-50 pr-16"
         />
 
         {label === "Referral Code (Optional)" && (
@@ -88,7 +88,7 @@ const FormInput: React.FC<FormInputProps> = ({
           </button>
         )}
       </div>
-      {(error || helperText) && <p id={`${id}-message`} className={error ? "ot-field-error" : "text-xs mt-1 text-gray-500"}>{error || helperText}</p>}
+      {(error || helperText) && <p id={`${id}-message`} className={error ? "mt-[5px] text-[11px] text-danger" : "mt-1 text-xs text-gray-500"}>{error || helperText}</p>}
     </div>
   );
 };

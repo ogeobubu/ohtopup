@@ -92,14 +92,14 @@ const UserManagement = () => {
       header: "User",
       render: (user) => (
         <div className="flex items-center space-x-3">
-          <div className={`ot-admin-neutral-card w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-            user?.role === 'admin' ? 'ot-admin-accent' : ''
+          <div className={`min-w-0 rounded-md border border-line bg-paper w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+            user?.role === 'admin' ? 'text-accent' : ''
           }`}>
             {user?.username?.charAt(0).toUpperCase()}
           </div>
           <div>
-            <div className="font-medium ot-admin-ink">{user?.username}</div>
-            <div className="text-sm ot-admin-muted">{user?.email}</div>
+            <div className="font-medium text-ink">{user?.username}</div>
+            <div className="text-sm text-muted">{user?.email}</div>
           </div>
         </div>
       ),
@@ -130,7 +130,7 @@ const UserManagement = () => {
     {
       header: "Source",
       render: (user) => (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ot-admin-soft ot-admin-ink capitalize">
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-bg text-ink capitalize">
           {user?.source || 'Direct'}
         </span>
       ),
@@ -138,7 +138,7 @@ const UserManagement = () => {
     {
       header: "Registration Date",
       render: (user) => (
-        <div className="text-sm ot-admin-muted">
+        <div className="text-sm text-muted">
           {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
         </div>
       ),
@@ -149,24 +149,24 @@ const UserManagement = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => navigate(`/admin/transactions?userId=${user._id}`)}
-            className="ot-admin-control ot-admin-action rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 transform "
+            className="min-h-[44px] bg-tint rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 transform"
             title="View User Transactions"
           >
             <FaCreditCard className="inline h-3 w-3" />
           </button>
           <button
             onClick={() => handleEditUser(user)}
-            className="ot-admin-control ot-admin-action rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 transform "
+            className="min-h-[44px] bg-tint rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 transform"
             title="Edit User"
           >
             <FaEdit className="inline h-3 w-3" />
           </button>
           <button
             onClick={() => handleToggleDelete()}
-            className={`ot-admin-control rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 transform ${
+            className={`min-h-[44px] rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 transform ${
               user?.isDeleted
-                ? 'ot-admin-action'
-                : 'ot-admin-danger'
+                ? 'bg-tint'
+                : 'bg-[#f9eeee] text-[#a73b3b]'
             }`}
             title={user?.isDeleted ? 'Restore User' : 'Delete User'}
           >
@@ -184,15 +184,15 @@ const UserManagement = () => {
   const deletedUsers = analyticsData?.totalDeletedUsers || 0;
 
   return (
-    <div className="ot-admin-management-page">
+    <div className="min-w-0">
       <div className="mb-4 md:mb-6">
-        <h1 className="ot-admin-page-title text-xl md:text-3xl font-bold ot-admin-ink mb-2">User Management</h1>
-        <p className="ot-admin-muted text-sm md:text-base">Manage and monitor all users in the system</p>
+        <h1 className="text-[26px] font-mediumish leading-tight tracking-[-0.6px] text-ink text-xl md:text-3xl font-bold text-ink mb-2">User Management</h1>
+        <p className="text-muted text-sm md:text-base">Manage and monitor all users in the system</p>
       </div>
 
       {/* Enhanced Analytics Cards */}
       <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-xs md:text-sm font-medium">Total Users</p>
@@ -202,7 +202,7 @@ const UserManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-xs md:text-sm font-medium">Active Users</p>
@@ -212,7 +212,7 @@ const UserManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-xs md:text-sm font-medium">Regular Users</p>
@@ -222,7 +222,7 @@ const UserManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-4 md:p-6 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-4 md:p-6 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-orange-100 text-xs md:text-sm font-medium">Admins</p>
@@ -235,7 +235,7 @@ const UserManagement = () => {
 
       {/* Secondary Analytics Row */}
       <div className="mb-4 md:mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-        <div className="ot-admin-neutral-card p-3 md:p-4 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-3 md:p-4 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-red-100 text-xs md:text-sm font-medium">Deleted Users</p>
@@ -245,7 +245,7 @@ const UserManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-3 md:p-4 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-3 md:p-4 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-indigo-100 text-xs md:text-sm font-medium">Users This Month</p>
@@ -255,7 +255,7 @@ const UserManagement = () => {
           </div>
         </div>
 
-        <div className="ot-admin-neutral-card p-3 md:p-4 rounded-lg ">
+        <div className="min-w-0 rounded-md border border-line bg-paper p-3 md:p-4 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-teal-100 text-xs md:text-sm font-medium">Active Rate</p>
@@ -271,7 +271,7 @@ const UserManagement = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3 px-2 md:px-0">
-        <div className="text-xs md:text-sm ot-admin-muted">
+        <div className="text-xs md:text-sm text-muted">
           {usersData?.users?.length || 0} users found
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -281,11 +281,11 @@ const UserManagement = () => {
               placeholder="Search by name or email"
               value={searchTerm}
               onChange={handleSearchChange}
-              className="border ot-admin-border rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
+              className="border border-line rounded-lg px-3 md:px-4 py-2 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-sm"
             />
-            <FaUsers className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 ot-admin-muted" />
+            <FaUsers className="absolute left-2 md:left-3 top-2.5 md:top-3 h-3 w-3 md:h-4 md:w-4 text-muted" />
           </div>
-          <Select classNamePrefix="ot-admin-select"
+          <Select classNamePrefix="min-w-0"
             options={[
               { value: "", label: "All Roles" },
               { value: "admin", label: "Admin" },
@@ -331,7 +331,7 @@ const UserManagement = () => {
               })
             }}
           />
-          <Select classNamePrefix="ot-admin-select"
+          <Select classNamePrefix="min-w-0"
             options={[
               { value: "all", label: "All Status" },
               { value: "active", label: "Active" },
@@ -377,7 +377,7 @@ const UserManagement = () => {
             }}
           />
           <button
-            className="ot-admin-control ot-admin-action px-3 md:px-4 py-2 rounded-lg transition-all duration-200 transform text-xs md:text-sm"
+            className="min-h-[44px] bg-tint px-3 md:px-4 py-2 rounded-lg transition-all duration-200 transform text-xs md:text-sm"
             onClick={() => toast.info("Export functionality coming soon!")}
           >
             <FaDownload className="inline mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
@@ -388,16 +388,16 @@ const UserManagement = () => {
 
       {isUsersLoading || isAnalyticsLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="ot-admin-paper rounded-full p-6 mb-4">
+          <div className="bg-paper rounded-full p-6 mb-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
-          <h3 className="text-lg font-semibold ot-admin-ink mb-2">Loading Users</h3>
-          <p className="ot-admin-muted text-center max-w-md">
+          <h3 className="text-lg font-semibold text-ink mb-2">Loading Users</h3>
+          <p className="text-muted text-center max-w-md">
             Please wait while we fetch the user data and analytics...
           </p>
         </div>
       ) : (
-        <div className="ot-admin-paper rounded-lg border ot-admin-border overflow-hidden mx-2 md:mx-0">
+        <div className="bg-paper rounded-lg border border-line overflow-hidden mx-2 md:mx-0">
           <div className="overflow-x-auto">
             <Table columns={columns} data={users} />
           </div>
@@ -416,41 +416,41 @@ const UserManagement = () => {
           onClick={toggleModal}
         >
           <div
-            className="ot-admin-paper rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
+            className="bg-paper rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-sm sm:max-w-md mx-4 sm:mx-auto transform transition-all duration-300 scale-100 max-h-[95vh] sm:max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-700 dark:hover:scrollbar-thumb-gray-500 px-2 sm:px-0 pb-8">
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="ot-admin-neutral-card inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
+              <div className="min-w-0 rounded-md border border-line bg-paper inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
                 <FaUser className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold ot-admin-ink">
+              <h3 className="text-2xl font-bold text-ink">
                 {currentUser?.isDeleted ? 'Restore User' : 'Delete User'}
               </h3>
-              <p className="text-sm ot-admin-muted">
+              <p className="text-sm text-muted">
                 Manage user account status for {currentUser?.username}
               </p>
             </div>
 
             {/* User Details */}
-            <div className="mb-6 p-6 rounded-lg ot-admin-soft">
+            <div className="mb-6 p-6 rounded-lg bg-bg">
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b ot-admin-border">
-                  <span className="font-medium ot-admin-muted">Username</span>
-                  <span className="font-semibold text-lg ot-admin-ink">
+                <div className="flex justify-between items-center py-2 border-b border-line">
+                  <span className="font-medium text-muted">Username</span>
+                  <span className="font-semibold text-lg text-ink">
                     {currentUser?.username}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b ot-admin-border">
-                  <span className="font-medium ot-admin-muted">Email</span>
-                  <span className="font-semibold ot-admin-ink">
+                <div className="flex justify-between items-center py-2 border-b border-line">
+                  <span className="font-medium text-muted">Email</span>
+                  <span className="font-semibold text-ink">
                     {currentUser?.email}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b ot-admin-border">
-                  <span className="font-medium ot-admin-muted">Role</span>
+                <div className="flex justify-between items-center py-2 border-b border-line">
+                  <span className="font-medium text-muted">Role</span>
                   <span className={`font-semibold ${
                     currentUser?.role === 'admin' ? 'text-orange-600' : 'text-blue-600'
                   }`}>
@@ -458,7 +458,7 @@ const UserManagement = () => {
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="font-medium ot-admin-muted">Current Status</span>
+                  <span className="font-medium text-muted">Current Status</span>
                   <span className={`font-semibold ${
                     currentUser?.isDeleted ? 'text-red-600' : 'text-green-600'
                   }`}>
@@ -508,17 +508,17 @@ const UserManagement = () => {
                 type="button"
                 onClick={toggleModal}
                 disabled={mutation.isPending}
-                className="ot-admin-control flex-1 px-6 py-3 bg-gray-200 ot-admin-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
+                className="min-h-[44px] flex-1 px-6 py-3 bg-gray-200 text-ink rounded-lg font-medium transition-all duration-200 hover:bg-gray-300 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleToggleDelete}
                 disabled={mutation.isPending}
-                className={`ot-admin-control flex-1 px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative ${
+                className={`min-h-[44px] flex-1 px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative ${
                   currentUser?.isDeleted
-                    ? ' ot-admin-action'
-                    : ' ot-admin-action'
+                    ? ' bg-tint'
+                    : ' bg-tint'
                 }`}
               >
                 {mutation.isPending ? (

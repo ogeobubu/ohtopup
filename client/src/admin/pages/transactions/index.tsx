@@ -55,8 +55,8 @@ const Transactions = () => {
 
   return (
     <div>
-      <div className="ot-dashboard-heading"><div><h1>Transactions</h1><p>Review utility payments and follow up on their status.</p></div></div>
-      <div className="ot-utility-tabs" role="group" aria-label="Transaction services">
+      <div className="mb-6 min-w-0"><div><h1>Transactions</h1><p>Review utility payments and follow up on their status.</p></div></div>
+      <div className="flex min-h-11 flex-wrap items-stretch justify-between border-b border-line" role="group" aria-label="Transaction services">
         {[
           "Data Services",
           "Airtime Recharge",
@@ -88,7 +88,7 @@ const Transactions = () => {
                 aria-label="Search transactions by reference"
                 value={requestId}
                 onChange={handleSearchChange}
-                className="ot-field max-w-xs"
+                className="block min-h-[46px] w-full rounded-[5px] border border-line bg-paper px-3 py-2.5 text-sm text-ink max-w-xs"
               />
             </div>
             <TransactionTable

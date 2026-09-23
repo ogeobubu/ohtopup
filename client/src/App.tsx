@@ -10,7 +10,6 @@ import { setUser } from "./actions/userActions";
 import { setAdminUser } from "./actions/adminActions";
 import { toggleDarkMode } from "./actions/themeActions";
 import { useSelector, useDispatch } from "react-redux";
-import { FaWhatsapp } from "react-icons/fa";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -108,11 +107,11 @@ const App = () => {
 
   if (userLoading && !savedUser) {
     return (
-      <div className="ot-public" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="ot-spinner" style={{ margin: '0 auto 16px' }} />
-          <p style={{ color: 'var(--ot-muted)' }}>Loading your account...</p>
-          <p style={{ color: 'var(--ot-muted)', fontSize: 13, marginTop: 8 }}>This may take a moment on first load</p>
+      <div className="flex min-h-dvh items-center justify-center bg-paper text-ink">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-[3px] border-line border-t-accent" />
+          <p className="text-muted">Loading your account...</p>
+          <p className="mt-2 text-[13px] text-muted">This may take a moment on first load</p>
         </div>
       </div>
     );

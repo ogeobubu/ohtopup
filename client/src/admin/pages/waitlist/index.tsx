@@ -71,7 +71,7 @@ const Waitlist = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => handleEditUser(user)}
-            className="ot-admin-control border border-green-500 flex justify-center items-center rounded-full w-8 h-8 text-green-500 hover:bg-green-100 transition"
+            className="min-h-[44px] border border-green-500 flex justify-center items-center rounded-full w-8 h-8 text-green-500 hover:bg-green-100 transition"
           >
             <FaPaperPlane size={16} />
           </button>
@@ -102,23 +102,23 @@ const Waitlist = () => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-5 ot-admin-ink ">
+      <h2 className="text-2xl font-bold mb-5 text-ink">
         Waitlist Management
       </h2>
-      <div className="flex flex-col md:flex-row ot-admin-paper ">
-        <div className="flex-1 min-h-[250px] flex flex-col justify-between ot-admin-paper rounded-lg p-4">
+      <div className="flex flex-col md:flex-row bg-paper">
+        <div className="flex-1 min-h-[250px] flex flex-col justify-between bg-paper rounded-lg p-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex-grow"></div>
             <div className="flex items-center">
               <input
                 type="search"
                 placeholder="Search by email"
-                className="border ot-admin-border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 "
+                className="border border-line rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button
-                className="ot-admin-control ml-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                className="min-h-[44px] ml-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
                 onClick={handleClearSearch}
               >
                 Clear
@@ -126,7 +126,7 @@ const Waitlist = () => {
             </div>
           </div>
           {isLoading ? (
-            <p className="ot-admin-muted text-center">Loading waitlists...</p>
+            <p className="text-muted text-center">Loading waitlists...</p>
           ) : isError ? (
             <p className="text-red-500">
               Error loading waitlists: {error.message}
@@ -141,9 +141,9 @@ const Waitlist = () => {
               />
             </div>
           ) : (
-            <div className="border ot-admin-border rounded-md p-6 flex flex-col items-center justify-center h-full ot-admin-soft dark:bg-gray-600">
+            <div className="border border-line rounded-md p-6 flex flex-col items-center justify-center h-full bg-bg dark:bg-gray-600">
               <img className="w-24 h-24 mb-4" src={noData} alt="No data" />
-              <p className="mt-2 ot-admin-muted text-center">
+              <p className="mt-2 text-muted text-center">
                 No referral history
               </p>
             </div>
@@ -169,7 +169,7 @@ const Waitlist = () => {
             <Form className="flex flex-col">
               <label
                 htmlFor="text"
-                className="mb-1 ot-admin-ink "
+                className="mb-1 text-ink"
               >
                 Enter Subject:
               </label>
@@ -177,14 +177,14 @@ const Waitlist = () => {
                 name="text"
                 as={Textfield}
                 placeholder="Enter subject"
-                className="border ot-admin-border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 "
+                className="border border-line rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.text && touched.text ? (
                 <div className="text-red-600 text-sm">{errors.text}</div>
               ) : null}
               <label
                 htmlFor="description"
-                className="mb-1 ot-admin-ink "
+                className="mb-1 text-ink"
               >
                 Enter Description:
               </label>
@@ -192,7 +192,7 @@ const Waitlist = () => {
                 name="description"
                 as={Textarea}
                 placeholder="Enter description"
-                className="border ot-admin-border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 "
+                className="border border-line rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.description && touched.description ? (
                 <div className="text-red-600 text-sm">{errors.description}</div>
@@ -203,12 +203,12 @@ const Waitlist = () => {
                   type="checkbox"
                   checked={sendToAll}
                   onChange={() => setSendToAll((prev) => !prev)}
-                  className="h-5 w-5 text-blue-600 ot-admin-border rounded focus:ring-blue-500 focus:ring-2 transition duration-200 ease-in-out cursor-pointer"
+                  className="h-5 w-5 text-blue-600 border-line rounded focus:ring-blue-500 focus:ring-2 transition duration-200 ease-in-out cursor-pointer"
                   id="sendToAll"
                 />
                 <label
                   htmlFor="sendToAll"
-                  className="ml-2 ot-admin-ink text-sm cursor-pointer hover:text-blue-600 transition duration-200 ease-in-out"
+                  className="ml-2 text-ink text-sm cursor-pointer hover:text-blue-600 transition duration-200 ease-in-out"
                 >
                   Send to all users
                 </label>

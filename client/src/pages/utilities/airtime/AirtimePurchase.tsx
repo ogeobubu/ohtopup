@@ -13,7 +13,7 @@ import { useOfflineQueue } from "../../../hooks/useOfflineQueue";
 const Loader = () => (
   <div className="flex items-center justify-center py-8">
     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-    <p className="mt-3 text-[var(--ot-muted)] ">Loading airtime services...</p>
+    <p className="mt-3 text-muted">Loading airtime services...</p>
   </div>
 );
 
@@ -200,9 +200,9 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
 
   return (
-    <div className="ot-utility-intro">
+    <div className="p-7">
       {pricingDialog}
-      <div><h3>Buy airtime</h3><p>Choose your network and the amount you want to top up.</p><button className="ot-button ot-button-primary" onClick={() => setIsModalOpen(true)}>Choose airtime</button></div>
+      <div><h3>Buy airtime</h3><p>Choose your network and the amount you want to top up.</p><button className="inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition border border-transparent bg-accent text-white hover:bg-accent-dark" onClick={() => setIsModalOpen(true)}>Choose airtime</button></div>
 
       <Modal
         isDarkMode={isDarkMode}
@@ -215,7 +215,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
         {isLoading ? (
           <Loader />
         ) : (
-          <div className="ot-purchase-content flex flex-col">
+          <div className="min-w-0 flex-1 flex flex-col flex flex-col">
 
             {/* Offline Status Banner */}
             {!isOnline && (
@@ -242,8 +242,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
             {currentStep === 1 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Choose Your Network</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Select your mobile network provider</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose Your Network</h3>
+                  <p className="text-sm text-muted">Select your mobile network provider</p>
                 </div>
                 <div className="grid grid-cols-2 gap-2 md:gap-3 max-w-sm mx-auto">
                   {providers?.map(provider => (
@@ -252,17 +252,17 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       onClick={() => {
                         handleNetworkChange(provider.serviceID);
                       }}
-                      className={`p-3 md:p-4 bg-[var(--ot-paper)] border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
+                      className={`p-3 md:p-4 bg-paper border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
                         selectedNetwork === provider.serviceID
-                          ? 'border-blue-500 bg-[var(--ot-tint)] shadow-md'
-                          : 'border-[var(--ot-line)] hover:border-blue-300'
+                          ? 'border-blue-500 bg-tint shadow-md'
+                          : 'border-line hover:border-blue-300'
                       }`}
                     >
                       <div className="text-center">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-[var(--ot-tint)] rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
-                          <FaMobileAlt className="text-[var(--ot-accent)] text-base md:text-lg" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-tint rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
+                          <FaMobileAlt className="text-accent text-base md:text-lg" />
                         </div>
-                        <div className="text-base md:text-lg font-bold text-[var(--ot-ink)] mb-1">
+                        <div className="text-base md:text-lg font-bold text-ink mb-1">
                           {provider.name?.toUpperCase() || provider.serviceID?.toUpperCase() || 'UNKNOWN'}
                         </div>
                       </div>
@@ -288,12 +288,12 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
                 {/* Network Change Notification */}
                 {selectedNetwork && (
-                  <div className="mt-3 p-3 bg-[var(--ot-tint)] border border-blue-200 rounded-lg">
+                  <div className="mt-3 p-3 bg-tint border border-blue-200 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-[var(--ot-tint)] rounded-full flex items-center justify-center">
-                        <FaCheck className="text-[var(--ot-accent)] text-xs" />
+                      <div className="w-5 h-5 bg-tint rounded-full flex items-center justify-center">
+                        <FaCheck className="text-accent text-xs" />
                       </div>
-                      <div className="text-sm text-[var(--ot-accent)]">
+                      <div className="text-sm text-accent">
                         <span className="font-medium">{selectedNetwork?.toUpperCase()}</span> selected.
                         {networkReset && (
                           <span className="text-orange-600 ml-1 block mt-1">
@@ -311,8 +311,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
             {currentStep === 2 && selectedNetwork && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Choose Amount</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Select airtime amount for {selectedNetwork?.toUpperCase()}</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose Amount</h3>
+                  <p className="text-sm text-muted">Select airtime amount for {selectedNetwork?.toUpperCase()}</p>
                 </div>
 
                 {/* Network Reset Notification */}
@@ -331,14 +331,14 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
                 {/* Amount Input */}
                 <div className="max-w-sm mx-auto">
-                  <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
+                  <label className="block text-sm md:text-base font-semibold text-ink mb-2">
                     Enter Amount (₦)
                   </label>
                   <input
                     type="number"
                     value={selectedAmount}
                     onChange={(e) => setSelectedAmount(e.target.value)}
-                    className="w-full px-3 py-2 md:py-3 border-2 border-[var(--ot-line)] rounded-lg text-sm md:text-base font-medium bg-[var(--ot-paper)] focus:border-blue-500 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 md:py-3 border-2 border-line rounded-lg text-sm md:text-base font-medium bg-paper focus:border-blue-500 focus:outline-none transition-colors"
                     placeholder="Enter amount"
                     min="50"
                   />
@@ -346,15 +346,15 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
                   {/* Selected Amount Display */}
                   {selectedAmount && (
-                    <div className="mt-3 p-3 bg-[var(--ot-tint)] rounded-lg border border-blue-200">
+                    <div className="mt-3 p-3 bg-tint rounded-lg border border-blue-200">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[var(--ot-tint)] rounded-lg flex items-center justify-center">
-                          <FaCreditCard className="text-[var(--ot-accent)] text-sm" />
+                        <div className="w-8 h-8 bg-tint rounded-lg flex items-center justify-center">
+                          <FaCreditCard className="text-accent text-sm" />
                         </div>
                         <div className="flex-1">
                           <div className="flex justify-between items-center mb-1">
-                            <h4 className="font-bold text-[var(--ot-ink)] text-sm">₦{selectedAmount}</h4>
-                            <span className="text-xs text-[var(--ot-muted)]">Airtime amount</span>
+                            <h4 className="font-bold text-ink text-sm">₦{selectedAmount}</h4>
+                            <span className="text-xs text-muted">Airtime amount</span>
                           </div>
                           {commissionAmount > 0 && (
                             <div className="text-xs text-green-600 font-medium">
@@ -362,7 +362,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                             </div>
                           )}
                           {commissionAmount > 0 && (
-                            <div className="text-xs text-[var(--ot-accent)] font-medium mt-1">
+                            <div className="text-xs text-accent font-medium mt-1">
                               You pay: ₦{adjustedAmount.toFixed(2)}
                             </div>
                           )}
@@ -376,7 +376,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(1)}
-                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -399,8 +399,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
             {currentStep === 3 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Confirm Phone Number</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Airtime will be sent to this number</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Confirm Phone Number</h3>
+                  <p className="text-sm text-muted">Airtime will be sent to this number</p>
                 </div>
 
                 <div className="max-w-sm mx-auto space-y-2 md:space-y-3">
@@ -427,19 +427,19 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         setCurrentStep(4);
                       }
                     }}
-                    className="w-full p-3 md:p-4 bg-[var(--ot-paper)] border-2 border-[var(--ot-line)] rounded-xl transition-all duration-200 hover:shadow-md hover:border-blue-300"
+                    className="w-full p-3 md:p-4 bg-paper border-2 border-line rounded-xl transition-all duration-200 hover:shadow-md hover:border-blue-300"
                   >
                     <div className="flex items-center gap-2 md:gap-3">
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-[var(--ot-tint)] rounded-lg flex items-center justify-center">
-                        <FaUser className="text-[var(--ot-accent)] text-base md:text-lg" />
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-tint rounded-lg flex items-center justify-center">
+                        <FaUser className="text-accent text-base md:text-lg" />
                       </div>
                       <div className="text-left flex-1 min-w-0">
-                        <div className="font-semibold text-[var(--ot-ink)] text-sm md:text-base">My registered number</div>
-                        <div className="text-[var(--ot-muted)] text-xs md:text-sm truncate">
+                        <div className="font-semibold text-ink text-sm md:text-base">My registered number</div>
+                        <div className="text-muted text-xs md:text-sm truncate">
                           {user?.phoneNumber ? formatPhoneNumberForDisplay(user.phoneNumber) : 'No registered number'}
                         </div>
                       </div>
-                      <div className="text-[var(--ot-accent)]">
+                      <div className="text-accent">
                         <FaChevronRight className="text-base md:text-lg" />
                       </div>
                     </div>
@@ -448,15 +448,15 @@ const AirtimePurchase = ({ isDarkMode }) => {
                   {/* Custom Number Option */}
                   <button
                     onClick={() => setUseCustomPhone(true)}
-                    className="w-full p-3 md:p-4 bg-[var(--ot-paper)] border-2 border-[var(--ot-line)] rounded-xl transition-all duration-200 hover:shadow-md hover:border-green-300"
+                    className="w-full p-3 md:p-4 bg-paper border-2 border-line rounded-xl transition-all duration-200 hover:shadow-md hover:border-green-300"
                   >
                     <div className="flex items-center gap-2 md:gap-3">
                       <div className="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-lg flex items-center justify-center">
                         <FaCheck className="text-green-600 text-base md:text-lg" />
                       </div>
                       <div className="text-left flex-1">
-                        <div className="font-semibold text-[var(--ot-ink)] text-sm md:text-base">Enter different number</div>
-                        <div className="text-[var(--ot-muted)] text-xs md:text-sm">Use another phone number</div>
+                        <div className="font-semibold text-ink text-sm md:text-base">Enter different number</div>
+                        <div className="text-muted text-xs md:text-sm">Use another phone number</div>
                       </div>
                       <div className="text-green-600">
                         <FaChevronRight className="text-base md:text-lg" />
@@ -466,8 +466,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
                   {/* Custom Phone Input */}
                   {useCustomPhone && (
-                    <div className="bg-[var(--ot-paper)] p-3 md:p-4 rounded-xl border-2 border-[var(--ot-line)]">
-                      <label className="block text-sm md:text-base font-semibold text-[var(--ot-ink)] mb-2">
+                    <div className="bg-paper p-3 md:p-4 rounded-xl border-2 border-line">
+                      <label className="block text-sm md:text-base font-semibold text-ink mb-2">
                         Enter Phone Number
                       </label>
                       <input
@@ -477,7 +477,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         className={`w-full px-3 py-2 md:py-3 border-2 rounded-lg text-sm md:text-base font-medium ${
                           phoneError
                             ? 'border-red-500 focus:border-red-500'
-                            : 'border-[var(--ot-line)] focus:border-blue-500'
+                            : 'border-line focus:border-blue-500'
                         }`}
                         placeholder="+2348012345678"
                         autoFocus
@@ -490,12 +490,12 @@ const AirtimePurchase = ({ isDarkMode }) => {
 
                       {/* Network Detection Display */}
                       {detectedNetwork && !phoneError && (
-                        <div className="mt-3 p-3 bg-[var(--ot-tint)] border border-blue-200 rounded-lg">
+                        <div className="mt-3 p-3 bg-tint border border-blue-200 rounded-lg">
                           <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 bg-[var(--ot-tint)] rounded-full flex items-center justify-center">
-                              <FaMobileAlt className="text-[var(--ot-accent)] text-xs" />
+                            <div className="w-5 h-5 bg-tint rounded-full flex items-center justify-center">
+                              <FaMobileAlt className="text-accent text-xs" />
                             </div>
-                            <div className="text-sm text-[var(--ot-accent)]">
+                            <div className="text-sm text-accent">
                               <span className="font-medium">Detected Network: {detectedNetwork?.toUpperCase()}</span>
                               {selectedNetwork === detectedNetwork && (
                                 <span className="text-green-600 ml-1">✓ Matches selected network</span>
@@ -529,7 +529,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                             </button>
                             <button
                               onClick={() => resolveNetworkConflict(false)}
-                              className="flex-1 px-3 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] text-xs rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors"
+                              className="flex-1 px-3 py-2 bg-bg text-ink text-xs rounded-lg font-medium hover:bg-line transition-colors"
                             >
                               Keep {selectedNetwork?.toUpperCase()}
                             </button>
@@ -537,13 +537,13 @@ const AirtimePurchase = ({ isDarkMode }) => {
                         </div>
                       )}
 
-                      <p className="text-xs text-[var(--ot-muted)] mt-2">
+                      <p className="text-xs text-muted mt-2">
                         Enter a valid Nigerian phone number (e.g., +2348012345678, 08012345678, or 8012345678)
                       </p>
                       <div className="flex gap-2 mt-3 md:mt-4">
                         <button
                           onClick={() => setUseCustomPhone(false)}
-                          className="flex-1 px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                          className="flex-1 px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                         >
                           Back
                         </button>
@@ -567,7 +567,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 <div className="mt-3 md:mt-4 flex justify-between">
                   <button
                     onClick={() => setCurrentStep(2)}
-                    className="px-3 md:px-4 py-2 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
@@ -590,13 +590,13 @@ const AirtimePurchase = ({ isDarkMode }) => {
             {currentStep === 4 && selectedNetwork && selectedAmount && phoneNumber && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Enter Transaction PIN</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Enter your 4-6 digit transaction PIN to proceed</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Enter Transaction PIN</h3>
+                  <p className="text-sm text-muted">Enter your 4-6 digit transaction PIN to proceed</p>
                 </div>
 
                 <div className="max-w-sm mx-auto space-y-3">
-                  <div className="bg-[var(--ot-paper)] p-4 rounded-xl border-2 border-[var(--ot-line)]">
-                    <label className="block text-base font-semibold text-[var(--ot-ink)] mb-2">
+                  <div className="bg-paper p-4 rounded-xl border-2 border-line">
+                    <label className="block text-base font-semibold text-ink mb-2">
                       Transaction PIN
                     </label>
                     <input
@@ -610,7 +610,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                       className={`w-full px-3 py-3 border-2 rounded-lg text-base font-medium ${
                         pinError
                           ? 'border-red-500 focus:border-red-500'
-                          : 'border-[var(--ot-line)] focus:border-blue-500'
+                          : 'border-line focus:border-blue-500'
                       }`}
                       placeholder="Enter your PIN"
                       maxLength={6}
@@ -619,7 +619,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                     {pinError && (
                       <p className="text-xs text-red-600 mt-2 font-medium">{pinError}</p>
                     )}
-                    <p className="text-xs text-[var(--ot-muted)] mt-2">
+                    <p className="text-xs text-muted mt-2">
                       Enter your 4-6 digit transaction PIN to secure this transaction
                     </p>
                   </div>
@@ -628,7 +628,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setCurrentStep(4)}
-                      className="flex-1 px-4 py-3 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                      className="flex-1 px-4 py-3 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                     >
                       Previous
                     </button>
@@ -652,23 +652,23 @@ const AirtimePurchase = ({ isDarkMode }) => {
             {currentStep === 5 && selectedNetwork && selectedAmount && phoneNumber && transactionPin && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-[var(--ot-ink)] mb-1">Confirm Your Purchase</h3>
-                  <p className="text-sm text-[var(--ot-muted)]">Review your selection and complete the purchase</p>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Confirm Your Purchase</h3>
+                  <p className="text-sm text-muted">Review your selection and complete the purchase</p>
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-[var(--ot-paper)] rounded-xl border-2 border-[var(--ot-line)] p-3 md:p-4 mb-3 md:mb-4">
-                  <h4 className="text-sm md:text-base font-bold text-[var(--ot-ink)] mb-2 md:mb-3">Order Summary</h4>
+                <div className="bg-paper rounded-xl border-2 border-line p-3 md:p-4 mb-3 md:mb-4">
+                  <h4 className="text-sm md:text-base font-bold text-ink mb-2 md:mb-3">Order Summary</h4>
 
                   <div className="space-y-2 md:space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[var(--ot-tint)] rounded-lg flex items-center justify-center">
-                          <FaMobileAlt className="text-[var(--ot-accent)] text-sm" />
+                        <div className="w-8 h-8 bg-tint rounded-lg flex items-center justify-center">
+                          <FaMobileAlt className="text-accent text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-[var(--ot-ink)] text-sm">Network Provider</div>
-                          <div className="text-xs text-[var(--ot-muted)]">{selectedNetwork?.toUpperCase()}</div>
+                          <div className="font-medium text-ink text-sm">Network Provider</div>
+                          <div className="text-xs text-muted">{selectedNetwork?.toUpperCase()}</div>
                         </div>
                       </div>
                     </div>
@@ -679,8 +679,8 @@ const AirtimePurchase = ({ isDarkMode }) => {
                           <FaCreditCard className="text-green-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-[var(--ot-ink)] text-sm">Airtime Amount</div>
-                          <div className="text-xs text-[var(--ot-muted)]">₦{selectedAmount}</div>
+                          <div className="font-medium text-ink text-sm">Airtime Amount</div>
+                          <div className="text-xs text-muted">₦{selectedAmount}</div>
                           {commissionAmount > 0 && (
                             <div className="text-xs text-green-600 font-medium">
                               Commission: -₦{commissionAmount.toFixed(2)} ({commissionRate}%)
@@ -696,17 +696,17 @@ const AirtimePurchase = ({ isDarkMode }) => {
                           <FaUser className="text-purple-600 text-sm" />
                         </div>
                         <div>
-                          <div className="font-medium text-[var(--ot-ink)] text-sm">Phone Number</div>
-                          <div className="text-xs text-[var(--ot-muted)]">{phoneNumber}</div>
+                          <div className="font-medium text-ink text-sm">Phone Number</div>
+                          <div className="text-xs text-muted">{phoneNumber}</div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center py-3 bg-[var(--ot-bg)] rounded-lg px-3">
-                      <div className="font-bold text-[var(--ot-ink)] text-base">
+                    <div className="flex justify-between items-center py-3 bg-bg rounded-lg px-3">
+                      <div className="font-bold text-ink text-base">
                         {commissionAmount > 0 ? 'Amount to Pay' : 'Total Amount'}
                       </div>
-                      <div className="text-xl font-bold text-[var(--ot-accent)]">
+                      <div className="text-xl font-bold text-accent">
                         ₦{commissionAmount > 0 ? adjustedAmount.toFixed(2) : selectedAmount}
                       </div>
                     </div>
@@ -717,7 +717,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentStep(3)}
-                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[var(--ot-bg)] text-[var(--ot-ink)] rounded-lg font-medium hover:bg-[var(--ot-line)] transition-colors text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-bg text-ink rounded-lg font-medium hover:bg-line transition-colors text-sm"
                   >
                     Previous
                   </button>
