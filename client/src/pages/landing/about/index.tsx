@@ -17,11 +17,11 @@ const AboutUs = () => {
           </div>
         </section>
 
-        <section className="ot-container" style={{ paddingBottom: 98 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 100 }}>
+        <section className="ot-container ot-about-body">
+          <div className="ot-about-grid">
             <div>
               <p className="ot-eyebrow">OUR STORY</p>
-              <h2 style={{ fontSize: 36, fontWeight: 500, letterSpacing: '-1.3px', lineHeight: 1.2, marginBottom: 22 }}>Built for everyday life in Nigeria.</h2>
+              <h2 className="ot-about-heading">Built for everyday life in Nigeria.</h2>
               <p style={{ color: 'var(--ot-muted)', fontSize: 14, lineHeight: 1.8, marginBottom: 20 }}>From airtime and data to TV and electricity, our platform delivers instant value at transparent prices. Today, thousands of customers trust OhTopUp for fast delivery, bank-grade security, and a delightful wallet experience.</p>
               <p style={{ color: 'var(--ot-muted)', fontSize: 14, lineHeight: 1.8 }}>We focus on reliability so you can focus on what matters: staying connected. Our team is customer-obsessed — we listen, ship improvements quickly, and provide 24/7 support when you need it.</p>
             </div>
@@ -35,11 +35,11 @@ const AboutUs = () => {
                   <div className="ot-feature-row"><span>🕑</span><div><h3>24/7 human support</h3><p>Real people, real help, whenever you need it.</p></div></div>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="ot-about-stats">
                 {[{ k: 'Users', v: '10k+' }, { k: 'Delivery', v: 'Instant' }, { k: 'Support', v: '24/7' }].map(s => (
-                  <div key={s.k} className="ot-panel" style={{ padding: 20, textAlign: 'center' }}>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--ot-accent)' }}>{s.v}</div>
-                    <div style={{ fontSize: 11, color: 'var(--ot-muted)', marginTop: 4 }}>{s.k}</div>
+                  <div key={s.k} className="ot-panel">
+                    <strong>{s.v}</strong>
+                    <small>{s.k}</small>
                   </div>
                 ))}
               </div>

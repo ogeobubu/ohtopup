@@ -206,11 +206,60 @@
   .ot-responsive-dialog > div { padding: 16px; }
 }
 
+/* About page columns (inline styles cannot respond to breakpoints). */
+.ot-about-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(32px, 7vw, 100px);
+}
+.ot-about-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.ot-about-grid > *, .ot-about-stats > * { min-width: 0; }
+.ot-about-heading {
+  font-size: clamp(26px, 5vw, 36px);
+  font-weight: 500;
+  letter-spacing: -1.3px;
+  line-height: 1.2;
+  margin-bottom: 22px;
+}
+.ot-about-stats .ot-panel { padding: clamp(12px, 3vw, 20px); text-align: center; }
+.ot-about-stats strong { display: block; font-size: clamp(16px, 4vw, 22px); font-weight: 700; color: var(--ot-accent); }
+.ot-about-stats small { display: block; font-size: 11px; color: var(--ot-muted); margin-top: 4px; }
+.ot-about-body { padding-bottom: clamp(48px, 10vw, 98px); }
+@media (max-width: 767px) {
+  .ot-about-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+}
+
+/* Landing/nav: prevent flex/grid children from painting over each other when content wraps. */
+.ot-public-nav .ot-nav-actions { flex-shrink: 0; }
+.ot-hero-copy, .ot-service-preview, .ot-explainer > *, .ot-faq > *, .ot-footer-top > * { min-width: 0; }
+.ot-hero h1 { overflow-wrap: anywhere; }
+
 /* Prevent horizontal overflow on all screens */
 html, body { overflow-x: hidden; max-width: 100vw; }
 
 /* iPhone SE / 7 / small phone fixes (≤375px) */
 @media (max-width: 375px) {
+  /* Landing public pages: keep hero/nav/sections inside the 375px viewport. */
+  .ot-public-nav { height: auto; min-height: 72px; padding-block: 10px; }
+  .ot-public-nav .ot-brand { font-size: 20px; }
+  .ot-hero { padding-block: 40px; gap: 28px; }
+  .ot-hero h1 { font-size: clamp(28px, 8.5vw, 34px); letter-spacing: -0.03em; line-height: 1.15; }
+  .ot-hero-description { margin: 18px 0 22px; }
+  .ot-hero-actions { gap: 12px; }
+  .ot-service-preview { padding: 12px; }
+  .ot-preview-caption { letter-spacing: 0.5px; }
+  .ot-service-tabs button { min-height: 52px; padding: 8px 2px; }
+  .ot-explainer, .ot-faq { gap: 28px; padding-block: 40px; }
+  .ot-explainer h2, .ot-faq h2, .ot-get-started h2 { font-size: 26px; letter-spacing: -0.5px; }
+  .ot-get-started { padding: 32px 0; }
+  .ot-get-started .ot-container { gap: 18px; }
+  .ot-footer-top { gap: 20px; padding-bottom: 28px; }
+  .ot-footer-bottom { gap: 4px; }
+
   .ot-shell .ot-app-main { padding: 20px 14px; }
   .ot-shell .ot-app-header { padding: 12px 14px 12px 56px; min-height: 64px; }
   .ot-shell .ot-header-title { font-size: 10px; }
