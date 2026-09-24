@@ -12,10 +12,10 @@ const secondaryBtn =
 const panel =
   "overflow-hidden rounded-lg border border-line bg-paper";
 const panelHeading =
-  "flex min-w-0 flex-wrap items-center justify-between gap-4 p-5 nav:p-[22px_24px]";
-const panelBody = "px-6 pb-6";
-const th = "px-6 py-2.5 text-left text-[11px] font-medium uppercase tracking-[0.5px] text-muted";
-const td = "px-6 py-3";
+  "flex min-w-0 flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 nav:p-[22px_24px]";
+const panelBody = "px-4 pb-5 pt-1 sm:px-6 sm:pb-6";
+const th = "px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-[0.5px] text-muted sm:px-6";
+const td = "px-4 py-3 sm:px-6";
 
 const Referral = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,18 +58,16 @@ const Referral = () => {
 
   return (
     <div className="min-w-0">
-      <div className="mb-[30px] flex min-w-0 flex-wrap items-center justify-between gap-5">
-        <div className="min-w-0">
-          <h1 className="mb-2 text-[22px] font-mediumish leading-tight tracking-[-0.5px] nav:text-[30px] nav:tracking-[-0.9px]">
-            Referral Program
-          </h1>
-          <p className="text-[13px] text-muted">
-            Invite friends and earn rewards when they join and make their first deposit
-          </p>
-        </div>
+      <div className="mb-6 min-w-0">
+        <h1 className="mb-2 text-[22px] font-mediumish leading-tight tracking-[-0.5px] nav:text-[30px] nav:tracking-[-0.9px]">
+          Referral Program
+        </h1>
+        <p className="max-w-[42ch] text-[13px] text-muted">
+          Invite friends and earn rewards when they join and make their first deposit
+        </p>
       </div>
 
-      <div className="mb-8 grid min-w-0 grid-cols-1 gap-6 md:mb-8 nav:grid-cols-[minmax(0,1fr)_minmax(0,1.55fr)]">
+      <div className="mb-8 grid min-w-0 grid-cols-1 gap-6 nav:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
         <section className={panel}>
           <div className={panelHeading}>
             <div className="min-w-0">
@@ -78,7 +76,7 @@ const Referral = () => {
             </div>
           </div>
           <div className={panelBody}>
-            <div className="mb-6 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="min-w-[160px] flex-1 rounded-md border border-line bg-tint px-4 py-3 text-center font-mono text-base font-semibold tracking-[1px]">
                 {user?.referralCode}
               </div>
@@ -87,18 +85,18 @@ const Referral = () => {
               </button>
             </div>
 
-            <p className="mb-3 block text-xs font-mediumish text-ink">How it works</p>
-            <div className="flex min-w-0 gap-6 border-line pb-[23px] pt-[23px] [&+&]:border-t [&+&]:border-t-line first:border-t-0 first:pt-0">
+            <p className="mb-1 text-xs font-mediumish text-ink">How it works</p>
+            <div className="flex min-w-0 flex-col">
               {[
                 ["01", "Share your code", "Send your unique referral code to friends."],
                 ["02", "They sign up", "Friends register using your referral code."],
                 ["03", "First deposit", "They make their first ₦1,000+ deposit."],
                 ["04", "You earn ₦500", "Points are credited to your account instantly."],
               ].map(([n, title, body]) => (
-                <div key={n} className="flex min-w-0 gap-6 border-t border-line py-[23px] first:border-t-0 first:pt-0">
+                <div key={n} className="flex min-w-0 gap-4 border-t border-line py-5 first:border-t-0 first:pt-4 sm:gap-6">
                   <span className="shrink-0 pt-1 text-[11px] tabular-nums text-muted">{n}</span>
-                  <div>
-                    <h3 className="mb-[7px] text-base font-semibold">{title}</h3>
+                  <div className="min-w-0">
+                    <h3 className="mb-1.5 text-base font-semibold">{title}</h3>
                     <p className="text-[13px] leading-[1.8] text-muted">{body}</p>
                   </div>
                 </div>
@@ -126,11 +124,11 @@ const Referral = () => {
             ].map((s) => (
               <div
                 key={s.label}
-                className="flex items-center justify-between rounded-md bg-tint px-4 py-3.5"
+                className="flex items-center justify-between gap-3 rounded-md bg-tint px-4 py-3.5"
               >
-                <span className="text-[13px] text-muted">{s.label}</span>
+                <span className="min-w-0 text-[13px] text-muted">{s.label}</span>
                 <span
-                  className="text-xl font-semibold tabular-nums"
+                  className="shrink-0 text-lg font-semibold tabular-nums sm:text-xl"
                   style={{ color: s.color || "var(--ot-ink)" }}
                 >
                   {s.value}
@@ -148,7 +146,7 @@ const Referral = () => {
             <p className="mt-1 text-xs text-muted">People who joined using your code.</p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5 px-6 pb-4">
+        <div className="flex flex-wrap items-center gap-2.5 px-4 pb-4 sm:px-6">
           <input
             type="search"
             placeholder="Search by username or email…"
@@ -157,7 +155,7 @@ const Referral = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="h-11 min-w-[200px] max-w-[320px] flex-1 rounded-md border border-line bg-bg px-3 text-xs text-ink outline-none placeholder:text-muted focus:ring-2 focus:ring-accent/40"
+            className="h-11 w-full min-w-0 rounded-md border border-line bg-bg px-3 text-xs text-ink outline-none placeholder:text-muted focus:ring-2 focus:ring-accent/40 sm:w-auto sm:min-w-[200px] sm:max-w-[320px] sm:flex-1"
           />
           {searchTerm && (
             <button
@@ -173,11 +171,11 @@ const Referral = () => {
         </div>
 
         {isLoading ? (
-          <div className="p-12 text-center" role="status">
+          <div className="p-8 text-center sm:p-12" role="status">
             <p className="text-xs text-muted">Loading referrals…</p>
           </div>
         ) : isError ? (
-          <div className="p-12 text-center">
+          <div className="p-8 text-center sm:p-12">
             <h3 className="mb-1.5 text-[15px] font-mediumish">We couldn&apos;t load your referrals.</h3>
             <p className="mb-4 text-xs text-muted">{(error as any)?.message || "Please try again."}</p>
             <button className={secondaryBtn} onClick={() => window.location.reload()}>
@@ -185,7 +183,7 @@ const Referral = () => {
             </button>
           </div>
         ) : refList.length === 0 ? (
-          <div className="p-12 text-center">
+          <div className="p-8 text-center sm:p-12">
             <h3 className="mb-1.5 text-[15px] font-mediumish">No referrals yet.</h3>
             <p className="mb-4 text-xs text-muted">Share your code and earn ₦500 for every friend who joins.</p>
             <button onClick={handleShare} className={primaryBtn}>
@@ -195,7 +193,7 @@ const Referral = () => {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-[13px]">
+              <table className="w-full min-w-[560px] text-[13px]">
                 <thead>
                   <tr className="border-b border-line">
                     <th className={th}>Username</th>
@@ -208,8 +206,10 @@ const Referral = () => {
                   {refList.map((u: any) => (
                     <tr key={u._id} className="border-b border-line last:border-b-0">
                       <td className={`${td} font-medium`}>{u.username}</td>
-                      <td className={`${td} text-muted`}>{u.email}</td>
-                      <td className={`${td} text-muted`}>
+                      <td className={`${td} max-w-[220px] truncate text-muted`} title={u.email}>
+                        {u.email}
+                      </td>
+                      <td className={`${td} whitespace-nowrap text-muted`}>
                         {new Date(u.createdAt).toLocaleDateString("en-GB", {
                           day: "2-digit",
                           month: "short",
@@ -230,7 +230,7 @@ const Referral = () => {
               </table>
             </div>
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 px-6 py-4">
+              <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-4 sm:px-6">
                 <button className={secondaryBtn} disabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)}>
                   ← Prev
                 </button>
