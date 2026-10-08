@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import { getWallet, getUser, getAirtimeProviders, getAirtimeSettings } from "../../../api";
 import Modal from "../../../admin/components/modal";
 import useAirtimePurchase from "./hooks/useAirtimePurchase";
-import { formatPhoneNumber, formatNairaAmount, extractNetworkFromPhoneNumber } from "../../../utils";
+import { formatPhoneNumber, extractNetworkFromPhoneNumber } from "../../../utils";
 import { FaMobileAlt, FaCheck, FaUser, FaCreditCard, FaChevronRight } from "react-icons/fa";
 import { useOfflineQueue } from "../../../hooks/useOfflineQueue";
 
@@ -32,7 +32,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
   const [networkConflict, setNetworkConflict] = useState(false); // Track if there's a conflict between selected and detected network
 
   // Fetch wallet and providers
-  const { data: walletData, isLoading: isWalletLoading } = useQuery({
+  const { isLoading: isWalletLoading } = useQuery({
     queryKey: ['wallet'],
     queryFn: getWallet,
   });
@@ -47,7 +47,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
     queryFn: () => getAirtimeProviders(),
   });
 
-  const { data: airtimeSettings, isLoading: isSettingsLoading } = useQuery({
+  const { isLoading: isSettingsLoading } = useQuery({
     queryKey: ['airtime', 'settings'],
     queryFn: () => getAirtimeSettings(),
   });
@@ -57,7 +57,7 @@ const AirtimePurchase = ({ isDarkMode }) => {
   });
 
   const [isConfirming, setIsConfirming] = useState(false);
-  const { isOnline, addToQueue } = useOfflineQueue();
+  const { isOnline } = useOfflineQueue();
 
   // Initialize phone number
   useEffect(() => {
@@ -227,10 +227,10 @@ const AirtimePurchase = ({ isDarkMode }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm md:text-base font-semibold text-yellow-900 dark:text-yellow-100">
-                        You're Offline
+                        You are offline
                       </h3>
                       <p className="text-xs md:text-sm text-yellow-700 dark:text-yellow-300">
-                        Your transaction will be queued and processed when you're back online
+                        Reconnect before submitting this transaction. Financial requests are never stored offline.
                       </p>
                     </div>
                   </div>

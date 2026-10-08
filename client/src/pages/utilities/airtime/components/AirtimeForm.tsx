@@ -1,7 +1,7 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import PropTypes from "prop-types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { formatNairaAmount } from "../../../../utils";
 import { getAirtimeLimits } from "../../../../api";
@@ -13,10 +13,10 @@ import { useOfflineQueue } from "../../../../hooks/useOfflineQueue";
 
 const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
   const [detectedNetwork, setDetectedNetwork] = useState(null);
-  const { isOnline, addToQueue } = useOfflineQueue();
+  const { isOnline } = useOfflineQueue();
 
   // Fetch airtime limits from API
-  const { data: limitsData, isLoading: limitsLoading } = useQuery({
+  const { data: limitsData } = useQuery({
     queryKey: ['airtimeLimits'],
     queryFn: getAirtimeLimits,
   });
@@ -106,18 +106,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
   // Handle form submission with offline support
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     if (!isOnline) {
-      // Queue transaction for offline processing
-      const queuedTransaction = {
-        type: 'airtime',
-        amount: parseFloat(values.amount),
-        phoneNumber: values.phoneNumber,
-        provider: values.provider,
-        transactionPin: values.transactionPin
-      };
-
-      addToQueue(queuedTransaction);
-      alert('Transaction queued! It will be processed when you\'re back online.');
-      resetForm();
+      alert('Reconnect before purchasing airtime. Financial transactions are not queued offline.');
       setSubmitting(false);
       return;
     }
@@ -269,7 +258,7 @@ const AirtimeForm = ({ providers, walletBalance, isDarkMode, onSubmit }) => {
                 <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
-                <span className="text-sm font-medium">You're offline - Transaction will be queued</span>
+                <span className="text-sm font-medium">Reconnect to submit this transaction</span>
               </div>
             </div>
           )}

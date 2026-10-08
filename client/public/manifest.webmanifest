@@ -1,0 +1,27 @@
+{
+  "name": "OhTopUp",
+  "short_name": "OhTopUp",
+  "description": "Buy airtime, data, cable TV and electricity securely in Nigeria.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#1f2937",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "/fav-black.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/ohtopup-high-resolution-logo-white.png",
+      "sizes": "1500x1500",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
