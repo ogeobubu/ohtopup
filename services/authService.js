@@ -7,7 +7,6 @@ const { generateConfirmationCode } = require("../utils");
 const {
   sendConfirmationEmail,
   sendVerificationEmail,
-  sendLoginNotificationEmail,
 } = require("../controllers/email/sendTransactionEmailNotification");
 const emailService = require("./emailService");
 const dbService = require("./dbService");
@@ -261,12 +260,6 @@ const loginUser = async (email, password) => {
   if (!isMatch) {
     throw { status: 401, message: "Invalid email or password" };
   }
-
-  // Authentication must not wait on an external email provider. SMTP retries can
-  // take minutes and cause the proxy to return 502 even when credentials are valid.
-  void sendLoginNotificationEmail(user.email).catch((error) => {
-    console.error("Login notification failed after authentication:", error.message);
-  });
 
   // Generate access token
   const payload = { user: { id: user._id, role: user.role } };
