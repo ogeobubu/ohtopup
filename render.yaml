@@ -16,6 +16,8 @@ services:
         sync: false # Set this in Render dashboard
       - key: SESSION_SECRET
         sync: false # Set this in Render dashboard
+      - key: BACKGROUND_JOB_SECRET
+        sync: false # Shared only with the external background-job scheduler
       - key: CLIENT_URL
         sync: false # Full HTTPS URL, e.g. https://ohtopup.name.ng
       - key: FRONTEND_URL

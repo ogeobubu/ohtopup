@@ -7,6 +7,28 @@
 - Never place authorization headers, cookies, PINs, provider payloads, or email bodies in logs.
 - Use a hosted error tracker with environment and release identifiers before public launch. Keep its DSN in deployment secrets.
 
+## Background jobs on Pxxl
+
+The free configuration does not require another service. The Pxxl web process starts both workers with the application:
+
+- payment reconciliation runs every five seconds;
+- durable email delivery runs every ten seconds;
+- both use MongoDB claims or leases, so restarts and overlapping runs do not duplicate work;
+- queued emails survive application restarts and successful jobs expire after 30 days.
+
+Pxxl Cron Jobs are currently limited to Plus, Pro, and Enterprise plans. On the free plan, leave `BACKGROUND_JOB_SECRET` unset and rely on the always-on application workers.
+
+If the project later moves to a paid Pxxl plan, create a cron job in the Pxxl dashboard with:
+
+- name: `OhTopUp background reconciliation`;
+- method: `POST`;
+- URL: `https://ohtopup.pxxlspace.cv/api/jobs/run`;
+- schedule: `*/5 * * * *`;
+- timeout: 30 seconds;
+- header: `Authorization: Bearer YOUR_BACKGROUND_JOB_SECRET`.
+
+Store `BACKGROUND_JOB_SECRET` in the Pxxl project Secrets screen and redeploy after adding it. The trigger is safe to retry because payments retain their existing leases/idempotency and email jobs are claimed atomically. Never place the secret in the URL or repository.
+
 ## Backup and restore
 
 1. Enable encrypted automated MongoDB snapshots with at least daily frequency and a documented retention period.

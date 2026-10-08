@@ -13,6 +13,7 @@ const authRoutes = require("./routes/authRoutes").authRouter
 const authUserRoutes = require("./routes/authUserRoutes");
 const xRoutes = require("./routes/xRoutes");
 const airtimeRoutes = require("./routes/airtimeRoutes");
+const jobRoutes = require('./routes/jobRoutes');
 const path = require("path");
 const crypto = require("crypto");
 const xController = require("./controllers/xController");
@@ -217,6 +218,7 @@ app.get("/api/health", (req, res) => {
 const PORT = process.env.PORT || 5001;
 let httpServer;
 let stopPaymentWorker;
+let stopEmailWorker;
 let shuttingDown = false;
 
 const shutdown = async signal => {
@@ -224,6 +226,7 @@ const shutdown = async signal => {
   shuttingDown = true;
   console.log(`${signal} received; shutting down`);
   stopPaymentWorker?.();
+  stopEmailWorker?.();
   xController.stopRepostJob();
   if (httpServer) await new Promise(resolve => httpServer.close(resolve));
   await mongoose.disconnect();
@@ -294,6 +297,7 @@ app.use("/api/users/admin/auth", authRoutes);
 app.use("/api/auth", authUserRoutes);
 app.use("/api/users/admin/x", xRoutes);
 app.use("/api/users", airtimeRoutes);
+app.use('/api/jobs', jobRoutes);
 
 const frontendBuildPath = path.join(__dirname, "client/dist");
 const clientPublicPath = path.join(__dirname, "client/public");
@@ -372,13 +376,14 @@ const startServer = async () => {
     await Promise.all([
       require('./model/Wallet').init(), require('./model/Transaction').init(), require('./model/Utility').init(),
       require('./model/WalletEntry').init(), require('./model/PaymentEvent').init(),
-      mongoose.model('Session').init(),
+      require('./model/EmailJob').init(), mongoose.model('Session').init(),
     ]);
     const topology = await mongoose.connection.db.admin().command({ hello: 1 });
     if (!topology.setName && topology.msg !== 'isdbgrid') {
       throw new Error('Wallet accounting requires a MongoDB replica set or sharded cluster');
     }
     stopPaymentWorker = require('./services/paymentWorker').start();
+    stopEmailWorker = require('./services/emailWorker').start();
     xController.startRepostJob();
 
     httpServer = app.listen(PORT, () => {

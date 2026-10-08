@@ -16,6 +16,7 @@ const Audit = require('../model/WithdrawalAuditLog');
 const { BetDiceGame, BetDiceGameSettings } = require('../model/BetDiceGame');
 const SystemLog = require('../model/SystemLog');
 const AuthSession = require('../model/AuthSession');
+const EmailJob = require('../model/EmailJob');
 const accounting = require('../services/accountingService');
 const deposits = require('../services/depositService');
 const purchases = require('../services/purchaseService');
@@ -28,7 +29,7 @@ let baseUrl;
 before(async () => {
   mongo = await MongoMemoryReplSet.create({ replSet: { count: 1 }, binary: { downloadDir: '/tmp/ohtopup-mongodb' } });
   await mongoose.connect(mongo.getUri());
-  await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit, BetDiceGame, BetDiceGameSettings, SystemLog, AuthSession].map(m => m.init()));
+  await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit, BetDiceGame, BetDiceGameSettings, SystemLog, AuthSession, EmailJob].map(m => m.init()));
   const app = require('express')();
   app.use(require('express').json());
   app.use('/wallet', require('../routes/walletRoutes'));
@@ -40,7 +41,7 @@ before(async () => {
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
 after(async () => { if (server) await new Promise(resolve => server.close(resolve)); await mongoose.disconnect(); if (mongo) await mongo.stop(); });
-beforeEach(async () => { await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit, BetDiceGame, BetDiceGameSettings, SystemLog, AuthSession].map(m => m.deleteMany({}))); });
+beforeEach(async () => { await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit, BetDiceGame, BetDiceGameSettings, SystemLog, AuthSession, EmailJob].map(m => m.deleteMany({}))); });
 const fixture = async () => {
   const userId = new mongoose.Types.ObjectId();
   const wallet = await Wallet.create({ userId, balance: 1000 });
@@ -411,6 +412,19 @@ test('session data survives a new store instance and expired sessions are reject
   await mongoose.model('Session').updateOne({ _id: 'session-test' }, { $set: { expires: new Date(0) } });
   const expired = await new Promise((resolve, reject) => read.get('session-test', (error, data) => error ? reject(error) : resolve(data)));
   assert.equal(expired, null);
+});
+
+test('queued emails survive in MongoDB and are leased for delivery once', async t => {
+  const emailService = require('../services/emailService');
+  const queued = await emailService.queueEmail({ to: 'customer@example.com', subject: 'Account update', text: 'Test' });
+  assert.equal(queued.queued, true);
+  assert.equal(await EmailJob.countDocuments({ status: 'queued' }), 1);
+  let sends = 0;
+  t.mock.method(emailService, 'sendEmailDirect', async () => ({ success: true, messageId: `message-${++sends}` }));
+  const results = await Promise.all([require('../services/emailWorker').processOne(), require('../services/emailWorker').processOne()]);
+  assert.equal(results.filter(Boolean).length, 1);
+  assert.equal(sends, 1);
+  assert.equal((await EmailJob.findOne()).status, 'sent');
 });
 
 test('read-only deployment preflight runs against the isolated replica set', async () => {

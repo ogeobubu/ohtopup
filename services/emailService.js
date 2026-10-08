@@ -4,6 +4,7 @@ const sgMail = require('@sendgrid/mail');
 const { createLog } = require('../controllers/systemLogController');
 const fs = require('fs').promises;
 const path = require('path');
+const crypto = require('crypto');
 require("dotenv").config();
 
 class EmailService {
@@ -19,8 +20,6 @@ class EmailService {
 
     this.initializeProvider();
     this.loadTemplates();
-    this.startQueueProcessor();
-    this.startRetryProcessor();
   }
 
   initializeProvider() {
@@ -498,33 +497,17 @@ class EmailService {
 
   // Queue email for background processing
   async queueEmail(options) {
-    const emailJob = {
-      id: Date.now() + Math.random(),
-      options,
-      timestamp: new Date(),
-      retries: 0,
-      maxRetries: this.maxRetries
-    };
-
-    this.queue.push(emailJob);
-
-    console.log(`📧 Email queued for background processing: ${options.subject} to ${options.to}`);
-
-    // Log queuing
-    await createLog(
-      'info',
-      `Email queued for background processing: ${options.subject}`,
-      'system',
-      null,
-      null,
-      {
-        emailType: options.emailType || 'general',
-        recipient: options.to,
-        queueSize: this.queue.length
-      }
-    );
-
-    return { success: true, queued: true, jobId: emailJob.id };
+    const jobId = crypto.randomUUID();
+    await require('../model/EmailJob').create({
+      jobId,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+      emailType: options.emailType || 'general',
+      maxAttempts: this.maxRetries,
+    });
+    return { success: true, queued: true, jobId };
   }
 
   // Start background queue processor
