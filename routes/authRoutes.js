@@ -51,9 +51,6 @@ router.get("/x/callback", async (req, res) => {
   const { oauth_token, oauth_verifier } = req.query;
   const oauth_token_secret = req.session.oauth_token_secret;
 
-  console.log("OAuth Callback Params:", req.query);
-
-
   delete req.session.oauth_token_secret;
 
   if (!oauth_token || !oauth_verifier || !oauth_token_secret) {
@@ -81,8 +78,7 @@ router.get("/x/callback", async (req, res) => {
 
     setStoredTokens(accessToken, accessSecret);
 
-    console.log(`OAuth successful! User: ${screenName} (ID: ${userId})`);
-    console.log("Access Token:", accessToken, "Access Secret:", accessSecret);
+    console.log(`X OAuth connected for account ${screenName} (${userId})`);
 
     res.send(
       "X account connected successfully! You can now close this window or return to your admin portal."

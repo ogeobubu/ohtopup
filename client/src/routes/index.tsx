@@ -1,20 +1,22 @@
+import { lazy } from "react";
 import { useRoutes, Navigate } from "react-router-dom";
-import Landing from "../pages/landing/home";
-import About from "../pages/landing/about";
-import Pricing from "../pages/landing/pricing";
-import Terms from "../pages/landing/terms";
-import Tutorial from "../pages/landing/tutorial";
-import TutorialDetail from "../pages/TutorialDetail";
-import Unsubscribe from "../pages/unsubscribe";
-import Create from "../pages/auth/create";
-import Verify from "../pages/auth/verify";
-import Login from "../pages/auth/login";
-import Forgot from "../pages/auth/forgot";
-import Reset from "../pages/auth/reset";
-import OAuthCallback from "../pages/auth/callback";
 import MainRoutes from "./mainRoutes";
 import AdminRoutes from "./adminRoutes";
-import AdminLogin from "../admin/pages/auth/login";
+
+const Landing = lazy(() => import("../pages/landing/home"));
+const About = lazy(() => import("../pages/landing/about"));
+const Pricing = lazy(() => import("../pages/landing/pricing"));
+const Terms = lazy(() => import("../pages/landing/terms"));
+const Tutorial = lazy(() => import("../pages/landing/tutorial"));
+const TutorialDetail = lazy(() => import("../pages/TutorialDetail"));
+const Unsubscribe = lazy(() => import("../pages/unsubscribe"));
+const Create = lazy(() => import("../pages/auth/create"));
+const Verify = lazy(() => import("../pages/auth/verify"));
+const Login = lazy(() => import("../pages/auth/login"));
+const Forgot = lazy(() => import("../pages/auth/forgot"));
+const Reset = lazy(() => import("../pages/auth/reset"));
+const OAuthCallback = lazy(() => import("../pages/auth/callback"));
+const AdminLogin = lazy(() => import("../admin/pages/auth/login"));
 
 export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
   const isLogin = localStorage.getItem("ohtopup-token");
@@ -87,12 +89,14 @@ export default function ThemeRoutes({ darkMode, toggleDarkMode }) {
     {
       path: "/admin/*",
       element: AdminRoutes.element,
+      errorElement: AdminRoutes.errorElement,
       children: AdminRoutes.children,
     },
     ...userRoutes,
     {
       path: MainRoutes.path,
       element: MainRoutes.element,
+      errorElement: MainRoutes.errorElement,
       children: MainRoutes.children,
     },
     {

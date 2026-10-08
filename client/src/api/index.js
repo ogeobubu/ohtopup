@@ -1323,12 +1323,26 @@ export const getManagementWallet = async () => {
 // Bet Dice Game APIs
 export const playBetDiceGame = async (gameData) => {
   try {
-    const response = await instance.post(`/bet-dice/play`, gameData);
+    const idempotencyKey = globalThis.crypto?.randomUUID?.() || `bet-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const response = await instance.post(`/bet-dice/play`, gameData, { headers: { "Idempotency-Key": idempotencyKey } });
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error playing bet dice game");
   }
 };
+
+export const getBetDiceQuote = async (gameData) => {
+  try {
+    const response = await instance.post(`/bet-dice/quote`, gameData);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Unable to quote this game");
+  }
+};
+
+export const getAuthSessions = async () => (await instance.get('/sessions')).data;
+export const revokeAuthSession = async sessionId => (await instance.delete(`/sessions/${sessionId}`)).data;
+export const revokeAllAuthSessions = async () => (await instance.delete('/sessions')).data;
 
 export const getBetDiceHistory = async (params = {}) => {
   try {
@@ -1351,6 +1365,15 @@ export const getBetDiceStats = async () => {
 export const getBetDiceSettings = async () => {
   try {
     const response = await instance.get(`/admin/bet-dice/settings`);
+    return response?.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching bet dice game settings");
+  }
+};
+
+export const getPublicBetDiceSettings = async () => {
+  try {
+    const response = await instance.get(`/bet-dice/settings`);
     return response?.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching bet dice game settings");

@@ -1,21 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import {
-  FaDice,
   FaPlay,
   FaHistory,
   FaTrophy,
   FaWallet,
   FaChartLine,
-  FaCrown,
-  FaMedal,
-  FaStar,
   FaCoins,
   FaGamepad
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { getUser, getWallet, playDiceGame, getUserGameHistory, getUserGameStats, getDiceGameSettings } from "../../api";
+import { getWallet, playDiceGame, getUserGameHistory, getUserGameStats, getDiceGameSettings } from "../../api";
 
 const DiceGame = () => {
   const [activeTab, setActiveTab] = useState("play");
@@ -24,16 +19,10 @@ const DiceGame = () => {
   const [dice2, setDice2] = useState(1);
   const [gameResult, setGameResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  const [notice, setNotice] = useState("");
 
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
-
-  const { data: userData } = useQuery({
-    queryKey: ["user"],
-    queryFn: getUser,
-    staleTime: 60000,
-  });
 
   const { data: walletData } = useQuery({
     queryKey: ["wallet"],
@@ -62,6 +51,7 @@ const DiceGame = () => {
   const playGameMutation = useMutation({
     mutationFn: playDiceGame,
     onSuccess: (data) => {
+      setNotice("");
       // Animate dice rolling
       setIsRolling(true);
       setShowResult(false);
@@ -87,28 +77,29 @@ const DiceGame = () => {
       }, 2000);
     },
     onError: (error) => {
-      alert(error.response?.data?.message || "Failed to play game");
+      setNotice(error.response?.data?.message || error.message || "Failed to play game");
     },
   });
 
 
   const handlePlayGame = () => {
+    setNotice("");
     // Check if game is enabled
     if (!gameSettings?.settings?.gameEnabled) {
-      alert("Dice game is currently disabled. Please try again later.");
+      setNotice("Dice game is currently disabled. Please try again later.");
       return;
     }
 
     // Check if maintenance mode is active
     if (gameSettings?.settings?.maintenanceMode) {
-      alert("Dice game is under maintenance. Please try again later.");
+      setNotice("Dice game is under maintenance. Please try again later.");
       return;
     }
 
     // Check balance requirement
     const minBalance = gameSettings?.settings?.minBalanceRequired || 10;
     if (!walletData?.balance || walletData.balance < minBalance) {
-      alert(`Insufficient balance! You need at least ₦${minBalance} to play.`);
+      setNotice(`Insufficient balance. You need at least ₦${minBalance} to play.`);
       return;
     }
 
@@ -119,10 +110,6 @@ const DiceGame = () => {
   const getDiceIcon = (value) => {
     const icons = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
     return icons[value - 1];
-  };
-
-  const getResultColor = (result) => {
-    return result?.game?.isWin ? "text-green-600" : "text-red-600";
   };
 
   const getResultBg = (result) => {
@@ -195,6 +182,7 @@ const DiceGame = () => {
         {/* Play Game Tab */}
         {activeTab === "play" && (
           <div className={`rounded-xl shadow-lg p-4 md:p-8 text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            {notice && <div className="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-900/20 dark:text-red-300" role="alert">{notice}</div>}
             {/* Game Status Messages */}
             {!gameSettings?.settings?.gameEnabled && (
               <div className="mb-4 md:mb-6 p-3 md:p-4 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
@@ -213,7 +201,7 @@ const DiceGame = () => {
                   🔧 Maintenance Mode
                 </h3>
                 <p className="text-sm md:text-base text-yellow-700 dark:text-yellow-300">
-                  The dice game is currently under maintenance. We'll be back soon!
+                  The dice game is currently under maintenance. We&apos;ll be back soon!
                 </p>
               </div>
             )}
@@ -323,7 +311,7 @@ const DiceGame = () => {
             <div className={`mt-6 md:mt-8 p-4 md:p-6 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
               <h4 className="text-base md:text-lg font-bold mb-3 md:mb-4">How to Play</h4>
               <div className="text-left space-y-1 md:space-y-2 text-sm md:text-base">
-                <p>1. Click "Play Game" to roll the dice (costs ₦{gameSettings?.settings?.entryFee || 10})</p>
+                <p>1. Click &quot;Play Game&quot; to roll the dice (costs ₦{gameSettings?.settings?.entryFee || 10})</p>
                 <p>2. If you roll double 6 (6, 6), you win {gameSettings?.settings?.winAmount?.toLocaleString() || '1,000'} Points!</p>
                 <p>3. Points are transferred to your account immediately upon winning</p>
                 <p>4. If you roll anything else, you lose the ₦{gameSettings?.settings?.entryFee || 10} entry fee</p>

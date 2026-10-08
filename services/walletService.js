@@ -174,7 +174,7 @@ const authenticateMonnify = async (base64Credentials) => {
       }
       return response.data.responseBody.accessToken;
   } catch (error) {
-      console.error("Error authenticating with Monnify:", error.response?.data || error.message);
+      console.error("Monnify authentication failed:", error.message);
       throw new Error(`Monnify Authentication Error: ${error.response?.data?.responseMessage || error.message}`);
   }
 };
@@ -195,7 +195,7 @@ const fetchMonnifyTransaction = async (encodedRef, accessToken) => {
       }
       return response.data;
   } catch (error) {
-       console.error("Error fetching Monnify transaction:", error.response?.data || error.message);
+       console.error("Monnify transaction lookup failed:", error.message);
        throw new Error(`Monnify Fetch Transaction Error: ${error.response?.data?.responseMessage || error.message}`);
   }
 };
@@ -217,7 +217,7 @@ const initiateMonnifyWithdrawal = async (accessToken, data) => {
          }
         return response.data;
     } catch (error) {
-         console.error("Error initiating Monnify withdrawal:", error.response?.data || error.message);
+         console.error("Monnify withdrawal initiation failed:", error.message);
          throw new Error(`Monnify Withdrawal Initiation Error: ${error.response?.data?.responseMessage || error.message}`);
     }
 };
@@ -239,7 +239,7 @@ const authorizeMonnifyWithdrawal = async (accessToken, data) => {
          }
         return response.data;
     } catch (error) {
-         console.error("Error authorizing Monnify withdrawal:", error.response?.data || error.message);
+         console.error("Monnify withdrawal authorization failed:", error.message);
          throw new Error(`Monnify Withdrawal Authorization Error: ${error.response?.data?.responseMessage || error.message}`);
     }
 };
@@ -259,7 +259,7 @@ const fetchPaystackTransaction = async (reference) => {
         }
         return data.data;
     } catch (error) {
-        console.error("Error fetching Paystack transaction:", error.response?.data || error.message);
+        console.error("Paystack transaction lookup failed:", error.message);
         throw new Error(`Paystack Fetch Transaction Error: ${error.response?.data?.message || error.message}`);
     }
 };
@@ -281,7 +281,7 @@ const createPaystackRecipient = async (recipientData) => {
          }
         return response.data.data;
     } catch (error) {
-         console.error("Error creating Paystack recipient:", error.response?.data || error.message);
+         console.error("Paystack recipient creation failed:", error.message);
          throw new Error(`Paystack Create Recipient Error: ${error.response?.data?.message || error.message}`);
     }
 };
@@ -304,7 +304,7 @@ const initiatePaystackTransfer = async (transferData) => {
          }
         return response.data.data;
     } catch (error) {
-         console.error("Error initiating Paystack transfer:", error.response?.data || error.message);
+         console.error("Paystack transfer initiation failed:", error.message);
          if (error.response?.data?.code === "transfer_unavailable") {
              throw new Error("Transfer unavailable: You cannot initiate third-party payouts as a starter business.", { cause: error.response.data });
          }
@@ -356,7 +356,7 @@ const verifyBankAccount = async (accountNumber, bankCode) => {
          }
         return response.data.data;
     } catch (error) {
-         console.error("Error verifying bank account:", error.response?.data || error.message);
+         console.error("Paystack bank verification failed:", error.message);
          throw new Error(`Paystack Bank Account Verification Error: ${error.response?.data?.message || error.message}`);
     }
 };

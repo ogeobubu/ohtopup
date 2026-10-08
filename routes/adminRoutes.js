@@ -143,6 +143,7 @@ const {
 
 const authUser = require("../middleware/authMiddleware");
 const authAdmin = require("../middleware/adminMiddleware");
+const paymentOperations = require('../controllers/paymentOperationsController');
 
 const router = express.Router();
 
@@ -171,6 +172,8 @@ router.get("/wallets", authUser, authAdmin, getWallets);
 router.patch("/wallets/:id/toggle", authUser, authAdmin, toggleWalletStatus);
 router.get("/transactions", authUser, authAdmin, getAllTransactions);
 router.get("/transactions/:requestId", authUser, authAdmin, getTransactionDetails);
+router.get('/payment-operations', paymentOperations.overview);
+router.post('/payment-operations/events/:eventId/requeue', paymentOperations.requeue);
 
 // Wallet Settings routes (Admin only)
 router.get("/wallet/settings", authUser, authAdmin, getWalletSettings);

@@ -19,6 +19,7 @@ const xController = require("./controllers/xController");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const csurf = require("csurf");
+const { shouldSkipCsrf } = require('./middleware/csrfPolicy');
 
 const { handleServiceError } = require('./middleware/errorHandler');
 
@@ -144,7 +145,7 @@ app.use(
         .filter(Boolean)
         .map((a) => a.replace(/\/+$/, '').toLowerCase());
 
-      if (allowed.some((a) => o === a || o.startsWith(a + '/') || a.startsWith(o + '/'))) {
+      if (allowed.includes(o)) {
         return callback(null, true);
       }
 
@@ -181,6 +182,7 @@ app.use(express.json({ limit: '256kb', verify: (req, res, buffer) => {
 
 // Database connection check middleware
 app.use((req, res, next) => {
+  if (req.path === '/api/health') return next();
   if (mongoose.connection.readyState !== 1) {
     return res.status(503).json({
       message: 'Database connection not ready. Please try again later.'
@@ -189,32 +191,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// CSRF protection (after session/cookie parser, before routes)
-// Skip CSRF for newsletter subscription, admin login, mobile app requests, and airtime
+// CSRF protects cookie-backed browser requests. Bearer credentials are not
+// attached automatically by browsers and remain protected by CORS + auth.
+const csrfProtection = csurf();
 app.use((req, res, next) => {
-  // Skip CSRF for mobile app requests (identified by x-mobile-app header)
-  if (req.headers['x-mobile-app'] === 'true') {
-    return next();
-  }
-
-  // Skip CSRF for specific endpoints that don't need protection
-  if (req.path === '/api/users/newsletter/subscribe' ||
-      req.path === '/api/users/newsletter/unsubscribe' ||
-      req.path === '/api/users/admin/auth/login' ||
-      req.path === '/api/users/login' ||
-      req.path === '/api/users/create' ||
-      req.path === '/api/users/forgot' ||
-      req.path === '/api/users/reset' ||
-      req.path === '/api/users/resend-otp' ||
-      req.path === '/api/users/verify' ||
-      req.path === '/api/users/airtime' || // Skip CSRF for airtime purchases
-      req.path === '/api/users/airtime/limits' || // Skip CSRF for airtime limits
-      req.path === '/api/users/airtime/settings' || // Skip CSRF for airtime settings
-      req.path.startsWith('/api/users/')) { // Skip CSRF for all user API endpoints
-    return next();
-  }
-
-  csurf()(req, res, next);
+  if (shouldSkipCsrf(req)) return next();
+  csrfProtection(req, res, next);
 });
 
 app.get("/api/csrf-token", (req, res) => {
@@ -223,16 +205,40 @@ app.get("/api/csrf-token", (req, res) => {
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
-  res.json({
-    status: "ok",
+  const ready = mongoose.connection.readyState === 1;
+  res.status(ready ? 200 : 503).json({
+    status: ready ? "ok" : "unavailable",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    database: dbStatus
+    database: ready ? "connected" : "disconnected"
   });
 });
 
 const PORT = process.env.PORT || 5001;
+let httpServer;
+let stopPaymentWorker;
+let shuttingDown = false;
+
+const shutdown = async signal => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`${signal} received; shutting down`);
+  stopPaymentWorker?.();
+  xController.stopRepostJob();
+  if (httpServer) await new Promise(resolve => httpServer.close(resolve));
+  await mongoose.disconnect();
+};
+
+for (const signal of ['SIGTERM', 'SIGINT']) {
+  process.on(signal, () => {
+    shutdown(signal)
+      .then(() => process.exit(0))
+      .catch(error => {
+        console.error('Graceful shutdown failed:', error.message);
+        process.exit(1);
+      });
+  });
+}
 
 const connectToDatabase = async () => {
   try {
@@ -372,10 +378,10 @@ const startServer = async () => {
     if (!topology.setName && topology.msg !== 'isdbgrid') {
       throw new Error('Wallet accounting requires a MongoDB replica set or sharded cluster');
     }
-    require('./services/paymentWorker').start();
+    stopPaymentWorker = require('./services/paymentWorker').start();
     xController.startRepostJob();
 
-    app.listen(PORT, () => {
+    httpServer = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {

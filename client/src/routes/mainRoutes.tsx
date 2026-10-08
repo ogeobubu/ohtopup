@@ -1,17 +1,20 @@
+import { lazy } from "react";
 import AuthGuard from "../utils/guard";
 import MainLayout from "../layout/mainLayout";
-import Dashboard from "../pages/dashboard";
-import Transactions from "../pages/transactions";
-import TransactionDetail from "../pages/TransactionDetail";
-import Wallet from "../pages/wallet";
-import Settings from "../pages/settings";
-import Referral from "../pages/referral";
-import Utilities from "../pages/utilities";
-import Confirmation from "../pages/wallet/confirmation";
-import Rank from "../pages/rank";
-import Support from "../pages/support";
-import DiceGame from "../pages/dice";
-import BetDiceGame from "../pages/betDice";
+import RouteError from "../components/ui/RouteError";
+
+const Dashboard = lazy(() => import("../pages/dashboard"));
+const Transactions = lazy(() => import("../pages/transactions"));
+const TransactionDetail = lazy(() => import("../pages/TransactionDetail"));
+const Wallet = lazy(() => import("../pages/wallet"));
+const Settings = lazy(() => import("../pages/settings"));
+const Referral = lazy(() => import("../pages/referral"));
+const Utilities = lazy(() => import("../pages/utilities"));
+const Confirmation = lazy(() => import("../pages/wallet/confirmation"));
+const Rank = lazy(() => import("../pages/rank"));
+const Support = lazy(() => import("../pages/support"));
+const DiceGame = lazy(() => import("../pages/dice"));
+const BetDiceGame = lazy(() => import("../pages/betDice"));
 
 const MainRoutes = {
   path: "/",
@@ -20,6 +23,7 @@ const MainRoutes = {
       <MainLayout />
     </AuthGuard>
   ),
+  errorElement: <RouteError />,
   children: [
     {
       path: "dashboard",

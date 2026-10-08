@@ -2,7 +2,8 @@ const User = require("../model/User");
 const Wallet = require("../model/Wallet");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { randomUUID } = require("crypto");
+const { randomUUID, createHash } = require("crypto");
+const AuthSession = require('../model/AuthSession');
 const { generateConfirmationCode } = require("../utils");
 const {
   sendConfirmationEmail,
@@ -172,15 +173,24 @@ const loginAdminUser = async (email, password) => {
   return token;
 };
 
-const generateRefreshToken = (userId) => {
+const hashRefreshToken = token => createHash('sha256').update(token).digest('hex');
+
+const generateRefreshToken = (userId, familyId = randomUUID()) => {
   return jwt.sign(
-    { type: 'refresh', userId: String(userId) },
+    { type: 'refresh', userId: String(userId), familyId },
     process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
     { expiresIn: '30d', jwtid: randomUUID() }
   );
 };
 
-const refreshAccessToken = async (refreshToken) => {
+const createRefreshSession = async (userId, context = {}, familyId = randomUUID()) => {
+  const refreshToken = generateRefreshToken(userId, familyId);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  await AuthSession.create({ userId, tokenHash: hashRefreshToken(refreshToken), familyId, expiresAt, userAgent: String(context.userAgent || '').slice(0, 300), ipAddress: String(context.ipAddress || '').slice(0, 100) });
+  return { refreshToken, expiresAt, familyId };
+};
+
+const refreshAccessToken = async (refreshToken, context = {}) => {
   try {
     // Verify the refresh token
     const decoded = jwt.verify(
@@ -192,20 +202,20 @@ const refreshAccessToken = async (refreshToken) => {
       throw { status: 401, message: "Invalid refresh token" };
     }
 
-    // Find user with this refresh token
-    const user = await User.findOne({
-      refreshToken: refreshToken,
-      refreshTokenExpires: { $gt: new Date() },
-      isDeleted: false
-    });
-
-    if (!user) {
-      throw { status: 401, message: "Invalid or expired refresh token" };
+    const tokenHash = hashRefreshToken(refreshToken);
+    const stored = await AuthSession.findOne({ tokenHash }).select('+tokenHash +replacedByHash');
+    if (!stored || stored.expiresAt <= new Date()) throw { status: 401, message: "Invalid or expired refresh token" };
+    if (stored.revokedAt) {
+      if (stored.replacedByHash) await AuthSession.updateMany({ familyId: stored.familyId, revokedAt: null }, { $set: { revokedAt: new Date(), revokeReason: 'refresh_token_reuse' } });
+      throw { status: 401, message: "Refresh token reuse detected. Please sign in again." };
     }
+    const user = await User.findOne({ _id: stored.userId, isDeleted: false });
+    if (!user) throw { status: 401, message: "Invalid or expired refresh token" };
 
     if (decoded.userId && decoded.userId !== String(user._id)) {
       throw { status: 401, message: "Invalid refresh token" };
     }
+    if (decoded.familyId !== stored.familyId) throw { status: 401, message: "Invalid refresh token" };
 
     // Generate new access token
     const payload = { user: { id: user._id, role: user.role } };
@@ -213,17 +223,14 @@ const refreshAccessToken = async (refreshToken) => {
     const newAccessToken = jwt.sign(payload, secret, { expiresIn: "15m" });
 
     // Optionally generate new refresh token (token rotation)
-    const newRefreshToken = generateRefreshToken(user._id);
-    const newRefreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    // Update refresh token in database
-    await User.updateOne(
-      { _id: user._id },
-      {
-        refreshToken: newRefreshToken,
-        refreshTokenExpires: newRefreshTokenExpires
-      }
-    );
+    const newRefreshToken = generateRefreshToken(user._id, stored.familyId);
+    const newHash = hashRefreshToken(newRefreshToken);
+    const rotated = await AuthSession.findOneAndUpdate({ _id: stored._id, revokedAt: null }, { $set: { revokedAt: new Date(), revokeReason: 'rotated', replacedByHash: newHash, lastUsedAt: new Date() } });
+    if (!rotated) {
+      await AuthSession.updateMany({ familyId: stored.familyId, revokedAt: null }, { $set: { revokedAt: new Date(), revokeReason: 'refresh_token_reuse' } });
+      throw { status: 401, message: "Refresh token reuse detected. Please sign in again." };
+    }
+    await AuthSession.create({ userId: user._id, tokenHash: newHash, familyId: stored.familyId, expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), userAgent: String(context.userAgent || stored.userAgent || '').slice(0, 300), ipAddress: String(context.ipAddress || stored.ipAddress || '').slice(0, 100) });
 
     return {
       token: newAccessToken,
@@ -240,7 +247,7 @@ const refreshAccessToken = async (refreshToken) => {
   }
 };
 
-const loginUser = async (email, password) => {
+const loginUser = async (email, password, context = {}) => {
   const user = await User.findOne({ email, isDeleted: false });
 
   if (!user) {
@@ -267,23 +274,27 @@ const loginUser = async (email, password) => {
   const token = jwt.sign(payload, secret, { expiresIn: "15m" }); // Shorter expiration for access token
 
   // Generate refresh token
-  const refreshToken = generateRefreshToken(user._id);
-  const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-
-  // Store refresh token in database
-  await User.updateOne(
-    { _id: user._id },
-    {
-      refreshToken: refreshToken,
-      refreshTokenExpires: refreshTokenExpires
-    }
-  );
+  const { refreshToken } = await createRefreshSession(user._id, context);
+  await User.updateOne({ _id: user._id }, { $unset: { refreshToken: 1, refreshTokenExpires: 1 } });
 
   return {
     message: "Login successful!",
     token,
     refreshToken
   };
+};
+
+const listSessions = async userId => AuthSession.find({ userId, revokedAt: null, expiresAt: { $gt: new Date() } }).select('_id userAgent ipAddress createdAt lastUsedAt expiresAt').sort({ lastUsedAt: -1 }).lean();
+
+const revokeSession = async (userId, sessionId) => {
+  const result = await AuthSession.updateOne({ _id: sessionId, userId, revokedAt: null }, { $set: { revokedAt: new Date(), revokeReason: 'user_revoked' } });
+  if (!result.matchedCount) throw { status: 404, message: 'Active session not found' };
+  return { message: 'Session revoked' };
+};
+
+const revokeAllSessions = async userId => {
+  const result = await AuthSession.updateMany({ userId, revokedAt: null }, { $set: { revokedAt: new Date(), revokeReason: 'user_revoked_all' } });
+  return { message: 'All sessions revoked', revokedCount: result.modifiedCount };
 };
 
 const forgotPassword = async (email) => {
@@ -361,5 +372,8 @@ module.exports = {
   verifyOtpAndResetPassword,
   resendOtp,
   loginAdminUser,
-  refreshAccessToken
+  refreshAccessToken,
+  listSessions,
+  revokeSession,
+  revokeAllSessions,
 };

@@ -16,8 +16,11 @@ const {
   redeemPoints,
   changePin,
   googleAuth,
-    googleAuthCallback,
-  refreshToken
+  googleAuthCallback,
+  refreshToken,
+  getSessions,
+  revokeSession,
+  revokeAllSessions,
 } = require("../controllers/userController");
 
 const {
@@ -56,11 +59,13 @@ const {
 
 const {
   playBetDiceGame,
+  createBetDiceQuote,
   getBetDiceHistory,
   getBetDiceStats,
   getAllBetDiceGames,
   getAdminBetDiceStats,
   getBetDiceSettings,
+  getPublicBetDiceSettings,
   updateBetDiceSettings,
   resetBetDiceSettings,
   forceResetBetDiceSettings,
@@ -154,6 +159,9 @@ router.post("/verify", verifyUser);
 router.post("/resend-code", resendVerificationCode);
 router.post("/login", loginUser);
 router.post("/refresh", refreshToken);
+router.get("/sessions", auth, getSessions);
+router.delete("/sessions", auth, revokeAllSessions);
+router.delete("/sessions/:sessionId", auth, revokeSession);
 router.post("/forgot", forgotPassword);
 router.post("/reset", verifyOtpAndResetPassword);
 router.post("/resend-otp", resendOtp);
@@ -350,9 +358,11 @@ router.get("/dice/history", auth, getUserGameHistory);
 router.get("/dice/stats", auth, getUserGameStats);
 
 // Bet Dice Game Routes
-router.post("/bet-dice/play", auth, playBetDiceGame);
+router.post("/bet-dice/play", auth, financialLimit, subject, playBetDiceGame);
+router.post("/bet-dice/quote", auth, financialLimit, subject, createBetDiceQuote);
 router.get("/bet-dice/history", auth, getBetDiceHistory);
 router.get("/bet-dice/stats", auth, getBetDiceStats);
+router.get("/bet-dice/settings", auth, getPublicBetDiceSettings);
 
 // Admin dice game settings routes
 router.get("/admin/dice/settings", auth, admin, getDiceGameSettings);

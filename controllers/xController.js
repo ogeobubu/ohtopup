@@ -72,6 +72,11 @@ const startRepostJob = () => {
   }
 };
 
+const stopRepostJob = () => {
+  processTask?.stop();
+  processTask = null;
+};
+
 const postTweet = async (req, res) => {
   const { text } = req.body;
 
@@ -120,5 +125,6 @@ module.exports = {
   postTweet,
   triggerRepost,
   startRepostJob,
+  stopRepostJob,
   setTwitterClient,
 };

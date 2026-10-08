@@ -4,8 +4,8 @@ import { useSelector } from "react-redux";
 import { FaTimes } from "react-icons/fa";
 import Button from "../../components/ui/forms/button";
 import Textarea from "../../components/ui/forms/input";
-import { useMutation } from "@tanstack/react-query";
-import { updateUser } from "../../api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { updateUser, getAuthSessions, revokeAuthSession, revokeAllAuthSessions } from "../../api";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
@@ -19,6 +19,14 @@ const Security = () => {
   const user = useSelector((state: any) => state.user.user);
   const [changePassword, setChangePassword] = useState(false);
   const [setTransactionPin, setSetTransactionPin] = useState(false);
+  const queryClient = useQueryClient();
+  const sessions = useQuery({ queryKey: ["auth-sessions"], queryFn: getAuthSessions });
+  const revoke = useMutation({ mutationFn: revokeAuthSession, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["auth-sessions"] }) });
+  const revokeAll = useMutation({ mutationFn: revokeAllAuthSessions, onSuccess: () => {
+    localStorage.removeItem("ohtopup-token");
+    localStorage.removeItem("ohtopup-refresh-token");
+    window.location.href = "/login";
+  } });
 
   const mutation = useMutation({
     mutationFn: updateUser,
@@ -71,6 +79,20 @@ const Security = () => {
           </div>
         </div>
       </div>
+
+      <section className="mt-6 overflow-hidden rounded-lg border border-line bg-paper">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line p-5">
+          <div><h3 className="text-sm font-semibold">Active sessions</h3><p className="mt-1 text-xs text-muted">Devices currently allowed to refresh your login.</p></div>
+          <button className="min-h-10 rounded-md border border-danger px-3 text-xs font-semibold text-danger disabled:opacity-50" disabled={revokeAll.isPending || !sessions.data?.sessions?.length} onClick={() => revokeAll.mutate()}>Sign out everywhere</button>
+        </div>
+        {sessions.isPending ? <p className="p-5 text-xs text-muted">Loading sessions…</p> : sessions.isError ? <p className="p-5 text-xs text-danger">Couldn’t load active sessions.</p> : sessions.data.sessions.length ? <div>
+          {sessions.data.sessions.map((session: any) => <div key={session._id} className="flex items-center justify-between gap-4 border-t border-line px-5 py-4 first:border-0">
+            <div className="min-w-0"><strong className="block truncate text-xs">{session.userAgent || "Unknown device"}</strong><span className="block text-[11px] text-muted">{session.ipAddress || "Unknown IP"} · Active {new Date(session.lastUsedAt).toLocaleString()}</span></div>
+            <button className="min-h-9 shrink-0 rounded border border-line px-3 text-[11px] font-semibold hover:bg-tint disabled:opacity-50" disabled={revoke.isPending} onClick={() => revoke.mutate(session._id)}>Revoke</button>
+          </div>)}
+        </div> : <p className="p-5 text-xs text-muted">No active refresh sessions.</p>}
+        {(revoke.isError || revokeAll.isError) && <p className="border-t border-line p-4 text-xs text-danger" role="alert">Unable to revoke the selected session.</p>}
+      </section>
 
       {changePassword && (
         <div className={modalOverlay} onClick={closeModal}>

@@ -26,7 +26,7 @@ const AdminBetDiceGame = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Settings state for betting dice game
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<any>({
     gameEnabled: true,
     maintenanceMode: false,
     minBetAmount: 10,
@@ -77,22 +77,6 @@ const AdminBetDiceGame = () => {
       trackBettingPatterns: true,
       generateReports: true,
       alertOnAnomalies: true
-    },
-    manipulation: {
-      enabled: false,
-      mode: 'fair',
-      bias: 0.5,
-      winProbability: 0.0278,
-      seed: null,
-      adminOnly: true,
-      logManipulations: true,
-      difficultySettings: {
-        easy: { winProbability: 0.1667 },
-        medium: { winProbability: 0.0833 },
-        hard: { winProbability: 0.0556 },
-        expert: { winProbability: 0.0278 },
-        legendary: { winProbability: 0.0463 }
-      }
     }
   });
 
@@ -843,8 +827,8 @@ const AdminBetDiceGame = () => {
               </div>
             </div>
 
-            {/* Bet Dice Game Manipulation */}
-            <div className="bg-paper p-6 rounded-lg border border-red-200 dark:border-red-700">
+            {/* Legacy outcome controls are intentionally unavailable. */}
+            {false && <div className="bg-paper p-6 rounded-lg border border-red-200 dark:border-red-700">
               <div className="flex items-center gap-2 mb-6">
                 <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
                   🎲 Bet Dice Game Manipulation
@@ -1035,7 +1019,7 @@ const AdminBetDiceGame = () => {
                   </>
                 )}
               </div>
-            </div>
+            </div>}
 
             {/* Save Settings Button */}
             <div className="flex justify-end gap-3">

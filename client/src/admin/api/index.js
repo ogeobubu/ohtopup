@@ -886,6 +886,11 @@ export const getWithdrawalAuditLogs = async (params = {}) => {
 };
 
 export const getPricingRules = async () => (await instance.get('/pricing-rules')).data;
+export const getPaymentOperations = async () => (await instance.get('/payment-operations')).data;
+export const requeuePaymentEvent = async eventId => {
+  try { return (await instance.post(`/payment-operations/events/${eventId}/requeue`)).data; }
+  catch (error) { throw new Error(error.response?.data?.message || 'Unable to requeue payment event'); }
+};
 export const getPricingOptions = async (params) => (await instance.get('/pricing-rules/options', { params })).data;
 export const getPricingPreview = async (params) => (await instance.get('/pricing-rules/preview', { params })).data;
 export const savePricingRule = async data => {

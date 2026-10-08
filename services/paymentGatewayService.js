@@ -16,10 +16,7 @@ const verifyBankAccount = async (accountNumber, bankCode) => {
 
     if (!response.data || !response.data.status) {
       // Paystack returned a 200 but with an unexpected body
-      console.error(
-        "Paystack bank verification failed: Unexpected response body",
-        response.data
-      );
+      console.error("Paystack bank verification returned an unexpected response");
       throw { status: 502, message: "Payment gateway verification failed." };
     }
 
@@ -36,10 +33,7 @@ const verifyBankAccount = async (accountNumber, bankCode) => {
       data: response.data.data, // The actual account details
     };
   } catch (error) {
-    console.error(
-      "Error verifying bank account with Paystack:",
-      error.response?.data || error.message
-    );
+    console.error("Paystack bank verification failed:", error.message);
     // Re-throw with specific status/message based on Paystack response
     if (error.response?.status === 400) {
       throw {

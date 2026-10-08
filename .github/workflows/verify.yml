@@ -12,4 +12,5 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm ci --prefix client --ignore-scripts
       - run: npm test
+      - run: npm run lint:reliability --prefix client
       - run: npm run build

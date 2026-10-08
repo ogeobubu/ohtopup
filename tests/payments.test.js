@@ -13,6 +13,9 @@ const Entry = require('../model/WalletEntry');
 const Utility = require('../model/Utility');
 const Event = require('../model/PaymentEvent');
 const Audit = require('../model/WithdrawalAuditLog');
+const { BetDiceGame, BetDiceGameSettings } = require('../model/BetDiceGame');
+const SystemLog = require('../model/SystemLog');
+const AuthSession = require('../model/AuthSession');
 const accounting = require('../services/accountingService');
 const deposits = require('../services/depositService');
 const purchases = require('../services/purchaseService');
@@ -25,7 +28,7 @@ let baseUrl;
 before(async () => {
   mongo = await MongoMemoryReplSet.create({ replSet: { count: 1 }, binary: { downloadDir: '/tmp/ohtopup-mongodb' } });
   await mongoose.connect(mongo.getUri());
-  await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit].map(m => m.init()));
+  await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit, BetDiceGame, BetDiceGameSettings, SystemLog, AuthSession].map(m => m.init()));
   const app = require('express')();
   app.use(require('express').json());
   app.use('/wallet', require('../routes/walletRoutes'));
@@ -37,7 +40,7 @@ before(async () => {
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
 after(async () => { if (server) await new Promise(resolve => server.close(resolve)); await mongoose.disconnect(); if (mongo) await mongo.stop(); });
-beforeEach(async () => { await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit].map(m => m.deleteMany({}))); });
+beforeEach(async () => { await Promise.all([Wallet, Transaction, Entry, Utility, Event, Audit, BetDiceGame, BetDiceGameSettings, SystemLog, AuthSession].map(m => m.deleteMany({}))); });
 const fixture = async () => {
   const userId = new mongoose.Types.ObjectId();
   const wallet = await Wallet.create({ userId, balance: 1000 });
@@ -123,6 +126,21 @@ test('webhooks authenticate original bytes, persist once and survive a processin
   await events.processOne(async () => {});
   assert.equal((await Event.findOne()).status, 'completed');
 });
+test('payment operations surfaces stale work and requeues review events idempotently', async () => {
+  const event = await Event.create({ key: 'review-event', payload: { event: 'charge.success', data: { reference: 'safe-reference' } }, status: 'review', attempts: 12, lastError: 'provider unavailable' });
+  const staleDate = new Date(Date.now() - 20 * 60 * 1000);
+  const purchase = await Utility.create({ requestId: 'stale-purchase', serviceID: 'mtn', status: 'pending', type: 'airtime', product_name: 'Airtime', amount: 100, revenue: 0, phone: '08000000000', commissionRate: 0, user: new mongoose.Types.ObjectId() });
+  await Utility.updateOne({ _id: purchase._id }, { $set: { createdAt: staleDate, updatedAt: staleDate } }, { timestamps: false });
+  const operations = require('../services/paymentOperationsService');
+  const overview = await operations.getOverview();
+  assert.equal(overview.summary.reviewEvents, 1);
+  assert.equal(overview.summary.stalePurchases, 1);
+  assert.equal(overview.reviewEvents[0].payload, undefined, 'raw webhook payload is not exposed');
+
+  const results = await Promise.all([operations.requeueEvent(event._id), operations.requeueEvent(event._id)]);
+  assert.equal(results.filter(result => result.duplicate === false).length, 1);
+  assert.equal((await Event.findById(event._id)).status, 'pending');
+});
 test('rejecting a pending withdrawal refunds the complete debit including fees exactly once', async () => {
   const { userId, wallet } = await fixture();
   const tx = await accounting.transact(async session => {
@@ -151,9 +169,20 @@ const call = (path, token, method = 'GET', body) => fetch(baseUrl + path, {
 test('ordinary users cannot list wallets, change settings or use admin aliases', async () => {
   const { token } = await authenticatedUser('user');
   for (const [path, method] of [['/wallet/all', 'GET'], ['/wallet/settings', 'PUT'], ['/wallet/transactions/all', 'GET'],
-    ['/users/admin/rewards', 'GET'], ['/users/electricity/settings', 'PUT'], ['/admin/users/analytics', 'GET'], ['/admin/newsletter/send', 'POST']]) {
+    ['/users/admin/rewards', 'GET'], ['/users/electricity/settings', 'PUT'], ['/admin/users/analytics', 'GET'], ['/admin/newsletter/send', 'POST'], ['/admin/payment-operations', 'GET']]) {
     assert.equal((await call(path, token, method, method !== 'GET' ? {} : undefined)).status, 403, path);
   }
+});
+test('administrators can view payment health and requeue a review event', async () => {
+  const { token } = await authenticatedUser('admin');
+  const event = await Event.create({ key: 'admin-review-event', payload: { event: 'charge.success', data: { reference: 'admin-reference' } }, status: 'review', attempts: 12 });
+  const overview = await call('/admin/payment-operations', token);
+  assert.equal(overview.status, 200);
+  assert.equal((await overview.json()).summary.reviewEvents, 1);
+  const response = await call(`/admin/payment-operations/events/${event._id}/requeue`, token, 'POST', {});
+  assert.equal(response.status, 200);
+  assert.equal((await Event.findById(event._id)).status, 'pending');
+  assert.equal(await SystemLog.countDocuments({ category: 'payment', 'metadata.eventId': event._id }), 1);
 });
 test('forged token roles and deleted accounts do not retain access', async () => {
   const { userId, token } = await authenticatedUser('admin');
@@ -161,6 +190,31 @@ test('forged token roles and deleted accounts do not retain access', async () =>
   assert.equal((await call('/wallet/all', token)).status, 403);
   await require('../model/User').updateOne({ _id: userId }, { $set: { isDeleted: true } });
   assert.equal((await call('/wallet', token)).status, 401);
+});
+test('refresh tokens rotate, are stored hashed, and reuse revokes the token family', async () => {
+  const User = require('../model/User');
+  const password = 'strong-test-password';
+  const user = await User.create({ username: `session-${Date.now()}`, email: `session-${Date.now()}@example.com`, phoneNumber: `+447700${String(Date.now()).slice(-6)}`, password: await require('bcrypt').hash(password, 10), source: 'test', isVerified: true });
+  const authService = require('../services/authService');
+  const login = await authService.loginUser(user.email, password, { userAgent: 'Test Browser', ipAddress: '127.0.0.1' });
+  const stored = await AuthSession.findOne({ userId: user._id }).select('+tokenHash');
+  assert.ok(stored);
+  assert.notEqual(stored.tokenHash, login.refreshToken);
+  assert.equal((await authService.listSessions(user._id)).length, 1);
+
+  const rotated = await authService.refreshAccessToken(login.refreshToken, { userAgent: 'Test Browser', ipAddress: '127.0.0.1' });
+  assert.notEqual(rotated.refreshToken, login.refreshToken);
+  await assert.rejects(authService.refreshAccessToken(login.refreshToken), error => error.status === 401 && /reuse/i.test(error.message));
+  await assert.rejects(authService.refreshAccessToken(rotated.refreshToken), error => error.status === 401);
+  assert.equal((await authService.listSessions(user._id)).length, 0);
+});
+test('users can list and revoke only their own active sessions', async () => {
+  const first = await authenticatedUser('user');
+  const second = await authenticatedUser('user');
+  const foreign = await AuthSession.create({ userId: second.userId, tokenHash: crypto.randomBytes(32).toString('hex'), familyId: crypto.randomUUID(), expiresAt: new Date(Date.now() + 60000) });
+  assert.equal((await call('/users/sessions', first.token)).status, 200);
+  assert.equal((await call(`/users/sessions/${foreign._id}`, first.token, 'DELETE')).status, 404);
+  assert.equal((await AuthSession.findById(foreign._id)).revokedAt, undefined);
 });
 test('unverified manual deposits are closed and confirmation requires an existing verified payment', async () => {
   const { userId, token } = await authenticatedUser('user');
@@ -175,6 +229,81 @@ test('a customer cannot initiate a deposit for another customer', async () => {
   const { token } = await authenticatedUser('user');
   const response = await call('/wallet/deposit/paystack/initiate', token, 'POST', { userId: String(new mongoose.Types.ObjectId()), amount: 500 });
   assert.equal(response.status, 403);
+});
+
+test('bet dice settings are customer-safe and repeated wager keys debit once', async () => {
+  const { userId, token } = await authenticatedUser('user');
+  const wallet = await Wallet.create({ userId, balance: 1000 });
+  const settingsResponse = await call('/users/bet-dice/settings', token);
+  assert.equal(settingsResponse.status, 200);
+  const publicSettings = (await settingsResponse.json()).settings;
+  assert.equal(publicSettings.manipulation, undefined);
+  assert.equal(publicSettings.riskManagement, undefined);
+
+  const body = { betAmount: 50, odds: 20, difficulty: 'easy', diceCount: 2 };
+  const quoteResponse = await call('/users/bet-dice/quote', token, 'POST', body);
+  assert.equal(quoteResponse.status, 200);
+  const quote = await quoteResponse.json();
+  assert.equal(quote.odds, 1.2, 'server chooses configured odds instead of client odds');
+  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Idempotency-Key': 'same-wager' };
+  const responses = await Promise.all(Array.from({ length: 2 }, () => fetch(`${baseUrl}/users/bet-dice/play`, {
+    method: 'POST', headers, body: JSON.stringify({ quoteToken: quote.quoteToken }),
+  })));
+  assert.ok(responses.every(response => response.status === 200));
+  assert.equal(await BetDiceGame.countDocuments({ user: userId }), 1);
+  const game = await BetDiceGame.findOne({ user: userId });
+  assert.equal(game.odds, 1.2);
+  assert.equal(game.betAmountKobo, 5000);
+  assert.equal(await Entry.countDocuments({ walletId: wallet._id, reason: 'Game entry' }), 1);
+  assert.ok((await Wallet.findById(wallet._id)).balanceKobo >= 95000);
+
+  const changedQuoteResponse = await call('/users/bet-dice/quote', token, 'POST', { ...body, betAmount: 60 });
+  const changedQuote = await changedQuoteResponse.json();
+  const changed = await fetch(`${baseUrl}/users/bet-dice/play`, { method: 'POST', headers, body: JSON.stringify({ quoteToken: changedQuote.quoteToken }) });
+  assert.equal(changed.status, 409);
+  const tampered = await fetch(`${baseUrl}/users/bet-dice/play`, { method: 'POST', headers: { ...headers, 'Idempotency-Key': 'tampered-wager' }, body: JSON.stringify({ quoteToken: `${quote.quoteToken}x` }) });
+  assert.equal(tampered.status, 400);
+});
+
+test('bet dice quotes are bound to one customer and failed wagers never debit the wallet', async () => {
+  const first = await authenticatedUser('user');
+  const second = await authenticatedUser('user');
+  const firstWallet = await Wallet.create({ userId: first.userId, balance: 100 });
+  const secondWallet = await Wallet.create({ userId: second.userId, balance: 25 });
+  const selection = { betAmount: 50, difficulty: 'easy', diceCount: 2 };
+  const quoteResponse = await call('/users/bet-dice/quote', first.token, 'POST', selection);
+  assert.equal(quoteResponse.status, 200);
+  const quote = await quoteResponse.json();
+
+  const foreignPlay = await fetch(`${baseUrl}/users/bet-dice/play`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${second.token}`, 'Content-Type': 'application/json', 'Idempotency-Key': 'foreign-quote' },
+    body: JSON.stringify({ quoteToken: quote.quoteToken }),
+  });
+  assert.equal(foreignPlay.status, 403);
+  assert.equal((await Wallet.findById(secondWallet._id)).balance, 25);
+
+  await Wallet.updateOne({ _id: firstWallet._id }, { $set: { balance: 25, balanceKobo: 2500 } });
+  const insufficientPlay = await fetch(`${baseUrl}/users/bet-dice/play`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${first.token}`, 'Content-Type': 'application/json', 'Idempotency-Key': 'insufficient-funds' },
+    body: JSON.stringify({ quoteToken: quote.quoteToken }),
+  });
+  assert.equal(insufficientPlay.status, 400);
+  assert.equal((await Wallet.findById(firstWallet._id)).balanceKobo, 2500);
+  assert.equal(await BetDiceGame.countDocuments(), 0);
+  assert.equal(await Entry.countDocuments(), 0);
+});
+
+test('bet dice refuses quotes while disabled or under maintenance', async () => {
+  const { token } = await authenticatedUser('user');
+  const selection = { betAmount: 50, difficulty: 'easy', diceCount: 2 };
+  const config = await BetDiceGameSettings.create({ gameEnabled: false });
+  assert.equal((await call('/users/bet-dice/quote', token, 'POST', selection)).status, 400);
+  await BetDiceGameSettings.updateOne({ _id: config._id }, { $set: { gameEnabled: true, maintenanceMode: true } });
+  assert.equal((await call('/users/bet-dice/quote', token, 'POST', selection)).status, 400);
+  assert.equal(await BetDiceGame.countDocuments(), 0);
+  assert.equal(await Entry.countDocuments(), 0);
 });
 
 test('simultaneous identical purchases reserve only once, even with different retry keys', async () => {

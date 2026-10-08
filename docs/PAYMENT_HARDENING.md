@@ -14,6 +14,7 @@ This change keeps MERN and consolidates wallet accounting. It has been tested wi
 - The payment worker starts with the application and checks pending deposits and purchases. It requeries purchases; it never blindly buys again. Reconciliation can run on multiple instances; accounting remains idempotent.
 - All withdrawal request aliases now create an admin-approved withdrawal request. Direct transfer/OTP routes and automatic withdrawal retry are unavailable. Pending or approved rejection refunds the full recorded debit including fees. Admin transitions and their audit entry commit together.
 - Game balance changes and point redemptions use the same accounting transactions.
+- Bet-dice play requires a short-lived, HMAC-signed server quote bound to the authenticated user, stake, dice count, difficulty, fee and payout odds. The client cannot choose or alter payout terms. Wagers use an idempotency key, cryptographic dice generation and integer-kobo accounting; legacy outcome-manipulation settings are ignored.
 - Administrative routes require a current database admin role. Deleted accounts lose access. Customer catalog aliases remain available to authenticated customers.
 - New PINs are bcrypt hashed; existing PINs migrate after successful verification. Changing an existing PIN requires the current PIN, and profile responses never return PINs or password hashes.
 - Sessions persist in MongoDB. Production requires secrets and a full HTTPS CLIENT_URL. CORS uses exact production origins.

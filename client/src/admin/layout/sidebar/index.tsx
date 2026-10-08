@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FiGrid, FiCreditCard, FiBriefcase, FiUsers, FiUserPlus, FiAward, FiTarget, FiServer, FiBookOpen, FiMail, FiFileText, FiSettings, FiHelpCircle, FiMenu, FiX } from "react-icons/fi";
+import { FiGrid, FiCreditCard, FiBriefcase, FiUsers, FiUserPlus, FiAward, FiTarget, FiServer, FiBookOpen, FiMail, FiFileText, FiSettings, FiHelpCircle, FiMenu, FiX, FiActivity } from "react-icons/fi";
 
 const groups = [
   { label: 'Workspace', links: [
-    ['Overview', 'dashboard', FiGrid], ['Transactions', 'transactions', FiCreditCard], ['Wallet', 'wallet', FiBriefcase], ['Users', 'users', FiUsers],
+    ['Overview', 'dashboard', FiGrid], ['Payment operations', 'payment-operations', FiActivity], ['Transactions', 'transactions', FiCreditCard], ['Wallet', 'wallet', FiBriefcase], ['Users', 'users', FiUsers],
   ] },
   { label: 'Manage', links: [
     ['Referrals', 'referral', FiUserPlus], ['Ranking', 'ranking', FiAward], ['Bet Dice Game', 'bet-dice', FiTarget], ['Providers', 'providers', FiServer], ['Tutorials', 'tutorials', FiBookOpen], ['Newsletter', 'newsletter', FiMail],

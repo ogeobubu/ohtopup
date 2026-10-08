@@ -1,7 +1,6 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ToastContainer, toast } from 'react-toastify';
-import { getFirebaseMessaging, onMessage, isSupported } from './config/firebase';
 import 'react-toastify/dist/ReactToastify.css';
 import Routes from "./routes";
 import ScrollToTop from "./components/ScrollToTop";
@@ -10,6 +9,7 @@ import { setUser } from "./actions/userActions";
 import { setAdminUser } from "./actions/adminActions";
 import { toggleDarkMode } from "./actions/themeActions";
 import { useSelector, useDispatch } from "react-redux";
+import PageLoader from "./components/ui/PageLoader";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -65,7 +65,7 @@ const App = () => {
   useEffect(() => {
     let disposed = false;
     let unsubscribe: (() => void) | undefined;
-    isSupported().then((supported) => {
+    import('./config/firebase').then(({ getFirebaseMessaging, onMessage, isSupported }) => isSupported().then((supported) => {
       if (!supported || disposed) return;
       const messaging = getFirebaseMessaging();
       if (!messaging) return;
@@ -76,30 +76,12 @@ const App = () => {
         toast.info(body ? `${title}: ${body}` : title);
         void queryClient.invalidateQueries({ queryKey: ["notifications"] });
       });
-    }).catch((error) => console.error("Push message listener failed:", error));
+    })).catch((error) => console.error("Push message listener failed:", error));
     return () => {
       disposed = true;
       unsubscribe?.();
     };
   }, [queryClient]);
-
-  // Keep server alive with periodic health checks
-  useEffect(() => {
-    const keepAlive = () => {
-      fetch('/api/health', { method: 'GET' })
-        .catch(() => {
-          // Silently handle errors to avoid console spam
-        });
-    };
-
-    // Check every 5 minutes to keep server warm
-    const interval = setInterval(keepAlive, 5 * 60 * 1000);
-
-    // Initial check
-    keepAlive();
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleToggleDarkMode = () => {
     dispatch(toggleDarkMode());
@@ -121,7 +103,7 @@ const App = () => {
     <div className={`${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
       <ScrollToTop />
       <ToastContainer />
-      <Routes darkMode={isDarkMode} toggleDarkMode={handleToggleDarkMode} />
+      <Suspense fallback={<PageLoader />}><Routes darkMode={isDarkMode} toggleDarkMode={handleToggleDarkMode} /></Suspense>
 
       {/* <a
         href="https://wa.me/+2348154212889"

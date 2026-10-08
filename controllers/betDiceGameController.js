@@ -2,21 +2,20 @@ const { BetDiceGame, BetDiceGameSettings } = require("../model/BetDiceGame");
 const User = require("../model/User");
 const Wallet = require("../model/Wallet");
 const { createLog } = require("./systemLogController");
-const { awardPoints } = require("./utilityController");
 const emailService = require("../services/emailService");
-const { betDiceManipulationEngine } = require("../utils/betDiceManipulation");
+const crypto = require("crypto");
+const { toKobo } = require("../utils/money");
 
-// Generate random odds based on difficulty level
-const generateRandomOdds = (difficulty, settings) => {
+// Use the configured server-side payout. Clients cannot choose their multiplier.
+const getConfiguredOdds = (difficulty, settings) => {
   const level = settings.difficultyLevels[difficulty];
   if (!level || !level.enabled) {
     throw new Error(`Difficulty level ${difficulty} is not available`);
   }
 
   const min = level.oddsRange.min;
-  const max = level.oddsRange.max;
-  const randomOdds = Math.random() * (max - min) + min;
-  return Math.round(randomOdds * 100) / 100; // Round to 2 decimal places
+  const minHundredths = Math.ceil(min * 100);
+  return minHundredths / 100;
 };
 
 // Determine win condition based on difficulty and dice results
@@ -73,22 +72,44 @@ const calculateExpectedValue = (betAmount, odds, winProbability) => {
 const generateDiceRolls = (count) => {
   const dice = [];
   for (let i = 0; i < count; i++) {
-    dice.push(Math.floor(Math.random() * 6) + 1);
+    dice.push(crypto.randomInt(1, 7));
   }
   return dice;
 };
 
 // Play bet dice game
-const playBetDiceGame = async (req, res) => {
+const legacyPlayBetDiceGame = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { betAmount, odds, difficulty, diceCount } = req.body;
+    const { betAmount: requestedBetAmount, difficulty, diceCount } = req.body;
+    const idempotencyKey = req.get("Idempotency-Key");
 
     // Validate required parameters
-    if (!betAmount || !odds || !difficulty || !diceCount) {
+    if (!requestedBetAmount || !difficulty || !diceCount) {
       return res.status(400).json({
-        message: "Missing required parameters: betAmount, odds, difficulty, diceCount"
+        message: "Missing required parameters: betAmount, difficulty, diceCount"
       });
+    }
+    if (!idempotencyKey || idempotencyKey.length > 128) {
+      return res.status(400).json({ message: "A valid Idempotency-Key header is required" });
+    }
+
+    let betAmountKobo;
+    try {
+      betAmountKobo = toKobo(requestedBetAmount);
+    } catch {
+      return res.status(400).json({ message: "Bet amount must be a valid amount with at most two decimal places" });
+    }
+    const betAmount = betAmountKobo / 100;
+    const operationKey = `${userId}:${idempotencyKey}`;
+    const requestFingerprint = crypto.createHash("sha256").update(JSON.stringify({ betAmountKobo, difficulty, diceCount })).digest("hex");
+    const existingGame = await BetDiceGame.findOne({ operationKey }).select("+requestFingerprint");
+    if (existingGame) {
+      if (existingGame.requestFingerprint !== requestFingerprint) {
+        return res.status(409).json({ message: "Idempotency-Key was already used with different game details" });
+      }
+      const currentWallet = await Wallet.findOne({ userId });
+      return res.status(200).json({ message: "Game result already recorded", game: existingGame, newBalance: currentWallet?.balance || 0, duplicate: true });
     }
 
     // Get game settings
@@ -130,13 +151,8 @@ const playBetDiceGame = async (req, res) => {
       });
     }
 
-    // Validate odds range
     const level = settings.difficultyLevels[difficulty];
-    if (odds < level.oddsRange.min || odds > level.oddsRange.max) {
-      return res.status(400).json({
-        message: `Odds must be between ${level.oddsRange.min}x and ${level.oddsRange.max}x for ${difficulty} difficulty`
-      });
-    }
+    const odds = getConfiguredOdds(difficulty, settings);
 
     // Validate dice count
     console.log(`Bet Dice Validation - diceCount: ${diceCount}, maxDiceCount: ${settings.maxDiceCount}, difficulty: ${difficulty}`);
@@ -156,7 +172,7 @@ const playBetDiceGame = async (req, res) => {
 
     // Check if user has enough balance
     const totalCost = betAmount + settings.entryFee;
-    if (wallet.balance < totalCost) {
+    if ((wallet.balanceKobo ?? Math.round(wallet.balance * 100)) < toKobo(totalCost)) {
       return res.status(400).json({
         message: `Insufficient balance. You need at least ₦${totalCost} to play.`
       });
@@ -179,36 +195,12 @@ const playBetDiceGame = async (req, res) => {
       });
     }
 
-    // Generate dice rolls with manipulation if enabled
-    let diceResult;
-    if (settings.manipulation?.enabled) {
-      // Initialize generator with seed if provided
-      if (settings.manipulation.seed) {
-        betDiceManipulationEngine.initializeGenerator(settings.manipulation.seed);
-      }
-
-      // Apply manipulation
-      diceResult = await betDiceManipulationEngine.applyManipulation(
-        settings.manipulation,
-        difficulty,
-        diceCount,
-        userId,
-        req
-      );
-    } else {
-      // Fair play - no manipulation
-      betDiceManipulationEngine.initializeGenerator(); // Reset to fair random
-      diceResult = await betDiceManipulationEngine.applyManipulation(
-        { mode: 'fair' },
-        difficulty,
-        diceCount,
-        userId,
-        req
-      );
-    }
-
-    const { dice, isWin, manipulationApplied, manipulationType, error: manipulationError } = diceResult;
-    const winnings = isWin ? betAmount * odds : 0;
+    const dice = generateDiceRolls(diceCount);
+    const isWin = determineWinCondition(difficulty, dice, diceCount);
+    const manipulationApplied = false;
+    const manipulationType = "fair";
+    const winningsKobo = isWin ? Math.round(betAmountKobo * odds) : 0;
+    const winnings = winningsKobo / 100;
     const gameResult = isWin ? "win" : "lose";
 
     // Calculate expected value and house edge
@@ -217,6 +209,8 @@ const playBetDiceGame = async (req, res) => {
 
     // Create game record
     const game = new BetDiceGame({
+      operationKey,
+      requestFingerprint,
       user: userId,
       betAmount,
       odds,
@@ -233,11 +227,10 @@ const playBetDiceGame = async (req, res) => {
     });
 
     const accounting = require('../services/accountingService');
-    const { toKobo } = require('../utils/money');
     const updatedWallet = await accounting.transact(async session => {
       await accounting.move({ walletId: wallet._id, deltaKobo: -toKobo(totalCost),
         key: `game:${game._id}:entry`, reason: 'Game entry', session });
-      if (isWin && winnings > 0) await accounting.move({ walletId: wallet._id, deltaKobo: toKobo(winnings),
+      if (isWin && winningsKobo > 0) await accounting.move({ walletId: wallet._id, deltaKobo: winningsKobo,
         key: `game:${game._id}:win`, reason: 'Game winnings', session });
       await BetDiceGame.create([game.toObject()], { session });
       return Wallet.findById(wallet._id).session(session);
@@ -356,6 +349,12 @@ const playBetDiceGame = async (req, res) => {
     res.status(200).json(responseData);
 
   } catch (error) {
+    if (error?.code === 11000 && req.get("Idempotency-Key")) {
+      const operationKey = `${req.user.id}:${req.get("Idempotency-Key")}`;
+      const existingGame = await BetDiceGame.findOne({ operationKey });
+      const currentWallet = await Wallet.findOne({ userId: req.user.id });
+      if (existingGame) return res.status(200).json({ message: "Game result already recorded", game: existingGame, newBalance: currentWallet?.balance || 0, duplicate: true });
+    }
     console.error("Error playing bet dice game:", error);
 
     // Log the error
@@ -369,7 +368,29 @@ const playBetDiceGame = async (req, res) => {
       req
     );
 
-    res.status(500).json({ message: "Error playing bet dice game" });
+    res.status(error.status || 500).json({ message: error.status ? error.message : "Error playing bet dice game" });
+  }
+};
+
+const createBetDiceQuote = async (req, res, next) => {
+  try {
+    const quote = await require('../services/betDiceGameService').issueQuote(req.user.id, req.body);
+    res.status(200).json(quote);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const playBetDiceGame = async (req, res, next) => {
+  try {
+    const result = await require('../services/betDiceGameService').play({
+      userId: req.user.id,
+      idempotencyKey: req.get('Idempotency-Key'),
+      quoteToken: req.body.quoteToken,
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -647,6 +668,27 @@ const getBetDiceSettings = async (req, res) => {
   }
 };
 
+const getPublicBetDiceSettings = async (req, res) => {
+  try {
+    let settings = await BetDiceGameSettings.findOne();
+    if (!settings) settings = await BetDiceGameSettings.create({});
+    res.status(200).json({
+      settings: {
+        gameEnabled: settings.gameEnabled,
+        maintenanceMode: settings.maintenanceMode,
+        minBetAmount: settings.minBetAmount,
+        maxBetAmount: settings.maxBetAmount,
+        entryFee: settings.entryFee,
+        maxDiceCount: settings.maxDiceCount,
+        difficultyLevels: settings.difficultyLevels,
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching public bet dice settings:", error.message);
+    res.status(500).json({ message: "Error fetching game settings" });
+  }
+};
+
 // Update bet dice game settings
 const updateBetDiceSettings = async (req, res) => {
   try {
@@ -655,6 +697,7 @@ const updateBetDiceSettings = async (req, res) => {
     if (!newSettings) {
       return res.status(400).json({ message: "Settings data is required" });
     }
+    delete newSettings.manipulation;
 
     let settings = await BetDiceGameSettings.findOne();
     if (!settings) {
@@ -897,11 +940,13 @@ const forceResetBetDiceSettings = async (req, res) => {
 
 module.exports = {
   playBetDiceGame,
+  createBetDiceQuote,
   getBetDiceHistory,
   getBetDiceStats,
   getAllBetDiceGames,
   getAdminBetDiceStats,
   getBetDiceSettings,
+  getPublicBetDiceSettings,
   updateBetDiceSettings,
   resetBetDiceSettings,
   forceResetBetDiceSettings,

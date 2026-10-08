@@ -206,17 +206,6 @@ const getPurchaseLimits = async (req, res, next) => {
 // Update purchase limits configuration
 const updatePurchaseLimits = async (req, res, next) => {
   try {
-    console.log('Update purchase limits request:', {
-      user: req.user?.id,
-      userRole: req.user?.role,
-      body: req.body,
-      bodyKeys: Object.keys(req.body || {}),
-      hasGlobal: !!req.body?.global,
-      hasNetworks: !!req.body?.networks,
-      globalKeys: req.body?.global ? Object.keys(req.body.global) : [],
-      networksKeys: req.body?.networks ? Object.keys(req.body.networks) : []
-    });
-
     const { global, networks } = req.body;
 
     // Update global settings
@@ -285,13 +274,7 @@ const updatePurchaseLimits = async (req, res, next) => {
       limits: updatedLimits
     });
   } catch (error) {
-    console.error('Error in updatePurchaseLimits:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-      code: error.code
-    });
+    console.error('Unable to update purchase limits:', error.message);
     next({
       status: 500,
       message: "Unable to update purchase limits"

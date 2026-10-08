@@ -2,6 +2,21 @@ const mongoose = require("mongoose");
 
 const betDiceGameSchema = new mongoose.Schema(
   {
+    operationKey: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    requestFingerprint: {
+      type: String,
+      select: false,
+    },
+    quoteId: { type: String, index: true },
+    betAmountKobo: Number,
+    entryFeeKobo: { type: Number, default: 0 },
+    oddsHundredths: Number,
+    winningsKobo: { type: Number, default: 0 },
+    expectedValueKobo: { type: Number, default: 0 },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -240,47 +255,6 @@ const betDiceGameSettingsSchema = new mongoose.Schema(
         default: true,
       },
       alertOnAnomalies: {
-        type: Boolean,
-        default: true,
-      },
-    },
-    manipulation: {
-      enabled: {
-        type: Boolean,
-        default: false,
-      },
-      mode: {
-        type: String,
-        enum: ['fair', 'biased_win', 'biased_loss', 'fixed_win', 'fixed_loss', 'custom_probability', 'specific_dice'],
-        default: 'fair',
-      },
-      bias: {
-        type: Number,
-        default: 0.5,
-        min: 0,
-        max: 1,
-      },
-      winProbability: {
-        type: Number,
-        default: 0.0278,
-        min: 0,
-        max: 1,
-      },
-      targetDice: [{
-        type: Number,
-        default: [6, 6],
-        min: 1,
-        max: 6,
-      }],
-      seed: {
-        type: String,
-        default: null,
-      },
-      adminOnly: {
-        type: Boolean,
-        default: true,
-      },
-      logManipulations: {
         type: Boolean,
         default: true,
       },

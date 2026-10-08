@@ -1,23 +1,27 @@
+import { lazy } from "react";
 import { useSelector } from "react-redux";
 import AuthGuard from "../utils/guard";
 import MainLayout from "../admin/layout/mainLayout";
-import Dashboard from "../admin/pages/dashboard";
-import Wallet from "../admin/pages/wallet";
-import Referral from "../admin/pages/referral";
-import UtilityTransactions from "../admin/pages/transactions";
-import AdminTransactionDetail from "../admin/pages/TransactionDetail";
-import UserManagement from "../admin/pages/users";
-import Settings from "../admin/pages/settings";
-import Waitlist from "../admin/pages/waitlist";
-import Utilities from "../admin/pages/utilities";
-import Support from "../admin/pages/support";
-import Newsletter from "../admin/pages/newsletter";
-import AdminRanking from "../admin/pages/ranking";
-import AdminDiceGame from "../admin/pages/dice";
-import AdminBetDiceGame from "../admin/pages/betDice";
-import ProviderManagement from "../admin/pages/providers";
-import SystemLogs from "../admin/pages/system-logs";
-import TutorialManagement from "../admin/pages/tutorials";
+import RouteError from "../components/ui/RouteError";
+
+const Dashboard = lazy(() => import("../admin/pages/dashboard"));
+const Wallet = lazy(() => import("../admin/pages/wallet"));
+const Referral = lazy(() => import("../admin/pages/referral"));
+const UtilityTransactions = lazy(() => import("../admin/pages/transactions"));
+const AdminTransactionDetail = lazy(() => import("../admin/pages/TransactionDetail"));
+const UserManagement = lazy(() => import("../admin/pages/users"));
+const Settings = lazy(() => import("../admin/pages/settings"));
+const Waitlist = lazy(() => import("../admin/pages/waitlist"));
+const Utilities = lazy(() => import("../admin/pages/utilities"));
+const Support = lazy(() => import("../admin/pages/support"));
+const Newsletter = lazy(() => import("../admin/pages/newsletter"));
+const AdminRanking = lazy(() => import("../admin/pages/ranking"));
+const AdminDiceGame = lazy(() => import("../admin/pages/dice"));
+const AdminBetDiceGame = lazy(() => import("../admin/pages/betDice"));
+const ProviderManagement = lazy(() => import("../admin/pages/providers"));
+const SystemLogs = lazy(() => import("../admin/pages/system-logs"));
+const TutorialManagement = lazy(() => import("../admin/pages/tutorials"));
+const PaymentOperations = lazy(() => import("../admin/pages/payment-operations"));
 
 const AdminTransactionDetailWrapper = () => {
   const isDarkMode = useSelector((state) => state.theme && state.theme.isDarkMode);
@@ -31,6 +35,7 @@ const AdminRoutes = {
       <MainLayout />
     </AuthGuard>
   ),
+  errorElement: <RouteError />,
   children: [
     {
       path: "dashboard",
@@ -39,6 +44,10 @@ const AdminRoutes = {
     {
       path: "transactions",
       element: <UtilityTransactions />,
+    },
+    {
+      path: "payment-operations",
+      element: <PaymentOperations />,
     },
     {
       path: "transactions/:requestId",

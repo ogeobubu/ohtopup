@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FiActivity, FiClock, FiDollarSign, FiInfo, FiPlay, FiShield, FiTarget, FiTrendingUp, FiZap } from "react-icons/fi";
-import { getWallet, playBetDiceGame, getBetDiceHistory, getBetDiceStats, getBetDiceSettings } from "../api";
+import { getWallet, playBetDiceGame, getBetDiceQuote, getBetDiceHistory, getBetDiceStats, getPublicBetDiceSettings } from "../api";
 import "./betDice.css";
 
 const DIFFICULTIES = {
@@ -32,7 +32,7 @@ const BetDiceGame = () => {
   const { data: walletData } = useQuery({ queryKey: ["wallet"], queryFn: getWallet, staleTime: 30000 });
   const { data: gameHistory } = useQuery({ queryKey: ["bet-dice-history"], queryFn: () => getBetDiceHistory({ page: 1, limit: 10 }), staleTime: 30000 });
   const { data: gameStats } = useQuery({ queryKey: ["bet-dice-stats"], queryFn: getBetDiceStats, staleTime: 30000 });
-  const { data: gameSettings } = useQuery({ queryKey: ["bet-dice-settings"], queryFn: getBetDiceSettings, staleTime: 60000 });
+  const { data: gameSettings } = useQuery({ queryKey: ["bet-dice-public-settings"], queryFn: getPublicBetDiceSettings, staleTime: 60000 });
 
   const settings = gameSettings?.settings;
   const entryFee = settings?.entryFee || 0;
@@ -42,6 +42,7 @@ const BetDiceGame = () => {
   const totalStake = betAmount + entryFee;
   const potentialPayout = betAmount * currentOdds;
   const selectedLevel = DIFFICULTIES[selectedDifficulty];
+  const configuredOdds = settings?.difficultyLevels?.[selectedDifficulty]?.oddsRange?.min ?? selectedLevel.oddsRange[0];
   const gameUnavailable = !settings?.gameEnabled || settings?.maintenanceMode;
 
   const enhancedStats = useMemo(() => {
@@ -51,15 +52,10 @@ const BetDiceGame = () => {
     return stats;
   }, [gameStats]);
 
-  const generateRandomOdds = (difficulty) => {
-    const level = DIFFICULTIES[difficulty];
-    return Math.round((Math.random() * (level.oddsRange[1] - level.oddsRange[0]) + level.oddsRange[0]) * 100) / 100;
-  };
-
   useEffect(() => {
-    setCurrentOdds(generateRandomOdds(selectedDifficulty));
+    setCurrentOdds(configuredOdds);
     setGameResult(null);
-  }, [selectedDifficulty]);
+  }, [configuredOdds, selectedDifficulty]);
 
   useEffect(() => {
     if (selectedDifficulty === "legendary" && selectedDiceCount < 3) setSelectedDiceCount(3);
@@ -83,7 +79,6 @@ const BetDiceGame = () => {
         setDice(data.game.dice);
         setGameResult(data);
         setIsRolling(false);
-        setCurrentOdds(generateRandomOdds(selectedDifficulty));
         queryClient.invalidateQueries({ queryKey: ["wallet"] });
         queryClient.invalidateQueries({ queryKey: ["bet-dice-history"] });
         queryClient.invalidateQueries({ queryKey: ["bet-dice-stats"] });
@@ -96,14 +91,20 @@ const BetDiceGame = () => {
     },
   });
 
-  const handlePlayGame = () => {
+  const handlePlayGame = async () => {
     setNotice("");
     if (!settings?.gameEnabled) return setNotice("The game is currently disabled.");
     if (settings?.maintenanceMode) return setNotice("The table is under maintenance. Please check back shortly.");
     if (betAmount < minBet) return setNotice(`The minimum bet is ${formatMoney(minBet)}.`);
     if (betAmount > maxBet) return setNotice(`The maximum bet is ${formatMoney(maxBet)}.`);
     if (balance < totalStake) return setNotice(`You need ${formatMoney(totalStake)} to make this roll.`);
-    playGameMutation.mutate({ betAmount, odds: currentOdds, difficulty: selectedDifficulty, diceCount: selectedDiceCount });
+    try {
+      const quote = await getBetDiceQuote({ betAmount, difficulty: selectedDifficulty, diceCount: selectedDiceCount });
+      setCurrentOdds(quote.odds);
+      playGameMutation.mutate({ quoteToken: quote.quoteToken });
+    } catch (error) {
+      setNotice(error.message || "Unable to prepare this roll.");
+    }
   };
 
   const setSafeBet = (amount) => setBetAmount(Math.min(maxBet, Math.max(minBet, Number(amount) || 0)));

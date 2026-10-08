@@ -59,7 +59,7 @@ const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const result = await authService.loginUser(email, password);
+    const result = await authService.loginUser(email, password, { userAgent: req.get('User-Agent'), ipAddress: req.ip });
     res.status(200).json(result);
   } catch (error) {
     next(error);
@@ -233,11 +233,26 @@ const refreshToken = async (req, res, next) => {
   }
 
   try {
-    const result = await authService.refreshAccessToken(refreshToken);
+    const result = await authService.refreshAccessToken(refreshToken, { userAgent: req.get('User-Agent'), ipAddress: req.ip });
     res.status(200).json(result);
   } catch (error) {
     next(error);
   }
+};
+
+const getSessions = async (req, res, next) => {
+  try { res.status(200).json({ sessions: await authService.listSessions(req.user.id) }); }
+  catch (error) { next(error); }
+};
+
+const revokeSession = async (req, res, next) => {
+  try { res.status(200).json(await authService.revokeSession(req.user.id, req.params.sessionId)); }
+  catch (error) { next(error); }
+};
+
+const revokeAllSessions = async (req, res, next) => {
+  try { res.status(200).json(await authService.revokeAllSessions(req.user.id)); }
+  catch (error) { next(error); }
 };
 
 module.exports = {
@@ -259,4 +274,7 @@ module.exports = {
   googleAuth,
   googleAuthCallback,
   refreshToken,
+  getSessions,
+  revokeSession,
+  revokeAllSessions,
 };

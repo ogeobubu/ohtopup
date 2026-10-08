@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "lint:reliability": "eslint src/main.tsx src/App.tsx src/routes/index.tsx src/routes/mainRoutes.tsx src/routes/adminRoutes.tsx src/components/ui/AppErrorBoundary.tsx src/components/ui/RouteError.tsx src/components/ui/QueryState.tsx src/components/ui/PageLoader.tsx src/pages/dice/index.tsx src/pages/betDice.tsx src/pages/settings/security.tsx src/admin/pages/payment-operations/index.tsx",
     "preview": "vite preview",
     "build:seo": "vite build && echo 'SEO files copied to build directory'"
   },
