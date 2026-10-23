@@ -35,9 +35,9 @@ const Login = ({ darkMode }: { darkMode?: boolean }) => {
 
   return (
     <div className="grid min-h-dvh grid-cols-1 overflow-wrap-anywhere bg-bg text-ink nav:grid-cols-2">
-      <div className="flex min-w-0 flex-col justify-center bg-paper px-6 py-[30px] xs:px-8 nav:px-[clamp(24px,6vw,95px)] nav:py-[45px]">
-        <div className="mx-auto my-5 w-full max-w-auth min-w-0 nav:my-auto">
-          <Logo href="/" className="mx-auto mb-11 w-auto" darkMode={darkMode} />
+      <div className="flex min-w-0 flex-col justify-start bg-paper px-6 py-6 nav:justify-center xs:px-8 nav:px-[clamp(24px,6vw,95px)] nav:py-[45px]">
+        <div className="mx-auto my-0 w-full max-w-auth min-w-0 nav:my-auto">
+          <Logo href="/" className="mx-auto mb-7 w-auto nav:mb-11" darkMode={darkMode} />
           <div>
             <h3 className="mb-2 text-2xl font-mediumish tracking-[-0.8px] nav:text-[30px]">Welcome back</h3>
             <p className="mb-6 text-sm text-muted">Sign in to manage your everyday payments.</p>
@@ -82,7 +82,7 @@ const Login = ({ darkMode }: { darkMode?: boolean }) => {
                     {({ field, meta }) => (
                       <Textarea
                         type="email"
-                        label="Email Address"
+                        label="Email address"
                         {...field}
                         error={
                           meta.touched && meta.error ? meta.error : undefined
@@ -106,7 +106,7 @@ const Login = ({ darkMode }: { darkMode?: boolean }) => {
                     className="text-blue-500 hover:text-blue-700 focus:text-blue-700 underline font-semibold"
                     to="/forgot"
                   >
-                    Forgot Password?
+                    Forgot password?
                   </Link>
                   <div className="my-3">
                     <Button
@@ -121,13 +121,13 @@ const Login = ({ darkMode }: { darkMode?: boolean }) => {
                     >
                       {isSubmitting || mutation.isPending
                         ? "Logging in..."
-                        : "Login"}
+                        : "Log in"}
                     </Button>
                   </div>
-                  <p className="text-center">
+                  <p className="text-center text-sm leading-relaxed">
                     Don&apos;t have an account?{" "}
                     <Link to="/create" className="text-blue-500">
-                      Create Account
+                      Create account
                     </Link>
                   </p>
                 </Form>

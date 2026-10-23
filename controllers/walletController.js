@@ -1,3 +1,4 @@
+const { describeActivity } = require('../utils/transactionActivity');
 const secureWithdrawals = require('./withdrawalController');
 const secureDeposits = require('./depositController');
 // walletController.js
@@ -255,7 +256,7 @@ const getAllTransactions = async (req, res) => {
       query.type = type;
     }
     if (reference) {
-      query.reference = { $regex: reference, $options: "i" };
+      query.reference = { $regex: escapedReference, $options: "i" };
     }
 
     const transactions = await Transaction.find(query)
@@ -306,6 +307,15 @@ const getAllTransactions = async (req, res) => {
 const getTransactionsByUser = async (req, res) => {
   const userId = req.user.id;
   const { type, page = 1, limit = 10, reference, status } = req.query;
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
+  const types = ['deposit', 'withdrawal', 'data', 'airtime', 'cable', 'electricity'];
+  const statuses = ['pending', 'initiated', 'processing', 'completed', 'successful', 'delivered', 'failed', 'rejected', 'approved', 'review_needed'];
+  if (!Number.isInteger(pageNumber) || pageNumber < 1 || !Number.isInteger(limitNumber) || limitNumber < 1 || limitNumber > 100
+    || (type && !types.includes(type)) || (status && !statuses.includes(status)) || (reference && (typeof reference !== 'string' || reference.length > 100))) {
+    return res.status(400).json({ message: 'Invalid transaction filters or pagination' });
+  }
+  const escapedReference = reference ? reference.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
 
   try {
     const wallet = await dbService.findWalletByUserId(userId);
@@ -316,7 +326,7 @@ const getTransactionsByUser = async (req, res) => {
     };
 
     if (reference) {
-      walletFilters.reference = { $regex: reference, $options: "i" };
+      walletFilters.reference = { $regex: escapedReference, $options: "i" };
     }
 
     // Add status filter for wallet transactions
@@ -334,7 +344,7 @@ const getTransactionsByUser = async (req, res) => {
     }
 
     if (reference) {
-      utilityFilters.requestId = { $regex: reference, $options: "i" };
+      utilityFilters.requestId = { $regex: escapedReference, $options: "i" };
     }
 
     // Add status filter for utility transactions
@@ -379,28 +389,31 @@ const getTransactionsByUser = async (req, res) => {
     const allTransactions = Array.from(transactionMap.values())
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // Apply type filter if specified (for wallet transactions only)
+    // Apply the type filter to the combined activity before pagination.
     let filteredTransactions = allTransactions;
-    if (type && !['data', 'airtime', 'cable', 'electricity'].includes(type.toLowerCase())) {
+    if (type) {
       filteredTransactions = allTransactions.filter(tx =>
-        tx.transactionType === 'wallet' && tx.type === type.toLowerCase()
+        tx.type === type.toLowerCase()
       );
     }
 
     // Apply pagination
     const totalTransactions = filteredTransactions.length;
     const totalPages = Math.ceil(totalTransactions / parseInt(limit));
-    const pageNumber = parseInt(page);
-    const limitNumber = parseInt(limit);
     const offset = (pageNumber - 1) * limitNumber;
 
     const paginatedTransactions = filteredTransactions.slice(offset, offset + limitNumber);
+    const references = paginatedTransactions.map(tx => tx.reference || tx.requestId);
+    const entries = await require('../model/WalletEntry').find({
+      walletId: wallet._id,
+      key: { $in: references.flatMap(ref => ['purchase', 'purchase-refund', 'deposit', 'withdrawal', 'withdrawal-refund'].map(prefix => `${prefix}:${ref}`)) },
+    }).lean();
 
     res.json({
       totalTransactions,
       totalPages,
       currentPage: pageNumber,
-      transactions: paginatedTransactions,
+      transactions: paginatedTransactions.map(tx => describeActivity(tx, entries)),
     });
   } catch (error) {
     handleServiceError(error, res);
@@ -630,7 +643,7 @@ const getWithdrawalsForAdmin = async (req, res) => {
       query.status = status;
     }
     if (reference) {
-      query.reference = { $regex: reference, $options: 'i' };
+      query.reference = { $regex: escapedReference, $options: 'i' };
     }
     if (userId) {
       const wallet = await Wallet.findOne({ userId });

@@ -9,6 +9,8 @@ function toCustomerUtility(tx) {
     status: obj.status,
     product_name: obj.product_name,
     amount: obj.amount,
+    debitKobo: obj.debitKobo,
+    transactionType: "utility",
     phone: obj.phone,
     network: obj.network || null,
     dataPlan: obj.dataPlan || null,

@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { FaArrowLeft, FaDownload } from "react-icons/fa";
+import { FaArrowLeft, FaPrint, FaCopy, FaCheck } from "react-icons/fa";
 import { getTransactionDetails } from "../api";
 import { formatNairaAmount } from "../utils";
 
@@ -12,11 +12,11 @@ const primaryBtn =
 
 function DetailRow({ label, value, color }: { label: string; value: unknown; color?: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-line py-2 last:border-b-0">
+    <div className="flex flex-col gap-1.5 border-b border-line py-3 last:border-b-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
       <span className="shrink-0 text-xs text-muted">{label}</span>
       <span
         title={String(value ?? "N/A")}
-        className="min-w-0 max-w-[60%] overflow-hidden text-ellipsis whitespace-nowrap text-right text-[13px] font-medium"
+        className="min-w-0 break-words text-[13px] font-medium [overflow-wrap:anywhere] sm:max-w-[65%] sm:text-right"
         style={{ color: color || "var(--ot-ink)" }}
       >
         {String(value ?? "N/A")}
@@ -29,7 +29,42 @@ const TransactionDetail = () => {
   const { requestId } = useParams();
   const hasValidReference = Boolean(requestId && requestId !== "undefined" && requestId !== "null");
   const navigate = useNavigate();
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const receiptRef = useRef<HTMLDivElement>(null);
+  const printRootRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const cleanUp = () => {
+      printRootRef.current?.remove();
+      printRootRef.current = null;
+    };
+    window.addEventListener('afterprint', cleanUp);
+    return () => {
+      window.removeEventListener('afterprint', cleanUp);
+      cleanUp();
+    };
+  }, []);
+  const printReceipt = () => {
+    if (!receiptRef.current) return;
+    printRootRef.current?.remove();
+    const printRoot = document.createElement('div');
+    printRoot.className = 'receipt-print-only';
+    const brand = document.createElement('h1');
+    brand.textContent = 'OhTopUp · Transaction receipt';
+    brand.style.cssText = 'font-size:18pt;margin-bottom:20px;font-weight:600';
+    printRoot.append(brand, receiptRef.current.cloneNode(true));
+    document.body.appendChild(printRoot);
+    printRootRef.current = printRoot;
+    // The printable copy lives outside app containers and their overflow rules.
+    window.print();
+  };
+  const [copyMessage, setCopyMessage] = useState('');
+  const copyReference = async () => {
+    try {
+      await navigator.clipboard.writeText(String(reference));
+      setCopyMessage('Reference copied');
+    } catch {
+      setCopyMessage('Couldn’t copy. Select the reference to copy it manually.');
+    }
+  };
 
   const { data: transactionData, isLoading, error } = useQuery({
     queryKey: ["transaction-detail", requestId],
@@ -47,15 +82,6 @@ const TransactionDetail = () => {
     if (s === "pending") return "#9a6818";
     if (s === "failed") return "#b84545";
     return "var(--ot-muted)";
-  };
-
-  const generatePDF = async () => {
-    setIsGeneratingPDF(true);
-    try {
-      alert("PDF generation will be implemented soon!");
-    } finally {
-      setIsGeneratingPDF(false);
-    }
   };
 
   if (isLoading)
@@ -104,101 +130,53 @@ const TransactionDetail = () => {
       : "N/A";
 
   return (
-    <div className="min-w-0">
-      <div className="mb-[30px] flex min-w-0 flex-wrap items-center justify-between gap-5">
-        <div className="flex min-w-0 items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className={`${secondaryBtn} min-h-auto px-3 py-2`}
-            aria-label="Go back"
-          >
-            <FaArrowLeft />
-          </button>
-          <div className="min-w-0">
-            <h1 className="mb-2 text-[22px] font-mediumish leading-tight tracking-[-0.5px] nav:text-[30px] nav:tracking-[-0.9px]">
-              Transaction Details
-            </h1>
-            <p className="overflow-wrap-anywhere font-mono text-xs text-muted">
-              Reference: {reference || "N/A"}
-            </p>
-          </div>
-        </div>
-        <button onClick={generatePDF} disabled={isGeneratingPDF} className={`${secondaryBtn} text-xs`}>
-          <FaDownload /> {isGeneratingPDF ? "Generating…" : "Download PDF"}
-        </button>
+    <div ref={receiptRef} className="transaction-receipt mx-auto w-full max-w-[820px] min-w-0">
+      <div className="receipt-actions mb-6 flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className={secondaryBtn} aria-label="Go back"><FaArrowLeft /></button>
+        <h1 className="text-[22px] font-mediumish tracking-[-0.5px] nav:text-[28px]">Transaction details</h1>
       </div>
-
-      <div className="mb-4 overflow-hidden rounded-lg border border-line bg-paper">
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-5 nav:p-[22px_24px]">
-          <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Transaction Status</h2>
-          <span
-            className="text-xs font-semibold uppercase"
-            style={{ color: statusColor(transaction.status) }}
-          >
-            {transaction.status}
-          </span>
-        </div>
-        <div className="grid gap-6 px-6 pb-6 sm:grid-cols-2">
-          <div>
-            <DetailRow label="Reference" value={reference} />
+      <article className="overflow-hidden rounded-lg border border-line bg-paper">
+        <header className="border-b border-line bg-tint px-5 py-7 sm:px-7">
+          <p className="text-sm font-medium text-muted">{formatLabel(transaction.product_name || transaction.type)}</p>
+          <p className="mb-3 mt-2 break-words text-4xl font-semibold tracking-tight">{formatNairaAmount(transaction.debitKobo != null ? transaction.debitKobo / 100 : transaction.amount)}</p>
+          <span className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: statusColor(transaction.status) }}><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />{formatLabel(transaction.status)}</span>
+          <p className="mt-2 text-xs text-muted">{transaction.debitKobo != null ? 'Wallet debit' : 'Transaction amount'}</p>
+        </header>
+        <div className="px-5 py-3 sm:px-7">
+          <h2 className="sr-only">Receipt details</h2>
+          <DetailRow label="Date & time" value={formattedDate} />
+          <DetailRow label="Service" value={formatLabel(transaction.type)} />
+          {transaction.phone && <DetailRow label="Recipient" value={transaction.phone} />}
+          {transaction.paymentMethod && <DetailRow label="Payment method" value={formatLabel(transaction.paymentMethod)} />}
+          {transaction.bankName && <DetailRow label="Bank" value={transaction.bankName} />}
+          {transaction.accountNumber && <DetailRow label="Account" value={`****${transaction.accountNumber.slice(-4)}`} />}
+          {transaction.transactionType === 'utility' && <>
+            {transaction.network && <DetailRow label="Network" value={transaction.network.toUpperCase()} />}
+            {transaction.dataPlan && <DetailRow label="Data plan" value={transaction.dataPlan} />}
+            {transaction.validity && <DetailRow label="Validity" value={transaction.validity} />}
+            {transaction.subscription_type && <DetailRow label="Subscription" value={formatLabel(transaction.subscription_type)} />}
+            {transaction.token != null && <DetailRow label="Electricity token" value={transaction.token} />}
+            {transaction.units != null && <DetailRow label="Electricity units" value={transaction.units} />}
+          </>}
+          <div className="border-t border-line py-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h3 className="text-xs text-muted">Payment reference</h3>
+              {reference && <button type="button" onClick={copyReference} className="receipt-actions inline-flex min-h-11 items-center gap-2 rounded-md px-2 text-xs font-semibold text-accent hover:bg-tint">{copyMessage === 'Reference copied' ? <FaCheck /> : <FaCopy />}Copy</button>}
+            </div>
+            <p className="select-all break-words font-mono text-xs leading-relaxed [overflow-wrap:anywhere]">{reference || 'Unavailable'}</p>
+            <p role="status" className="receipt-actions mt-2 text-xs text-muted">{copyMessage}</p>
+          </div>
+          {(transactionId || transaction.serviceID) && <details className="receipt-secondary border-t border-line py-3">
+            <summary className="min-h-11 cursor-pointer py-3 text-xs font-medium text-muted">Technical details</summary>
             {transactionId && <DetailRow label="Transaction ID" value={transactionId} />}
-            <DetailRow
-              label={transaction.debitKobo != null ? "Wallet debit" : "Amount"}
-              value={formatNairaAmount(transaction.debitKobo != null ? transaction.debitKobo / 100 : transaction.amount)}
-              color="#27805d"
-            />
-            <DetailRow label="Date & Time" value={formattedDate} />
-          </div>
-          <div>
-            <DetailRow label="Service Type" value={formatLabel(transaction.type)} />
-            <DetailRow label="Product Name" value={formatLabel(transaction.product_name)} />
-            {transaction.phone && <DetailRow label="Phone Number" value={transaction.phone} />}
-          </div>
+            {transaction.serviceID && <DetailRow label="Service ID" value={transaction.serviceID} />}
+          </details>}
         </div>
+      </article>
+      <div className="receipt-actions mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <button type="button" onClick={printReceipt} className={secondaryBtn}><FaPrint />Print / save PDF</button>
+        <Link to="/support" className="inline-flex min-h-11 items-center justify-center gap-2 text-sm font-semibold text-accent hover:underline">Need help with this payment?</Link>
       </div>
-
-      {transaction.transactionType === "utility" && (
-        <div className="mb-4 overflow-hidden rounded-lg border border-line bg-paper">
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-5 nav:p-[22px_24px]">
-            <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Service Details</h2>
-          </div>
-          <div className="grid gap-6 px-6 pb-6 sm:grid-cols-2">
-            <div>
-              <DetailRow label="Service ID" value={transaction.serviceID} />
-              {transaction.network && <DetailRow label="Network" value={transaction.network.toUpperCase()} />}
-              {transaction.dataPlan && <DetailRow label="Data Plan" value={transaction.dataPlan} />}
-              {transaction.provider && <DetailRow label="Provider" value={formatLabel(transaction.provider)} />}
-            </div>
-            <div>
-              {transaction.validity && <DetailRow label="Validity" value={transaction.validity} />}
-              {transaction.subscription_type && (
-                <DetailRow label="Subscription Type" value={formatLabel(transaction.subscription_type)} />
-              )}
-              {transaction.token != null && <DetailRow label="Electricity Token" value={transaction.token} />}
-              {transaction.units != null && (
-                <DetailRow label="Electricity Units" value={transaction.units} color="var(--ot-accent)" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {transaction.transactionType === "wallet" && (
-        <div className="overflow-hidden rounded-lg border border-line bg-paper">
-          <div className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-5 nav:p-[22px_24px]">
-            <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Payment Details</h2>
-          </div>
-          <div className="px-6 pb-6">
-            {transaction.paymentMethod && (
-              <DetailRow label="Payment Method" value={transaction.paymentMethod.replace("_", " ")} />
-            )}
-            {transaction.bankName && <DetailRow label="Bank" value={transaction.bankName} />}
-            {transaction.accountNumber && (
-              <DetailRow label="Account" value={`****${transaction.accountNumber.slice(-4)}`} />
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

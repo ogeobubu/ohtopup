@@ -594,3 +594,33 @@ for (const type of ['cable', 'electricity']) test(`${type} customer discount is 
   const tx = await Utility.findOne({ user: userId });
   assert.equal(tx.pricing.actualPlatformMargin, 10);
 });
+
+test('customer activity filters isolate services and expose ledger-confirmed debit and refund', async () => {
+  const { userId, token } = await authenticatedUser('user');
+  const wallet = await Wallet.create({ userId, balance: 1000 });
+  await Transaction.create({ walletId: wallet._id, reference: 'deposit.with.dot', amount: 100, type: 'deposit', paymentMethod: 'paystack', status: 'completed' });
+  const args = { userId, key: 'activity-test', fingerprint: 'activity', amount: 100, cost: 99, serviceID: 'mtn', contact: '08012345678', type: 'airtime', provider: 'vtpass' };
+  const { transaction } = await purchases.begin(args);
+  const other = await authenticatedUser('user');
+  await Wallet.create({ userId: other.userId, balance: 1000 });
+  await purchases.begin({ ...args, userId: other.userId, key: 'other' });
+  let response = await call('/users/transactions?type=airtime&status=pending', token);
+  assert.equal(response.status, 200);
+  let result = await response.json();
+  assert.equal(result.totalTransactions, 1);
+  assert.equal(result.transactions[0].walletDirection, 'debit');
+  assert.equal(result.transactions[0].walletAmountKobo, 9900);
+  assert.equal(result.transactions[0].refundStatus, null);
+  await purchases.finish(transaction.requestId, { code: '016', content: { transactions: { status: 'failed' } } });
+  result = await (await call('/users/transactions?type=airtime&status=failed', token)).json();
+  assert.equal(result.transactions[0].refundStatus, 'refunded');
+  assert.equal(await Entry.countDocuments({ walletId: wallet._id, key: `purchase-refund:${transaction.requestId}` }), 1);
+  result = await (await call('/users/transactions?type=deposit', token)).json();
+  assert.equal(result.totalTransactions, 1);
+  assert.equal(result.transactions[0].walletDirection, null, 'legacy completed status alone does not prove ledger movement');
+  result = await (await call('/users/transactions?reference=deposit.*', token)).json();
+  assert.equal(result.totalTransactions, 0, 'reference search is literal');
+  for (const query of ['page=0', 'limit=101', 'type=unknown', 'status=unknown']) {
+    assert.equal((await call(`/users/transactions?${query}`, token)).status, 400);
+  }
+});

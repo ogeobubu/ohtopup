@@ -1,5 +1,5 @@
+import InlinePurchasePanel from "../components/InlinePurchasePanel";
 import useQuotedPurchase from '../../../hooks/useQuotedPurchase';
-import PurchaseHeader from "../components/PurchaseHeader";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import PropTypes from "prop-types";
@@ -16,8 +16,8 @@ const Loader = () => (
 );
 
 const ElectricityPurchase = ({ isDarkMode }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDisco, setSelectedDisco] = useState('');
+  const [providerSearch, setProviderSearch] = useState('');
   const [selectedMeterType, setSelectedMeterType] = useState('');
   const [meterNumber, setMeterNumber] = useState('');
   const [selectedAmount, setSelectedAmount] = useState('');
@@ -172,7 +172,8 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
       // Reset form after a delay
       setTimeout(() => {
-        setIsModalOpen(false);
+        setCurrentStep(1);
+        setTransactionPin('');
         setShowSuccessModal(false);
         setPurchaseResult(null);
         // Reset form
@@ -224,17 +225,9 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
 
   return (
-    <div className="p-7">
+    <div className="min-w-0">
       {pricingDialog}
-      <div><h3>Pay your electricity bill</h3><p>Choose your provider and have your meter number ready.</p><button className="inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition border border-transparent bg-accent text-white hover:bg-accent-dark" onClick={() => setIsModalOpen(true)}>Choose provider</button></div>
-      <Modal
-        isDarkMode={isDarkMode}
-        isOpen={isModalOpen}
-        closeModal={() => setIsModalOpen(false)}
-        size="lg"
-        showCloseButton={false}
-        stickyHeader={<PurchaseHeader title="Pay electricity bill" step={currentStep} total={7} onClose={() => setIsModalOpen(false)} />}
-      >
+      <InlinePurchasePanel title="Pay electricity bill" step={currentStep} total={7}>
         {isLoading ? (
           <Loader />
         ) : (
@@ -243,36 +236,25 @@ const ElectricityPurchase = ({ isDarkMode }) => {
             {currentStep === 1 && (
               <div className="px-3 md:px-4 py-3 md:py-4 pb-6 md:pb-8">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose Your Disco</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose your provider</h3>
                   <p className="text-sm text-muted">Select your electricity distribution company</p>
                 </div>
-                <div className="grid grid-cols-1 gap-2 md:gap-3 max-w-sm mx-auto">
-                  {providers?.discos?.map(disco => (
-                    <button
-                      key={disco.serviceID}
-                      onClick={() => {
-                        handleDiscoChange(disco.serviceID);
-                      }}
-                      className={`p-3 md:p-4 bg-paper border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
-                        selectedDisco === disco.serviceID
-                          ? 'border-yellow-500 bg-yellow-50 shadow-md'
-                          : 'border-line hover:border-yellow-300'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
-                          <FaBolt className="text-accent text-base md:text-lg" />
-                        </div>
-                        <div className="text-base md:text-lg font-bold text-ink mb-1">
-                          {disco.displayName}
-                        </div>
-                        <div className="text-xs text-muted">
-                          Final discount shown at checkout
-                        </div>
-                      </div>
+                <label className="mb-4 block text-xs font-medium text-muted">
+                  Find your electricity provider
+                  <input type="search" value={providerSearch} onChange={e => setProviderSearch(e.target.value)} placeholder="Search by provider name" className="mt-2 min-h-11 w-full rounded-md border border-line bg-paper px-3 text-sm text-ink focus:border-accent focus:outline-accent" />
+                </label>
+                <div className="grid max-h-72 grid-cols-1 gap-2 overflow-y-auto overscroll-contain p-1 sm:grid-cols-2" aria-label="Electricity providers">
+                  {providers?.discos?.filter(disco => String(disco.displayName || '').toLowerCase().includes(providerSearch.trim().toLowerCase())).map(disco => (
+                    <button type="button" key={disco.serviceID} aria-pressed={selectedDisco === disco.serviceID} onClick={() => handleDiscoChange(disco.serviceID)}
+                      className={`flex min-h-14 items-center gap-3 rounded-md border px-3 py-3 text-left text-sm transition-colors ${selectedDisco === disco.serviceID ? 'border-accent bg-tint text-accent' : 'border-line bg-paper text-ink hover:bg-tint'}`}>
+                      <FaBolt aria-hidden="true" className="shrink-0 text-accent" />
+                      <span className="min-w-0 flex-1 font-medium">{disco.displayName}</span>
+                      {selectedDisco === disco.serviceID && <FaCheck aria-hidden="true" className="shrink-0 text-accent" />}
                     </button>
                   ))}
+                  {!providers?.discos?.some(disco => String(disco.displayName || '').toLowerCase().includes(providerSearch.trim().toLowerCase())) && <p role="status" className="p-3 text-sm text-muted sm:col-span-2">No matching providers. Try another name.</p>}
                 </div>
+                <p className="mt-3 text-xs text-muted">Final price shown at review.</p>
 
             {/* Navigation Buttons */}
                 <div className="mt-4 md:mt-6 flex justify-end">
@@ -284,7 +266,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!selectedDisco}
-                    className="px-4 md:px-6 py-2 md:py-3 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-4 md:px-6 py-2 md:py-3 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -502,7 +484,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!meterNumber || !customerName}
-                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -608,7 +590,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!selectedAmount}
-                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Next
                   </button>
@@ -652,7 +634,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!phoneNumber}
-                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Continue to PIN
                   </button>
@@ -700,7 +682,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                       }
                     }}
                     disabled={!transactionPin || transactionPin.length < 4 || transactionPin.length > 6}
-                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    className="px-3 md:px-4 py-2 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                   >
                     Continue to Payment
                   </button>
@@ -815,7 +797,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
                   <button
                     onClick={confirmPurchase}
                     disabled={isConfirming}
-                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
+                    className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-[#3057c5] text-white rounded-lg font-medium hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl text-sm"
                   >
                     {isConfirming ? (
                       <div className="flex items-center justify-center gap-1">
@@ -836,7 +818,7 @@ const ElectricityPurchase = ({ isDarkMode }) => {
 
           </div>
         )}
-      </Modal>
+      </InlinePurchasePanel>
 
       {/* Success Modal */}
       {showSuccessModal && purchaseResult && (

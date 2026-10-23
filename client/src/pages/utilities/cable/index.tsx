@@ -1,6 +1,6 @@
+import InlinePurchasePanel from "../components/InlinePurchasePanel";
 import useQuotedPurchase from '../../../hooks/useQuotedPurchase';
 import React, { useState, useEffect } from "react";
-import Modal from "../../../admin/components/modal";
 import mtn from "../../../assets/mtn.svg";
 import glo from "../../../assets/glo.svg";
 import airtel from "../../../assets/airtel.svg";
@@ -57,11 +57,9 @@ const formatPhoneNumber = (phoneNumber) => {
   return phoneNumber.replace(/^\+234/, "0");
 };
 
-const Cable = ({ user, isDarkMode }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const Cable = ({ isDarkMode }: { isDarkMode?: boolean }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const closeModal = () => {
-    setIsModalOpen(false);
     setIsSubmitting(false);
   };
 
@@ -183,15 +181,9 @@ const Cable = ({ user, isDarkMode }) => {
   };
 
   return (
-    <div className="p-7">
+    <div className="min-w-0">
       {pricingDialog}
-      <div><h3>Renew your TV subscription</h3><p>Choose your provider and a package for your next renewal.</p><button className="inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition border border-transparent bg-accent text-white hover:bg-accent-dark" onClick={() => setIsModalOpen(true)}>Choose TV package</button></div>
-      <Modal
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        title="Cable Purchase"
-        isDarkMode={isDarkMode}
-      >
+      <InlinePurchasePanel title="Renew TV subscription">
         {identifersLoading ? (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -413,7 +405,7 @@ const Cable = ({ user, isDarkMode }) => {
                                 onChange={(e) => {
                                   form.setFieldValue(
                                     field.name,
-                                    (accountNameApi?.data.Renewal_Amount).toString()
+                                    String(accountNameApi?.data?.Renewal_Amount ?? '')
                                   );
                                 }}
                               />
@@ -534,7 +526,7 @@ const Cable = ({ user, isDarkMode }) => {
             }}
           </Formik>
         )}
-      </Modal>
+      </InlinePurchasePanel>
     </div>
   );
 };

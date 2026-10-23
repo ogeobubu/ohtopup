@@ -41,7 +41,7 @@ export default function Navbar() {
               <FiMoon className="h-[18px] w-[18px] dark:hidden" style={{ display: dark ? 'none' : undefined }} />
               <FiSun className="h-[18px] w-[18px]" style={{ display: dark ? undefined : 'none' }} />
             </button>
-            <Link className="inline-flex items-center px-2.5 py-2.5 text-xs nav:hidden xs:inline-flex" to="/login">Log in</Link>
+            <Link className="inline-flex min-h-11 items-center rounded-md px-2.5 py-2.5 text-xs font-medium hover:bg-tint hover:text-accent nav:text-sm" to="/login">Log in</Link>
             <Link
               className="hidden nav:inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition-[background,border-color] hover:bg-accent-dark"
               to="/create"

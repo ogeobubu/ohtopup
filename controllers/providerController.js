@@ -1,3 +1,4 @@
+const { normalizeDataPlanMetadata } = require("../utils/dataPlanMetadata");
 require("dotenv").config()
 const { Provider, NetworkProvider } = require("../model/Provider");
 const vtpassService = require("../services/vtpassService");
@@ -680,9 +681,7 @@ const getAllDataPlans = async (req, res) => {
                   planId: variation.variation_code,
                   name: variation.name,
                   amount: parseFloat(variation.variation_amount || 0),
-                  dataAmount: variation.variation_code,
-                  validity: variation.name.toLowerCase().includes('day') ? 'Daily' :
-                          variation.name.toLowerCase().includes('month') ? 'Monthly' : 'Other',
+                  ...normalizeDataPlanMetadata({ name: variation.name }),
                   type: normalizePlanType(variation.name.toLowerCase().includes('sme') ? 'SME' : 'Regular'),
                   network: normalizeNetwork(serviceId.replace('-data', '')),
                   isActive: true

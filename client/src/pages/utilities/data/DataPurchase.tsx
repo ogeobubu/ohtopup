@@ -1,9 +1,8 @@
+import InlinePurchasePanel from "../components/InlinePurchasePanel";
 import useQuotedPurchase from '../../../hooks/useQuotedPurchase';
-import PurchaseHeader from "../components/PurchaseHeader";
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getWallet, getSelectedPlansForUsers, getUser, getAirtimeSettings } from '../../../api';
-import Modal from '../../../admin/components/modal';
 import useDataPurchase from './hooks/useDataPurchase';
 import { formatNairaAmount, formatPhoneNumber } from '../../../utils';
 import { FaWifi, FaCheck, FaEdit, FaUser, FaSignal, FaCreditCard, FaChevronRight } from 'react-icons/fa';
@@ -15,8 +14,7 @@ const Loader = () => (
   </div>
 );
 
-const DataPurchase = ({ isDarkMode }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const DataPurchase = () => {
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -147,7 +145,8 @@ const DataPurchase = ({ isDarkMode }) => {
 
 
   const { mutateAsync } = useDataPurchase(() => {
-    setIsModalOpen(false);
+    setCurrentStep(1);
+    setTransactionPin('');
   });
 
   const [isConfirming, setIsConfirming] = useState(false);
@@ -179,18 +178,9 @@ const DataPurchase = ({ isDarkMode }) => {
   const isLoading = isSelectedPlansLoading || isWalletLoading || isUserLoading || isSettingsLoading;
 
   return (
-    <div className="p-7">
+    <div className="min-w-0">
       {pricingDialog}
-      <div><h3>Buy data</h3><p>Find a data plan for your network and your everyday needs.</p><button className="inline-flex min-h-[46px] items-center justify-center gap-4 rounded-md border border-transparent bg-accent px-[19px] py-[11px] text-sm font-semibold text-white transition border border-transparent bg-accent text-white hover:bg-accent-dark" onClick={() => setIsModalOpen(true)}>Choose data</button></div>
-
-      <Modal
-        isDarkMode={isDarkMode}
-        isOpen={isModalOpen}
-        closeModal={() => setIsModalOpen(false)}
-        size="lg"
-        showCloseButton={false}
-        stickyHeader={<PurchaseHeader title="Buy data" step={currentStep} total={5} onClose={() => setIsModalOpen(false)} />}
-      >
+      <InlinePurchasePanel title="Buy data" step={currentStep} total={5}>
         {isLoading ? (
           <Loader />
         ) : (
@@ -198,32 +188,32 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 1: Network Selection */}
             {currentStep === 1 && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-4 md:pb-5">
                 <div className="mb-3 md:mb-4 text-center">
-                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose Your Network</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose your network</h3>
                   <p className="text-sm text-muted">Select your mobile network provider</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 md:gap-3 max-w-sm mx-auto">
+                <div className="grid grid-cols-2 gap-2 md:gap-3 w-full">
                   {availableNetworks.map(network => (
                     <button
                       key={network}
                       onClick={() => {
                         handleNetworkChange(network);
                       }}
-                      className={`p-3 md:p-4 bg-paper border-2 rounded-xl transition-all duration-200 hover:shadow-md active:scale-95 ${
+                      className={`px-3 py-3 bg-paper border rounded-md transition-colors ${
                         selectedNetwork === network
                           ? 'border-blue-500 bg-tint shadow-md'
                           : 'border-line hover:border-blue-300'
                       }`}
                     >
-                      <div className="text-center">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-tint rounded-full flex items-center justify-center mx-auto mb-1 md:mb-2">
+                      <div className="flex items-center gap-2.5 text-left">
+                        <div className="h-8 w-8 shrink-0 bg-tint rounded-full flex items-center justify-center">
                           <FaSignal className="text-accent text-base md:text-lg" />
                         </div>
-                        <div className="text-base md:text-lg font-bold text-ink mb-1">
+                        <div className="text-sm font-semibold text-ink">
                           {network.toUpperCase()}
                         </div>
-                        <div className="text-xs text-muted">
+                        <div className="sr-only">
                           {selectedPlansData.plans[network]?.length || 0} plans
                         </div>
                       </div>
@@ -270,7 +260,7 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 2: Data Plan Selection */}
             {currentStep === 2 && selectedNetwork && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-4 md:pb-5">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Choose Your Data Plan</h3>
                   <p className="text-sm text-muted">Select a plan for {selectedNetwork.toUpperCase()}</p>
@@ -389,7 +379,7 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 3: Phone Number Selection */}
             {currentStep === 3 && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-4 md:pb-5">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Confirm Phone Number</h3>
                   <p className="text-sm text-muted">Data will be sent to this number</p>
@@ -516,7 +506,7 @@ const DataPurchase = ({ isDarkMode }) => {
 
             {/* Step 4: Transaction PIN */}
             {currentStep === 4 && selectedNetwork && selectedPlan && phoneNumber && (
-              <div className="px-3 md:px-4 py-3 md:py-4 pb-16 md:pb-8">
+              <div className="px-3 md:px-4 py-3 md:py-4 pb-4 md:pb-5">
                 <div className="mb-3 md:mb-4 text-center">
                   <h3 className="text-lg md:text-xl font-bold text-ink mb-1">Enter Transaction PIN</h3>
                   <p className="text-sm text-muted">Enter your 4-6 digit transaction PIN to proceed</p>
@@ -688,7 +678,7 @@ const DataPurchase = ({ isDarkMode }) => {
 
           </div>
         )}
-      </Modal>
+      </InlinePurchasePanel>
 
     </div>
   );

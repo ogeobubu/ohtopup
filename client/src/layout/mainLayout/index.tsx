@@ -1,9 +1,12 @@
+import { Suspense } from 'react';
+import PageLoader from '../../components/ui/PageLoader';
 import Header from '../header';
 import Sidebar from '../sidebar';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import OfflineIndicator from '../../components/ui/OfflineIndicator';
 
 export default function MainLayout() {
+  const { pathname } = useLocation();
   return (
     <div className="relative min-w-0 overflow-wrap-anywhere bg-bg text-ink">
       <a className="sr-only focus:not-sr-only" href="#account-content">Skip to content</a>
@@ -14,7 +17,11 @@ export default function MainLayout() {
           className="mx-auto box-border min-h-[calc(100vh-150px)] w-full max-w-app min-w-0 px-4 py-6 md:px-6 md:py-8 xl:px-12 xl:py-[42px]"
           id="account-content"
         >
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <div key={pathname} className="route-page-enter min-w-0">
+              <Outlet />
+            </div>
+          </Suspense>
         </main>
         <footer className="mx-auto w-full max-w-app min-w-0 px-4 md:px-6 xl:px-12">
           <div className="flex flex-wrap justify-between gap-4 border-t border-line py-6 text-[11px] text-muted [padding-bottom:max(24px,env(safe-area-inset-bottom))]">

@@ -1,3 +1,4 @@
+const { normalizeDataPlanMetadata } = require("../utils/dataPlanMetadata");
 const axios = require("axios");
 const mongoose = require("mongoose");
 const Variation = require("../model/Variation");
@@ -232,11 +233,12 @@ const getSavedVariationsForPricing = async (req, res) => {
     const pricingData = (await Promise.all(selectedPlans.filter(plan => plan.provider?.isActive).map(async plan => {
       try {
         const pricing = await require('../services/pricingService').planPricing(plan);
+        const metadata = normalizeDataPlanMetadata(plan);
         return {
           id: plan._id, name: plan.displayName || plan.name, price: pricing.retailAmount,
           finalPrice: pricing.customerCharge, commissionRate: pricing.customerDiscountRate,
           commissionAmount: pricing.customerDiscountAmount, discount: 0, discountAmount: 0,
-          dataLimit: plan.dataAmount, validity: plan.validity, planId: plan.planId,
+          dataLimit: metadata.dataAmount, validity: metadata.validity, planId: plan.planId,
           serviceID: plan.serviceId, network: plan.network, planType: plan.planType,
           provider: plan.providerName, type: 'data'
         };

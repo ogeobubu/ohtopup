@@ -316,11 +316,12 @@ export const getTransactions = async (
   type,
   page = 1,
   limit = 10,
-  reference
+  reference,
+  status
 ) => {
   try {
     const response = await instance.get(`/transactions`, {
-      params: { type, page, limit, reference },
+      params: { type, page, limit, reference, status },
     });
     return response.data;
   } catch (error) {

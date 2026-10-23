@@ -1,3 +1,4 @@
+const { normalizeDataPlanMetadata } = require("../utils/dataPlanMetadata");
 const SelectedDataPlan = require("../model/SelectedDataPlan");
 const { Provider } = require("../model/Provider");
 
@@ -181,8 +182,7 @@ const selectDataPlan = async (req, res) => {
       name,
       displayName: displayName || name,
       amount: parseFloat(amount),
-      dataAmount,
-      validity,
+      ...normalizeDataPlanMetadata({ name, dataAmount, validity }),
       network: normalizeNetwork(network),
       planType: normalizePlanType(planType),
       selectedBy: req.user?.id || "admin"
